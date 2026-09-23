@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { AppHeader } from "@/components/AppHeader";
 import { ACTIVITY_CATALOG, GOALS, type Exercise, type Workout } from "@/lib/trilha-data";
 import { useTrilha } from "@/lib/trilha-store";
 
@@ -18,6 +17,8 @@ export const Route = createFileRoute("/atividades")({
         property: "og:description",
         content: "Modalidades, treinos prontos e criação de treino próprio, com séries e descanso.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Atividades,
@@ -31,8 +32,6 @@ function Atividades() {
 
   return (
     <>
-      <div className="app-glow" />
-      <AppHeader />
       <main className="mx-auto max-w-6xl px-5 pb-20 sm:px-8">
         <section className="pt-8 pb-4">
           <p className="text-xs font-medium uppercase tracking-[0.18em] text-steel">Atividades físicas</p>

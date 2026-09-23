@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { AppHeader } from "@/components/AppHeader";
 import { DAYS, KIND_LABEL, brl, type BlockKind, type DayKey } from "@/lib/trilha-data";
 import { useTrilha } from "@/lib/trilha-store";
 
@@ -18,6 +17,8 @@ export const Route = createFileRoute("/")({
         property: "og:description",
         content: "Organize alimentação, atividade física e rotina pessoal em um só lugar.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: MinhaSemana,
@@ -38,7 +39,7 @@ function MinhaSemana() {
   const [adding, setAdding] = useState(false);
 
   const blocks = plan[day];
-  const dayInfo = DAYS.find((d) => d.key === day)!;
+  const dayInfo = DAYS.find((d) => d.key === day) ?? DAYS[0];
 
   const resumo = useMemo(() => {
     const cost = blocks.reduce((sum, b) => sum + (getMeal(b.mealId)?.cost ?? 0), 0);
@@ -69,8 +70,6 @@ function MinhaSemana() {
 
   return (
     <>
-      <div className="app-glow" />
-      <AppHeader />
       <main className="mx-auto max-w-6xl px-5 pb-20 sm:px-8">
         <section className="pt-8 pb-4">
           <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
