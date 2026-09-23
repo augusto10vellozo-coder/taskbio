@@ -17,6 +17,8 @@ export const Route = createFileRoute("/atividades")({
         property: "og:description",
         content: "Modalidades, treinos prontos e criação de treino próprio, com séries e descanso.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Atividades,

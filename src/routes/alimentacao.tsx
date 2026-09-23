@@ -8,6 +8,8 @@ export const Route = createFileRoute("/alimentacao")({
     { name: "description", content: "Planeje refeições com receitas, informações nutricionais e custo estimado." },
     { property: "og:title", content: "Alimentação — Trilha" },
     { property: "og:description", content: "Refeições, macros, receitas e economia em um só planejamento." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary_large_image" },
   ] }),
   component: Alimentacao,
 });

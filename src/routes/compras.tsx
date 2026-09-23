@@ -9,6 +9,8 @@ export const Route = createFileRoute("/compras")({
     { name: "description", content: "Lista de compras gerada a partir das refeições planejadas, com quantidades e custo semanal estimado." },
     { property: "og:title", content: "Compras da semana — Trilha" },
     { property: "og:description", content: "Transforme o planejamento alimentar em uma lista de compras prática." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary_large_image" },
   ] }),
   component: Compras,
 });

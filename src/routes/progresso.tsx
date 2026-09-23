@@ -8,6 +8,8 @@ export const Route = createFileRoute("/progresso")({
     { name: "description", content: "Acompanhe treinos, minutos ativos, refeições e conclusão da rotina semanal." },
     { property: "og:title", content: "Meu progresso — Trilha" },
     { property: "og:description", content: "Visualize sua consistência em atividades, rotina e alimentação." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary_large_image" },
   ] }),
   component: Progresso,
 });
