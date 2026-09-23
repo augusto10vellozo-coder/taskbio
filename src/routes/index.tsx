@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { AppHeader } from "@/components/AppHeader";
 import { DAYS, KIND_LABEL, brl, type BlockKind, type DayKey } from "@/lib/trilha-data";
 import { useTrilha } from "@/lib/trilha-store";
 
@@ -69,8 +68,6 @@ function MinhaSemana() {
 
   return (
     <>
-      <div className="app-glow" />
-      <AppHeader />
       <main className="mx-auto max-w-6xl px-5 pb-20 sm:px-8">
         <section className="pt-8 pb-4">
           <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
