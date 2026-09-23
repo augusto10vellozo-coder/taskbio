@@ -37,7 +37,7 @@ function MinhaSemana() {
   const [adding, setAdding] = useState(false);
 
   const blocks = plan[day];
-  const dayInfo = DAYS.find((d) => d.key === day)!;
+  const dayInfo = DAYS.find((d) => d.key === day) ?? DAYS[0];
 
   const resumo = useMemo(() => {
     const cost = blocks.reduce((sum, b) => sum + (getMeal(b.mealId)?.cost ?? 0), 0);
