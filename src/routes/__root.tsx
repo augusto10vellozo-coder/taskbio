@@ -13,6 +13,9 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AppHeader } from "../components/AppHeader";
 import { TrilhaProvider } from "../lib/trilha-store";
+import { AuthProvider } from "../lib/auth-context";
+import { SyncManager } from "../components/SyncManager";
+import { Toaster } from "../components/ui/sonner";
 
 function NotFoundComponent() {
   return (
@@ -106,7 +109,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="pt-BR">
       <head>
         <HeadContent />
       </head>
@@ -123,11 +126,15 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <TrilhaProvider>
-        <div className="app-glow" />
-        <AppHeader />
-        <Outlet />
-      </TrilhaProvider>
+      <AuthProvider>
+        <TrilhaProvider>
+          <div className="app-glow" />
+          <AppHeader />
+          <Outlet />
+          <SyncManager />
+          <Toaster position="top-center" richColors />
+        </TrilhaProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

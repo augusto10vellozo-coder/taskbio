@@ -18,14 +18,16 @@ import {
   type Workout,
 } from "./trilha-data";
 
-type State = {
+export type TrilhaState = {
   plan: Plan;
   workouts: Workout[];
   meals: Meal[];
   goal: string | null;
 };
 
-type Store = State & {
+type Store = TrilhaState & {
+  ready: boolean;
+  hydrate: (state: Partial<TrilhaState>) => void;
   toggleBlock: (day: DayKey, blockId: string) => void;
   removeBlock: (day: DayKey, blockId: string) => void;
   addBlock: (day: DayKey, block: Omit<Block, "id" | "done">) => void;
@@ -36,7 +38,7 @@ type Store = State & {
   getMeal: (id?: string) => Meal | undefined;
 };
 
-const initialState: State = {
+const initialState: TrilhaState = {
   plan: INITIAL_PLAN,
   workouts: WORKOUTS,
   meals: MEALS,
@@ -58,28 +60,34 @@ const sortBlocks = (blocks: Block[]) =>
   [...blocks].sort((a, b) => a.time.localeCompare(b.time));
 
 export function TrilhaProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState<State>(initialState);
+  const [state, setState] = useState<TrilhaState>(initialState);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) setState({ ...initialState, ...(JSON.parse(raw) as State) });
+      if (raw) setState({ ...initialState, ...(JSON.parse(raw) as TrilhaState) });
     } catch {
       /* ignora estado inválido */
+    } finally {
+      setReady(true);
     }
   }, []);
 
   useEffect(() => {
+    if (!ready) return;
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     } catch {
       /* armazenamento indisponível */
     }
-  }, [state]);
+  }, [ready, state]);
 
   const value = useMemo<Store>(
     () => ({
       ...state,
+      ready,
+      hydrate: (nextState) => setState((current) => ({ ...current, ...nextState })),
       toggleBlock: (day, blockId) =>
         setState((s) => ({
           ...s,
@@ -121,7 +129,7 @@ export function TrilhaProvider({ children }: { children: ReactNode }) {
       getWorkout: (id) => state.workouts.find((w) => w.id === id),
       getMeal: (id) => state.meals.find((m) => m.id === id),
     }),
-    [state],
+    [ready, state],
   );
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
