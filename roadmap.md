@@ -1,7 +1,7 @@
 # Roadmap
 
-- [ ] Contas Google e e-mail com perfil completo
-- [ ] Sincronização da agenda, treinos, alimentação e progresso
+- [x] Contas Google e e-mail com perfil completo
+- [x] Sincronização da agenda, treinos e alimentação
 - [ ] Criação, edição, repetição e lembretes de compromissos
 - [ ] Execução de treino com cronômetro e histórico
 - [ ] Planejamento alimentar e compras automáticas

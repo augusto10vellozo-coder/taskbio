@@ -36,21 +36,31 @@ function ProfilePage() {
     supabase.from("profiles").select("display_name, avatar_url, goal, preferences").eq("id", user.id).single().then(({ data, error }) => {
       if (error) toast.error("Não foi possível carregar seu perfil.");
       if (data) {
-        setName(data.display_name || user.user_metadata.display_name || "");
-        setAvatarUrl(data.avatar_url || user.user_metadata.avatar_url || "");
+        setName(data.display_name || user.user_metadata["display_name"] || "");
+        setAvatarUrl(data.avatar_url || user.user_metadata["avatar_url"] || "");
         setProfileGoal(data.goal || "");
-        if (data.preferences && typeof data.preferences === "object" && !Array.isArray(data.preferences)) setPreferences((current) => ({ ...current, ...data.preferences }));
+        if (data.preferences && typeof data.preferences === "object" && !Array.isArray(data.preferences)) {
+          const saved = data.preferences as Record<string, unknown>;
+          setPreferences((current) => ({
+            reminders: typeof saved["reminders"] === "boolean" ? saved["reminders"] : current.reminders,
+            weeklySummary: typeof saved["weeklySummary"] === "boolean" ? saved["weeklySummary"] : current.weeklySummary,
+            compactView: typeof saved["compactView"] === "boolean" ? saved["compactView"] : current.compactView,
+          }));
+        }
       }
       setLoading(false);
     });
-  }, [user.id, user.user_metadata.avatar_url, user.user_metadata.display_name]);
+  }, [user.id, user.user_metadata]);
 
   async function save(event: FormEvent) {
     event.preventDefault();
     setSaving(true);
     const { error } = await supabase.from("profiles").update({ display_name: name.trim(), avatar_url: avatarUrl.trim() || null, goal: goal || null, preferences, updated_at: new Date().toISOString() }).eq("id", user.id);
     setSaving(false);
-    if (error) return toast.error("Não foi possível salvar o perfil.");
+    if (error) {
+      toast.error("Não foi possível salvar o perfil.");
+      return;
+    }
     if (goal) setGoal(goal);
     toast.success("Perfil atualizado.");
   }

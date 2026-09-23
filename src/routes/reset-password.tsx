@@ -33,9 +33,15 @@ function ResetPasswordPage() {
 
   async function submit(event: FormEvent) {
     event.preventDefault();
-    if (password !== confirmed) return toast.error("As senhas não coincidem.");
+    if (password !== confirmed) {
+      toast.error("As senhas não coincidem.");
+      return;
+    }
     const { error } = await supabase.auth.updateUser({ password });
-    if (error) return toast.error(error.message);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     setSaved(true);
   }
 
