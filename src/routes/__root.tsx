@@ -11,7 +11,6 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
-import { AppHeader } from "../components/AppHeader";
 import { TrilhaProvider } from "../lib/trilha-store";
 
 function NotFoundComponent() {
@@ -125,7 +124,6 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <TrilhaProvider>
         <div className="app-glow" />
-        <AppHeader />
         <Outlet />
       </TrilhaProvider>
     </QueryClientProvider>
