@@ -1,4 +1,12 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type Context,
+  type ReactNode,
+} from "react";
 import {
   INITIAL_PLAN,
   MEALS,
@@ -37,7 +45,14 @@ const initialState: State = {
 
 const STORAGE_KEY = "trilha.state.v1";
 
-const StoreContext = createContext<Store | null>(null);
+// Route chunks can evaluate this module independently in production. Keeping the
+// Context on globalThis guarantees that providers and consumers share one identity.
+const contextKey = "__trilha_store_context__";
+const globalContexts = globalThis as typeof globalThis & {
+  [contextKey]?: Context<Store | null>;
+};
+const StoreContext = globalContexts[contextKey] ?? createContext<Store | null>(null);
+globalContexts[contextKey] = StoreContext;
 
 const sortBlocks = (blocks: Block[]) =>
   [...blocks].sort((a, b) => a.time.localeCompare(b.time));
