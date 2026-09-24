@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from "react";
 import {
-  INITIAL_PLAN,
+  EMPTY_PLAN,
   MEALS,
   WORKOUTS,
   type Block,
@@ -16,6 +16,7 @@ import {
   type Meal,
   type Plan,
   type Workout,
+  type WorkoutHistoryEntry,
 } from "./trilha-data";
 
 export type TrilhaState = {
@@ -23,6 +24,7 @@ export type TrilhaState = {
   workouts: Workout[];
   meals: Meal[];
   goal: string | null;
+  workoutHistory: WorkoutHistoryEntry[];
 };
 
 type Store = TrilhaState & {
@@ -33,6 +35,8 @@ type Store = TrilhaState & {
   addBlock: (day: DayKey, block: Omit<Block, "id" | "done">) => void;
   updateBlock: (day: DayKey, blockId: string, block: Omit<Block, "id" | "done">) => void;
   setDoneSets: (workoutId: string, exerciseId: string, doneSets: number) => void;
+  setExerciseLoad: (workoutId: string, exerciseId: string, loadKg: number) => void;
+  completeWorkout: (entry: WorkoutHistoryEntry) => void;
   addWorkout: (workout: Workout) => void;
   setGoal: (goal: string) => void;
   getWorkout: (id?: string) => Workout | undefined;
@@ -40,13 +44,14 @@ type Store = TrilhaState & {
 };
 
 const initialState: TrilhaState = {
-  plan: INITIAL_PLAN,
+  plan: EMPTY_PLAN,
   workouts: WORKOUTS,
   meals: MEALS,
   goal: null,
+  workoutHistory: [],
 };
 
-const STORAGE_KEY = "trilha.state.v1";
+const STORAGE_KEY = "trilha.state.v2";
 
 // Route chunks can evaluate this module independently in production. Keeping the
 // Context on globalThis guarantees that providers and consumers share one identity.
@@ -127,6 +132,30 @@ export function TrilhaProvider({ children }: { children: ReactNode }) {
                   ...w,
                   exercises: w.exercises.map((e) => (e.id === exerciseId ? { ...e, doneSets } : e)),
                 },
+          ),
+        })),
+      setExerciseLoad: (workoutId, exerciseId, loadKg) =>
+        setState((s) => ({
+          ...s,
+          workouts: s.workouts.map((workout) =>
+            workout.id !== workoutId
+              ? workout
+              : {
+                  ...workout,
+                  exercises: workout.exercises.map((exercise) =>
+                    exercise.id === exerciseId ? { ...exercise, loadKg } : exercise,
+                  ),
+                },
+          ),
+        })),
+      completeWorkout: (entry) =>
+        setState((s) => ({
+          ...s,
+          workoutHistory: [entry, ...s.workoutHistory].slice(0, 50),
+          workouts: s.workouts.map((workout) =>
+            workout.id === entry.workoutId
+              ? { ...workout, exercises: workout.exercises.map((exercise) => ({ ...exercise, doneSets: 0 })) }
+              : workout,
           ),
         })),
       addWorkout: (workout) => setState((s) => ({ ...s, workouts: [...s.workouts, workout] })),

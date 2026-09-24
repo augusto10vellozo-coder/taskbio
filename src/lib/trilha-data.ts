@@ -34,6 +34,23 @@ export type Workout = {
   exercises: Exercise[];
 };
 
+export type WorkoutHistoryEntry = {
+  id: string;
+  workoutId: string;
+  workoutName: string;
+  completedAt: string;
+  durationSec: number;
+  completedSets: number;
+  totalVolumeKg: number;
+  exercises: {
+    exerciseId: string;
+    name: string;
+    sets: number;
+    reps: number;
+    loadKg: number;
+  }[];
+};
+
 export type Meal = {
   id: string;
   name: string;
@@ -58,6 +75,16 @@ export type Block = {
 };
 
 export type Plan = Record<DayKey, Block[]>;
+
+export const EMPTY_PLAN: Plan = {
+  seg: [],
+  ter: [],
+  qua: [],
+  qui: [],
+  sex: [],
+  sab: [],
+  dom: [],
+};
 
 export const MEALS: Meal[] = [
   {
