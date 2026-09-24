@@ -344,7 +344,17 @@ function AddBlockForm({
       onSubmit={(e) => {
         e.preventDefault();
         if (!title.trim()) return;
-        onAdd({ time, endTime: endTime || undefined, kind, title: title.trim(), note: note.trim() || undefined, reminderMinutes: reminderMinutes ? Number(reminderMinutes) : undefined, recurrence, mealId: initial?.mealId, workoutId: initial?.workoutId });
+        onAdd({
+          time,
+          kind,
+          title: title.trim(),
+          recurrence,
+          ...(endTime ? { endTime } : {}),
+          ...(note.trim() ? { note: note.trim() } : {}),
+          ...(reminderMinutes ? { reminderMinutes: Number(reminderMinutes) } : {}),
+          ...(initial?.mealId ? { mealId: initial.mealId } : {}),
+          ...(initial?.workoutId ? { workoutId: initial.workoutId } : {}),
+        });
         setTitle("");
       }}
       className="mb-5 grid gap-3 rounded-xl bg-white/50 p-4 ring-1 ring-black/5 sm:grid-cols-2"
