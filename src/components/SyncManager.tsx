@@ -9,7 +9,7 @@ type SyncStatus = "idle" | "loading" | "saved" | "error";
 
 export function SyncManager() {
   const { user, loading: authLoading } = useAuth();
-  const { plan, workouts, meals, goal, ready, hydrate } = useTrilha();
+  const { plan, workouts, meals, goal, workoutHistory, ready, hydrate } = useTrilha();
   const [status, setStatus] = useState<SyncStatus>("idle");
   const initializedUser = useRef<string | null>(null);
   const skipNextPush = useRef(false);
@@ -39,6 +39,9 @@ export function SyncManager() {
           workouts: data.workouts as unknown as TrilhaState["workouts"],
           meals: data.meals as unknown as TrilhaState["meals"],
           goal: typeof settings["goal"] === "string" ? settings["goal"] : null,
+          workoutHistory: Array.isArray(settings["workoutHistory"])
+            ? settings["workoutHistory"] as unknown as TrilhaState["workoutHistory"]
+            : [],
         });
       } else {
         const { error: insertError } = await supabase.from("user_data").insert({
@@ -46,7 +49,7 @@ export function SyncManager() {
           plan: plan as unknown as Json,
           workouts: workouts as unknown as Json,
           meals: meals as unknown as Json,
-          settings: { goal },
+          settings: { goal, workoutHistory } as unknown as Json,
         });
         if (insertError) {
           setStatus("error");
@@ -73,13 +76,13 @@ export function SyncManager() {
         plan: plan as unknown as Json,
         workouts: workouts as unknown as Json,
         meals: meals as unknown as Json,
-        settings: { goal },
+        settings: { goal, workoutHistory } as unknown as Json,
         updated_at: new Date().toISOString(),
       });
       setStatus(error ? "error" : "saved");
     }, 900);
     return () => window.clearTimeout(timer);
-  }, [goal, meals, plan, user, workouts]);
+  }, [goal, meals, plan, user, workoutHistory, workouts]);
 
   if (!user || status === "idle") return null;
   return <div className="fixed bottom-4 right-4 z-40 flex items-center gap-1.5 rounded-full bg-card/90 px-3 py-1.5 text-[11px] font-medium text-steel shadow-sm ring-1 ring-line backdrop-blur" role="status">

@@ -1,9 +1,10 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Bell, Pencil, Plus, Trash2, X } from "lucide-react";
+import { ArrowRight, Bell, CalendarDays, Pencil, Plus, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DAYS, KIND_LABEL, brl, type Block, type BlockKind, type DayKey } from "@/lib/trilha-data";
 import { useTrilha } from "@/lib/trilha-store";
+import { useAuth } from "@/lib/auth-context";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -34,6 +35,7 @@ const dotColor: Record<BlockKind, string> = {
 };
 
 function MinhaSemana() {
+  const { user, loading } = useAuth();
   const { plan, getMeal, getWorkout, toggleBlock, removeBlock, addBlock, updateBlock, setDoneSets, goal } =
     useTrilha();
   const [day, setDay] = useState<DayKey>("seg");
@@ -70,6 +72,37 @@ function MinhaSemana() {
     });
     return [...map.entries()].slice(0, 5);
   }, [plan, getMeal]);
+
+  if (loading) {
+    return <main className="mx-auto max-w-6xl px-5 py-12 sm:px-8"><div className="h-48 animate-pulse rounded-2xl bg-mist" /></main>;
+  }
+
+  if (!user) {
+    return (
+      <main className="mx-auto flex min-h-[calc(100vh-7rem)] max-w-6xl items-center px-5 py-12 sm:px-8">
+        <section className="w-full border-y border-line py-12 sm:py-16">
+          <div className="grid gap-8 lg:grid-cols-[1fr_0.7fr] lg:items-end">
+            <div>
+              <div className="mb-6 grid size-12 place-items-center rounded-xl bg-ink text-primary-foreground">
+                <CalendarDays className="size-6" />
+              </div>
+              <p className="text-xs font-medium uppercase tracking-[0.18em] text-brand-deep">Sua rotina começa aqui</p>
+              <h1 className="mt-3 max-w-2xl text-balance font-display text-4xl font-semibold sm:text-5xl">
+                Abra sua conta e planeje sua semana.
+              </h1>
+              <p className="mt-4 max-w-xl text-pretty text-base leading-7 text-steel">
+                Organize compromissos, atividades físicas e refeições em um só lugar. Sua agenda começa vazia e é preenchida por você.
+              </p>
+            </div>
+            <div className="lg:justify-self-end">
+              <Button asChild size="lg"><Link to="/auth">Criar minha conta <ArrowRight /></Link></Button>
+              <p className="mt-3 text-xs text-steel">Já tem uma conta? <Link to="/auth" className="font-medium text-brand-deep">Entrar</Link></p>
+            </div>
+          </div>
+        </section>
+      </main>
+    );
+  }
 
   return (
     <>
