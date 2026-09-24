@@ -348,7 +348,7 @@ function AddBlockForm({
           time,
           kind,
           title: title.trim(),
-          recurrence,
+          recurrence: recurrence ?? "none",
           ...(endTime ? { endTime } : {}),
           ...(note.trim() ? { note: note.trim() } : {}),
           ...(reminderMinutes ? { reminderMinutes: Number(reminderMinutes) } : {}),
