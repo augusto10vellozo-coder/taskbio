@@ -53,6 +53,8 @@ export type Block = {
   done: boolean;
   mealId?: string;
   workoutId?: string;
+  reminderMinutes?: number;
+  recurrence?: "none" | "weekdays" | "daily";
 };
 
 export type Plan = Record<DayKey, Block[]>;

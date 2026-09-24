@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { DAYS, KIND_LABEL, brl, type BlockKind, type DayKey } from "@/lib/trilha-data";
+import { Bell, Pencil, Plus, Trash2, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { DAYS, KIND_LABEL, brl, type Block, type BlockKind, type DayKey } from "@/lib/trilha-data";
 import { useTrilha } from "@/lib/trilha-store";
 
 export const Route = createFileRoute("/")({
@@ -32,11 +34,12 @@ const dotColor: Record<BlockKind, string> = {
 };
 
 function MinhaSemana() {
-  const { plan, getMeal, getWorkout, toggleBlock, removeBlock, addBlock, setDoneSets, goal } =
+  const { plan, getMeal, getWorkout, toggleBlock, removeBlock, addBlock, updateBlock, setDoneSets, goal } =
     useTrilha();
   const [day, setDay] = useState<DayKey>("seg");
   const [openWorkout, setOpenWorkout] = useState<string | null>("w1");
   const [adding, setAdding] = useState(false);
+  const [editing, setEditing] = useState<Block | null>(null);
 
   const blocks = plan[day];
   const dayInfo = DAYS.find((d) => d.key === day) ?? DAYS[0];
@@ -105,12 +108,14 @@ function MinhaSemana() {
             <div className="glass-strong rounded-2xl p-5 ring-1 ring-black/5 sm:p-6">
               <div className="mb-5 flex items-center justify-between">
                 <h2 className="font-display text-lg font-semibold tracking-tight">Linha do dia</h2>
-                <button
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => setAdding((v) => !v)}
-                  className="rounded-lg px-2.5 py-1 text-xs font-medium text-brand-deep ring-1 ring-brand/20 hover:bg-brand/5"
+                  className="text-brand-deep ring-1 ring-brand/20"
                 >
-                  {adding ? "Cancelar" : "Adicionar bloco"}
-                </button>
+                  {adding ? <X /> : <Plus />}{adding ? "Cancelar" : "Adicionar"}
+                </Button>
               </div>
 
               {adding && (
@@ -119,6 +124,7 @@ function MinhaSemana() {
                     addBlock(day, b);
                     setAdding(false);
                   }}
+                  onCancel={() => setAdding(false)}
                 />
               )}
 
@@ -156,7 +162,8 @@ function MinhaSemana() {
                           </p>
                           <div className="flex shrink-0 items-center gap-2">
                             {b.endTime && <span className="text-[11px] text-steel">{b.time} — {b.endTime}</span>}
-                            <button
+                             {b.reminderMinutes ? <span title={`Lembrete ${b.reminderMinutes} minutos antes`} className="text-brand-deep"><Bell className="size-3.5" /></span> : null}
+                             <button
                               onClick={() => toggleBlock(day, b.id)}
                               className={`rounded-full px-2.5 py-0.5 text-[11px] font-medium ring-1 ${
                                 b.done
@@ -166,13 +173,24 @@ function MinhaSemana() {
                             >
                               {b.done ? "Feito" : "Marcar"}
                             </button>
-                            <button
+                             <Button
+                               variant="ghost"
+                               size="icon"
+                               onClick={() => setEditing(b)}
+                               className="size-7 text-steel"
+                               aria-label="Editar bloco"
+                               title="Editar"
+                             ><Pencil className="size-3.5" /></Button>
+                             <Button
+                               variant="ghost"
+                               size="icon"
                               onClick={() => removeBlock(day, b.id)}
-                              className="text-[11px] text-steel hover:text-ink"
+                               className="size-7 text-steel hover:text-destructive"
                               aria-label="Remover bloco"
+                               title="Remover"
                             >
-                              ×
-                            </button>
+                               <Trash2 className="size-3.5" />
+                             </Button>
                           </div>
                         </div>
 
@@ -297,36 +315,58 @@ function MinhaSemana() {
           </aside>
         </div>
       </main>
+      {editing && <div className="fixed inset-0 z-50 grid place-items-center bg-ink/35 px-4" role="dialog" aria-modal="true" aria-label="Editar bloco"><div className="glass-strong w-full max-w-2xl rounded-2xl p-5 shadow-xl ring-1 ring-black/10"><div className="mb-4 flex items-center justify-between"><h2 className="font-display text-xl font-semibold">Editar bloco</h2><Button variant="ghost" size="icon" onClick={() => setEditing(null)} aria-label="Fechar"><X /></Button></div><AddBlockForm initial={editing} submitLabel="Salvar alterações" onCancel={() => setEditing(null)} onAdd={(block) => { updateBlock(day, editing.id, block); setEditing(null); }} /></div></div>}
     </>
   );
 }
 
 function AddBlockForm({
   onAdd,
+  onCancel,
+  initial,
+  submitLabel = "Salvar",
 }: {
-  onAdd: (b: { time: string; kind: BlockKind; title: string; note?: string }) => void;
+  onAdd: (b: Omit<Block, "id" | "done">) => void;
+  onCancel: () => void;
+  initial?: Block;
+  submitLabel?: string;
 }) {
-  const [time, setTime] = useState("07:00");
-  const [kind, setKind] = useState<BlockKind>("compromisso");
-  const [title, setTitle] = useState("");
+  const [time, setTime] = useState(initial?.time ?? "07:00");
+  const [endTime, setEndTime] = useState(initial?.endTime ?? "");
+  const [kind, setKind] = useState<BlockKind>(initial?.kind ?? "compromisso");
+  const [title, setTitle] = useState(initial?.title ?? "");
+  const [note, setNote] = useState(initial?.note ?? "");
+  const [reminderMinutes, setReminderMinutes] = useState(initial?.reminderMinutes?.toString() ?? "");
+  const [recurrence, setRecurrence] = useState<Block["recurrence"]>(initial?.recurrence ?? "none");
 
   return (
     <form
       onSubmit={(e) => {
         e.preventDefault();
         if (!title.trim()) return;
-        onAdd({ time, kind, title: title.trim() });
+        onAdd({
+          time,
+          kind,
+          title: title.trim(),
+          recurrence: recurrence ?? "none",
+          ...(endTime ? { endTime } : {}),
+          ...(note.trim() ? { note: note.trim() } : {}),
+          ...(reminderMinutes ? { reminderMinutes: Number(reminderMinutes) } : {}),
+          ...(initial?.mealId ? { mealId: initial.mealId } : {}),
+          ...(initial?.workoutId ? { workoutId: initial.workoutId } : {}),
+        });
         setTitle("");
       }}
-      className="mb-5 grid gap-2 rounded-xl bg-white/50 p-3 ring-1 ring-black/5 sm:grid-cols-[88px_150px_1fr_auto]"
+      className="mb-5 grid gap-3 rounded-xl bg-white/50 p-4 ring-1 ring-black/5 sm:grid-cols-2"
     >
-      <input
+      <label className="text-xs font-medium text-steel">Início<input
         type="time"
         value={time}
         onChange={(e) => setTime(e.target.value)}
         className="rounded-lg bg-white px-2 py-1.5 text-sm ring-1 ring-line"
-      />
-      <select
+      /></label>
+      <label className="text-xs font-medium text-steel">Término<input type="time" value={endTime} onChange={(event) => setEndTime(event.target.value)} className="mt-1.5 w-full rounded-lg bg-white px-2 py-1.5 text-sm text-ink ring-1 ring-line" /></label>
+      <label className="text-xs font-medium text-steel">Categoria<select
         value={kind}
         onChange={(e) => setKind(e.target.value as BlockKind)}
         className="rounded-lg bg-white px-2 py-1.5 text-sm ring-1 ring-line"
@@ -335,16 +375,17 @@ function AddBlockForm({
         <option value="refeicao">Refeição</option>
         <option value="treino">Atividade física</option>
         <option value="descanso">Descanso</option>
-      </select>
-      <input
+      </select></label>
+      <label className="text-xs font-medium text-steel">Título<input
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         placeholder="Ex.: Consulta, estudo, reunião"
         className="rounded-lg bg-white px-2 py-1.5 text-sm ring-1 ring-line"
-      />
-      <button className="rounded-lg bg-brand px-3 py-1.5 text-sm font-medium text-white ring-1 ring-brand/30">
-        Salvar
-      </button>
+      /></label>
+      <label className="text-xs font-medium text-steel sm:col-span-2">Observações<input value={note} onChange={(event) => setNote(event.target.value)} placeholder="Detalhes importantes" className="mt-1.5 w-full rounded-lg bg-white px-2 py-1.5 text-sm text-ink ring-1 ring-line" /></label>
+      <label className="text-xs font-medium text-steel">Lembrete<select value={reminderMinutes} onChange={(event) => setReminderMinutes(event.target.value)} className="mt-1.5 w-full rounded-lg bg-white px-2 py-1.5 text-sm text-ink ring-1 ring-line"><option value="">Sem lembrete</option><option value="10">10 minutos antes</option><option value="30">30 minutos antes</option><option value="60">1 hora antes</option></select></label>
+      <label className="text-xs font-medium text-steel">Repetição<select disabled={Boolean(initial)} value={recurrence} onChange={(event) => setRecurrence(event.target.value as Block["recurrence"])} className="mt-1.5 w-full rounded-lg bg-white px-2 py-1.5 text-sm text-ink ring-1 ring-line disabled:opacity-60"><option value="none">Não repetir</option><option value="weekdays">Dias úteis</option><option value="daily">Todos os dias</option></select></label>
+      <div className="flex justify-end gap-2 sm:col-span-2"><Button type="button" variant="ghost" onClick={onCancel}>Cancelar</Button><Button type="submit">{submitLabel}</Button></div>
     </form>
   );
 }

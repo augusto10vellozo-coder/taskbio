@@ -31,6 +31,7 @@ type Store = TrilhaState & {
   toggleBlock: (day: DayKey, blockId: string) => void;
   removeBlock: (day: DayKey, blockId: string) => void;
   addBlock: (day: DayKey, block: Omit<Block, "id" | "done">) => void;
+  updateBlock: (day: DayKey, blockId: string, block: Omit<Block, "id" | "done">) => void;
   setDoneSets: (workoutId: string, exerciseId: string, doneSets: number) => void;
   addWorkout: (workout: Workout) => void;
   setGoal: (goal: string) => void;
@@ -104,14 +105,18 @@ export function TrilhaProvider({ children }: { children: ReactNode }) {
       addBlock: (day, block) =>
         setState((s) => ({
           ...s,
-          plan: {
-            ...s.plan,
-            [day]: sortBlocks([
-              ...s.plan[day],
-              { ...block, id: `b-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, done: false },
-            ]),
-          },
+          plan: (block.recurrence === "daily" || block.recurrence === "weekdays"
+            ? (Object.keys(s.plan) as DayKey[]).reduce((next, targetDay) => {
+                if (block.recurrence === "weekdays" && (targetDay === "sab" || targetDay === "dom")) return next;
+                next[targetDay] = sortBlocks([...next[targetDay], { ...block, id: `b-${Date.now()}-${targetDay}`, done: false }]);
+                return next;
+              }, { ...s.plan })
+            : { ...s.plan, [day]: sortBlocks([...s.plan[day], { ...block, id: `b-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, done: false }]) }),
         })),
+      updateBlock: (day, blockId, block) => setState((s) => ({
+        ...s,
+        plan: { ...s.plan, [day]: sortBlocks(s.plan[day].map((item) => item.id === blockId ? { ...item, ...block } : item)) },
+      })),
       setDoneSets: (workoutId, exerciseId, doneSets) =>
         setState((s) => ({
           ...s,
