@@ -9,7 +9,7 @@
 - [x] Planejamento alimentar e compras automáticas
 - [x] Gráficos completos de progresso
 - [ ] Premium mensal/anual com pagamentos
-- [ ] Plano Profissional e gestão de alunos
+- [x] Área profissional restrita, convites e vínculos autorizados
 - [x] Agenda mensal e visão integrada de datas
 - [x] Lembretes locais com preferências e permissões
 - [ ] Estados vazios, carregamentos e mensagens de erro consistentes
