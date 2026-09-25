@@ -65,7 +65,16 @@ export type Meal = {
   items: string;
   macros: Macros;
   cost: number;
-  ingredients: { name: string; qty: string }[];
+  ingredients: { name: string; qty: string; amount?: number; unit?: string }[];
+};
+
+export type ShoppingItem = {
+  id: string;
+  name: string;
+  amount: number;
+  unit: string;
+  checked: boolean;
+  manual?: boolean;
 };
 
 export type Block = {
@@ -361,6 +370,33 @@ export const INITIAL_PLAN: Plan = {
 
 export const brl = (v: number) =>
   v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+
+const parseIngredientQuantity = (qty: string) => {
+  const match = qty.trim().match(/^(\d+(?:[.,]\d+)?)\s*(.*)$/);
+  return match
+    ? { amount: Number(match[1]?.replace(",", ".")) || 1, unit: match[2]?.trim() || "un" }
+    : { amount: 1, unit: qty.trim() || "un" };
+};
+
+export function consolidateIngredients(meals: Meal[]) {
+  const consolidated = new Map<string, { name: string; amount: number; unit: string }>();
+  meals.forEach((meal) => meal.ingredients.forEach((ingredient) => {
+    const parsed = ingredient.amount != null && ingredient.unit
+      ? { amount: ingredient.amount, unit: ingredient.unit }
+      : parseIngredientQuantity(ingredient.qty);
+    const key = `${ingredient.name.toLocaleLowerCase("pt-BR")}::${parsed.unit.toLocaleLowerCase("pt-BR")}`;
+    const current = consolidated.get(key);
+    consolidated.set(key, {
+      name: ingredient.name,
+      amount: (current?.amount ?? 0) + parsed.amount,
+      unit: parsed.unit,
+    });
+  }));
+  return [...consolidated.entries()].map(([id, item]) => ({ id, ...item }));
+}
+
+export const formatIngredientAmount = (amount: number, unit: string) =>
+  `${amount.toLocaleString("pt-BR", { maximumFractionDigits: 2 })} ${unit}`;
 
 export const KIND_LABEL: Record<BlockKind, string> = {
   refeicao: "Refeição",

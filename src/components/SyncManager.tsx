@@ -9,7 +9,7 @@ type SyncStatus = "idle" | "loading" | "saved" | "error";
 
 export function SyncManager() {
   const { user, loading: authLoading } = useAuth();
-  const { plan, workouts, meals, goal, preferredModality, workoutHistory, ready, hydrate } = useTrilha();
+  const { plan, workouts, meals, goal, preferredModality, workoutHistory, shoppingItems, ready, hydrate } = useTrilha();
   const [status, setStatus] = useState<SyncStatus>("idle");
   const initializedUser = useRef<string | null>(null);
   const skipNextPush = useRef(false);
@@ -22,7 +22,7 @@ export function SyncManager() {
 
     let active = true;
     setStatus("loading");
-    supabase.from("user_data").select("plan, workouts, meals, settings").eq("user_id", user.id).maybeSingle().then(async ({ data, error }) => {
+    supabase.from("user_data").select("plan, workouts, meals, shopping_state, settings").eq("user_id", user.id).maybeSingle().then(async ({ data, error }) => {
       if (!active) return;
       if (error) {
         setStatus("error");
@@ -43,6 +43,9 @@ export function SyncManager() {
           workoutHistory: Array.isArray(settings["workoutHistory"])
             ? settings["workoutHistory"] as unknown as TrilhaState["workoutHistory"]
             : [],
+          shoppingItems: Array.isArray(data.shopping_state)
+            ? data.shopping_state as unknown as TrilhaState["shoppingItems"]
+            : [],
         });
       } else {
         const { error: insertError } = await supabase.from("user_data").insert({
@@ -50,6 +53,7 @@ export function SyncManager() {
           plan: plan as unknown as Json,
           workouts: workouts as unknown as Json,
           meals: meals as unknown as Json,
+          shopping_state: shoppingItems as unknown as Json,
           settings: { goal, preferredModality, workoutHistory } as unknown as Json,
         });
         if (insertError) {
@@ -77,13 +81,14 @@ export function SyncManager() {
         plan: plan as unknown as Json,
         workouts: workouts as unknown as Json,
         meals: meals as unknown as Json,
+        shopping_state: shoppingItems as unknown as Json,
         settings: { goal, preferredModality, workoutHistory } as unknown as Json,
         updated_at: new Date().toISOString(),
       });
       setStatus(error ? "error" : "saved");
     }, 900);
     return () => window.clearTimeout(timer);
-  }, [goal, meals, plan, preferredModality, user, workoutHistory, workouts]);
+  }, [goal, meals, plan, preferredModality, shoppingItems, user, workoutHistory, workouts]);
 
   if (!user || status === "idle") return null;
   return <div className="fixed bottom-4 right-4 z-40 flex items-center gap-1.5 rounded-full bg-card/90 px-3 py-1.5 text-[11px] font-medium text-steel shadow-sm ring-1 ring-line backdrop-blur" role="status">
