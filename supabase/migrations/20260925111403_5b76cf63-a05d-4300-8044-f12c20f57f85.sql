@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS professionals_find_profiles ON public.profiles;
