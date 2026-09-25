@@ -80,19 +80,12 @@ export type Block = {
   workoutId?: string;
   reminderMinutes?: number;
   recurrence?: "none" | "weekdays" | "daily";
+  recurrenceUntil?: string;
 };
 
-export type Plan = Record<DayKey, Block[]>;
+export type Plan = Record<string, Block[]>;
 
-export const EMPTY_PLAN: Plan = {
-  seg: [],
-  ter: [],
-  qua: [],
-  qui: [],
-  sex: [],
-  sab: [],
-  dom: [],
-};
+export const EMPTY_PLAN: Plan = {};
 
 export const MEALS: Meal[] = [
   {
