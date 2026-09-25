@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Check, History, Pause, Play, RotateCcw, Timer, X } from "lucide-react";
+import { Check, ChevronDown, ChevronUp, CircleAlert, History, Pause, Play, Plus, RotateCcw, Sparkles, Timer, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ACTIVITY_CATALOG, GOALS, type Exercise, type Workout } from "@/lib/trilha-data";
+import { ACTIVITY_CATALOG, GOALS, OBJECTIVE_EFFECTS, getWorkoutExamples, type Exercise, type Workout } from "@/lib/trilha-data";
 import { useTrilha } from "@/lib/trilha-store";
 
 export const Route = createFileRoute("/atividades")({
@@ -27,12 +27,26 @@ export const Route = createFileRoute("/atividades")({
 });
 
 function Atividades() {
-  const { workouts, workoutHistory, addWorkout, setDoneSets, setExerciseLoad, completeWorkout, goal, setGoal } = useTrilha();
+  const { workouts, workoutHistory, addWorkout, setDoneSets, setExerciseLoad, completeWorkout, goal, setGoal, preferredModality, setPreferredModality } = useTrilha();
   const [selected, setSelected] = useState<string | null>(workouts[0]?.id ?? null);
   const [creating, setCreating] = useState(false);
   const [runningWorkoutId, setRunningWorkoutId] = useState<string | null>(null);
+  const [openExample, setOpenExample] = useState<string | null>(null);
   const workout = workouts.find((w) => w.id === selected);
   const runningWorkout = workouts.find((w) => w.id === runningWorkoutId);
+  const examples = preferredModality ? getWorkoutExamples(preferredModality, goal) : [];
+  const objectiveEffect = goal ? OBJECTIVE_EFFECTS[goal] : null;
+
+  const saveExample = (example: Workout) => {
+    const created: Workout = {
+      ...example,
+      id: `w-${Date.now()}`,
+      name: `${example.name} (meu treino)`,
+      exercises: example.exercises.map((exercise, index) => ({ ...exercise, id: `ex-${Date.now()}-${index}` })),
+    };
+    addWorkout(created);
+    setSelected(created.id);
+  };
 
   return (
     <>
@@ -50,19 +64,29 @@ function Atividades() {
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
           <section className="lg:col-span-5 space-y-5">
             <div className="glass-strong rounded-2xl p-5 ring-1 ring-black/5">
-              <h2 className="font-display text-lg font-semibold tracking-tight">Modalidades</h2>
+              <div className="flex items-center justify-between gap-3">
+                <h2 className="font-display text-lg font-semibold tracking-tight">Modalidades</h2>
+                {preferredModality && <span className="text-xs font-medium text-brand-deep">{preferredModality}</span>}
+              </div>
+              <p className="mt-1 text-xs text-steel">Escolha uma opção para ver exemplos relacionados.</p>
               <div className="mt-4 space-y-4">
                 {ACTIVITY_CATALOG.map((g) => (
                   <div key={g.group}>
                     <p className="text-[11px] uppercase tracking-[0.14em] text-steel">{g.group}</p>
                     <div className="mt-2 flex flex-wrap gap-1.5">
                       {g.items.map((i) => (
-                        <span
+                        <Button
                           key={i}
-                          className="rounded-full bg-white/60 px-2.5 py-1 text-[12px] font-medium text-ink ring-1 ring-line"
-                        >
-                          {i}
-                        </span>
+                          type="button"
+                          size="sm"
+                          variant={preferredModality === i ? "default" : "outline"}
+                          aria-pressed={preferredModality === i}
+                          onClick={() => {
+                            setPreferredModality(i);
+                            setOpenExample(null);
+                          }}
+                          className="h-7 rounded-full px-2.5 text-[12px]"
+                        >{i}</Button>
                       ))}
                     </div>
                   </div>
@@ -72,23 +96,98 @@ function Atividades() {
 
             <div className="glass-strong rounded-2xl p-5 ring-1 ring-black/5">
               <h2 className="font-display text-lg font-semibold tracking-tight">Meu objetivo</h2>
+              <p className="mt-1 text-xs text-steel">O objetivo ajusta foco, frequência, intensidade, duração e recuperação dos exemplos.</p>
               <div className="mt-3 flex flex-wrap gap-1.5">
                 {GOALS.map((g) => (
-                  <button
+                  <Button
                     key={g}
+                    type="button"
+                    size="sm"
+                    variant={goal === g ? "default" : "outline"}
+                    aria-pressed={goal === g}
                     onClick={() => setGoal(g)}
-                    className={`rounded-full px-2.5 py-1 text-[12px] font-medium ring-1 ${
-                      goal === g ? "bg-ink text-white ring-ink" : "bg-white/60 text-steel ring-line hover:text-ink"
-                    }`}
+                    className="h-7 rounded-full px-2.5 text-[12px]"
                   >
                     {g}
-                  </button>
+                  </Button>
                 ))}
               </div>
+              {objectiveEffect && (
+                <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 border-t border-line pt-4 text-xs">
+                  <div className="col-span-2"><dt className="text-steel">Foco</dt><dd className="mt-0.5 font-medium text-ink">{objectiveEffect.focus}</dd></div>
+                  <div><dt className="text-steel">Frequência sugerida</dt><dd className="mt-0.5 font-medium text-ink">{objectiveEffect.frequency}</dd></div>
+                  <div><dt className="text-steel">Intensidade</dt><dd className="mt-0.5 font-medium text-ink">{objectiveEffect.intensity}</dd></div>
+                  <div><dt className="text-steel">Duração</dt><dd className="mt-0.5 font-medium text-ink">{objectiveEffect.duration}</dd></div>
+                  <div><dt className="text-steel">Recuperação</dt><dd className="mt-0.5 font-medium text-ink">{objectiveEffect.recovery}</dd></div>
+                </dl>
+              )}
             </div>
           </section>
 
           <section className="lg:col-span-7 space-y-5">
+            <div className="glass-strong rounded-2xl p-5 ring-1 ring-black/5">
+              <div className="flex items-start gap-3">
+                <div className="grid size-9 shrink-0 place-items-center rounded-lg bg-brand/10 text-brand-deep"><Sparkles className="size-4" /></div>
+                <div>
+                  <h2 className="font-display text-lg font-semibold tracking-tight">Exemplos para você explorar</h2>
+                  <p className="mt-1 text-xs leading-5 text-steel">
+                    {preferredModality
+                      ? `${preferredModality}${goal ? ` para o objetivo “${goal}”` : ""}.`
+                      : "Selecione uma modalidade para começar."}
+                  </p>
+                </div>
+              </div>
+
+              {!preferredModality ? (
+                <p className="mt-5 rounded-lg border border-dashed border-line p-4 text-sm text-steel">As opções aparecerão aqui depois que você escolher uma modalidade.</p>
+              ) : !goal ? (
+                <p className="mt-5 rounded-lg border border-dashed border-line p-4 text-sm text-steel">Agora escolha seu objetivo para ajustar os exemplos. Você também pode explorar a versão geral abaixo.</p>
+              ) : null}
+
+              {examples.length > 0 && (
+                <div className="mt-4 space-y-3">
+                  {examples.map((example, exampleIndex) => {
+                    const expanded = openExample === example.id;
+                    const approximateMinutes = example.exercises.reduce((total, exercise) => total + exercise.sets * 3, 0);
+                    return (
+                      <article key={example.id} className="rounded-xl bg-card/70 p-4 ring-1 ring-line">
+                        <div className="flex flex-wrap items-start justify-between gap-3">
+                          <div>
+                            <div className="flex flex-wrap items-center gap-2">
+                              <h3 className="text-sm font-semibold">{example.name}</h3>
+                              <span className="rounded-full bg-mist px-2 py-0.5 text-[10px] font-medium text-steel">{exampleIndex === 0 ? "Mais leve" : "Sessão completa"}</span>
+                            </div>
+                            <p className="mt-1 text-xs text-steel">{example.exercises.length} etapas · cerca de {approximateMinutes} min · {example.focus}</p>
+                          </div>
+                          <Button variant="ghost" size="sm" onClick={() => setOpenExample(expanded ? null : example.id)}>
+                            {expanded ? <ChevronUp /> : <ChevronDown />}{expanded ? "Recolher" : "Ver exemplo"}
+                          </Button>
+                        </div>
+                        {expanded && (
+                          <div className="mt-4 border-t border-line pt-4">
+                            <ol className="space-y-2">
+                              {example.exercises.map((exercise, index) => (
+                                <li key={exercise.id} className="flex items-start gap-3 text-xs">
+                                  <span className="grid size-5 shrink-0 place-items-center rounded-full bg-mist font-semibold text-steel">{index + 1}</span>
+                                  <div><p className="font-medium text-ink">{exercise.name} · {exercise.sets} × {exercise.reps}</p><p className="mt-0.5 leading-5 text-steel">{exercise.howTo}</p></div>
+                                </li>
+                              ))}
+                            </ol>
+                            <Button className="mt-4 w-full" onClick={() => saveExample(example)}><Plus /> Adicionar aos meus treinos</Button>
+                          </div>
+                        )}
+                      </article>
+                    );
+                  })}
+                </div>
+              )}
+
+              <div className="mt-4 flex items-start gap-2 rounded-lg bg-mist p-3 text-xs leading-5 text-steel">
+                <CircleAlert className="mt-0.5 size-4 shrink-0 text-brand-deep" />
+                <p>Estes são apenas exemplos gerais, não aulas nem prescrição individual. Para segurança, técnica e um plano adequado ao seu corpo, procure um profissional de educação física.</p>
+              </div>
+            </div>
+
             <div className="glass-strong rounded-2xl p-5 ring-1 ring-black/5">
               <div className="flex items-center justify-between">
                 <h2 className="font-display text-lg font-semibold tracking-tight">Meus treinos</h2>
