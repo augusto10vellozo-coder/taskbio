@@ -8,7 +8,7 @@
 - [x] Agenda por datas reais e planejamento futuro
 - [x] Planejamento alimentar e compras automáticas
 - [x] Gráficos completos de progresso
-- [ ] Premium mensal/anual com pagamentos
+- [x] Aplicativo definido como gratuito para a fase de testes, sem planos ou cobranças
 - [x] Área profissional restrita, convites e vínculos autorizados
 - [x] Agenda mensal e visão integrada de datas
 - [x] Lembretes locais com preferências e permissões
@@ -16,4 +16,3 @@
 - [x] Exportação e exclusão de dados e páginas jurídicas iniciais
 - [x] Revisão de acessibilidade, experiência móvel e estabilidade do acesso
 - [x] Testes dos fluxos públicos e proteção da área profissional em celular e computador
-- [ ] Validação do checkout e da cobrança real após revisão comercial e jurídica
