@@ -9,6 +9,7 @@ const links = [
   { to: "/alimentacao", label: "Alimentação" },
   { to: "/compras", label: "Compras" },
   { to: "/progresso", label: "Progresso" },
+  { to: "/premium", label: "Premium" },
 ] as const;
 
 export function AppHeader() {

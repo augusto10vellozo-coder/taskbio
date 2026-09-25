@@ -16,6 +16,7 @@ import { TrilhaProvider } from "../lib/trilha-store";
 import { AuthProvider } from "../lib/auth-context";
 import { SyncManager } from "../components/SyncManager";
 import { Toaster } from "../components/ui/sonner";
+import { ReminderManager } from "../components/ReminderManager";
 
 function NotFoundComponent() {
   return (
@@ -132,6 +133,7 @@ function RootComponent() {
           <AppHeader />
           <Outlet />
           <SyncManager />
+          <ReminderManager />
           <Toaster position="top-center" richColors />
         </TrilhaProvider>
       </AuthProvider>
