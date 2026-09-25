@@ -48,7 +48,7 @@ export function AppHeader() {
 
         <div className="flex items-center gap-2">
           {!loading && user ? <>
-            <span className="hidden rounded-full bg-brand/10 px-2.5 py-1 text-[11px] font-medium text-brand-deep ring-1 ring-brand/15 sm:inline">Plano gratuito</span>
+            <Link to="/premium" className="hidden rounded-full bg-brand/10 px-2.5 py-1 text-[11px] font-medium text-brand-deep ring-1 ring-brand/15 sm:inline">Plano gratuito</Link>
             <Link to="/perfil" title="Abrir meu perfil" aria-label="Abrir meu perfil" className="grid size-9 place-items-center rounded-full bg-mist text-xs font-semibold text-steel ring-1 ring-black/5">{initials || <UserRound className="size-4" />}</Link>
           </> : !loading ? <Button asChild variant="outline" size="sm"><Link to="/auth"><LogIn /> Entrar</Link></Button> : <span className="size-9 animate-pulse rounded-full bg-mist" />}
         </div>
