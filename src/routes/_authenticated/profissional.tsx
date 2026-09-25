@@ -18,7 +18,10 @@ export const Route = createFileRoute("/_authenticated/profissional")({
 });
 
 type LinkRow = { id: string; client_id: string | null; invite_email: string; status: "pending" | "active" | "declined" | "ended" };
-type ClientSummary = { plan?: Record<string, Array<{ done?: boolean }>>; settings?: { workoutHistory?: unknown[] } };
+type ClientSummary = {
+  plan: Record<string, Array<{ done?: boolean }>> | undefined;
+  settings: { workoutHistory?: unknown[] } | undefined;
+};
 
 function ProfessionalPage() {
   const { user } = Route.useRouteContext();
