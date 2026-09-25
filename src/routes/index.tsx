@@ -1,10 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { ArrowRight, Bell, CalendarDays, Pencil, Plus, Trash2, X } from "lucide-react";
+import { addDays, format, isSameDay } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { ArrowRight, Bell, CalendarDays, ChevronLeft, ChevronRight, Pencil, Plus, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { DAYS, KIND_LABEL, brl, type Block, type BlockKind, type DayKey } from "@/lib/trilha-data";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { KIND_LABEL, brl, type Block, type BlockKind } from "@/lib/trilha-data";
 import { useTrilha } from "@/lib/trilha-store";
 import { useAuth } from "@/lib/auth-context";
+import { formatFullDate, formatWeekRange, getWeekDates, toDateKey } from "@/lib/calendar-utils";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -38,13 +43,15 @@ function MinhaSemana() {
   const { user, loading } = useAuth();
   const { plan, getMeal, getWorkout, toggleBlock, removeBlock, addBlock, updateBlock, setDoneSets, goal } =
     useTrilha();
-  const [day, setDay] = useState<DayKey>("seg");
+  const [selectedDate, setSelectedDate] = useState(() => new Date());
   const [openWorkout, setOpenWorkout] = useState<string | null>("w1");
   const [adding, setAdding] = useState(false);
   const [editing, setEditing] = useState<Block | null>(null);
 
-  const blocks = plan[day];
-  const dayInfo = DAYS.find((d) => d.key === day) ?? DAYS[0];
+  const dateKey = toDateKey(selectedDate);
+  const weekDates = useMemo(() => getWeekDates(selectedDate), [selectedDate]);
+  const weekKeys = useMemo(() => weekDates.map(toDateKey), [weekDates]);
+  const blocks = plan[dateKey] ?? [];
 
   const resumo = useMemo(() => {
     const cost = blocks.reduce((sum, b) => sum + (getMeal(b.mealId)?.cost ?? 0), 0);
@@ -53,7 +60,7 @@ function MinhaSemana() {
   }, [blocks, getMeal]);
 
   const weekStats = useMemo(() => {
-    const all = DAYS.flatMap((d) => plan[d.key]);
+    const all = weekKeys.flatMap((key) => plan[key] ?? []);
     const done = all.filter((b) => b.done).length;
     return {
       pct: all.length ? Math.round((done / all.length) * 100) : 0,
@@ -61,17 +68,17 @@ function MinhaSemana() {
       refeicoes: all.filter((b) => b.kind === "refeicao" && b.done).length,
       semanaCusto: all.reduce((s, b) => s + (getMeal(b.mealId)?.cost ?? 0), 0),
     };
-  }, [plan, getMeal]);
+  }, [getMeal, plan, weekKeys]);
 
   const compras = useMemo(() => {
     const map = new Map<string, string[]>();
-    DAYS.flatMap((d) => plan[d.key]).forEach((b) => {
+    weekKeys.flatMap((key) => plan[key] ?? []).forEach((b) => {
       getMeal(b.mealId)?.ingredients.forEach((i) => {
         map.set(i.name, [...(map.get(i.name) ?? []), i.qty]);
       });
     });
     return [...map.entries()].slice(0, 5);
-  }, [plan, getMeal]);
+  }, [getMeal, plan, weekKeys]);
 
   if (loading) {
     return <main className="mx-auto max-w-6xl px-5 py-12 sm:px-8"><div className="h-48 animate-pulse rounded-2xl bg-mist" /></main>;
@@ -110,9 +117,9 @@ function MinhaSemana() {
         <section className="pt-8 pb-4">
           <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
             <div>
-              <p className="text-xs font-medium uppercase tracking-[0.18em] text-steel">Minha Semana</p>
+              <p className="text-xs font-medium uppercase tracking-[0.18em] text-steel">Minha agenda</p>
               <h1 className="mt-2 max-w-[40ch] text-balance font-display text-3xl font-semibold tracking-tight sm:text-4xl">
-                {dayInfo.long}
+                {formatFullDate(selectedDate)}
               </h1>
               <p className="mt-2 max-w-[48ch] text-pretty text-sm text-steel">
                 {blocks.length} blocos planejados · {resumo.done} concluídos · custo do dia estimado em{" "}
@@ -120,19 +127,32 @@ function MinhaSemana() {
                 {goal ? ` · objetivo: ${goal}` : ""}
               </p>
             </div>
-            <div className="glass flex gap-1 overflow-x-auto rounded-xl p-1.5 ring-1 ring-black/5">
-              {DAYS.map((d) => (
-                <button
-                  key={d.key}
-                  onClick={() => setDay(d.key)}
-                  className={`shrink-0 rounded-lg px-3 py-2 text-sm font-medium ${
-                    d.key === day ? "bg-ink text-white" : "text-steel hover:text-ink"
-                  }`}
-                >
-                  {d.short}
-                </button>
-              ))}
+            <div className="flex flex-wrap items-center gap-2 lg:justify-end">
+              <Button variant="outline" size="sm" onClick={() => setSelectedDate(new Date())}>Hoje</Button>
+              <div className="glass flex items-center rounded-lg p-1 ring-1 ring-black/5">
+                <Button variant="ghost" size="icon" className="size-8" onClick={() => setSelectedDate((date) => addDays(date, -7))} aria-label="Semana anterior" title="Semana anterior"><ChevronLeft /></Button>
+                <span className="min-w-32 px-2 text-center text-xs font-medium text-steel">{formatWeekRange(selectedDate)}</span>
+                <Button variant="ghost" size="icon" className="size-8" onClick={() => setSelectedDate((date) => addDays(date, 7))} aria-label="Próxima semana" title="Próxima semana"><ChevronRight /></Button>
+              </div>
+              <Popover>
+                <PopoverTrigger asChild><Button variant="outline" size="icon" aria-label="Abrir calendário" title="Escolher data"><CalendarDays /></Button></PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="end">
+                  <Calendar mode="single" selected={selectedDate} onSelect={(date) => date && setSelectedDate(date)} defaultMonth={selectedDate} locale={ptBR} className="pointer-events-auto p-3" />
+                </PopoverContent>
+              </Popover>
             </div>
+          </div>
+          <div className="mt-5 grid grid-cols-7 gap-1.5 sm:gap-2">
+            {weekDates.map((date) => {
+              const active = isSameDay(date, selectedDate);
+              const today = isSameDay(date, new Date());
+              const count = (plan[toDateKey(date)] ?? []).length;
+              return <Button key={toDateKey(date)} variant={active ? "default" : "outline"} onClick={() => setSelectedDate(date)} className="h-auto min-w-0 flex-col gap-0.5 px-1.5 py-2 sm:px-3" aria-pressed={active}>
+                <span className="text-[10px] font-medium uppercase sm:text-xs">{format(date, "EEE", { locale: ptBR }).replace(".", "")}</span>
+                <span className="font-display text-lg font-semibold sm:text-xl">{format(date, "dd")}</span>
+                <span className="hidden text-[10px] font-normal sm:block">{format(date, "MMM", { locale: ptBR }).replace(".", "")}{today ? " · hoje" : count ? ` · ${count}` : ""}</span>
+              </Button>;
+            })}
           </div>
         </section>
 
@@ -154,7 +174,7 @@ function MinhaSemana() {
               {adding && (
                 <AddBlockForm
                   onAdd={(b) => {
-                    addBlock(day, b);
+                    addBlock(dateKey, b);
                     setAdding(false);
                   }}
                   onCancel={() => setAdding(false)}
@@ -197,7 +217,7 @@ function MinhaSemana() {
                             {b.endTime && <span className="text-[11px] text-steel">{b.time} — {b.endTime}</span>}
                              {b.reminderMinutes ? <span title={`Lembrete ${b.reminderMinutes} minutos antes`} className="text-brand-deep"><Bell className="size-3.5" /></span> : null}
                              <button
-                              onClick={() => toggleBlock(day, b.id)}
+                              onClick={() => toggleBlock(dateKey, b.id)}
                               className={`rounded-full px-2.5 py-0.5 text-[11px] font-medium ring-1 ${
                                 b.done
                                   ? "bg-good/10 text-good ring-good/20"
@@ -217,7 +237,7 @@ function MinhaSemana() {
                              <Button
                                variant="ghost"
                                size="icon"
-                              onClick={() => removeBlock(day, b.id)}
+                               onClick={() => removeBlock(dateKey, b.id)}
                                className="size-7 text-steel hover:text-destructive"
                               aria-label="Remover bloco"
                                title="Remover"
@@ -300,7 +320,7 @@ function MinhaSemana() {
             <div className="glass-strong rounded-2xl p-5 ring-1 ring-black/5">
               <div className="flex items-center justify-between">
                 <h2 className="font-display text-lg font-semibold tracking-tight">Progresso da semana</h2>
-                <span className="text-xs text-steel">Semana 24</span>
+                 <span className="text-xs text-steel">{formatWeekRange(selectedDate)}</span>
               </div>
               <div className="mt-4 grid grid-cols-2 gap-3">
                 <div className="rounded-xl bg-white/50 p-3 ring-1 ring-black/5">
@@ -348,7 +368,7 @@ function MinhaSemana() {
           </aside>
         </div>
       </main>
-      {editing && <div className="fixed inset-0 z-50 grid place-items-center bg-ink/35 px-4" role="dialog" aria-modal="true" aria-label="Editar bloco"><div className="glass-strong w-full max-w-2xl rounded-2xl p-5 shadow-xl ring-1 ring-black/10"><div className="mb-4 flex items-center justify-between"><h2 className="font-display text-xl font-semibold">Editar bloco</h2><Button variant="ghost" size="icon" onClick={() => setEditing(null)} aria-label="Fechar"><X /></Button></div><AddBlockForm initial={editing} submitLabel="Salvar alterações" onCancel={() => setEditing(null)} onAdd={(block) => { updateBlock(day, editing.id, block); setEditing(null); }} /></div></div>}
+      {editing && <div className="fixed inset-0 z-50 grid place-items-center bg-ink/35 px-4" role="dialog" aria-modal="true" aria-label="Editar bloco"><div className="glass-strong w-full max-w-2xl rounded-2xl p-5 shadow-xl ring-1 ring-black/10"><div className="mb-4 flex items-center justify-between"><h2 className="font-display text-xl font-semibold">Editar bloco</h2><Button variant="ghost" size="icon" onClick={() => setEditing(null)} aria-label="Fechar"><X /></Button></div><AddBlockForm initial={editing} submitLabel="Salvar alterações" onCancel={() => setEditing(null)} onAdd={(block) => { updateBlock(dateKey, editing.id, block); setEditing(null); }} /></div></div>}
     </>
   );
 }
@@ -371,6 +391,7 @@ function AddBlockForm({
   const [note, setNote] = useState(initial?.note ?? "");
   const [reminderMinutes, setReminderMinutes] = useState(initial?.reminderMinutes?.toString() ?? "");
   const [recurrence, setRecurrence] = useState<Block["recurrence"]>(initial?.recurrence ?? "none");
+  const [recurrenceUntil, setRecurrenceUntil] = useState(initial?.recurrenceUntil ?? "");
 
   return (
     <form
@@ -385,6 +406,7 @@ function AddBlockForm({
           ...(endTime ? { endTime } : {}),
           ...(note.trim() ? { note: note.trim() } : {}),
           ...(reminderMinutes ? { reminderMinutes: Number(reminderMinutes) } : {}),
+           ...(recurrence !== "none" && recurrenceUntil ? { recurrenceUntil } : {}),
           ...(initial?.mealId ? { mealId: initial.mealId } : {}),
           ...(initial?.workoutId ? { workoutId: initial.workoutId } : {}),
         });
@@ -418,6 +440,7 @@ function AddBlockForm({
       <label className="text-xs font-medium text-steel sm:col-span-2">Observações<input value={note} onChange={(event) => setNote(event.target.value)} placeholder="Detalhes importantes" className="mt-1.5 w-full rounded-lg bg-white px-2 py-1.5 text-sm text-ink ring-1 ring-line" /></label>
       <label className="text-xs font-medium text-steel">Lembrete<select value={reminderMinutes} onChange={(event) => setReminderMinutes(event.target.value)} className="mt-1.5 w-full rounded-lg bg-white px-2 py-1.5 text-sm text-ink ring-1 ring-line"><option value="">Sem lembrete</option><option value="10">10 minutos antes</option><option value="30">30 minutos antes</option><option value="60">1 hora antes</option></select></label>
       <label className="text-xs font-medium text-steel">Repetição<select disabled={Boolean(initial)} value={recurrence} onChange={(event) => setRecurrence(event.target.value as Block["recurrence"])} className="mt-1.5 w-full rounded-lg bg-white px-2 py-1.5 text-sm text-ink ring-1 ring-line disabled:opacity-60"><option value="none">Não repetir</option><option value="weekdays">Dias úteis</option><option value="daily">Todos os dias</option></select></label>
+      {!initial && recurrence !== "none" && <label className="text-xs font-medium text-steel">Repetir até<input type="date" value={recurrenceUntil} onChange={(event) => setRecurrenceUntil(event.target.value)} className="mt-1.5 w-full rounded-lg bg-white px-2 py-1.5 text-sm text-ink ring-1 ring-line" /></label>}
       <div className="flex justify-end gap-2 sm:col-span-2"><Button type="button" variant="ghost" onClick={onCancel}>Cancelar</Button><Button type="submit">{submitLabel}</Button></div>
     </form>
   );

@@ -4,7 +4,7 @@ import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
 
 const links = [
-  { to: "/", label: "Minha Semana" },
+  { to: "/", label: "Minha Agenda" },
   { to: "/atividades", label: "Atividades" },
   { to: "/alimentacao", label: "Alimentação" },
   { to: "/compras", label: "Compras" },
@@ -13,7 +13,7 @@ const links = [
 
 export function AppHeader() {
   const { user, loading } = useAuth();
-  const displayName = typeof user?.user_metadata["display_name"] === "string"
+  const displayName = typeof user?.user_metadata?.["display_name"] === "string"
     ? user.user_metadata["display_name"]
     : user?.email?.split("@")[0];
   const initials = displayName?.split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase();
