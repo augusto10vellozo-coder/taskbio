@@ -17,6 +17,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CalendarioRouteImport } from './routes/calendario'
 import { Route as ComprasRouteImport } from './routes/compras'
 import { Route as EsqueciSenhaRouteImport } from './routes/esqueci-senha'
+import { Route as PremiumRouteImport } from './routes/premium'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as ProgressoRouteImport } from './routes/progresso'
 import { Route as ReembolsoRouteImport } from './routes/reembolso'
@@ -63,6 +64,11 @@ const EsqueciSenhaRoute = EsqueciSenhaRouteImport.update({
   path: '/esqueci-senha',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PremiumRoute = PremiumRouteImport.update({
+  id: '/premium',
+  path: '/premium',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PrivacidadeRoute = PrivacidadeRouteImport.update({
   id: '/privacidade',
   path: '/privacidade',
@@ -102,6 +108,7 @@ export interface FileRoutesByFullPath {
   '/calendario': typeof CalendarioRoute
   '/compras': typeof ComprasRoute
   '/esqueci-senha': typeof EsqueciSenhaRoute
+  '/premium': typeof PremiumRoute
   '/privacidade': typeof PrivacidadeRoute
   '/progresso': typeof ProgressoRoute
   '/reembolso': typeof ReembolsoRoute
@@ -117,6 +124,7 @@ export interface FileRoutesByTo {
   '/calendario': typeof CalendarioRoute
   '/compras': typeof ComprasRoute
   '/esqueci-senha': typeof EsqueciSenhaRoute
+  '/premium': typeof PremiumRoute
   '/privacidade': typeof PrivacidadeRoute
   '/progresso': typeof ProgressoRoute
   '/reembolso': typeof ReembolsoRoute
@@ -134,6 +142,7 @@ export interface FileRoutesById {
   '/calendario': typeof CalendarioRoute
   '/compras': typeof ComprasRoute
   '/esqueci-senha': typeof EsqueciSenhaRoute
+  '/premium': typeof PremiumRoute
   '/privacidade': typeof PrivacidadeRoute
   '/progresso': typeof ProgressoRoute
   '/reembolso': typeof ReembolsoRoute
@@ -151,6 +160,7 @@ export interface FileRouteTypes {
     | '/calendario'
     | '/compras'
     | '/esqueci-senha'
+    | '/premium'
     | '/privacidade'
     | '/progresso'
     | '/reembolso'
@@ -166,6 +176,7 @@ export interface FileRouteTypes {
     | '/calendario'
     | '/compras'
     | '/esqueci-senha'
+    | '/premium'
     | '/privacidade'
     | '/progresso'
     | '/reembolso'
@@ -182,6 +193,7 @@ export interface FileRouteTypes {
     | '/calendario'
     | '/compras'
     | '/esqueci-senha'
+    | '/premium'
     | '/privacidade'
     | '/progresso'
     | '/reembolso'
@@ -199,6 +211,7 @@ export interface RootRouteChildren {
   CalendarioRoute: typeof CalendarioRoute
   ComprasRoute: typeof ComprasRoute
   EsqueciSenhaRoute: typeof EsqueciSenhaRoute
+  PremiumRoute: typeof PremiumRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
   ProgressoRoute: typeof ProgressoRoute
   ReembolsoRoute: typeof ReembolsoRoute
@@ -262,6 +275,13 @@ declare module '@tanstack/react-router' {
       path: '/esqueci-senha'
       fullPath: '/esqueci-senha'
       preLoaderRoute: typeof EsqueciSenhaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/premium': {
+      id: '/premium'
+      path: '/premium'
+      fullPath: '/premium'
+      preLoaderRoute: typeof PremiumRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacidade': {
@@ -329,6 +349,7 @@ const rootRouteChildren: RootRouteChildren = {
   CalendarioRoute: CalendarioRoute,
   ComprasRoute: ComprasRoute,
   EsqueciSenhaRoute: EsqueciSenhaRoute,
+  PremiumRoute: PremiumRoute,
   PrivacidadeRoute: PrivacidadeRoute,
   ProgressoRoute: ProgressoRoute,
   ReembolsoRoute: ReembolsoRoute,
