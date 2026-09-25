@@ -34,6 +34,14 @@ export type Workout = {
   exercises: Exercise[];
 };
 
+export type ObjectiveEffect = {
+  focus: string;
+  frequency: string;
+  intensity: string;
+  duration: string;
+  recovery: string;
+};
+
 export type WorkoutHistoryEntry = {
   id: string;
   workoutId: string;
@@ -228,6 +236,80 @@ export const GOALS = [
   "Organizar minha rotina",
   "Melhorar alimentação",
 ];
+
+export const OBJECTIVE_EFFECTS: Record<string, ObjectiveEffect> = {
+  "Ganhar massa muscular": { focus: "mais volume e progressão gradual", frequency: "3 a 5 vezes por semana", intensity: "moderada, com técnica controlada", duration: "45 a 70 minutos", recovery: "intervalos de 60 a 90 segundos" },
+  "Melhorar condicionamento": { focus: "resistência e capacidade cardiorrespiratória", frequency: "3 a 4 vezes por semana", intensity: "leve a moderada, com progressão", duration: "30 a 50 minutos", recovery: "pausas curtas e recuperação ativa" },
+  "Começar a correr": { focus: "adaptação gradual entre caminhada e corrida", frequency: "2 a 3 vezes por semana", intensity: "leve, permitindo conversar", duration: "20 a 40 minutos", recovery: "ao menos um dia entre sessões" },
+  "Ser mais ativo": { focus: "movimento frequente e sustentável", frequency: "3 a 5 momentos na semana", intensity: "leve a moderada", duration: "20 a 40 minutos", recovery: "conforme disposição e rotina" },
+  "Organizar minha rotina": { focus: "sessões simples e fáceis de encaixar", frequency: "2 a 4 vezes por semana", intensity: "adaptável ao tempo disponível", duration: "20 a 45 minutos", recovery: "dias e horários consistentes" },
+  "Melhorar alimentação": { focus: "atividade regular como apoio à rotina saudável", frequency: "2 a 4 vezes por semana", intensity: "leve a moderada", duration: "25 a 45 minutos", recovery: "sono, hidratação e alimentação adequados" },
+};
+
+const MODALITY_MOVEMENTS: Record<string, [string, string, string, string]> = {
+  Musculação: ["Agachamento com peso corporal", "Remada", "Supino com halteres", "Elevação pélvica"],
+  Hipertrofia: ["Agachamento", "Supino", "Remada", "Desenvolvimento"],
+  Força: ["Agachamento", "Levantamento terra técnico", "Supino", "Remada"],
+  Emagrecimento: ["Agachamento livre", "Remada elástica", "Polichinelo adaptado", "Prancha"],
+  "Treino funcional": ["Agachamento", "Avanço", "Remada elástica", "Prancha"],
+  Caminhada: ["Aquecimento caminhando", "Caminhada confortável", "Passos mais rápidos", "Desaceleração"],
+  Corrida: ["Caminhada de aquecimento", "Corrida leve", "Caminhada de recuperação", "Desaceleração"],
+  Intervalado: ["Aquecimento", "Intervalo moderado", "Recuperação ativa", "Volta à calma"],
+  "5 km": ["Aquecimento", "Corrida contínua leve", "Acelerações curtas", "Volta à calma"],
+  "10 km": ["Aquecimento", "Corrida contínua", "Trecho em ritmo confortável", "Volta à calma"],
+  Boxe: ["Base e deslocamento", "Jab e direto no ar", "Esquivas técnicas", "Mobilidade final"],
+  "Muay Thai": ["Base e guarda", "Sequência técnica no ar", "Joelhadas controladas", "Mobilidade final"],
+  "Jiu-Jitsu": ["Mobilidade de quadril", "Fuga de quadril", "Movimentos técnicos sem parceiro", "Alongamento leve"],
+  Judô: ["Mobilidade e quedas educativas", "Deslocamento e pegada", "Entrada técnica sem projeção", "Alongamento leve"],
+  Karatê: ["Base e postura", "Golpes fundamentais no ar", "Deslocamentos", "Mobilidade final"],
+  Kickboxing: ["Base e deslocamento", "Combinações no ar", "Chutes controlados", "Mobilidade final"],
+  MMA: ["Mobilidade", "Combinações no ar", "Movimentos de solo sem parceiro", "Volta à calma"],
+  Pilates: ["Respiração e alinhamento", "Ponte", "Dead bug", "Mobilidade de coluna"],
+  Yoga: ["Respiração", "Saudação ao sol adaptada", "Posturas em pé", "Relaxamento"],
+  "Cross training": ["Mobilidade", "Agachamento", "Remada elástica", "Circuito leve"],
+  Ciclismo: ["Giro leve", "Cadência confortável", "Trecho moderado", "Giro de recuperação"],
+  Natação: ["Aquecimento fora da água", "Nado leve", "Técnica de braçada", "Recuperação"],
+  Calistenia: ["Agachamento", "Flexão adaptada", "Remada australiana adaptada", "Prancha"],
+  Dança: ["Mobilidade rítmica", "Passos básicos", "Sequência contínua", "Desaceleração"],
+  Alongamento: ["Pescoço e ombros", "Quadril", "Posteriores de coxa", "Respiração"],
+  Mobilidade: ["Coluna torácica", "Quadril", "Tornozelos", "Ombros"],
+};
+
+export function getWorkoutExamples(modality: string, goal: string | null): Workout[] {
+  const movements = MODALITY_MOVEMENTS[modality] ?? MODALITY_MOVEMENTS["Treino funcional"];
+  const strengthGoal = goal === "Ganhar massa muscular";
+  const starterGoal = goal === "Começar a correr" || goal === "Ser mais ativo";
+  const isCardio = ["Caminhada", "Corrida", "Intervalado", "5 km", "10 km", "Ciclismo", "Natação", "Dança"].includes(modality);
+  const sets = starterGoal ? 2 : strengthGoal ? 4 : 3;
+  const reps = isCardio ? 5 : strengthGoal ? 10 : 12;
+  const rest = strengthGoal ? 75 : isCardio ? 60 : 45;
+  const makeExercise = (name: string, index: number, easier = false): Exercise => ({
+    id: `suggestion-${modality}-${index}-${easier ? "intro" : "base"}`,
+    name,
+    sets: easier ? Math.max(1, sets - 1) : sets,
+    reps,
+    restSec: rest,
+    muscles: isCardio ? "Condicionamento e coordenação" : "Movimentos gerais da modalidade",
+    howTo: isCardio ? "Faça por cerca de 5 minutos em ritmo confortável." : "Execute devagar, respeitando sua amplitude e sem dor.",
+    doneSets: 0,
+  });
+  return [
+    {
+      id: `example-${modality}-intro`,
+      name: `${modality} — início`,
+      focus: goal ?? "Movimento e adaptação",
+      modality,
+      exercises: movements.slice(0, 3).map((movement, index) => makeExercise(movement, index, true)),
+    },
+    {
+      id: `example-${modality}-base`,
+      name: `${modality} — base`,
+      focus: goal ?? "Prática geral",
+      modality,
+      exercises: movements.map((movement, index) => makeExercise(movement, index)),
+    },
+  ];
+}
 
 export const INITIAL_PLAN: Plan = {
   seg: [
