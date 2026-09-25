@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { DAYS, brl } from "@/lib/trilha-data";
+import { brl } from "@/lib/trilha-data";
 import { useTrilha } from "@/lib/trilha-store";
+import { getWeekKeys } from "@/lib/calendar-utils";
 
 export const Route = createFileRoute("/compras")({
   head: () => ({ meta: [
@@ -20,7 +21,7 @@ function Compras() {
   const [checked, setChecked] = useState<string[]>([]);
   const data = useMemo(() => {
     const items = new Map<string, string[]>(); let cost = 0;
-    DAYS.flatMap((d) => plan[d.key]).forEach((b) => { const meal = getMeal(b.mealId); if (!meal) return; cost += meal.cost; meal.ingredients.forEach((i) => items.set(i.name, [...(items.get(i.name) ?? []), i.qty])); });
+    getWeekKeys(new Date()).flatMap((key) => plan[key] ?? []).forEach((b) => { const meal = getMeal(b.mealId); if (!meal) return; cost += meal.cost; meal.ingredients.forEach((i) => items.set(i.name, [...(items.get(i.name) ?? []), i.qty])); });
     return { items: [...items.entries()], cost };
   }, [plan, getMeal]);
   return (

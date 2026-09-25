@@ -5,6 +5,7 @@
 - [x] Criação, edição, repetição e lembretes de compromissos
 - [x] Execução de treino com cronômetro e histórico
 - [x] Modalidades e objetivos com exemplos de treinos contextualizados
+- [x] Agenda por datas reais e planejamento futuro
 - [ ] Planejamento alimentar e compras automáticas
 - [ ] Gráficos completos de progresso
 - [ ] Premium mensal/anual com pagamentos
