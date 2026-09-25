@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { Check, History, Pause, Play, RotateCcw, Timer, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { ACTIVITY_CATALOG, GOALS, type Exercise, type Workout } from "@/lib/trilha-data";
 import { useTrilha } from "@/lib/trilha-store";
 
@@ -25,10 +27,12 @@ export const Route = createFileRoute("/atividades")({
 });
 
 function Atividades() {
-  const { workouts, addWorkout, setDoneSets, goal, setGoal } = useTrilha();
+  const { workouts, workoutHistory, addWorkout, setDoneSets, setExerciseLoad, completeWorkout, goal, setGoal } = useTrilha();
   const [selected, setSelected] = useState<string | null>(workouts[0]?.id ?? null);
   const [creating, setCreating] = useState(false);
+  const [runningWorkoutId, setRunningWorkoutId] = useState<string | null>(null);
   const workout = workouts.find((w) => w.id === selected);
+  const runningWorkout = workouts.find((w) => w.id === runningWorkoutId);
 
   return (
     <>
@@ -159,13 +163,166 @@ function Atividades() {
                       </div>
                     ))}
                   </div>
+                  <Button className="mt-4 w-full" onClick={() => setRunningWorkoutId(workout.id)}>
+                    <Play /> Iniciar treino
+                  </Button>
+                </div>
+              )}
+            </div>
+
+            <div className="glass-strong rounded-2xl p-5 ring-1 ring-black/5">
+              <div className="flex items-center justify-between">
+                <h2 className="flex items-center gap-2 font-display text-lg font-semibold tracking-tight"><History className="size-4 text-brand-deep" /> Histórico recente</h2>
+                <span className="text-xs text-steel">últimas sessões</span>
+              </div>
+              {workoutHistory.length === 0 ? (
+                <p className="mt-4 text-sm text-steel">Conclua seu primeiro treino para acompanhar cargas e evolução.</p>
+              ) : (
+                <div className="mt-4 space-y-2">
+                  {workoutHistory.slice(0, 5).map((entry) => (
+                    <article key={entry.id} className="flex items-center justify-between gap-4 rounded-lg bg-card/70 p-3 ring-1 ring-line">
+                      <div>
+                        <p className="text-sm font-medium">{entry.workoutName}</p>
+                        <p className="mt-0.5 text-[11px] text-steel">{new Date(entry.completedAt).toLocaleDateString("pt-BR")} · {entry.completedSets} séries</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-semibold">{entry.totalVolumeKg.toLocaleString("pt-BR")} kg</p>
+                        <p className="text-[11px] text-steel">{formatTime(entry.durationSec)}</p>
+                      </div>
+                    </article>
+                  ))}
                 </div>
               )}
             </div>
           </section>
         </div>
       </main>
+      {runningWorkout && (
+        <WorkoutRunner
+          workout={runningWorkout}
+          onClose={() => setRunningWorkoutId(null)}
+          onSetDone={setDoneSets}
+          onLoadChange={setExerciseLoad}
+          onComplete={(durationSec) => {
+            const completedExercises = runningWorkout.exercises.filter((exercise) => exercise.doneSets > 0);
+            const completedSets = completedExercises.reduce((sum, exercise) => sum + exercise.doneSets, 0);
+            completeWorkout({
+              id: `history-${Date.now()}`,
+              workoutId: runningWorkout.id,
+              workoutName: runningWorkout.name,
+              completedAt: new Date().toISOString(),
+              durationSec,
+              completedSets,
+              totalVolumeKg: completedExercises.reduce((sum, exercise) => sum + (exercise.loadKg ?? 0) * exercise.reps * exercise.doneSets, 0),
+              exercises: completedExercises.map((exercise) => ({
+                exerciseId: exercise.id,
+                name: exercise.name,
+                sets: exercise.doneSets,
+                reps: exercise.reps,
+                loadKg: exercise.loadKg ?? 0,
+              })),
+            });
+            setRunningWorkoutId(null);
+          }}
+        />
+      )}
     </>
+  );
+}
+
+function formatTime(totalSeconds: number) {
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+}
+
+function WorkoutRunner({
+  workout,
+  onClose,
+  onSetDone,
+  onLoadChange,
+  onComplete,
+}: {
+  workout: Workout;
+  onClose: () => void;
+  onSetDone: (workoutId: string, exerciseId: string, doneSets: number) => void;
+  onLoadChange: (workoutId: string, exerciseId: string, loadKg: number) => void;
+  onComplete: (durationSec: number) => void;
+}) {
+  const [elapsed, setElapsed] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const [restLeft, setRestLeft] = useState(0);
+
+  useEffect(() => {
+    if (paused) return;
+    const interval = window.setInterval(() => setElapsed((value) => value + 1), 1000);
+    return () => window.clearInterval(interval);
+  }, [paused]);
+
+  useEffect(() => {
+    if (paused || restLeft <= 0) return;
+    const interval = window.setInterval(() => setRestLeft((value) => Math.max(0, value - 1)), 1000);
+    return () => window.clearInterval(interval);
+  }, [paused, restLeft]);
+
+  const completedSets = workout.exercises.reduce((sum, exercise) => sum + exercise.doneSets, 0);
+  const totalSets = workout.exercises.reduce((sum, exercise) => sum + exercise.sets, 0);
+
+  return (
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-background/95 px-4 py-5 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label="Treino em andamento">
+      <div className="mx-auto max-w-3xl">
+        <header className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-line bg-background/95 py-3 backdrop-blur">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-[0.18em] text-brand-deep">Treino em andamento</p>
+            <h2 className="font-display text-xl font-semibold">{workout.name} — {workout.focus}</h2>
+          </div>
+          <Button variant="ghost" size="icon" onClick={onClose} aria-label="Fechar treino"><X /></Button>
+        </header>
+
+        <div className="grid grid-cols-3 gap-2 py-4">
+          <div className="rounded-lg bg-card p-3 text-center ring-1 ring-line"><p className="text-[11px] text-steel">Tempo</p><p className="mt-1 font-display text-xl font-semibold tabular-nums">{formatTime(elapsed)}</p></div>
+          <div className="rounded-lg bg-card p-3 text-center ring-1 ring-line"><p className="text-[11px] text-steel">Séries</p><p className="mt-1 font-display text-xl font-semibold">{completedSets}/{totalSets}</p></div>
+          <div className="rounded-lg bg-card p-3 text-center ring-1 ring-line"><p className="text-[11px] text-steel">Descanso</p><p className="mt-1 font-display text-xl font-semibold tabular-nums">{formatTime(restLeft)}</p></div>
+        </div>
+
+        {restLeft > 0 && (
+          <div className="mb-4 flex items-center justify-between rounded-lg bg-brand/10 p-3 text-brand-deep ring-1 ring-brand/20">
+            <span className="flex items-center gap-2 text-sm font-medium"><Timer /> Recupere-se para a próxima série</span>
+            <Button variant="ghost" size="sm" onClick={() => setRestLeft(0)}>Pular</Button>
+          </div>
+        )}
+
+        <div className="space-y-3">
+          {workout.exercises.map((exercise) => (
+            <article key={exercise.id} className="rounded-xl bg-card p-4 ring-1 ring-line">
+              <div className="flex items-start justify-between gap-3">
+                <div><h3 className="text-base font-semibold">{exercise.name}</h3><p className="mt-1 text-xs leading-5 text-steel">{exercise.muscles} — {exercise.howTo}</p></div>
+                <span className="shrink-0 text-xs font-medium text-steel">{exercise.sets} × {exercise.reps}</span>
+              </div>
+              <div className="mt-4 flex flex-wrap items-end justify-between gap-3">
+                <label className="text-xs font-medium text-steel">Carga por série (kg)
+                  <input type="number" min="0" step="0.5" value={exercise.loadKg ?? ""} onChange={(event) => onLoadChange(workout.id, exercise.id, Math.max(0, Number(event.target.value) || 0))} className="mt-1 block h-9 w-28 rounded-md bg-background px-3 text-sm text-ink ring-1 ring-line focus:outline-none focus:ring-brand" placeholder="0" />
+                </label>
+                <div className="flex gap-2">
+                  {Array.from({ length: exercise.sets }, (_, index) => index + 1).map((setNumber) => {
+                    const done = exercise.doneSets >= setNumber;
+                    return <Button key={setNumber} type="button" size="icon" variant={done ? "default" : "outline"} aria-label={`Série ${setNumber}${done ? " concluída" : ""}`} onClick={() => { const next = done ? setNumber - 1 : setNumber; onSetDone(workout.id, exercise.id, next); if (!done && exercise.restSec > 0) setRestLeft(exercise.restSec); }}>{done ? <Check /> : setNumber}</Button>;
+                  })}
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+
+        <footer className="sticky bottom-0 mt-5 flex items-center justify-between gap-3 border-t border-line bg-background/95 py-4 backdrop-blur">
+          <Button variant="outline" onClick={() => setPaused((value) => !value)}>{paused ? <Play /> : <Pause />}{paused ? "Continuar" : "Pausar"}</Button>
+          <div className="flex gap-2">
+            <Button variant="ghost" onClick={() => setRestLeft(0)} title="Zerar descanso"><RotateCcw /> Descanso</Button>
+            <Button onClick={() => onComplete(elapsed)} disabled={completedSets === 0}><Check /> Concluir treino</Button>
+          </div>
+        </footer>
+      </div>
+    </div>
   );
 }
 
