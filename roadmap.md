@@ -10,3 +10,9 @@
 - [ ] Gráficos completos de progresso
 - [ ] Premium mensal/anual com pagamentos
 - [ ] Plano Profissional e gestão de alunos
+- [ ] Agenda mensal e visão integrada de datas
+- [ ] Lembretes reais com preferências e permissões
+- [ ] Estados vazios, carregamentos e mensagens de erro consistentes
+- [ ] Exportação e exclusão de dados, consentimentos e páginas jurídicas
+- [ ] Revisão de acessibilidade, experiência móvel e estabilidade do acesso
+- [ ] Testes completos dos fluxos principais antes da cobrança real
