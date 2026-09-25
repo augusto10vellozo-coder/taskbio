@@ -39,7 +39,14 @@ function ProfessionalPage() {
     const activeIds = currentLinks.filter((item) => item.status === "active" && item.client_id).map((item) => item.client_id as string);
     if (allowed && activeIds.length) {
       const { data } = await supabase.from("user_data").select("user_id, plan, settings").in("user_id", activeIds);
-      setSummaries(Object.fromEntries((data ?? []).map((item) => [item.user_id, { plan: item.plan as ClientSummary["plan"], settings: item.settings as ClientSummary["settings"] }])));
+      const next: Record<string, ClientSummary> = {};
+      (data ?? []).forEach((item) => {
+        next[item.user_id] = {
+          plan: item.plan as ClientSummary["plan"],
+          settings: item.settings as ClientSummary["settings"],
+        };
+      });
+      setSummaries(next);
     }
   }
 
