@@ -12,12 +12,13 @@ import {
   MEALS,
   WORKOUTS,
   type Block,
-  type DayKey,
   type Meal,
   type Plan,
   type Workout,
   type WorkoutHistoryEntry,
 } from "./trilha-data";
+import { addDays, isAfter, isWeekend, parseISO } from "date-fns";
+import { normalizePlan, toDateKey } from "./calendar-utils";
 
 export type TrilhaState = {
   plan: Plan;
@@ -31,10 +32,10 @@ export type TrilhaState = {
 type Store = TrilhaState & {
   ready: boolean;
   hydrate: (state: Partial<TrilhaState>) => void;
-  toggleBlock: (day: DayKey, blockId: string) => void;
-  removeBlock: (day: DayKey, blockId: string) => void;
-  addBlock: (day: DayKey, block: Omit<Block, "id" | "done">) => void;
-  updateBlock: (day: DayKey, blockId: string, block: Omit<Block, "id" | "done">) => void;
+  toggleBlock: (date: string, blockId: string) => void;
+  removeBlock: (date: string, blockId: string) => void;
+  addBlock: (date: string, block: Omit<Block, "id" | "done">) => void;
+  updateBlock: (date: string, blockId: string, block: Omit<Block, "id" | "done">) => void;
   setDoneSets: (workoutId: string, exerciseId: string, doneSets: number) => void;
   setExerciseLoad: (workoutId: string, exerciseId: string, loadKg: number) => void;
   completeWorkout: (entry: WorkoutHistoryEntry) => void;
@@ -75,7 +76,10 @@ export function TrilhaProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) setState({ ...initialState, ...(JSON.parse(raw) as TrilhaState) });
+      if (raw) {
+        const stored = JSON.parse(raw) as Partial<TrilhaState>;
+        setState({ ...initialState, ...stored, plan: normalizePlan(stored.plan) });
+      }
     } catch {
       /* ignora estado inválido */
     } finally {
@@ -96,34 +100,50 @@ export function TrilhaProvider({ children }: { children: ReactNode }) {
     () => ({
       ...state,
       ready,
-      hydrate: (nextState) => setState((current) => ({ ...current, ...nextState })),
+      hydrate: (nextState) => setState((current) => ({
+        ...current,
+        ...nextState,
+        ...(nextState.plan ? { plan: normalizePlan(nextState.plan) } : {}),
+      })),
       toggleBlock: (day, blockId) =>
         setState((s) => ({
           ...s,
           plan: {
             ...s.plan,
-            [day]: s.plan[day].map((b) => (b.id === blockId ? { ...b, done: !b.done } : b)),
+            [day]: (s.plan[day] ?? []).map((b) => (b.id === blockId ? { ...b, done: !b.done } : b)),
           },
         })),
       removeBlock: (day, blockId) =>
         setState((s) => ({
           ...s,
-          plan: { ...s.plan, [day]: s.plan[day].filter((b) => b.id !== blockId) },
+          plan: { ...s.plan, [day]: (s.plan[day] ?? []).filter((b) => b.id !== blockId) },
         })),
       addBlock: (day, block) =>
         setState((s) => ({
           ...s,
-          plan: (block.recurrence === "daily" || block.recurrence === "weekdays"
-            ? (Object.keys(s.plan) as DayKey[]).reduce((next, targetDay) => {
-                if (block.recurrence === "weekdays" && (targetDay === "sab" || targetDay === "dom")) return next;
-                next[targetDay] = sortBlocks([...next[targetDay], { ...block, id: `b-${Date.now()}-${targetDay}`, done: false }]);
-                return next;
-              }, { ...s.plan })
-            : { ...s.plan, [day]: sortBlocks([...s.plan[day], { ...block, id: `b-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, done: false }]) }),
+          plan: (() => {
+            const next = { ...s.plan };
+            const start = parseISO(day);
+            const defaultEnd = addDays(start, 28);
+            const end = block.recurrenceUntil ? parseISO(block.recurrenceUntil) : defaultEnd;
+            const repeating = block.recurrence === "daily" || block.recurrence === "weekdays";
+            let cursor = start;
+            do {
+              if (block.recurrence !== "weekdays" || !isWeekend(cursor)) {
+                const targetDate = toDateKey(cursor);
+                next[targetDate] = sortBlocks([
+                  ...(next[targetDate] ?? []),
+                  { ...block, id: `b-${Date.now()}-${targetDate}`, done: false },
+                ]);
+              }
+              cursor = addDays(cursor, 1);
+            } while (repeating && !isAfter(cursor, end));
+            return next;
+          })(),
         })),
       updateBlock: (day, blockId, block) => setState((s) => ({
         ...s,
-        plan: { ...s.plan, [day]: sortBlocks(s.plan[day].map((item) => item.id === blockId ? { ...item, ...block } : item)) },
+        plan: { ...s.plan, [day]: sortBlocks((s.plan[day] ?? []).map((item) => item.id === blockId ? { ...item, ...block } : item)) },
       })),
       setDoneSets: (workoutId, exerciseId, doneSets) =>
         setState((s) => ({
