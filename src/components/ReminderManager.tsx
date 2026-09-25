@@ -1,7 +1,8 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { parseISO, setHours, setMinutes, subMinutes } from "date-fns";
 import { useTrilha } from "@/lib/trilha-store";
 import { useAuth } from "@/lib/auth-context";
+import { supabase } from "@/integrations/supabase/client";
 
 const MAX_DELAY = 24 * 60 * 60 * 1000;
 
@@ -9,11 +10,20 @@ export function ReminderManager() {
   const { user } = useAuth();
   const { plan } = useTrilha();
   const timers = useRef<number[]>([]);
+  const [enabled, setEnabled] = useState(false);
+
+  useEffect(() => {
+    if (!user) { setEnabled(false); return; }
+    supabase.from("profiles").select("preferences").eq("id", user.id).single().then(({ data }) => {
+      const preferences = data?.preferences;
+      setEnabled(Boolean(preferences && typeof preferences === "object" && !Array.isArray(preferences) && preferences["reminders"] !== false));
+    });
+  }, [user?.id]);
 
   useEffect(() => {
     timers.current.forEach(window.clearTimeout);
     timers.current = [];
-    if (!user || !("Notification" in window) || Notification.permission !== "granted") return;
+    if (!user || !enabled || !("Notification" in window) || Notification.permission !== "granted") return;
 
     const now = new Date();
     Object.entries(plan).forEach(([dateKey, blocks]) => blocks.forEach((block) => {
@@ -29,7 +39,7 @@ export function ReminderManager() {
     }));
 
     return () => timers.current.forEach(window.clearTimeout);
-  }, [plan, user]);
+  }, [enabled, plan, user]);
 
   return null;
 }

@@ -9,10 +9,11 @@
 - [x] Planejamento alimentar e compras automáticas
 - [x] Gráficos completos de progresso
 - [ ] Premium mensal/anual com pagamentos
-- [ ] Plano Profissional e gestão de alunos
+- [x] Área profissional restrita, convites e vínculos autorizados
 - [x] Agenda mensal e visão integrada de datas
 - [x] Lembretes locais com preferências e permissões
-- [ ] Estados vazios, carregamentos e mensagens de erro consistentes
+- [x] Estados vazios, carregamentos e mensagens de erro consistentes
 - [x] Exportação e exclusão de dados e páginas jurídicas iniciais
-- [ ] Revisão de acessibilidade, experiência móvel e estabilidade do acesso
-- [ ] Testes completos dos fluxos principais antes da cobrança real
+- [x] Revisão de acessibilidade, experiência móvel e estabilidade do acesso
+- [x] Testes dos fluxos públicos e proteção da área profissional em celular e computador
+- [ ] Validação do checkout e da cobrança real após revisão comercial e jurídica

@@ -17,6 +17,7 @@ import { AuthProvider } from "../lib/auth-context";
 import { SyncManager } from "../components/SyncManager";
 import { Toaster } from "../components/ui/sonner";
 import { ReminderManager } from "../components/ReminderManager";
+import { PendingProfessionalInvites } from "../components/PendingProfessionalInvites";
 
 function NotFoundComponent() {
   return (
@@ -134,6 +135,7 @@ function RootComponent() {
           <Outlet />
           <SyncManager />
           <ReminderManager />
+          <PendingProfessionalInvites />
           <Toaster position="top-center" richColors />
         </TrilhaProvider>
       </AuthProvider>
