@@ -24,6 +24,7 @@ export type TrilhaState = {
   workouts: Workout[];
   meals: Meal[];
   goal: string | null;
+  preferredModality: string | null;
   workoutHistory: WorkoutHistoryEntry[];
 };
 
@@ -39,6 +40,7 @@ type Store = TrilhaState & {
   completeWorkout: (entry: WorkoutHistoryEntry) => void;
   addWorkout: (workout: Workout) => void;
   setGoal: (goal: string) => void;
+  setPreferredModality: (modality: string) => void;
   getWorkout: (id?: string) => Workout | undefined;
   getMeal: (id?: string) => Meal | undefined;
 };
@@ -48,6 +50,7 @@ const initialState: TrilhaState = {
   workouts: WORKOUTS,
   meals: MEALS,
   goal: null,
+  preferredModality: null,
   workoutHistory: [],
 };
 
@@ -160,6 +163,7 @@ export function TrilhaProvider({ children }: { children: ReactNode }) {
         })),
       addWorkout: (workout) => setState((s) => ({ ...s, workouts: [...s.workouts, workout] })),
       setGoal: (goal) => setState((s) => ({ ...s, goal })),
+      setPreferredModality: (preferredModality) => setState((s) => ({ ...s, preferredModality })),
       getWorkout: (id) => state.workouts.find((w) => w.id === id),
       getMeal: (id) => state.meals.find((m) => m.id === id),
     }),
