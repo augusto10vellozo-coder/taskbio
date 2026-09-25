@@ -275,8 +275,15 @@ const MODALITY_MOVEMENTS: Record<string, [string, string, string, string]> = {
   Mobilidade: ["Coluna torácica", "Quadril", "Tornozelos", "Ombros"],
 };
 
+const DEFAULT_MODALITY_MOVEMENTS: [string, string, string, string] = [
+  "Agachamento",
+  "Avanço",
+  "Remada elástica",
+  "Prancha",
+];
+
 export function getWorkoutExamples(modality: string, goal: string | null): Workout[] {
-  const movements = MODALITY_MOVEMENTS[modality] ?? MODALITY_MOVEMENTS["Treino funcional"];
+  const movements = MODALITY_MOVEMENTS[modality] ?? DEFAULT_MODALITY_MOVEMENTS;
   const strengthGoal = goal === "Ganhar massa muscular";
   const starterGoal = goal === "Começar a correr" || goal === "Ser mais ativo";
   const isCardio = ["Caminhada", "Corrida", "Intervalado", "5 km", "10 km", "Ciclismo", "Natação", "Dança"].includes(modality);
