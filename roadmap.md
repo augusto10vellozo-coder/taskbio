@@ -6,13 +6,13 @@
 - [x] Execução de treino com cronômetro e histórico
 - [x] Modalidades e objetivos com exemplos de treinos contextualizados
 - [x] Agenda por datas reais e planejamento futuro
-- [ ] Planejamento alimentar e compras automáticas
-- [ ] Gráficos completos de progresso
+- [x] Planejamento alimentar e compras automáticas
+- [x] Gráficos completos de progresso
 - [ ] Premium mensal/anual com pagamentos
 - [ ] Plano Profissional e gestão de alunos
-- [ ] Agenda mensal e visão integrada de datas
-- [ ] Lembretes reais com preferências e permissões
+- [x] Agenda mensal e visão integrada de datas
+- [x] Lembretes locais com preferências e permissões
 - [ ] Estados vazios, carregamentos e mensagens de erro consistentes
-- [ ] Exportação e exclusão de dados, consentimentos e páginas jurídicas
+- [x] Exportação e exclusão de dados e páginas jurídicas iniciais
 - [ ] Revisão de acessibilidade, experiência móvel e estabilidade do acesso
 - [ ] Testes completos dos fluxos principais antes da cobrança real

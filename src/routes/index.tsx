@@ -43,7 +43,12 @@ function MinhaSemana() {
   const { user, loading } = useAuth();
   const { plan, getMeal, getWorkout, toggleBlock, removeBlock, addBlock, updateBlock, setDoneSets, goal } =
     useTrilha();
-  const [selectedDate, setSelectedDate] = useState(() => new Date());
+  const [selectedDate, setSelectedDate] = useState(() => {
+    if (typeof window === "undefined") return new Date();
+    const saved = sessionStorage.getItem("trilha:selected-date");
+    if (saved) { sessionStorage.removeItem("trilha:selected-date"); return new Date(`${saved}T12:00:00`); }
+    return new Date();
+  });
   const [openWorkout, setOpenWorkout] = useState<string | null>("w1");
   const [adding, setAdding] = useState(false);
   const [editing, setEditing] = useState<Block | null>(null);
@@ -122,6 +127,7 @@ function MinhaSemana() {
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2 lg:justify-end">
+              <Button asChild variant="outline" size="sm"><Link to="/calendario"><CalendarDays /> Mês</Link></Button>
               <Button variant="outline" size="sm" onClick={() => setSelectedDate(new Date())}>Hoje</Button>
               <div className="glass flex items-center rounded-lg p-1 ring-1 ring-black/5">
                 <Button variant="ghost" size="icon" className="size-8" onClick={() => setSelectedDate((date) => addDays(date, -7))} aria-label="Semana anterior" title="Semana anterior"><ChevronLeft /></Button>

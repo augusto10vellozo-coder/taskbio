@@ -136,7 +136,7 @@ function AuthPage() {
           {mode === "entrar" && <Link to="/esqueci-senha" className="block text-right text-xs font-medium text-brand-deep">Esqueci minha senha</Link>}
           <Button className="w-full" disabled={busy}>{busy ? <Loader2 className="animate-spin" /> : <>{mode === "entrar" ? "Entrar" : "Criar conta"}<ArrowRight /></>}</Button>
         </form>
-        <p className="mt-5 text-center text-[11px] leading-5 text-steel">Ao criar uma conta, você concorda em usar o Trilha como ferramenta de organização. As sugestões são gerais e não substituem orientação profissional.</p>
+        <p className="mt-5 text-center text-[11px] leading-5 text-steel">Ao criar uma conta, você concorda com os <Link to="/termos" className="underline">Termos de Uso</Link> e a <Link to="/privacidade" className="underline">Política de Privacidade</Link>. Sugestões são gerais e não substituem orientação profissional.</p>
       </section>
     </main>
   );
