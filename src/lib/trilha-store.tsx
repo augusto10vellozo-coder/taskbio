@@ -14,6 +14,7 @@ import {
   type Block,
   type Meal,
   type Plan,
+  type ShoppingItem,
   type Workout,
   type WorkoutHistoryEntry,
 } from "./trilha-data";
@@ -27,6 +28,7 @@ export type TrilhaState = {
   goal: string | null;
   preferredModality: string | null;
   workoutHistory: WorkoutHistoryEntry[];
+  shoppingItems: ShoppingItem[];
 };
 
 type Store = TrilhaState & {
@@ -42,6 +44,10 @@ type Store = TrilhaState & {
   addWorkout: (workout: Workout) => void;
   setGoal: (goal: string) => void;
   setPreferredModality: (modality: string) => void;
+  setShoppingItems: (items: ShoppingItem[]) => void;
+  toggleShoppingItem: (id: string) => void;
+  addShoppingItem: (item: Omit<ShoppingItem, "id" | "checked" | "manual">) => void;
+  removeShoppingItem: (id: string) => void;
   getWorkout: (id?: string) => Workout | undefined;
   getMeal: (id?: string) => Meal | undefined;
 };
@@ -53,6 +59,7 @@ const initialState: TrilhaState = {
   goal: null,
   preferredModality: null,
   workoutHistory: [],
+  shoppingItems: [],
 };
 
 const STORAGE_KEY = "trilha.state.v2";
@@ -184,6 +191,19 @@ export function TrilhaProvider({ children }: { children: ReactNode }) {
       addWorkout: (workout) => setState((s) => ({ ...s, workouts: [...s.workouts, workout] })),
       setGoal: (goal) => setState((s) => ({ ...s, goal })),
       setPreferredModality: (preferredModality) => setState((s) => ({ ...s, preferredModality })),
+      setShoppingItems: (shoppingItems) => setState((s) => ({ ...s, shoppingItems })),
+      toggleShoppingItem: (id) => setState((s) => ({
+        ...s,
+        shoppingItems: s.shoppingItems.map((item) => item.id === id ? { ...item, checked: !item.checked } : item),
+      })),
+      addShoppingItem: (item) => setState((s) => ({
+        ...s,
+        shoppingItems: [...s.shoppingItems, { ...item, id: `manual-${Date.now()}`, checked: false, manual: true }],
+      })),
+      removeShoppingItem: (id) => setState((s) => ({
+        ...s,
+        shoppingItems: s.shoppingItems.filter((item) => item.id !== id),
+      })),
       getWorkout: (id) => state.workouts.find((w) => w.id === id),
       getMeal: (id) => state.meals.find((m) => m.id === id),
     }),

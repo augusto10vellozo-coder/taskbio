@@ -6,7 +6,7 @@ import { ArrowRight, Bell, CalendarDays, ChevronLeft, ChevronRight, Pencil, Plus
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { KIND_LABEL, brl, type Block, type BlockKind } from "@/lib/trilha-data";
+import { KIND_LABEL, brl, consolidateIngredients, formatIngredientAmount, type Block, type BlockKind } from "@/lib/trilha-data";
 import { useTrilha } from "@/lib/trilha-store";
 import { useAuth } from "@/lib/auth-context";
 import { formatFullDate, formatWeekRange, getWeekDates, toDateKey } from "@/lib/calendar-utils";
@@ -70,15 +70,9 @@ function MinhaSemana() {
     };
   }, [getMeal, plan, weekKeys]);
 
-  const compras = useMemo(() => {
-    const map = new Map<string, string[]>();
-    weekKeys.flatMap((key) => plan[key] ?? []).forEach((b) => {
-      getMeal(b.mealId)?.ingredients.forEach((i) => {
-        map.set(i.name, [...(map.get(i.name) ?? []), i.qty]);
-      });
-    });
-    return [...map.entries()].slice(0, 5);
-  }, [getMeal, plan, weekKeys]);
+  const compras = useMemo(() => consolidateIngredients(
+    weekKeys.flatMap((key) => plan[key] ?? []).map((block) => getMeal(block.mealId)).filter((meal) => meal != null),
+  ).slice(0, 5), [getMeal, plan, weekKeys]);
 
   if (loading) {
     return <main className="mx-auto max-w-6xl px-5 py-12 sm:px-8"><div className="h-48 animate-pulse rounded-2xl bg-mist" /></main>;
@@ -354,10 +348,10 @@ function MinhaSemana() {
                 <span className="text-sm font-semibold text-ink">{brl(weekStats.semanaCusto)}</span>
               </div>
               <ul className="mt-4 space-y-2 text-sm">
-                {compras.map(([name, qtys]) => (
-                  <li key={name} className="flex items-center justify-between">
-                    <span className="text-steel">{name}</span>
-                    <span className="font-medium">{qtys.length}× {qtys[0]}</span>
+                {compras.map((item) => (
+                  <li key={item.id} className="flex items-center justify-between">
+                    <span className="text-steel">{item.name}</span>
+                    <span className="font-medium">{formatIngredientAmount(item.amount, item.unit)}</span>
                   </li>
                 ))}
               </ul>
