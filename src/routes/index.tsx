@@ -99,7 +99,7 @@ function MinhaSemana() {
               <p className="mt-4 max-w-xl text-pretty text-base leading-7 text-steel">
                 Organize compromissos, atividades físicas e refeições em um só lugar. Sua agenda começa vazia e é preenchida por você.
               </p>
-              <p className="mt-3 text-sm font-medium text-good">Gratuito durante esta fase de testes.</p>
+              <p className="mt-3 text-sm font-medium text-good">Acesso gratuito.</p>
             </div>
             <div className="lg:justify-self-end">
               <Button asChild size="lg"><Link to="/auth">Criar minha conta <ArrowRight /></Link></Button>

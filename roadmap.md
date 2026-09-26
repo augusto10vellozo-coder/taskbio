@@ -8,7 +8,7 @@
 - [x] Agenda por datas reais e planejamento futuro
 - [x] Planejamento alimentar e compras automáticas
 - [x] Gráficos completos de progresso
-- [x] Aplicativo definido como gratuito para a fase de testes, sem planos ou cobranças
+- [x] Aplicativo gratuito, sem planos ou cobranças
 - [x] Área profissional restrita, convites e vínculos autorizados
 - [x] Agenda mensal e visão integrada de datas
 - [x] Lembretes locais com preferências e permissões
@@ -16,3 +16,5 @@
 - [x] Exportação e exclusão de dados e páginas jurídicas iniciais
 - [x] Revisão de acessibilidade, experiência móvel e estabilidade do acesso
 - [x] Testes dos fluxos públicos e proteção da área profissional em celular e computador
+- [x] Remover referências públicas à fase de testes
+- [ ] Preparar publicação de anúncios AdSense — aguarda código de editor, identificação legal e revisão da privacidade antes de ativar
