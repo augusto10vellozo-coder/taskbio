@@ -12,6 +12,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AppHeader } from "../components/AppHeader";
+import { AppFooter } from "../components/AppFooter";
 import { TrilhaProvider } from "../lib/trilha-store";
 import { AuthProvider } from "../lib/auth-context";
 import { SyncManager } from "../components/SyncManager";
@@ -133,6 +134,7 @@ function RootComponent() {
           <div className="app-glow" />
           <AppHeader />
           <Outlet />
+          <AppFooter />
           <SyncManager />
           <ReminderManager />
           <PendingProfessionalInvites />
