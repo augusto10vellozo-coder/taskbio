@@ -17,4 +17,5 @@
 - [x] Revisão de acessibilidade, experiência móvel e estabilidade do acesso
 - [x] Testes dos fluxos públicos e proteção da área profissional em celular e computador
 - [x] Remover referências públicas à fase de testes
-- [ ] Preparar publicação de anúncios AdSense — aguarda código de editor, identificação legal e revisão da privacidade antes de ativar
+- [x] Preparar informações públicas, contato e política para candidatura ao AdSense, sem carregar anúncios antes da aprovação
+- [ ] Ativar AdSense — aguarda ID de editor aprovado, identificação legal do responsável, política e mecanismo de escolhas de privacidade para publicidade

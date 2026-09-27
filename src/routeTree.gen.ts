@@ -16,10 +16,12 @@ import { Route as AtividadesRouteImport } from './routes/atividades'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CalendarioRouteImport } from './routes/calendario'
 import { Route as ComprasRouteImport } from './routes/compras'
+import { Route as ContatoRouteImport } from './routes/contato'
 import { Route as EsqueciSenhaRouteImport } from './routes/esqueci-senha'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as ProgressoRouteImport } from './routes/progresso'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as SobreRouteImport } from './routes/sobre'
 import { Route as TermosRouteImport } from './routes/termos'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
 import { Route as AuthenticatedProfissionalRouteImport } from './routes/_authenticated/profissional'
@@ -58,6 +60,11 @@ const ComprasRoute = ComprasRouteImport.update({
   path: '/compras',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ContatoRoute = ContatoRouteImport.update({
+  id: '/contato',
+  path: '/contato',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EsqueciSenhaRoute = EsqueciSenhaRouteImport.update({
   id: '/esqueci-senha',
   path: '/esqueci-senha',
@@ -76,6 +83,11 @@ const ProgressoRoute = ProgressoRouteImport.update({
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SobreRoute = SobreRouteImport.update({
+  id: '/sobre',
+  path: '/sobre',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TermosRoute = TermosRouteImport.update({
@@ -102,10 +114,12 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/calendario': typeof CalendarioRoute
   '/compras': typeof ComprasRoute
+  '/contato': typeof ContatoRoute
   '/esqueci-senha': typeof EsqueciSenhaRoute
   '/privacidade': typeof PrivacidadeRoute
   '/progresso': typeof ProgressoRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/sobre': typeof SobreRoute
   '/termos': typeof TermosRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/profissional': typeof AuthenticatedProfissionalRoute
@@ -117,10 +131,12 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/calendario': typeof CalendarioRoute
   '/compras': typeof ComprasRoute
+  '/contato': typeof ContatoRoute
   '/esqueci-senha': typeof EsqueciSenhaRoute
   '/privacidade': typeof PrivacidadeRoute
   '/progresso': typeof ProgressoRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/sobre': typeof SobreRoute
   '/termos': typeof TermosRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/profissional': typeof AuthenticatedProfissionalRoute
@@ -134,10 +150,12 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/calendario': typeof CalendarioRoute
   '/compras': typeof ComprasRoute
+  '/contato': typeof ContatoRoute
   '/esqueci-senha': typeof EsqueciSenhaRoute
   '/privacidade': typeof PrivacidadeRoute
   '/progresso': typeof ProgressoRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/sobre': typeof SobreRoute
   '/termos': typeof TermosRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
   '/_authenticated/profissional': typeof AuthenticatedProfissionalRoute
@@ -151,10 +169,12 @@ export interface FileRouteTypes {
     | '/auth'
     | '/calendario'
     | '/compras'
+    | '/contato'
     | '/esqueci-senha'
     | '/privacidade'
     | '/progresso'
     | '/reset-password'
+    | '/sobre'
     | '/termos'
     | '/perfil'
     | '/profissional'
@@ -166,10 +186,12 @@ export interface FileRouteTypes {
     | '/auth'
     | '/calendario'
     | '/compras'
+    | '/contato'
     | '/esqueci-senha'
     | '/privacidade'
     | '/progresso'
     | '/reset-password'
+    | '/sobre'
     | '/termos'
     | '/perfil'
     | '/profissional'
@@ -182,10 +204,12 @@ export interface FileRouteTypes {
     | '/auth'
     | '/calendario'
     | '/compras'
+    | '/contato'
     | '/esqueci-senha'
     | '/privacidade'
     | '/progresso'
     | '/reset-password'
+    | '/sobre'
     | '/termos'
     | '/_authenticated/perfil'
     | '/_authenticated/profissional'
@@ -199,10 +223,12 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   CalendarioRoute: typeof CalendarioRoute
   ComprasRoute: typeof ComprasRoute
+  ContatoRoute: typeof ContatoRoute
   EsqueciSenhaRoute: typeof EsqueciSenhaRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
   ProgressoRoute: typeof ProgressoRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  SobreRoute: typeof SobreRoute
   TermosRoute: typeof TermosRoute
 }
 
@@ -257,6 +283,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ComprasRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/contato': {
+      id: '/contato'
+      path: '/contato'
+      fullPath: '/contato'
+      preLoaderRoute: typeof ContatoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/esqueci-senha': {
       id: '/esqueci-senha'
       path: '/esqueci-senha'
@@ -283,6 +316,13 @@ declare module '@tanstack/react-router' {
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sobre': {
+      id: '/sobre'
+      path: '/sobre'
+      fullPath: '/sobre'
+      preLoaderRoute: typeof SobreRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/termos': {
@@ -330,10 +370,12 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   CalendarioRoute: CalendarioRoute,
   ComprasRoute: ComprasRoute,
+  ContatoRoute: ContatoRoute,
   EsqueciSenhaRoute: EsqueciSenhaRoute,
   PrivacidadeRoute: PrivacidadeRoute,
   ProgressoRoute: ProgressoRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  SobreRoute: SobreRoute,
   TermosRoute: TermosRoute,
 }
 export const routeTree = rootRouteImport
