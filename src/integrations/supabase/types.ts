@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      content_reviews: {
+        Row: {
+          clarity_score: number | null
+          created_at: string
+          created_by: string
+          criteria: string
+          id: string
+          pages: Json
+          result: Json
+          suitability_score: number | null
+          updated_at: string
+          utility_score: number | null
+        }
+        Insert: {
+          clarity_score?: number | null
+          created_at?: string
+          created_by: string
+          criteria: string
+          id?: string
+          pages?: Json
+          result?: Json
+          suitability_score?: number | null
+          updated_at?: string
+          utility_score?: number | null
+        }
+        Update: {
+          clarity_score?: number | null
+          created_at?: string
+          created_by?: string
+          criteria?: string
+          id?: string
+          pages?: Json
+          result?: Json
+          suitability_score?: number | null
+          updated_at?: string
+          utility_score?: number | null
+        }
+        Relationships: []
+      }
       professional_clients: {
         Row: {
           client_id: string | null
@@ -113,6 +152,30 @@ export type Database = {
           updated_at?: string
           user_id?: string
           value?: number
+        }
+        Relationships: []
+      }
+      public_events: {
+        Row: {
+          ad_slot: string | null
+          created_at: string
+          event_type: string
+          id: number
+          page_path: string
+        }
+        Insert: {
+          ad_slot?: string | null
+          created_at?: string
+          event_type: string
+          id?: never
+          page_path: string
+        }
+        Update: {
+          ad_slot?: string | null
+          created_at?: string
+          event_type?: string
+          id?: never
+          page_path?: string
         }
         Relationships: []
       }
