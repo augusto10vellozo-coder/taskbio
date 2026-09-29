@@ -18,4 +18,5 @@
 - [x] Testes dos fluxos públicos e proteção da área profissional em celular e computador
 - [x] Remover referências públicas à fase de testes
 - [x] Preparar informações públicas, contato e política para candidatura ao AdSense, sem carregar anúncios antes da aprovação
+- [x] Revisão editorial por IA, espaços responsivos de anúncios inativos e métricas opcionais com consentimento
 - [ ] Ativar AdSense — aguarda ID de editor aprovado, identificação legal do responsável, política e mecanismo de escolhas de privacidade para publicidade

@@ -1,5 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { LogIn, UserRound } from "lucide-react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
 
@@ -13,6 +15,13 @@ const links = [
 
 export function AppHeader() {
   const { user, loading } = useAuth();
+  const [isAdmin, setIsAdmin] = useState(false);
+  useEffect(() => {
+    let active = true;
+    if (!user) return;
+    supabase.from("user_roles").select("role").eq("user_id", user.id).eq("role", "admin").maybeSingle().then(({ data }) => { if (active) setIsAdmin(data?.role === "admin"); });
+    return () => { active = false; setIsAdmin(false); };
+  }, [user?.id]);
   const displayName = typeof user?.user_metadata?.["display_name"] === "string"
     ? user.user_metadata["display_name"]
     : user?.email?.split("@")[0];
@@ -46,6 +55,7 @@ export function AppHeader() {
         </nav>
 
         <div className="flex items-center gap-2">
+          {isAdmin && <Button asChild variant="ghost" size="sm"><Link to="/equipe">Equipe</Link></Button>}
           {!loading && user ? <>
             <span className="hidden text-[11px] font-medium text-steel sm:inline">Acesso gratuito</span>
             <Link to="/perfil" title="Abrir meu perfil" aria-label="Abrir meu perfil" className="grid size-9 place-items-center rounded-full bg-mist text-xs font-semibold text-steel ring-1 ring-black/5">{initials || <UserRound className="size-4" />}</Link>

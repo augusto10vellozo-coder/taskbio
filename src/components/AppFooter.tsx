@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { PrivacySettingsButton } from "./PrivacyConsent";
 
 export function AppFooter() {
   return (
@@ -10,6 +11,7 @@ export function AppFooter() {
           <Link to="/contato" className="hover:text-ink">Contato</Link>
           <Link to="/privacidade" className="hover:text-ink">Privacidade</Link>
           <Link to="/termos" className="hover:text-ink">Termos de uso</Link>
+          <PrivacySettingsButton />
         </nav>
       </div>
     </footer>
