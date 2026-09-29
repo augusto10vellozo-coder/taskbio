@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { reviewPublicContent } from "@/lib/content-review.functions";
-import type { ContentReviewResult } from "@/lib/content-review.server";
+type ContentReviewResult = { summary: string; scores: { clarity: number; utility: number; suitability: number }; strengths: string[]; improvements: Array<{ priority: string; page: string; action: string; reason: string }>; risks: string[] };
 
 export const Route = createFileRoute("/_authenticated/equipe")({
   head: () => ({ meta: [

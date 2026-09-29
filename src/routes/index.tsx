@@ -10,6 +10,7 @@ import { KIND_LABEL, brl, consolidateIngredients, formatIngredientAmount, type B
 import { useTrilha } from "@/lib/trilha-store";
 import { useAuth } from "@/lib/auth-context";
 import { formatFullDate, formatWeekRange, getWeekDates, toDateKey } from "@/lib/calendar-utils";
+import { AdSlot } from "@/components/AdSlot";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -85,7 +86,7 @@ function MinhaSemana() {
 
   if (!user) {
     return (
-      <main className="mx-auto flex min-h-[calc(100vh-7rem)] max-w-6xl items-center px-5 py-12 sm:px-8">
+      <main className="mx-auto flex min-h-[calc(100vh-7rem)] max-w-6xl flex-col justify-center px-5 py-12 sm:px-8">
         <section className="w-full border-y border-line py-12 sm:py-16">
           <div className="grid gap-8 lg:grid-cols-[1fr_0.7fr] lg:items-end">
             <div>
@@ -107,6 +108,7 @@ function MinhaSemana() {
             </div>
           </div>
         </section>
+        <AdSlot page="/" slot="home-inline" />
       </main>
     );
   }

@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { AdSlot } from "@/components/AdSlot";
 
 export const Route = createFileRoute("/contato")({
   head: () => ({ meta: [
@@ -21,5 +22,6 @@ function ContactPage() {
       <div><h2 className="font-display text-lg font-semibold">E-mail</h2><a href="mailto:suporte01trilha@gmail.com" className="mt-2 block break-all text-brand-deep underline">suporte01trilha@gmail.com</a></div>
       <div><h2 className="font-display text-lg font-semibold">Telefone</h2><a href="tel:+5554994535730" className="mt-2 block text-brand-deep underline">(54) 99453-5730</a></div>
     </div>
+    <AdSlot page="/contato" slot="contact-inline" />
   </main>;
 }

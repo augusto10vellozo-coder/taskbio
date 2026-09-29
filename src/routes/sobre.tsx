@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
+import { AdSlot } from "@/components/AdSlot";
 
 export const Route = createFileRoute("/sobre")({
   head: () => ({ meta: [
@@ -28,6 +29,7 @@ function AboutPage() {
       </div>
     </section>
     <p className="mt-8 border-t border-line pt-6 text-sm leading-6 text-steel">Informações nutricionais e exemplos de atividade são gerais e não substituem orientação de profissionais de saúde ou educação física.</p>
+    <AdSlot page="/sobre" slot="about-inline" />
     <div className="mt-7 flex flex-wrap gap-3"><Button asChild><Link to="/auth">Criar conta gratuita</Link></Button><Button asChild variant="outline"><Link to="/contato">Fale com o Trilha</Link></Button></div>
   </main>;
 }

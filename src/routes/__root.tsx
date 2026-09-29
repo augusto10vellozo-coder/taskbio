@@ -19,6 +19,7 @@ import { SyncManager } from "../components/SyncManager";
 import { Toaster } from "../components/ui/sonner";
 import { ReminderManager } from "../components/ReminderManager";
 import { PendingProfessionalInvites } from "../components/PendingProfessionalInvites";
+import { PrivacyConsent } from "../components/PrivacyConsent";
 
 function NotFoundComponent() {
   return (
@@ -135,6 +136,7 @@ function RootComponent() {
           <AppHeader />
           <Outlet />
           <AppFooter />
+          <PrivacyConsent />
           <SyncManager />
           <ReminderManager />
           <PendingProfessionalInvites />
