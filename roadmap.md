@@ -20,4 +20,5 @@
 - [x] Remover referências públicas à fase de testes
 - [x] Preparar informações públicas, contato e política para candidatura ao AdSense, sem carregar anúncios antes da aprovação
 - [x] Revisão editorial por IA, espaços responsivos de anúncios inativos e métricas opcionais com consentimento
+- [x] Restringir futuros anúncios ao navegador, ocultando-os no aplicativo instalado e em contêiner nativo
 - [ ] Ativar AdSense — aguarda ID de editor aprovado, identificação legal do responsável, política e mecanismo de escolhas de privacidade para publicidade
