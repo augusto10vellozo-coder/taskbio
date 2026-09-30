@@ -86,6 +86,11 @@ export type Block = {
   note?: string;
   done: boolean;
   mealId?: string;
+  manualMeal?: {
+    portion: string;
+    macros: Macros;
+    cost: number;
+  };
   workoutId?: string;
   reminderMinutes?: number;
   recurrence?: "none" | "weekdays" | "daily";
