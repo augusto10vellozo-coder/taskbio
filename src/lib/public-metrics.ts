@@ -15,9 +15,15 @@ export function readPrivacyChoice(): PrivacyChoice | null {
   } catch { return null; }
 }
 
-export function savePrivacyChoice(analytics: boolean) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify({ analytics, version: 1 } satisfies PrivacyChoice));
-  window.dispatchEvent(new CustomEvent(PRIVACY_EVENT));
+export function savePrivacyChoice(analytics: boolean): PrivacyChoice {
+  const choice = { analytics, version: 1 } satisfies PrivacyChoice;
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(choice));
+  } catch {
+    // Keep the choice for the current visit when browser storage is unavailable.
+  }
+  window.dispatchEvent(new CustomEvent(PRIVACY_EVENT, { detail: choice }));
+  return choice;
 }
 
 export async function recordPublicEvent(pagePath: PublicPath, eventType: "page_view" | "ad_click", adSlot?: string) {
