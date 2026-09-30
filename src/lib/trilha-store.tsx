@@ -10,7 +10,6 @@ import {
 import {
   EMPTY_PLAN,
   MEALS,
-  WORKOUTS,
   type Block,
   type Meal,
   type Plan,
@@ -42,6 +41,7 @@ type Store = TrilhaState & {
   setExerciseLoad: (workoutId: string, exerciseId: string, loadKg: number) => void;
   completeWorkout: (entry: WorkoutHistoryEntry) => void;
   addWorkout: (workout: Workout) => void;
+  removeWorkout: (workoutId: string) => void;
   setGoal: (goal: string) => void;
   setPreferredModality: (modality: string) => void;
   setShoppingItems: (items: ShoppingItem[]) => void;
@@ -54,7 +54,7 @@ type Store = TrilhaState & {
 
 const initialState: TrilhaState = {
   plan: EMPTY_PLAN,
-  workouts: WORKOUTS,
+  workouts: [],
   meals: MEALS,
   goal: null,
   preferredModality: null,
@@ -189,6 +189,10 @@ export function TrilhaProvider({ children }: { children: ReactNode }) {
           ),
         })),
       addWorkout: (workout) => setState((s) => ({ ...s, workouts: [...s.workouts, workout] })),
+      removeWorkout: (workoutId) => setState((s) => ({
+        ...s,
+        workouts: s.workouts.filter((workout) => workout.id !== workoutId),
+      })),
       setGoal: (goal) => setState((s) => ({ ...s, goal })),
       setPreferredModality: (preferredModality) => setState((s) => ({ ...s, preferredModality })),
       setShoppingItems: (shoppingItems) => setState((s) => ({ ...s, shoppingItems })),
