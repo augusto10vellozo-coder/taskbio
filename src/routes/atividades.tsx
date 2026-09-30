@@ -1,7 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Check, ChevronDown, ChevronUp, CircleAlert, History, Pause, Play, Plus, RotateCcw, Sparkles, Timer, X } from "lucide-react";
+import { Check, ChevronDown, ChevronUp, CircleAlert, Dumbbell, History, Pause, Play, Plus, RotateCcw, Sparkles, Timer, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { ACTIVITY_CATALOG, GOALS, OBJECTIVE_EFFECTS, getWorkoutExamples, type Exercise, type Workout } from "@/lib/trilha-data";
 import { useTrilha } from "@/lib/trilha-store";
 
@@ -27,7 +38,7 @@ export const Route = createFileRoute("/atividades")({
 });
 
 function Atividades() {
-  const { workouts, workoutHistory, addWorkout, setDoneSets, setExerciseLoad, completeWorkout, goal, setGoal, preferredModality, setPreferredModality } = useTrilha();
+  const { workouts, workoutHistory, addWorkout, removeWorkout, setDoneSets, setExerciseLoad, completeWorkout, goal, setGoal, preferredModality, setPreferredModality } = useTrilha();
   const [selected, setSelected] = useState<string | null>(workouts[0]?.id ?? null);
   const [creating, setCreating] = useState(false);
   const [runningWorkoutId, setRunningWorkoutId] = useState<string | null>(null);
@@ -36,6 +47,11 @@ function Atividades() {
   const runningWorkout = workouts.find((w) => w.id === runningWorkoutId);
   const examples = preferredModality ? getWorkoutExamples(preferredModality, goal) : [];
   const objectiveEffect = goal ? OBJECTIVE_EFFECTS[goal] : null;
+
+  useEffect(() => {
+    if (selected && workouts.some((item) => item.id === selected)) return;
+    setSelected(workouts[0]?.id ?? null);
+  }, [selected, workouts]);
 
   const saveExample = (example: Workout) => {
     const created: Workout = {
@@ -191,12 +207,14 @@ function Atividades() {
             <div className="glass-strong rounded-2xl p-5 ring-1 ring-black/5">
               <div className="flex items-center justify-between">
                 <h2 className="font-display text-lg font-semibold tracking-tight">Meus treinos</h2>
-                <button
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
                   onClick={() => setCreating((v) => !v)}
-                  className="rounded-lg px-2.5 py-1 text-xs font-medium text-brand-deep ring-1 ring-brand/20 hover:bg-brand/5"
                 >
                   {creating ? "Cancelar" : "Criar treino"}
-                </button>
+                </Button>
               </div>
 
               {creating && (
@@ -209,29 +227,55 @@ function Atividades() {
                 />
               )}
 
-              <div className="mt-4 flex flex-wrap gap-1.5">
-                {workouts.map((w) => (
-                  <button
-                    key={w.id}
-                    onClick={() => setSelected(w.id)}
-                    className={`rounded-lg px-3 py-1.5 text-sm font-medium ring-1 ${
-                      selected === w.id ? "bg-ink text-white ring-ink" : "bg-white/60 text-steel ring-line"
-                    }`}
-                  >
-                    {w.name}
-                  </button>
-                ))}
-              </div>
+              {workouts.length === 0 ? (
+                <div className="mt-4 border-y border-dashed border-line py-9 text-center">
+                  <Dumbbell className="mx-auto size-7 text-steel" />
+                  <p className="mt-2 text-sm font-medium">Você ainda não tem treinos</p>
+                  <p className="mx-auto mt-1 max-w-sm text-xs leading-5 text-steel">Crie um treino do seu jeito ou adicione uma das sugestões acima.</p>
+                  <Button type="button" size="sm" className="mt-4" onClick={() => setCreating(true)}><Plus /> Criar meu primeiro treino</Button>
+                </div>
+              ) : (
+                <div className="mt-4 flex flex-wrap gap-1.5">
+                  {workouts.map((w) => (
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant={selected === w.id ? "default" : "outline"}
+                      key={w.id}
+                      onClick={() => setSelected(w.id)}
+                    >
+                      {w.name}
+                    </Button>
+                  ))}
+                </div>
+              )}
 
               {workout && (
                 <div className="mt-4 rail rounded-xl bg-white/50 p-3 pl-4 ring-1 ring-black/5">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-start justify-between gap-3">
                     <p className="text-sm font-medium">
                       {workout.name} — {workout.focus}
                     </p>
-                    <span className="rounded-full bg-brand/10 px-2 py-0.5 text-[11px] font-medium text-brand-deep ring-1 ring-brand/15">
-                      {workout.modality}
-                    </span>
+                    <div className="flex shrink-0 items-center gap-1.5">
+                      <span className="rounded-full bg-brand/10 px-2 py-0.5 text-[11px] font-medium text-brand-deep ring-1 ring-brand/15">
+                        {workout.modality}
+                      </span>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button type="button" variant="ghost" size="icon" className="size-7 text-destructive" aria-label={`Excluir ${workout.name}`} title="Excluir treino"><Trash2 /></Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Excluir {workout.name}?</AlertDialogTitle>
+                            <AlertDialogDescription>Este treino será removido de “Meus treinos”. O histórico das sessões já concluídas será mantido.</AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                            <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => removeWorkout(workout.id)}>Excluir treino</AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
                   </div>
                   <div className="mt-3 space-y-2.5">
                     {workout.exercises.map((e) => (
