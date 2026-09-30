@@ -18,6 +18,7 @@ export function PrivacyConsent() {
 
   useEffect(() => {
     const sync = () => setChoice(readPrivacyChoice());
+    sync();
     window.addEventListener(PRIVACY_EVENT, sync);
     return () => window.removeEventListener(PRIVACY_EVENT, sync);
   }, []);
