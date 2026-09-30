@@ -2,9 +2,19 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { addDays, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarPlus, ChevronLeft, ChevronRight, ShoppingBasket } from "lucide-react";
+import { CalendarPlus, ChevronLeft, ChevronRight, Plus, ShoppingBasket } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { brl } from "@/lib/trilha-data";
 import { useTrilha } from "@/lib/trilha-store";
 import { formatWeekRange, getWeekDates, toDateKey } from "@/lib/calendar-utils";
@@ -29,10 +39,39 @@ const defaultTimes: Record<string, string> = {
   "Café reforçado": "08:00",
 };
 
+type ManualMealForm = {
+  name: string;
+  time: string;
+  portion: string;
+  kcal: string;
+  prot: string;
+  carb: string;
+  gord: string;
+  cost: string;
+};
+
+const emptyManualMeal: ManualMealForm = {
+  name: "",
+  time: "12:00",
+  portion: "",
+  kcal: "",
+  prot: "",
+  carb: "",
+  gord: "",
+  cost: "",
+};
+
+const toNonNegativeNumber = (value: string) => {
+  const parsed = Number(value.replace(",", "."));
+  return Number.isFinite(parsed) ? Math.max(0, parsed) : 0;
+};
+
 function Alimentacao() {
   const { meals, plan, addBlock, removeBlock, getMeal } = useTrilha();
   const [referenceDate, setReferenceDate] = useState(() => new Date());
   const [selectedDate, setSelectedDate] = useState(() => new Date());
+  const [manualOpen, setManualOpen] = useState(false);
+  const [manualMeal, setManualMeal] = useState<ManualMealForm>(emptyManualMeal);
   const weekDates = useMemo(() => getWeekDates(referenceDate), [referenceDate]);
   const weekKeys = useMemo(() => weekDates.map(toDateKey), [weekDates]);
   const scheduled = useMemo(() => weekKeys.flatMap((key) => (plan[key] ?? []).filter((block) => block.kind === "refeicao")), [plan, weekKeys]);
@@ -40,13 +79,14 @@ function Alimentacao() {
   const selectedMeals = (plan[selectedKey] ?? []).filter((block) => block.kind === "refeicao");
   const totals = scheduled.reduce((result, block) => {
     const meal = getMeal(block.mealId);
-    if (!meal) return result;
+    const macros = meal?.macros ?? block.manualMeal?.macros;
+    if (!macros) return result;
     return {
-      kcal: result.kcal + meal.macros.kcal,
-      prot: result.prot + meal.macros.prot,
-      carb: result.carb + meal.macros.carb,
-      gord: result.gord + meal.macros.gord,
-      cost: result.cost + meal.cost,
+      kcal: result.kcal + macros.kcal,
+      prot: result.prot + macros.prot,
+      carb: result.carb + macros.carb,
+      gord: result.gord + macros.gord,
+      cost: result.cost + (meal?.cost ?? block.manualMeal?.cost ?? 0),
     };
   }, { kcal: 0, prot: 0, carb: 0, gord: 0, cost: 0 });
 
@@ -61,6 +101,35 @@ function Alimentacao() {
       recurrence: "none",
     });
     toast.success(`${meal.name} adicionada em ${format(selectedDate, "dd/MM")}.`);
+  }
+
+  function registerManualMeal(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const name = manualMeal.name.trim();
+    const portion = manualMeal.portion.trim();
+    if (!name || !portion) {
+      toast.error("Informe o alimento e a porção consumida.");
+      return;
+    }
+    addBlock(selectedKey, {
+      time: manualMeal.time,
+      kind: "refeicao",
+      title: name,
+      recurrence: "none",
+      manualMeal: {
+        portion,
+        macros: {
+          kcal: toNonNegativeNumber(manualMeal.kcal),
+          prot: toNonNegativeNumber(manualMeal.prot),
+          carb: toNonNegativeNumber(manualMeal.carb),
+          gord: toNonNegativeNumber(manualMeal.gord),
+        },
+        cost: toNonNegativeNumber(manualMeal.cost),
+      },
+    });
+    setManualMeal(emptyManualMeal);
+    setManualOpen(false);
+    toast.success(`${name} registrado em ${format(selectedDate, "dd/MM")}.`);
   }
 
   return (
@@ -91,7 +160,7 @@ function Alimentacao() {
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_300px]">
         <section>
-          <div className="flex items-end justify-between gap-3"><div><h2 className="font-display text-xl font-semibold">Escolher para {format(selectedDate, "EEEE", { locale: ptBR })}</h2><p className="mt-1 text-xs text-steel">Adicione quantas refeições precisar.</p></div></div>
+          <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-end"><div><h2 className="font-display text-xl font-semibold">Escolher para {format(selectedDate, "EEEE", { locale: ptBR })}</h2><p className="mt-1 text-xs text-steel">Adicione sugestões ou registre o que você realmente comeu.</p></div><Button type="button" onClick={() => setManualOpen(true)}><Plus /> Registrar o que comi</Button></div>
           <div className="mt-4 grid gap-4 md:grid-cols-2">
             {meals.map((meal) => (
               <article key={meal.id} className="rounded-lg bg-card p-4 ring-1 ring-line">
@@ -108,10 +177,32 @@ function Alimentacao() {
             <p className="text-[11px] uppercase text-primary-foreground/70">Resumo da semana</p><p className="mt-2 font-display text-3xl font-semibold">{brl(totals.cost)}</p><p className="mt-1 text-xs text-primary-foreground/70">{scheduled.length} refeições · {totals.kcal.toLocaleString("pt-BR")} kcal</p>
             <dl className="mt-4 grid grid-cols-3 gap-2 border-t border-primary-foreground/20 pt-4 text-center"><div><dt className="text-[10px] text-primary-foreground/70">Proteína</dt><dd className="mt-1 font-semibold">{totals.prot}g</dd></div><div><dt className="text-[10px] text-primary-foreground/70">Carboidrato</dt><dd className="mt-1 font-semibold">{totals.carb}g</dd></div><div><dt className="text-[10px] text-primary-foreground/70">Gordura</dt><dd className="mt-1 font-semibold">{totals.gord}g</dd></div></dl>
           </section>
-          <section className="rounded-lg bg-card p-4 ring-1 ring-line"><h2 className="font-display text-base font-semibold">Neste dia</h2>{selectedMeals.length === 0 ? <p className="mt-3 text-sm text-steel">Nenhuma refeição planejada.</p> : <ul className="mt-3 divide-y divide-line">{selectedMeals.map((block) => <li key={block.id} className="flex items-center justify-between gap-3 py-3"><div><p className="text-sm font-medium">{getMeal(block.mealId)?.items ?? block.title}</p><p className="text-xs text-steel">{block.time}</p></div><Button variant="ghost" size="sm" onClick={() => removeBlock(selectedKey, block.id)}>Remover</Button></li>)}</ul>}</section>
+          <section className="rounded-lg bg-card p-4 ring-1 ring-line"><h2 className="font-display text-base font-semibold">Neste dia</h2>{selectedMeals.length === 0 ? <p className="mt-3 text-sm text-steel">Nenhuma refeição registrada.</p> : <ul className="mt-3 divide-y divide-line">{selectedMeals.map((block) => { const meal = getMeal(block.mealId); return <li key={block.id} className="flex items-center justify-between gap-3 py-3"><div className="min-w-0"><div className="flex flex-wrap items-center gap-2"><p className="text-sm font-medium">{meal?.items ?? block.title}</p>{block.manualMeal ? <span className="rounded-full bg-mist px-2 py-0.5 text-[10px] font-medium text-steel">registrado</span> : null}</div><p className="mt-0.5 text-xs text-steel">{block.time}{block.manualMeal ? ` · ${block.manualMeal.portion} · ${block.manualMeal.macros.kcal} kcal` : ""}</p></div><Button variant="ghost" size="sm" onClick={() => removeBlock(selectedKey, block.id)}>Remover</Button></li>; })}</ul>}</section>
           <p className="text-xs leading-5 text-steel">Estimativas não substituem avaliação ou orientação de nutricionista ou médico.</p>
         </aside>
       </div>
+      <Dialog open={manualOpen} onOpenChange={setManualOpen}>
+        <DialogContent className="max-h-[90vh] w-[calc(100%-2rem)] overflow-y-auto sm:max-w-xl">
+          <form onSubmit={registerManualMeal}>
+            <DialogHeader>
+              <DialogTitle>Registrar o que comi</DialogTitle>
+              <DialogDescription>Adicione um alimento ou refeição em {format(selectedDate, "dd/MM")}. Os valores nutricionais são opcionais.</DialogDescription>
+            </DialogHeader>
+            <div className="mt-5 grid gap-4 sm:grid-cols-2">
+              <div className="sm:col-span-2"><Label htmlFor="manual-meal-name">Alimento ou refeição</Label><Input id="manual-meal-name" className="mt-1.5" value={manualMeal.name} onChange={(event) => setManualMeal((current) => ({ ...current, name: event.target.value }))} maxLength={100} placeholder="Ex.: Arroz, feijão e frango" required /></div>
+              <div><Label htmlFor="manual-meal-time">Horário</Label><Input id="manual-meal-time" className="mt-1.5" type="time" value={manualMeal.time} onChange={(event) => setManualMeal((current) => ({ ...current, time: event.target.value }))} required /></div>
+              <div><Label htmlFor="manual-meal-portion">Porção consumida</Label><Input id="manual-meal-portion" className="mt-1.5" value={manualMeal.portion} onChange={(event) => setManualMeal((current) => ({ ...current, portion: event.target.value }))} maxLength={60} placeholder="Ex.: 1 prato ou 250 g" required /></div>
+              <div><Label htmlFor="manual-meal-kcal">Calorias (kcal)</Label><Input id="manual-meal-kcal" className="mt-1.5" type="number" min="0" max="10000" step="1" inputMode="decimal" value={manualMeal.kcal} onChange={(event) => setManualMeal((current) => ({ ...current, kcal: event.target.value }))} placeholder="Opcional" /></div>
+              <div><Label htmlFor="manual-meal-cost">Custo estimado (R$)</Label><Input id="manual-meal-cost" className="mt-1.5" type="number" min="0" max="10000" step="0.01" inputMode="decimal" value={manualMeal.cost} onChange={(event) => setManualMeal((current) => ({ ...current, cost: event.target.value }))} placeholder="Opcional" /></div>
+              <div><Label htmlFor="manual-meal-prot">Proteínas (g)</Label><Input id="manual-meal-prot" className="mt-1.5" type="number" min="0" max="1000" step="0.1" inputMode="decimal" value={manualMeal.prot} onChange={(event) => setManualMeal((current) => ({ ...current, prot: event.target.value }))} placeholder="Opcional" /></div>
+              <div><Label htmlFor="manual-meal-carb">Carboidratos (g)</Label><Input id="manual-meal-carb" className="mt-1.5" type="number" min="0" max="1000" step="0.1" inputMode="decimal" value={manualMeal.carb} onChange={(event) => setManualMeal((current) => ({ ...current, carb: event.target.value }))} placeholder="Opcional" /></div>
+              <div><Label htmlFor="manual-meal-gord">Gorduras (g)</Label><Input id="manual-meal-gord" className="mt-1.5" type="number" min="0" max="1000" step="0.1" inputMode="decimal" value={manualMeal.gord} onChange={(event) => setManualMeal((current) => ({ ...current, gord: event.target.value }))} placeholder="Opcional" /></div>
+            </div>
+            <p className="mt-4 text-xs leading-5 text-steel">Use valores do rótulo ou uma estimativa. O registro serve para organização e não substitui orientação nutricional.</p>
+            <DialogFooter className="mt-5"><Button type="button" variant="outline" onClick={() => setManualOpen(false)}>Cancelar</Button><Button type="submit">Salvar registro</Button></DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </main>
   );
 }

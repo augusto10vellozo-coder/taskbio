@@ -8,6 +8,7 @@
 - [x] Novas contas sem treinos iniciais e exclusão confirmada de treinos adicionados
 - [x] Agenda por datas reais e planejamento futuro
 - [x] Planejamento alimentar e compras automáticas
+- [x] Registro manual de alimentos consumidos com porção e valores nutricionais opcionais
 - [x] Gráficos completos de progresso
 - [x] Aplicativo gratuito, sem planos ou cobranças
 - [x] Área profissional restrita, convites e vínculos autorizados

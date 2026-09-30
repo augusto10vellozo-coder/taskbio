@@ -16,3 +16,5 @@ Ad components must use the centralized display-mode guard: browser ads are allow
 Public analytics uses opt-in browser consent and stores only event type, known public path, optional ad slot, and timestamp; admin-only RLS protects reports and editorial reviews. This avoids collecting visitor identity or health data.
 
 Content reviews run only from an authenticated, server-verified admin function; the AI key and model call stay server-only to prevent unauthorized spending.
+
+Manual food entries are stored as dated meal blocks inside the existing plan payload; this preserves offline use and account synchronization without a parallel food-log store.
