@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 
 const links = [
   { to: "/", label: "Minha Agenda" },
+  { to: "/rotina", label: "Rotina" },
   { to: "/atividades", label: "Atividades" },
   { to: "/alimentacao", label: "Alimentação" },
   { to: "/compras", label: "Compras" },
