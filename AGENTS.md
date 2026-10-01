@@ -18,3 +18,5 @@ Public analytics uses opt-in browser consent and stores only event type, known p
 Content reviews run only from an authenticated, server-verified admin function; the AI key and model call stay server-only to prevent unauthorized spending.
 
 Manual food entries are stored as dated meal blocks inside the existing plan payload; this preserves offline use and account synchronization without a parallel food-log store.
+
+The legacy `/rotina` address redirects to the main agenda at `/`; this keeps old links and saved browser addresses working.
