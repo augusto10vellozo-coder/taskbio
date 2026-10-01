@@ -18,5 +18,3 @@ Public analytics uses opt-in browser consent and stores only event type, known p
 Content reviews run only from an authenticated, server-verified admin function; the AI key and model call stay server-only to prevent unauthorized spending.
 
 Manual food entries are stored as dated meal blocks inside the existing plan payload; this preserves offline use and account synchronization without a parallel food-log store.
-
-The personalized routine is a focused view of dated plan blocks, not a separate data model; this keeps training, meals, sleep and cloud synchronization consistent across screens.

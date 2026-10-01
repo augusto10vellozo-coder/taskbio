@@ -21,7 +21,6 @@ import { Route as EsqueciSenhaRouteImport } from './routes/esqueci-senha'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as ProgressoRouteImport } from './routes/progresso'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
-import { Route as RotinaRouteImport } from './routes/rotina'
 import { Route as SobreRouteImport } from './routes/sobre'
 import { Route as TermosRouteImport } from './routes/termos'
 import { Route as AuthenticatedEquipeRouteImport } from './routes/_authenticated/equipe'
@@ -87,11 +86,6 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
   path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
-const RotinaRoute = RotinaRouteImport.update({
-  id: '/rotina',
-  path: '/rotina',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const SobreRoute = SobreRouteImport.update({
   id: '/sobre',
   path: '/sobre',
@@ -131,7 +125,6 @@ export interface FileRoutesByFullPath {
   '/privacidade': typeof PrivacidadeRoute
   '/progresso': typeof ProgressoRoute
   '/reset-password': typeof ResetPasswordRoute
-  '/rotina': typeof RotinaRoute
   '/sobre': typeof SobreRoute
   '/termos': typeof TermosRoute
   '/equipe': typeof AuthenticatedEquipeRoute
@@ -150,7 +143,6 @@ export interface FileRoutesByTo {
   '/privacidade': typeof PrivacidadeRoute
   '/progresso': typeof ProgressoRoute
   '/reset-password': typeof ResetPasswordRoute
-  '/rotina': typeof RotinaRoute
   '/sobre': typeof SobreRoute
   '/termos': typeof TermosRoute
   '/equipe': typeof AuthenticatedEquipeRoute
@@ -171,7 +163,6 @@ export interface FileRoutesById {
   '/privacidade': typeof PrivacidadeRoute
   '/progresso': typeof ProgressoRoute
   '/reset-password': typeof ResetPasswordRoute
-  '/rotina': typeof RotinaRoute
   '/sobre': typeof SobreRoute
   '/termos': typeof TermosRoute
   '/_authenticated/equipe': typeof AuthenticatedEquipeRoute
@@ -192,7 +183,6 @@ export interface FileRouteTypes {
     | '/privacidade'
     | '/progresso'
     | '/reset-password'
-    | '/rotina'
     | '/sobre'
     | '/termos'
     | '/equipe'
@@ -211,7 +201,6 @@ export interface FileRouteTypes {
     | '/privacidade'
     | '/progresso'
     | '/reset-password'
-    | '/rotina'
     | '/sobre'
     | '/termos'
     | '/equipe'
@@ -231,7 +220,6 @@ export interface FileRouteTypes {
     | '/privacidade'
     | '/progresso'
     | '/reset-password'
-    | '/rotina'
     | '/sobre'
     | '/termos'
     | '/_authenticated/equipe'
@@ -252,7 +240,6 @@ export interface RootRouteChildren {
   PrivacidadeRoute: typeof PrivacidadeRoute
   ProgressoRoute: typeof ProgressoRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
-  RotinaRoute: typeof RotinaRoute
   SobreRoute: typeof SobreRoute
   TermosRoute: typeof TermosRoute
 }
@@ -343,13 +330,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/rotina': {
-      id: '/rotina'
-      path: '/rotina'
-      fullPath: '/rotina'
-      preLoaderRoute: typeof RotinaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/sobre': {
       id: '/sobre'
       path: '/sobre'
@@ -416,7 +396,6 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacidadeRoute: PrivacidadeRoute,
   ProgressoRoute: ProgressoRoute,
   ResetPasswordRoute: ResetPasswordRoute,
-  RotinaRoute: RotinaRoute,
   SobreRoute: SobreRoute,
   TermosRoute: TermosRoute,
 }
