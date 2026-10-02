@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { addDays, format, isSameDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { ArrowRight, Bell, CalendarDays, ChevronLeft, ChevronRight, Pencil, Plus, Trash2, X } from "lucide-react";
@@ -11,6 +11,7 @@ import { useTrilha } from "@/lib/trilha-store";
 import { useAuth } from "@/lib/auth-context";
 import { formatFullDate, formatWeekRange, getWeekDates, toDateKey } from "@/lib/calendar-utils";
 import { AdSlot } from "@/components/AdSlot";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -42,7 +43,7 @@ const dotColor: Record<BlockKind, string> = {
 
 function MinhaSemana() {
   const { user, loading } = useAuth();
-  const { plan, getMeal, getWorkout, toggleBlock, removeBlock, addBlock, updateBlock, setDoneSets, goal } =
+  const { plan, ready, replaceDays, clearWeek, getMeal, getWorkout, toggleBlock, removeBlock, addBlock, updateBlock, setDoneSets, goal } =
     useTrilha();
   const [selectedDate, setSelectedDate] = useState(() => {
     if (typeof window === "undefined") return new Date();
@@ -53,11 +54,50 @@ function MinhaSemana() {
   const [openWorkout, setOpenWorkout] = useState<string | null>("w1");
   const [adding, setAdding] = useState(false);
   const [editing, setEditing] = useState<Block | null>(null);
+  const [exampleDismissed, setExampleDismissed] = useState(false);
+  const [installPrompt, setInstallPrompt] = useState<Event | null>(null);
+  const [installed, setInstalled] = useState(false);
+  useEffect(() => {
+    setExampleDismissed(localStorage.getItem("trilha:example-dismissed") === "yes");
+    setInstalled(window.matchMedia("(display-mode: standalone)").matches || (navigator as Navigator & { standalone?: boolean }).standalone === true);
+    const onPrompt = (event: Event) => { event.preventDefault(); setInstallPrompt(event); };
+    window.addEventListener("beforeinstallprompt", onPrompt);
+    return () => window.removeEventListener("beforeinstallprompt", onPrompt);
+  }, []);
 
   const dateKey = toDateKey(selectedDate);
   const weekDates = useMemo(() => getWeekDates(selectedDate), [selectedDate]);
   const weekKeys = useMemo(() => weekDates.map(toDateKey), [weekDates]);
   const blocks = plan[dateKey] ?? [];
+  const emptyWeek = ready && weekKeys.every((key) => (plan[key] ?? []).length === 0);
+  const clone = (items: Block[]) => items.map((block) => ({ ...block, id: crypto.randomUUID(), done: false, recurrence: "none" as const }));
+  const duplicateDay = () => {
+    const source = plan[toDateKey(addDays(selectedDate, -1))] ?? [];
+    if (!source.length) { toast.info("O dia anterior está vazio."); return; }
+    if (blocks.length && !window.confirm("Substituir os itens deste dia pelos do dia anterior?")) return;
+    replaceDays({ [dateKey]: clone(source) }); toast.success("Dia duplicado.");
+  };
+  const duplicateWeek = () => {
+    const sources = weekDates.map((day) => plan[toDateKey(addDays(day, -7))] ?? []);
+    if (sources.every((items) => !items.length)) { toast.info("A semana anterior está vazia."); return; }
+    if (!window.confirm("Copiar a semana anterior para esta semana? Os dias desta semana serão substituídos.")) return;
+    replaceDays(Object.fromEntries(weekKeys.map((key, index) => [key, clone(sources[index] ?? [])]))); toast.success("Semana duplicada.");
+  };
+  const fillExample = () => {
+    if (!emptyWeek) return;
+    const examples: Array<Array<Omit<Block, "id">>> = [
+      [{ time: "07:30", kind: "refeicao", title: "Café da manhã", mealId: "m1", done: false }, { time: "18:00", kind: "treino", title: "Caminhada leve", done: false }],
+      [{ time: "12:30", kind: "refeicao", title: "Almoço", mealId: "m2", done: false }],
+      [{ time: "07:30", kind: "refeicao", title: "Café da manhã", mealId: "m1", done: false }, { time: "18:00", kind: "treino", title: "Mobilidade", done: false }],
+      [{ time: "19:00", kind: "descanso", title: "Descanso", done: false }],
+      [{ time: "12:30", kind: "refeicao", title: "Almoço", mealId: "m2", done: false }, { time: "18:00", kind: "treino", title: "Caminhada leve", done: false }],
+      [{ time: "09:00", kind: "treino", title: "Atividade ao ar livre", done: false }],
+      [{ time: "09:00", kind: "descanso", title: "Descanso", done: false }],
+    ];
+    replaceDays(Object.fromEntries(weekKeys.map((key, index) => [key, (examples[index] ?? []).map((block) => ({ ...block, id: crypto.randomUUID() }))])));
+    setExampleDismissed(true); localStorage.setItem("trilha:example-dismissed", "yes");
+    toast.success("Semana de exemplo adicionada. Você pode editar ou limpar os itens.");
+  };
 
   const resumo = useMemo(() => {
     const cost = blocks.reduce((sum, b) => sum + (getMeal(b.mealId)?.cost ?? 0), 0);
@@ -84,39 +124,12 @@ function MinhaSemana() {
     return <main className="mx-auto max-w-6xl px-5 py-12 sm:px-8"><div className="h-48 animate-pulse rounded-2xl bg-mist" /></main>;
   }
 
-  if (!user) {
-    return (
-      <main className="mx-auto flex min-h-[calc(100vh-7rem)] max-w-6xl flex-col justify-center px-5 py-12 sm:px-8">
-        <section className="w-full border-y border-line py-12 sm:py-16">
-          <div className="grid gap-8 lg:grid-cols-[1fr_0.7fr] lg:items-end">
-            <div>
-              <div className="mb-6 grid size-12 place-items-center rounded-xl bg-ink text-primary-foreground">
-                <CalendarDays className="size-6" />
-              </div>
-              <p className="text-xs font-medium uppercase tracking-[0.18em] text-brand-deep">Sua rotina começa aqui</p>
-              <h1 className="mt-3 max-w-2xl text-balance font-display text-4xl font-semibold sm:text-5xl">
-                Abra sua conta e planeje sua semana.
-              </h1>
-              <p className="mt-4 max-w-xl text-pretty text-base leading-7 text-steel">
-                Organize compromissos, atividades físicas e refeições em um só lugar. Sua agenda começa vazia e é preenchida por você.
-              </p>
-              <p className="mt-3 text-sm font-medium text-good">Acesso gratuito.</p>
-            </div>
-            <div className="lg:justify-self-end">
-              <Button asChild size="lg"><Link to="/auth">Criar minha conta <ArrowRight /></Link></Button>
-              <p className="mt-3 text-xs text-steel">Já tem uma conta? <Link to="/auth" className="font-medium text-brand-deep">Entrar</Link></p>
-            </div>
-          </div>
-        </section>
-        <AdSlot page="/" slot="home-inline" />
-      </main>
-    );
-  }
-
   return (
     <>
       <main className="mx-auto max-w-6xl px-5 pb-20 sm:px-8">
         <section className="pt-8 pb-4">
+          {!user && <div className="mb-5 flex flex-wrap items-center justify-between gap-2 border-b border-line pb-3 text-sm text-steel"><span>Seus dados ficam apenas neste navegador, sem sincronização.</span><Button asChild variant="outline" size="sm"><Link to="/auth">Entrar para sincronizar <ArrowRight /></Link></Button></div>}
+          {installPrompt && !installed && <div className="mb-5 flex items-center justify-between gap-3 border-b border-line pb-3 text-sm"><span>Instalar Trilha neste aparelho</span><Button variant="outline" size="sm" onClick={async () => { const prompt = installPrompt as Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: string }> }; await prompt.prompt(); await prompt.userChoice; setInstallPrompt(null); }}>Instalar</Button></div>}
           <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
             <div>
               <p className="text-xs font-medium uppercase tracking-[0.18em] text-steel">Minha agenda</p>
@@ -157,6 +170,8 @@ function MinhaSemana() {
               </Button>;
             })}
           </div>
+          <div className="mt-4 flex flex-wrap gap-2"><Button variant="outline" size="sm" onClick={duplicateDay}>Duplicar dia anterior</Button><Button variant="outline" size="sm" onClick={duplicateWeek}>Duplicar semana inteira</Button>{!emptyWeek && <Button variant="ghost" size="sm" onClick={() => { if (window.confirm("Limpar todos os itens desta semana?")) clearWeek(weekKeys); }}>Limpar semana</Button>}</div>
+          {emptyWeek && !exampleDismissed && <div className="mt-5 border-y border-line py-5"><p className="font-display font-semibold">Comece com uma semana de exemplo</p><p className="mt-1 text-sm text-steel">Refeições, atividades e descanso editáveis. Você pode limpar a semana a qualquer momento.</p><div className="mt-3 flex gap-2"><Button size="sm" onClick={fillExample}>Preencher com semana de exemplo</Button><Button size="sm" variant="ghost" onClick={() => { localStorage.setItem("trilha:example-dismissed", "yes"); setExampleDismissed(true); }}>Agora não</Button></div></div>}
         </section>
 
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
@@ -176,6 +191,7 @@ function MinhaSemana() {
 
               {adding && (
                 <AddBlockForm
+                    suggestions={Object.values(plan).flat().slice(-100).reduce<string[]>((names, block) => block.title && !names.includes(block.title) ? [...names, block.title] : names, []).slice(-5).reverse()}
                   onAdd={(b) => {
                     addBlock(dateKey, b);
                     setAdding(false);
@@ -371,6 +387,7 @@ function MinhaSemana() {
           </aside>
         </div>
       </main>
+      <AdSlot page="/" slot="home-inline" />
       {editing && <div className="fixed inset-0 z-50 grid place-items-center bg-ink/35 px-4" role="dialog" aria-modal="true" aria-label="Editar bloco"><div className="glass-strong w-full max-w-2xl rounded-2xl p-5 shadow-xl ring-1 ring-black/10"><div className="mb-4 flex items-center justify-between"><h2 className="font-display text-xl font-semibold">Editar bloco</h2><Button variant="ghost" size="icon" onClick={() => setEditing(null)} aria-label="Fechar"><X /></Button></div><AddBlockForm initial={editing} submitLabel="Salvar alterações" onCancel={() => setEditing(null)} onAdd={(block) => { updateBlock(dateKey, editing.id, block); setEditing(null); }} /></div></div>}
     </>
   );
@@ -381,11 +398,13 @@ function AddBlockForm({
   onCancel,
   initial,
   submitLabel = "Salvar",
+  suggestions = [],
 }: {
   onAdd: (b: Omit<Block, "id" | "done">) => void;
   onCancel: () => void;
   initial?: Block;
   submitLabel?: string;
+  suggestions?: string[];
 }) {
   const [time, setTime] = useState(initial?.time ?? "07:00");
   const [endTime, setEndTime] = useState(initial?.endTime ?? "");
@@ -417,6 +436,7 @@ function AddBlockForm({
       }}
       className="mb-5 grid gap-3 rounded-xl bg-white/50 p-4 ring-1 ring-black/5 sm:grid-cols-2"
     >
+      {suggestions.length > 0 && !initial && <div className="flex flex-wrap gap-1.5 sm:col-span-2">{suggestions.map((name) => <Button type="button" variant="outline" size="sm" key={name} onClick={() => setTitle(name)}>{name}</Button>)}</div>}
       <label className="text-xs font-medium text-steel">Início<input
         type="time"
         value={time}
