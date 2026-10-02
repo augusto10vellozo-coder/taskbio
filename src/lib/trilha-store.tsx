@@ -28,6 +28,7 @@ export type TrilhaState = {
   preferredModality: string | null;
   workoutHistory: WorkoutHistoryEntry[];
   shoppingItems: ShoppingItem[];
+  weeklyGoals: { workouts: number; mealDays: number; restDays: number };
 };
 
 type Store = TrilhaState & {
@@ -48,6 +49,9 @@ type Store = TrilhaState & {
   toggleShoppingItem: (id: string) => void;
   addShoppingItem: (item: Omit<ShoppingItem, "id" | "checked" | "manual">) => void;
   removeShoppingItem: (id: string) => void;
+  setWeeklyGoals: (goals: TrilhaState["weeklyGoals"]) => void;
+  replaceDays: (days: Record<string, Block[]>) => void;
+  clearWeek: (keys: string[]) => void;
   getWorkout: (id?: string) => Workout | undefined;
   getMeal: (id?: string) => Meal | undefined;
 };
@@ -60,6 +64,7 @@ const initialState: TrilhaState = {
   preferredModality: null,
   workoutHistory: [],
   shoppingItems: [],
+  weeklyGoals: { workouts: 3, mealDays: 5, restDays: 2 },
 };
 
 const STORAGE_KEY = "trilha.state.v2";
@@ -208,6 +213,9 @@ export function TrilhaProvider({ children }: { children: ReactNode }) {
         ...s,
         shoppingItems: s.shoppingItems.filter((item) => item.id !== id),
       })),
+      setWeeklyGoals: (weeklyGoals) => setState((s) => ({ ...s, weeklyGoals })),
+      replaceDays: (days) => setState((s) => ({ ...s, plan: { ...s.plan, ...days } })),
+      clearWeek: (keys) => setState((s) => ({ ...s, plan: Object.fromEntries(Object.entries(s.plan).filter(([key]) => !keys.includes(key))) })),
       getWorkout: (id) => state.workouts.find((w) => w.id === id),
       getMeal: (id) => state.meals.find((m) => m.id === id),
     }),

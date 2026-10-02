@@ -36,7 +36,7 @@ const chartConfig = { value: { label: "Valor", color: "var(--brand)" } } satisfi
 
 function Progresso() {
   const { user, loading: authLoading } = useAuth();
-  const { plan, workouts, workoutHistory, getMeal } = useTrilha();
+  const { plan, workouts, workoutHistory, getMeal, weeklyGoals, setWeeklyGoals } = useTrilha();
   const [entries, setEntries] = useState<ProgressEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState<7 | 30 | 90>(30);
@@ -72,6 +72,15 @@ function Progresso() {
   const done = all.filter((block) => block.done);
   const pct = all.length ? Math.round(done.length / all.length * 100) : 0;
   const totalVolume = workoutHistory.reduce((sum, entry) => sum + entry.totalVolumeKg, 0);
+  const weeklyCount = (dates: Date[]) => {
+    const blocks = dates.flatMap((day) => plan[toDateKey(day)] ?? []);
+    return [blocks.filter((b) => b.kind === "treino" && b.done).length,
+      dates.filter((day) => (plan[toDateKey(day)] ?? []).some((b) => b.kind === "refeicao")).length,
+      dates.filter((day) => (plan[toDateKey(day)] ?? []).some((b) => b.kind === "descanso")).length];
+  };
+  const thisWeek = weeklyCount(weekDates);
+  const lastWeek = weeklyCount(getWeekDates(subDays(new Date(), 7)));
+  const goalRows = (["Treinos realizados", "Dias com refeições planejadas", "Dias de descanso"] as const).map((label, index) => ({ label, value: thisWeek[index] ?? 0, previous: lastWeek[index] ?? 0, target: [weeklyGoals.workouts, weeklyGoals.mealDays, weeklyGoals.restDays][index] ?? 0, key: (["workouts", "mealDays", "restDays"] as const)[index] }));
 
   async function addEntry(event: FormEvent) {
     event.preventDefault();
