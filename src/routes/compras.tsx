@@ -1,10 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { Plus, RotateCcw, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { brl, consolidateIngredients, formatIngredientAmount } from "@/lib/trilha-data";
 import { useTrilha } from "@/lib/trilha-store";
 import { getWeekKeys } from "@/lib/calendar-utils";
+import { downloadShoppingPdf, shoppingLines } from "@/lib/shopping-export";
 
 export const Route = createFileRoute("/compras")({
   head: () => ({ meta: [
@@ -39,10 +42,18 @@ function Compras() {
   const cost = weekMeals.reduce((sum, meal) => sum + meal.cost, 0);
   const checked = shoppingItems.filter((item) => item.checked).length;
 
+  async function copyList() {
+    try { await navigator.clipboard.writeText(shoppingLines(shoppingItems, cost).join("\n")); toast.success("Lista copiada para compartilhar."); }
+    catch { toast.error("Não foi possível copiar a lista."); }
+  }
+
   return (
     <main className="mx-auto max-w-4xl px-5 pb-20 sm:px-8">
       <section className="pt-8 pb-5"><p className="text-xs font-medium uppercase tracking-[0.18em] text-steel">Compras</p><h1 className="mt-2 font-display text-3xl font-semibold sm:text-4xl">Lista consolidada da semana</h1><p className="mt-2 text-sm text-steel">Ingredientes iguais são somados automaticamente. Seus itens pessoais também ficam salvos.</p></section>
-      <section className="rounded-lg bg-card p-5 ring-1 ring-line sm:p-6">
+       <div className="mb-4 flex justify-end" title={shoppingItems.length ? undefined : "Planeje refeições primeiro"}>
+         <DropdownMenu><DropdownMenuTrigger asChild><Button variant="outline" disabled={shoppingItems.length === 0}>Exportar lista</Button></DropdownMenuTrigger><DropdownMenuContent align="end"><DropdownMenuItem onSelect={copyList}>Copiar como texto</DropdownMenuItem><DropdownMenuItem onSelect={() => { downloadShoppingPdf(shoppingItems, cost).catch(() => toast.error("Não foi possível baixar o PDF.")); }}>Baixar PDF</DropdownMenuItem></DropdownMenuContent></DropdownMenu>
+       </div>
+       <section className="rounded-lg bg-card p-5 ring-1 ring-line sm:p-6">
         <div className="flex flex-wrap items-end justify-between gap-4 border-b border-line pb-4"><div><h2 className="font-display text-lg font-semibold">{shoppingItems.length} itens</h2><p className="text-xs text-steel">{checked} colocados no carrinho</p></div><div className="text-right"><p className="text-xs text-steel">Custo estimado das refeições</p><p className="font-display text-2xl font-semibold">{brl(cost)}</p></div></div>
         <form className="mt-4 grid gap-2 sm:grid-cols-[1fr_90px_90px_auto]" onSubmit={(event) => { event.preventDefault(); if (!name.trim()) return; addShoppingItem({ name: name.trim(), amount: Math.max(0.01, Number(amount) || 1), unit: unit.trim() || "un" }); setName(""); }}><input value={name} onChange={(event) => setName(event.target.value)} placeholder="Adicionar item pessoal" className="h-10 rounded-md bg-background px-3 text-sm ring-1 ring-line" /><input type="number" min="0.01" step="0.01" value={amount} onChange={(event) => setAmount(event.target.value)} aria-label="Quantidade" className="h-10 rounded-md bg-background px-3 text-sm ring-1 ring-line" /><input value={unit} onChange={(event) => setUnit(event.target.value)} aria-label="Unidade" className="h-10 rounded-md bg-background px-3 text-sm ring-1 ring-line" /><Button><Plus /> Adicionar</Button></form>
         {shoppingItems.length === 0 ? <div className="mt-6 border-y border-dashed border-line py-10 text-center"><p className="text-sm font-medium">Sua lista está vazia</p><p className="mt-1 text-xs text-steel">Planeje refeições ou acrescente um item pessoal.</p></div> : <ul className="mt-3 divide-y divide-line">{shoppingItems.map((item) => <li key={item.id} className="flex items-center gap-3 py-3"><Button variant={item.checked ? "default" : "outline"} size="icon" className="size-7" onClick={() => toggleShoppingItem(item.id)} aria-label={`${item.name}: ${item.checked ? "retirar" : "colocar"} no carrinho`}>{item.checked ? "✓" : ""}</Button><span className={`flex-1 text-sm ${item.checked ? "text-steel line-through" : ""}`}>{item.name}{item.manual ? <span className="ml-2 text-[10px] text-steel">pessoal</span> : null}</span><span className="text-xs text-steel">{formatIngredientAmount(item.amount, item.unit)}</span>{item.manual ? <Button variant="ghost" size="icon" className="size-7" onClick={() => removeShoppingItem(item.id)} aria-label={`Remover ${item.name}`}><Trash2 /></Button> : null}</li>)}</ul>}
