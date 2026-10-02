@@ -20,6 +20,7 @@ import { Toaster } from "../components/ui/sonner";
 import { ReminderManager } from "../components/ReminderManager";
 import { PendingProfessionalInvites } from "../components/PendingProfessionalInvites";
 import { PrivacyConsent } from "../components/PrivacyConsent";
+import { ThemeProvider } from "../lib/theme-context";
 
 function NotFoundComponent() {
   return (
@@ -130,6 +131,7 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <ThemeProvider>
       <AuthProvider>
         <TrilhaProvider>
           <div className="app-glow" />
@@ -143,6 +145,7 @@ function RootComponent() {
           <Toaster position="top-center" richColors />
         </TrilhaProvider>
       </AuthProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

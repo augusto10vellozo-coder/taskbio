@@ -82,6 +82,40 @@
   --ring: var(--brand);
 }
 
+.dark {
+  color-scheme: dark;
+  --ink: oklch(0.93 0.01 255);
+  --steel: oklch(0.74 0.016 255);
+  --mist: oklch(0.28 0.013 255);
+  --line: oklch(0.38 0.014 255);
+  --brand: oklch(0.7 0.14 255);
+  --brand-deep: oklch(0.79 0.12 255);
+  --good: oklch(0.73 0.12 160);
+  --background: oklch(0.18 0.012 255);
+  --foreground: var(--ink);
+  --card: oklch(0.23 0.012 255);
+  --card-foreground: var(--ink);
+  --popover: var(--card);
+  --popover-foreground: var(--ink);
+  --primary: var(--brand);
+  --primary-foreground: oklch(0.15 0.01 255);
+  --secondary: var(--mist);
+  --secondary-foreground: var(--ink);
+  --muted: var(--mist);
+  --muted-foreground: var(--steel);
+  --accent: oklch(0.7 0.13 55);
+  --accent-foreground: oklch(0.15 0.01 255);
+  --destructive: oklch(0.7 0.16 25);
+  --destructive-foreground: oklch(0.15 0.01 255);
+  --border: var(--line);
+  --input: var(--line);
+  --ring: var(--brand);
+}
+
+.dark .bg-white, .dark .bg-white\/50 { background-color: var(--card); }
+.dark .text-white { color: var(--primary-foreground); }
+.dark .ring-black\/5, .dark .ring-black\/10, .dark .border-white\/40 { --tw-ring-color: var(--line); border-color: var(--line); }
+
 @layer base {
   * {
     border-color: var(--color-border);
@@ -103,13 +137,13 @@
 }
 
 @utility glass {
-  background: color-mix(in oklch, white 55%, transparent);
+  background: color-mix(in oklch, var(--card) 72%, transparent);
   backdrop-filter: blur(18px) saturate(1.15);
   -webkit-backdrop-filter: blur(18px) saturate(1.15);
 }
 
 @utility glass-strong {
-  background: color-mix(in oklch, white 72%, transparent);
+  background: color-mix(in oklch, var(--card) 88%, transparent);
   backdrop-filter: blur(24px) saturate(1.2);
   -webkit-backdrop-filter: blur(24px) saturate(1.2);
 }
@@ -123,7 +157,7 @@
     radial-gradient(48% 40% at 18% 8%, color-mix(in oklch, var(--brand) 22%, transparent), transparent 70%),
     radial-gradient(46% 42% at 88% 22%, color-mix(in oklch, var(--accent) 16%, transparent), transparent 70%),
     radial-gradient(60% 50% at 50% 108%, color-mix(in oklch, var(--good) 14%, transparent), transparent 70%),
-    linear-gradient(180deg, oklch(0.975 0.003 255) 0%, oklch(0.935 0.006 255) 100%);
+    linear-gradient(180deg, var(--background), var(--background));
 }
 
 @utility rail {

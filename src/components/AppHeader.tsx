@@ -1,9 +1,11 @@
 import { Link } from "@tanstack/react-router";
-import { LogIn, UserRound } from "lucide-react";
+import { LogIn, Settings2, UserRound } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { useThemePreference, type ThemePreference } from "@/lib/theme-context";
 
 const links = [
   { to: "/", label: "Minha Agenda" },
@@ -15,6 +17,7 @@ const links = [
 
 export function AppHeader() {
   const { user, loading } = useAuth();
+  const { theme, setTheme } = useThemePreference();
   const [isAdmin, setIsAdmin] = useState(false);
   useEffect(() => {
     let active = true;
@@ -55,6 +58,7 @@ export function AppHeader() {
         </nav>
 
         <div className="flex items-center gap-2">
+          <DropdownMenu><DropdownMenuTrigger asChild><Button variant="ghost" size="icon" aria-label="Configurações" title="Configurações"><Settings2 /></Button></DropdownMenuTrigger><DropdownMenuContent align="end"><DropdownMenuLabel>Aparência</DropdownMenuLabel><DropdownMenuRadioGroup value={theme} onValueChange={(value) => setTheme(value as ThemePreference)}><DropdownMenuRadioItem value="light">Claro</DropdownMenuRadioItem><DropdownMenuRadioItem value="dark">Escuro</DropdownMenuRadioItem><DropdownMenuRadioItem value="system">Seguir sistema</DropdownMenuRadioItem></DropdownMenuRadioGroup></DropdownMenuContent></DropdownMenu>
           {isAdmin && <Button asChild variant="ghost" size="sm"><Link to="/equipe">Equipe</Link></Button>}
           {!loading && user ? <>
             <span className="hidden text-[11px] font-medium text-steel sm:inline">Acesso gratuito</span>
