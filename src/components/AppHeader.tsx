@@ -6,7 +6,6 @@ import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useThemePreference, type ThemePreference } from "@/lib/theme-context";
-import { useEffect as useReminderEffect } from "react";
 import { defaultReminderPreferences, readReminderPreferences, saveReminderPreferences, type ReminderPreferences } from "@/lib/reminder-preferences";
 
 const links = [
@@ -22,7 +21,7 @@ export function AppHeader() {
   const { theme, setTheme } = useThemePreference();
   const [isAdmin, setIsAdmin] = useState(false);
   const [reminders, setReminders] = useState<ReminderPreferences>(defaultReminderPreferences);
-  useReminderEffect(() => setReminders(readReminderPreferences()), []);
+  useEffect(() => setReminders(readReminderPreferences()), []);
   async function updateReminders(next: ReminderPreferences) {
     if (next.enabled && "Notification" in window && Notification.permission !== "granted") {
       const permission = await Notification.requestPermission();

@@ -25,10 +25,11 @@ export function ReminderManager() {
 
     const now = new Date();
     Object.entries(plan).forEach(([dateKey, blocks]) => blocks.forEach((block) => {
-       if (!block.reminderMinutes || block.done || (block.kind === "treino" && !preferences.workoutEnabled)) return;
+       const reminderMinutes = block.reminderMinutes ?? (block.kind === "treino" && preferences.workoutEnabled ? 30 : undefined);
+       if (!reminderMinutes || block.done || (block.kind === "treino" && !preferences.workoutEnabled)) return;
       const [hour = 0, minute = 0] = block.time.split(":").map(Number);
       const eventTime = setMinutes(setHours(parseISO(dateKey), hour), minute);
-      const reminderTime = subMinutes(eventTime, block.reminderMinutes);
+      const reminderTime = subMinutes(eventTime, reminderMinutes);
       const delay = reminderTime.getTime() - now.getTime();
       if (delay <= 0 || delay > MAX_DELAY) return;
       timers.current.push(window.setTimeout(() => {
