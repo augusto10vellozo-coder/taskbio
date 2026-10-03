@@ -128,7 +128,7 @@ function MinhaSemana() {
     <>
       <main className="mx-auto max-w-6xl px-5 pb-20 sm:px-8">
         <section className="pt-8 pb-4">
-          {!user && <div className="mb-5 flex flex-wrap items-center justify-between gap-2 border-b border-line pb-3 text-sm text-steel"><span>Seus dados ficam apenas neste navegador, sem sincronização.</span><Button asChild variant="outline" size="sm"><Link to="/auth">Entrar para sincronizar <ArrowRight /></Link></Button></div>}
+          {!user && <div className="mb-5 flex flex-wrap items-center justify-between gap-2 border-b border-line pb-3 text-sm text-steel"><span>Entre para salvar sua agenda e acessá-la em outros dispositivos.</span><Button asChild variant="outline" size="sm"><Link to="/auth">Entrar e sincronizar <ArrowRight /></Link></Button></div>}
           {installPrompt && !installed && <div className="mb-5 flex items-center justify-between gap-3 border-b border-line pb-3 text-sm"><span>Instalar Trilha neste aparelho</span><Button variant="outline" size="sm" onClick={async () => { const prompt = installPrompt as Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: string }> }; await prompt.prompt(); await prompt.userChoice; setInstallPrompt(null); }}>Instalar</Button></div>}
           <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
             <div>
