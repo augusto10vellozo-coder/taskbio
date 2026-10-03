@@ -1,10 +1,10 @@
 # Roadmap
 
-- [ ] Exportar lista de compras como texto e PDF
-- [ ] Oferecer temas claro, escuro e seguir sistema
-- [ ] Metas semanais editáveis e comparativo no progresso
-- [ ] Semana de exemplo opcional, uso local sem conta e ações rápidas da agenda
-- [ ] Instalação PWA e lembretes consentidos (por último)
+- [x] Exportar lista de compras como texto e PDF
+- [x] Oferecer temas claro, escuro e seguir sistema
+- [x] Metas semanais editáveis e comparativo no progresso
+- [x] Semana de exemplo opcional, uso local sem conta e ações rápidas da agenda
+- [x] Instalação no celular e lembretes locais consentidos
 - [x] Contas Google e e-mail com perfil completo
 - [x] Sincronização da agenda, treinos e alimentação
 - [x] Criação, edição, repetição e lembretes de compromissos

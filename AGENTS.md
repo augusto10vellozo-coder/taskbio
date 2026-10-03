@@ -20,3 +20,5 @@ Content reviews run only from an authenticated, server-verified admin function; 
 Manual food entries are stored as dated meal blocks inside the existing plan payload; this preserves offline use and account synchronization without a parallel food-log store.
 
 The legacy `/rotina` address redirects to the main agenda at `/`; this keeps old links and saved browser addresses working.
+
+Home-screen installation uses a web app manifest without app-shell caching; this preserves installability without stale preview or deployment caches.
