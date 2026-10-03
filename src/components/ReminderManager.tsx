@@ -1,36 +1,35 @@
 import { useEffect, useRef, useState } from "react";
 import { parseISO, setHours, setMinutes, subMinutes } from "date-fns";
 import { useTrilha } from "@/lib/trilha-store";
-import { useAuth } from "@/lib/auth-context";
-import { supabase } from "@/integrations/supabase/client";
+import { addDays, format } from "date-fns";
+import { defaultReminderPreferences, readReminderPreferences, reminderPreferencesEvent, type ReminderPreferences } from "@/lib/reminder-preferences";
 
 const MAX_DELAY = 24 * 60 * 60 * 1000;
 
 export function ReminderManager() {
-  const { user } = useAuth();
   const { plan } = useTrilha();
   const timers = useRef<number[]>([]);
-  const [enabled, setEnabled] = useState(false);
+  const [preferences, setPreferences] = useState<ReminderPreferences>(defaultReminderPreferences);
 
   useEffect(() => {
-    if (!user) { setEnabled(false); return; }
-    supabase.from("profiles").select("preferences").eq("id", user.id).single().then(({ data }) => {
-      const preferences = data?.preferences;
-      setEnabled(Boolean(preferences && typeof preferences === "object" && !Array.isArray(preferences) && preferences["reminders"] !== false));
-    });
-  }, [user?.id]);
+    const update = () => setPreferences(readReminderPreferences());
+    update();
+    window.addEventListener(reminderPreferencesEvent, update);
+    return () => window.removeEventListener(reminderPreferencesEvent, update);
+  }, []);
 
   useEffect(() => {
     timers.current.forEach(window.clearTimeout);
     timers.current = [];
-    if (!user || !enabled || !("Notification" in window) || Notification.permission !== "granted") return;
+    if (!preferences.enabled || !("Notification" in window) || Notification.permission !== "granted") return;
 
     const now = new Date();
     Object.entries(plan).forEach(([dateKey, blocks]) => blocks.forEach((block) => {
-      if (!block.reminderMinutes || block.done) return;
+       const reminderMinutes = block.reminderMinutes ?? (block.kind === "treino" && preferences.workoutEnabled ? 30 : undefined);
+       if (!reminderMinutes || block.done || (block.kind === "treino" && !preferences.workoutEnabled)) return;
       const [hour = 0, minute = 0] = block.time.split(":").map(Number);
       const eventTime = setMinutes(setHours(parseISO(dateKey), hour), minute);
-      const reminderTime = subMinutes(eventTime, block.reminderMinutes);
+      const reminderTime = subMinutes(eventTime, reminderMinutes);
       const delay = reminderTime.getTime() - now.getTime();
       if (delay <= 0 || delay > MAX_DELAY) return;
       timers.current.push(window.setTimeout(() => {
@@ -38,8 +37,19 @@ export function ReminderManager() {
       }, delay));
     }));
 
+    if (preferences.dailyEnabled) {
+      const tomorrow = addDays(now, 1);
+      const [hour = 20, minute = 0] = preferences.dailyTime.split(":").map(Number);
+      let reminderTime = setMinutes(setHours(now, hour), minute);
+      if (reminderTime <= now) reminderTime = addDays(reminderTime, 1);
+      const delay = reminderTime.getTime() - now.getTime();
+      timers.current.push(window.setTimeout(() => {
+        new Notification("Planeje o dia seguinte", { body: `Organize sua agenda de ${format(tomorrow, "dd/MM")} no Trilha.` });
+      }, delay));
+    }
+
     return () => timers.current.forEach(window.clearTimeout);
-  }, [enabled, plan, user]);
+  }, [plan, preferences]);
 
   return null;
 }
