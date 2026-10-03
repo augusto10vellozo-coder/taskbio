@@ -80,7 +80,7 @@ function Progresso() {
   };
   const thisWeek = weeklyCount(weekDates);
   const lastWeek = weeklyCount(getWeekDates(subDays(new Date(), 7)));
-  const goalRows = (["Treinos realizados", "Dias com refeições planejadas", "Dias de descanso"] as const).map((label, index) => ({ label, value: thisWeek[index] ?? 0, previous: lastWeek[index] ?? 0, target: [weeklyGoals.workouts, weeklyGoals.mealDays, weeklyGoals.restDays][index] ?? 0, key: (["workouts", "mealDays", "restDays"] as const)[index] }));
+  const goalRows = (["Treinos realizados", "Dias com refeições planejadas", "Dias de descanso"] as const).map((label, index) => ({ label, value: thisWeek[index] ?? 0, previous: lastWeek[index] ?? 0, target: [weeklyGoals.workouts, weeklyGoals.mealDays, weeklyGoals.restDays][index] ?? 0, key: (["workouts", "mealDays", "restDays"] as const)[index] ?? "workouts" }));
 
   async function addEntry(event: FormEvent) {
     event.preventDefault();
