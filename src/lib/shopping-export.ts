@@ -1,7 +1,7 @@
 import { brl, formatIngredientAmount, type ShoppingItem } from "./trilha-data";
 
 export const shoppingLines = (items: ShoppingItem[], cost: number) => [
-  "Compras da semana — Trilha",
+  "Compras da semana — TaskBio",
   "",
   ...items.map((item) => `• ${item.name} — ${formatIngredientAmount(item.amount, item.unit)}${item.manual ? " (pessoal)" : ""}`),
   "",
@@ -50,6 +50,6 @@ export async function downloadShoppingPdf(items: ShoppingItem[], cost: number) {
   const blob = new Blob([new Uint8Array(bytes)], { type: "application/pdf" });
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
-  anchor.href = url; anchor.download = "compras-da-semana-trilha.pdf"; anchor.click();
+  anchor.href = url; anchor.download = "compras-da-semana-taskbio.pdf"; anchor.click();
   window.setTimeout(() => URL.revokeObjectURL(url), 1000);
 }

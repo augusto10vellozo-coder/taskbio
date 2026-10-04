@@ -5,15 +5,15 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { brl, consolidateIngredients, formatIngredientAmount } from "@/lib/trilha-data";
-import { useTrilha } from "@/lib/trilha-store";
+import { useTaskBio } from "@/lib/trilha-store";
 import { getWeekKeys } from "@/lib/calendar-utils";
 import { downloadShoppingPdf, shoppingLines } from "@/lib/shopping-export";
 
 export const Route = createFileRoute("/compras")({
   head: () => ({ meta: [
-    { title: "Compras da semana — Trilha" },
+    { title: "Compras da semana — TaskBio" },
     { name: "description", content: "Lista de compras consolidada a partir das refeições planejadas, com itens pessoais e custo estimado." },
-    { property: "og:title", content: "Compras da semana — Trilha" },
+    { property: "og:title", content: "Compras da semana — TaskBio" },
     { property: "og:description", content: "Transforme o planejamento alimentar em uma lista prática e sincronizada." },
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary_large_image" },
@@ -22,7 +22,7 @@ export const Route = createFileRoute("/compras")({
 });
 
 function Compras() {
-  const { plan, getMeal, shoppingItems, setShoppingItems, toggleShoppingItem, addShoppingItem, removeShoppingItem } = useTrilha();
+  const { plan, getMeal, shoppingItems, setShoppingItems, toggleShoppingItem, addShoppingItem, removeShoppingItem } = useTaskBio();
   const [name, setName] = useState("");
   const [amount, setAmount] = useState("1");
   const [unit, setUnit] = useState("un");

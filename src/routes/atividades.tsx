@@ -14,18 +14,18 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { ACTIVITY_CATALOG, GOALS, OBJECTIVE_EFFECTS, getWorkoutExamples, type Exercise, type Workout } from "@/lib/trilha-data";
-import { useTrilha } from "@/lib/trilha-store";
+import { useTaskBio } from "@/lib/trilha-store";
 
 export const Route = createFileRoute("/atividades")({
   head: () => ({
     meta: [
-      { title: "Atividades físicas — Trilha" },
+      { title: "Atividades físicas — TaskBio" },
       {
         name: "description",
         content:
           "Escolha modalidades de academia, corrida, lutas e mais, monte seus próprios treinos com séries, repetições e descanso.",
       },
-      { property: "og:title", content: "Atividades físicas — Trilha" },
+      { property: "og:title", content: "Atividades físicas — TaskBio" },
       {
         property: "og:description",
         content: "Modalidades, treinos prontos e criação de treino próprio, com séries e descanso.",
@@ -38,7 +38,7 @@ export const Route = createFileRoute("/atividades")({
 });
 
 function Atividades() {
-  const { workouts, workoutHistory, addWorkout, removeWorkout, setDoneSets, setExerciseLoad, completeWorkout, goal, setGoal, preferredModality, setPreferredModality } = useTrilha();
+  const { workouts, workoutHistory, addWorkout, removeWorkout, setDoneSets, setExerciseLoad, completeWorkout, goal, setGoal, preferredModality, setPreferredModality } = useTaskBio();
   const [selected, setSelected] = useState<string | null>(workouts[0]?.id ?? null);
   const [creating, setCreating] = useState(false);
   const [runningWorkoutId, setRunningWorkoutId] = useState<string | null>(null);

@@ -11,9 +11,9 @@ export const Route = createFileRoute("/auth")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Entrar ou criar conta — Trilha" },
-      { name: "description", content: "Entre no Trilha para sincronizar sua rotina saudável entre dispositivos." },
-      { property: "og:title", content: "Conta Trilha" },
+      { title: "Entrar ou criar conta — TaskBio" },
+      { name: "description", content: "Entre no TaskBio para sincronizar sua rotina saudável entre dispositivos." },
+      { property: "og:title", content: "Conta TaskBio" },
       { property: "og:description", content: "Acesse sua rotina, treinos, refeições e progresso." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

@@ -16,7 +16,7 @@ export const reviewPublicContent = createServerFn({ method: "POST" })
   .inputValidator((input) => reviewInput.parse(input))
   .handler(async ({ data, context }) => {
     const { data: isAdmin } = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" });
-    if (!isAdmin) return { data: null, error: "Esta área é exclusiva da equipe responsável pelo Trilha." };
+    if (!isAdmin) return { data: null, error: "Esta área é exclusiva da equipe responsável pelo TaskBio." };
 
     const { evaluatePublicContent } = await import("./content-review.server");
     const evaluation = await evaluatePublicContent(data.pages, data.criteria);

@@ -20,7 +20,7 @@ import {
 import { addDays, isAfter, isWeekend, parseISO } from "date-fns";
 import { normalizePlan, toDateKey } from "./calendar-utils";
 
-export type TrilhaState = {
+export type TaskBioState = {
   plan: Plan;
   workouts: Workout[];
   meals: Meal[];
@@ -31,9 +31,9 @@ export type TrilhaState = {
   weeklyGoals: { workouts: number; mealDays: number; restDays: number };
 };
 
-type Store = TrilhaState & {
+type Store = TaskBioState & {
   ready: boolean;
-  hydrate: (state: Partial<TrilhaState>) => void;
+  hydrate: (state: Partial<TaskBioState>) => void;
   toggleBlock: (date: string, blockId: string) => void;
   removeBlock: (date: string, blockId: string) => void;
   addBlock: (date: string, block: Omit<Block, "id" | "done">) => void;
@@ -49,14 +49,14 @@ type Store = TrilhaState & {
   toggleShoppingItem: (id: string) => void;
   addShoppingItem: (item: Omit<ShoppingItem, "id" | "checked" | "manual">) => void;
   removeShoppingItem: (id: string) => void;
-  setWeeklyGoals: (goals: TrilhaState["weeklyGoals"]) => void;
+  setWeeklyGoals: (goals: TaskBioState["weeklyGoals"]) => void;
   replaceDays: (days: Record<string, Block[]>) => void;
   clearWeek: (keys: string[]) => void;
   getWorkout: (id?: string) => Workout | undefined;
   getMeal: (id?: string) => Meal | undefined;
 };
 
-const initialState: TrilhaState = {
+const initialState: TaskBioState = {
   plan: EMPTY_PLAN,
   workouts: [],
   meals: MEALS,
@@ -81,15 +81,15 @@ globalContexts[contextKey] = StoreContext;
 const sortBlocks = (blocks: Block[]) =>
   [...blocks].sort((a, b) => a.time.localeCompare(b.time));
 
-export function TrilhaProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState<TrilhaState>(initialState);
+export function TaskBioProvider({ children }: { children: ReactNode }) {
+  const [state, setState] = useState<TaskBioState>(initialState);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
-        const stored = JSON.parse(raw) as Partial<TrilhaState>;
+        const stored = JSON.parse(raw) as Partial<TaskBioState>;
         setState({ ...initialState, ...stored, plan: normalizePlan(stored.plan) });
       }
     } catch {
@@ -225,8 +225,8 @@ export function TrilhaProvider({ children }: { children: ReactNode }) {
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
 }
 
-export function useTrilha() {
+export function useTaskBio() {
   const ctx = useContext(StoreContext);
-  if (!ctx) throw new Error("useTrilha precisa estar dentro de TrilhaProvider");
+  if (!ctx) throw new Error("useTaskBio precisa estar dentro de TaskBioProvider");
   return ctx;
 }
