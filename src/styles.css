@@ -5,7 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Trilha — design system.
+ * TaskBio — design system.
  * Paleta: ink / steel / mist / line / brand / accent / good.
  * Todos os valores em oklch. Componentes usam apenas tokens semânticos.
  */

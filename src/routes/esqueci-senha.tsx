@@ -7,10 +7,10 @@ import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/esqueci-senha")({
   head: () => ({ meta: [
-    { title: "Recuperar senha — Trilha" },
-    { name: "description", content: "Solicite um link seguro para recuperar sua senha do Trilha." },
-    { property: "og:title", content: "Recuperar senha — Trilha" },
-    { property: "og:description", content: "Recupere o acesso à sua rotina no Trilha." },
+    { title: "Recuperar senha — TaskBio" },
+    { name: "description", content: "Solicite um link seguro para recuperar sua senha do TaskBio." },
+    { property: "og:title", content: "Recuperar senha — TaskBio" },
+    { property: "og:description", content: "Recupere o acesso à sua rotina no TaskBio." },
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary" },
   ] }),

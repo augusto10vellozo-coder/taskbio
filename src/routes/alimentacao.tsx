@@ -16,14 +16,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { brl } from "@/lib/trilha-data";
-import { useTrilha } from "@/lib/trilha-store";
+import { useTaskBio } from "@/lib/trilha-store";
 import { formatWeekRange, getWeekDates, toDateKey } from "@/lib/calendar-utils";
 
 export const Route = createFileRoute("/alimentacao")({
   head: () => ({ meta: [
-    { title: "Planejamento alimentar — Trilha" },
+    { title: "Planejamento alimentar — TaskBio" },
     { name: "description", content: "Escolha refeições para a semana e acompanhe estimativas nutricionais e de custo." },
-    { property: "og:title", content: "Planejamento alimentar — Trilha" },
+    { property: "og:title", content: "Planejamento alimentar — TaskBio" },
     { property: "og:description", content: "Planeje refeições e transforme suas escolhas em uma lista de compras." },
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary_large_image" },
@@ -67,7 +67,7 @@ const toNonNegativeNumber = (value: string) => {
 };
 
 function Alimentacao() {
-  const { meals, plan, addBlock, removeBlock, getMeal } = useTrilha();
+  const { meals, plan, addBlock, removeBlock, getMeal } = useTaskBio();
   const [referenceDate, setReferenceDate] = useState(() => new Date());
   const [selectedDate, setSelectedDate] = useState(() => new Date());
   const [manualOpen, setManualOpen] = useState(false);

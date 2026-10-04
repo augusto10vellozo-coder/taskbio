@@ -7,9 +7,9 @@ import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/profissional")({
   head: () => ({ meta: [
-    { title: "Área profissional — Trilha" },
-    { name: "description", content: "Convide alunos e acompanhe rotinas autorizadas no Trilha." },
-    { property: "og:title", content: "Área profissional — Trilha" },
+    { title: "Área profissional — TaskBio" },
+    { name: "description", content: "Convide alunos e acompanhe rotinas autorizadas no TaskBio." },
+    { property: "og:title", content: "Área profissional — TaskBio" },
     { property: "og:description", content: "Gestão segura de alunos e vínculos profissionais." },
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary" },

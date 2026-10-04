@@ -13,7 +13,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AppHeader } from "../components/AppHeader";
 import { AppFooter } from "../components/AppFooter";
-import { TrilhaProvider } from "../lib/trilha-store";
+import { TaskBioProvider } from "../lib/trilha-store";
 import { AuthProvider } from "../lib/auth-context";
 import { SyncManager } from "../components/SyncManager";
 import { Toaster } from "../components/ui/sonner";
@@ -89,10 +89,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { name: "theme-color", content: "#3859c7" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
-      { title: "Trilha — Organização de vida saudável" },
+      { title: "TaskBio — Organização de vida saudável" },
       { name: "description", content: "Organize rotina, atividades físicas, alimentação e progresso em um só lugar." },
-      { name: "author", content: "Trilha" },
-      { property: "og:title", content: "Trilha — Organização de vida saudável" },
+      { name: "author", content: "TaskBio" },
+      { property: "og:title", content: "TaskBio — Organização de vida saudável" },
       { property: "og:description", content: "Sua semana saudável em uma única agenda." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -107,7 +107,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { rel: "icon", href: "/favicon.png", type: "image/png" },
       { rel: "manifest", href: "/manifest.webmanifest" },
-      { rel: "apple-touch-icon", href: "/icons/trilha-192.png" },
+      { rel: "apple-touch-icon", href: "/icons/taskbio-192.png" },
     ],
   }),
   shellComponent: RootShell,
@@ -137,7 +137,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
       <AuthProvider>
-        <TrilhaProvider>
+        <TaskBioProvider>
           <div className="app-glow" />
           <AppHeader />
           <Outlet />
@@ -147,7 +147,7 @@ function RootComponent() {
           <ReminderManager />
           <PendingProfessionalInvites />
           <Toaster position="top-center" richColors />
-        </TrilhaProvider>
+        </TaskBioProvider>
       </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>

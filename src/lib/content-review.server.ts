@@ -50,7 +50,7 @@ export async function evaluatePublicContent(pages: ReviewPage[], criteria: strin
     const result = streamText({
       model: provider.responses("openai/gpt-6-astra"),
       system: "Você é um revisor editorial brasileiro especializado em conteúdo público de bem-estar. Avalie sem oferecer diagnóstico, prescrição ou aconselhamento jurídico. Responda somente com JSON válido, sem markdown.",
-      prompt: `Avalie as páginas públicas do Trilha segundo os critérios informados. Dê notas inteiras de 0 a 100. As melhorias devem ser específicas, acionáveis e priorizadas.\n\nCRITÉRIOS:\n${criteria}\n\nPÁGINAS:\n${JSON.stringify(pages)}\n\nFormato obrigatório: {"summary":"...","scores":{"clarity":0,"utility":0,"suitability":0},"strengths":["..."],"improvements":[{"priority":"alta|média|baixa","page":"/caminho","action":"...","reason":"..."}],"risks":["..."]}`,
+      prompt: `Avalie as páginas públicas do TaskBio segundo os critérios informados. Dê notas inteiras de 0 a 100. As melhorias devem ser específicas, acionáveis e priorizadas.\n\nCRITÉRIOS:\n${criteria}\n\nPÁGINAS:\n${JSON.stringify(pages)}\n\nFormato obrigatório: {"summary":"...","scores":{"clarity":0,"utility":0,"suitability":0},"strengths":["..."],"improvements":[{"priority":"alta|média|baixa","page":"/caminho","action":"...","reason":"..."}],"risks":["..."]}`,
       providerOptions: { openai: { forceReasoning: true, reasoningEffort: "medium", reasoningSummary: "auto", store: false, include: ["reasoning.encrypted_content"] } },
     });
     const text = await result.text;

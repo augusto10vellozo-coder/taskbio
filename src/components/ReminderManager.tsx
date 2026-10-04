@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { parseISO, setHours, setMinutes, subMinutes } from "date-fns";
-import { useTrilha } from "@/lib/trilha-store";
+import { useTaskBio } from "@/lib/trilha-store";
 import { addDays, format } from "date-fns";
 import { defaultReminderPreferences, readReminderPreferences, reminderPreferencesEvent, type ReminderPreferences } from "@/lib/reminder-preferences";
 
 const MAX_DELAY = 24 * 60 * 60 * 1000;
 
 export function ReminderManager() {
-  const { plan } = useTrilha();
+  const { plan } = useTaskBio();
   const timers = useRef<number[]>([]);
   const [preferences, setPreferences] = useState<ReminderPreferences>(defaultReminderPreferences);
 
@@ -33,7 +33,7 @@ export function ReminderManager() {
       const delay = reminderTime.getTime() - now.getTime();
       if (delay <= 0 || delay > MAX_DELAY) return;
       timers.current.push(window.setTimeout(() => {
-        new Notification(block.title, { body: `Começa às ${block.time}. Abra o Trilha para ver os detalhes.` });
+        new Notification(block.title, { body: `Começa às ${block.time}. Abra o TaskBio para ver os detalhes.` });
       }, delay));
     }));
 
@@ -44,7 +44,7 @@ export function ReminderManager() {
       if (reminderTime <= now) reminderTime = addDays(reminderTime, 1);
       const delay = reminderTime.getTime() - now.getTime();
       timers.current.push(window.setTimeout(() => {
-        new Notification("Planeje o dia seguinte", { body: `Organize sua agenda de ${format(tomorrow, "dd/MM")} no Trilha.` });
+        new Notification("Planeje o dia seguinte", { body: `Organize sua agenda de ${format(tomorrow, "dd/MM")} no TaskBio.` });
       }, delay));
     }
 

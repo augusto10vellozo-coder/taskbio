@@ -3,13 +3,13 @@ import { Cloud, CloudOff } from "lucide-react";
 import type { Json } from "@/integrations/supabase/types";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
-import { useTrilha, type TrilhaState } from "@/lib/trilha-store";
+import { useTaskBio, type TaskBioState } from "@/lib/trilha-store";
 
 type SyncStatus = "idle" | "loading" | "saved" | "error";
 
 export function SyncManager() {
   const { user, loading: authLoading } = useAuth();
-  const { plan, workouts, meals, goal, preferredModality, workoutHistory, shoppingItems, weeklyGoals, ready, hydrate } = useTrilha();
+  const { plan, workouts, meals, goal, preferredModality, workoutHistory, shoppingItems, weeklyGoals, ready, hydrate } = useTaskBio();
   const [status, setStatus] = useState<SyncStatus>("idle");
   const initializedUser = useRef<string | null>(null);
   const skipNextPush = useRef(false);
@@ -35,18 +35,18 @@ export function SyncManager() {
           : {};
         skipNextPush.current = true;
         hydrate({
-          plan: data.plan as unknown as TrilhaState["plan"],
-          workouts: data.workouts as unknown as TrilhaState["workouts"],
-          meals: data.meals as unknown as TrilhaState["meals"],
+          plan: data.plan as unknown as TaskBioState["plan"],
+          workouts: data.workouts as unknown as TaskBioState["workouts"],
+          meals: data.meals as unknown as TaskBioState["meals"],
           goal: typeof settings["goal"] === "string" ? settings["goal"] : null,
           preferredModality: typeof settings["preferredModality"] === "string" ? settings["preferredModality"] : null,
           workoutHistory: Array.isArray(settings["workoutHistory"])
-            ? settings["workoutHistory"] as unknown as TrilhaState["workoutHistory"]
+            ? settings["workoutHistory"] as unknown as TaskBioState["workoutHistory"]
             : [],
           shoppingItems: Array.isArray(data.shopping_state)
-            ? data.shopping_state as unknown as TrilhaState["shoppingItems"]
+            ? data.shopping_state as unknown as TaskBioState["shoppingItems"]
             : [],
-          weeklyGoals: settings["weeklyGoals"] && typeof settings["weeklyGoals"] === "object" ? settings["weeklyGoals"] as TrilhaState["weeklyGoals"] : { workouts: 3, mealDays: 5, restDays: 2 },
+          weeklyGoals: settings["weeklyGoals"] && typeof settings["weeklyGoals"] === "object" ? settings["weeklyGoals"] as TaskBioState["weeklyGoals"] : { workouts: 3, mealDays: 5, restDays: 2 },
         });
       } else {
         const { error: insertError } = await supabase.from("user_data").insert({

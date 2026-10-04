@@ -4,14 +4,14 @@ import { addMonths, eachDayOfInterval, endOfMonth, endOfWeek, format, isSameMont
 import { ptBR } from "date-fns/locale";
 import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useTrilha } from "@/lib/trilha-store";
+import { useTaskBio } from "@/lib/trilha-store";
 import { toDateKey } from "@/lib/calendar-utils";
 
 export const Route = createFileRoute("/calendario")({
   head: () => ({ meta: [
-    { title: "Calendário mensal — Trilha" },
+    { title: "Calendário mensal — TaskBio" },
     { name: "description", content: "Veja compromissos, refeições, atividades e descanso em um calendário mensal." },
-    { property: "og:title", content: "Calendário mensal — Trilha" },
+    { property: "og:title", content: "Calendário mensal — TaskBio" },
     { property: "og:description", content: "Uma visão mensal completa da sua rotina saudável." },
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary_large_image" },
@@ -20,7 +20,7 @@ export const Route = createFileRoute("/calendario")({
 });
 
 function MonthlyCalendar() {
-  const { plan } = useTrilha();
+  const { plan } = useTaskBio();
   const [month, setMonth] = useState(() => new Date());
   const days = useMemo(() => eachDayOfInterval({ start: startOfWeek(startOfMonth(month), { weekStartsOn: 1 }), end: endOfWeek(endOfMonth(month), { weekStartsOn: 1 }) }), [month]);
   return <main className="mx-auto max-w-6xl px-5 pb-20 sm:px-8">

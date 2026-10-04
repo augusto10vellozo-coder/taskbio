@@ -12,10 +12,10 @@ type ContentReviewResult = { summary: string; scores: { clarity: number; utility
 
 export const Route = createFileRoute("/_authenticated/equipe")({
   head: () => ({ meta: [
-    { title: "Equipe — Conteúdo e métricas | Trilha" },
-    { name: "description", content: "Área restrita da equipe Trilha para revisão editorial e métricas das páginas públicas." },
-    { property: "og:title", content: "Equipe — Conteúdo e métricas | Trilha" },
-    { property: "og:description", content: "Revisão de conteúdo e acompanhamento de visitas públicas pela equipe Trilha." },
+    { title: "Equipe — Conteúdo e métricas | TaskBio" },
+    { name: "description", content: "Área restrita da equipe TaskBio para revisão editorial e métricas das páginas públicas." },
+    { property: "og:title", content: "Equipe — Conteúdo e métricas | TaskBio" },
+    { property: "og:description", content: "Revisão de conteúdo e acompanhamento de visitas públicas pela equipe TaskBio." },
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary" },
   ] }),
@@ -26,7 +26,7 @@ type PageInput = { path: string; title: string; content: string };
 type EventRow = { page_path: string; event_type: string; ad_slot: string | null; created_at: string };
 type ReviewRow = { id: string; created_at: string; pages: unknown; result: unknown; criteria: string };
 const paths = ["/", "/sobre", "/contato", "/privacidade", "/termos"];
-const initialPages: PageInput[] = [{ path: "/sobre", title: "Sobre o Trilha", content: "" }];
+const initialPages: PageInput[] = [{ path: "/sobre", title: "Sobre o TaskBio", content: "" }];
 
 function TeamPage() {
   const { user } = Route.useRouteContext();
@@ -76,7 +76,7 @@ function TeamPage() {
   }
 
   if (allowed === null) return <main className="mx-auto max-w-5xl px-5 py-12"><p className="text-steel">Verificando acesso…</p></main>;
-  if (!allowed) return <main className="mx-auto max-w-3xl px-5 py-16 text-center"><h1 className="font-display text-3xl font-semibold">Área reservada à equipe</h1><p className="mt-3 text-steel">Sua conta não tem acesso a este painel.</p><Button asChild variant="outline" className="mt-6"><Link to="/">Voltar ao Trilha</Link></Button></main>;
+  if (!allowed) return <main className="mx-auto max-w-3xl px-5 py-16 text-center"><h1 className="font-display text-3xl font-semibold">Área reservada à equipe</h1><p className="mt-3 text-steel">Sua conta não tem acesso a este painel.</p><Button asChild variant="outline" className="mt-6"><Link to="/">Voltar ao TaskBio</Link></Button></main>;
 
   const rows = paths.map((path) => ({ path, visits: events.filter((row) => row.page_path === path && row.event_type === "page_view").length, clicks: events.filter((row) => row.page_path === path && row.event_type === "ad_click").length }));
   const totalVisits = rows.reduce((sum, row) => sum + row.visits, 0);

@@ -6,10 +6,10 @@ import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/reset-password")({
   head: () => ({ meta: [
-    { title: "Criar nova senha — Trilha" },
-    { name: "description", content: "Defina uma nova senha para sua conta Trilha." },
-    { property: "og:title", content: "Criar nova senha — Trilha" },
-    { property: "og:description", content: "Recupere com segurança sua conta Trilha." },
+    { title: "Criar nova senha — TaskBio" },
+    { name: "description", content: "Defina uma nova senha para sua conta TaskBio." },
+    { property: "og:title", content: "Criar nova senha — TaskBio" },
+    { property: "og:description", content: "Recupere com segurança sua conta TaskBio." },
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary" },
   ] }),

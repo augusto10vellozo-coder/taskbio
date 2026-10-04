@@ -9,14 +9,14 @@ import { Button } from "@/components/ui/button";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
-import { useTrilha } from "@/lib/trilha-store";
+import { useTaskBio } from "@/lib/trilha-store";
 import { getWeekDates, toDateKey } from "@/lib/calendar-utils";
 
 export const Route = createFileRoute("/progresso")({
   head: () => ({ meta: [
-    { title: "Meu progresso — Trilha" },
+    { title: "Meu progresso — TaskBio" },
     { name: "description", content: "Registre peso, medidas, força e corrida e acompanhe sua evolução por período." },
-    { property: "og:title", content: "Meu progresso — Trilha" },
+    { property: "og:title", content: "Meu progresso — TaskBio" },
     { property: "og:description", content: "Gráficos de evolução, consistência e histórico de atividades." },
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary_large_image" },
@@ -36,7 +36,7 @@ const chartConfig = { value: { label: "Valor", color: "var(--brand)" } } satisfi
 
 function Progresso() {
   const { user, loading: authLoading } = useAuth();
-  const { plan, workouts, workoutHistory, getMeal, weeklyGoals, setWeeklyGoals } = useTrilha();
+  const { plan, workouts, workoutHistory, getMeal, weeklyGoals, setWeeklyGoals } = useTaskBio();
   const [entries, setEntries] = useState<ProgressEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState<7 | 30 | 90>(30);
