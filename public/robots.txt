@@ -1,3 +1,5 @@
+Sitemap: https://taskbio.com.br/sitemap.xml
+
 User-agent: Googlebot
 Allow: /
 
