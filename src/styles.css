@@ -11,8 +11,8 @@
  */
 
 @theme inline {
-  --font-display: "Sora", ui-sans-serif, system-ui, sans-serif;
-  --font-body: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-sans: var(--font-body);
 
   --radius-sm: calc(var(--radius) - 4px);
@@ -48,42 +48,33 @@
   --color-brand: var(--brand);
   --color-brand-deep: var(--brand-deep);
   --color-good: var(--good);
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--foreground);
-  --color-sidebar-primary: var(--primary);
-  --color-sidebar-primary-foreground: var(--primary-foreground);
-  --color-sidebar-accent: var(--muted);
-  --color-sidebar-accent-foreground: var(--foreground);
-  --color-sidebar-border: var(--border);
-  --color-sidebar-ring: var(--ring);
 }
 
 :root {
-  --radius: 0.5rem;
+  --radius: 0.75rem;
 
-  --ink: oklch(0.25 0.025 164);
-  --steel: oklch(0.51 0.022 164);
-  --mist: oklch(0.95 0.014 164);
-  --line: oklch(0.89 0.015 164);
-  --brand: oklch(0.596 0.118 163.5);
-  --brand-deep: oklch(0.37 0.063 167);
-  --good: var(--brand);
-  --sidebar: oklch(1 0 0);
+  --ink: oklch(0.19 0.012 265);
+  --steel: oklch(0.49 0.021 258);
+  --mist: oklch(0.955 0.005 255);
+  --line: oklch(0.885 0.009 255);
+  --brand: oklch(0.51 0.19 262);
+  --brand-deep: oklch(0.36 0.13 262);
+  --good: oklch(0.6 0.13 160);
 
-  --background: oklch(0.985 0.004 164);
+  --background: oklch(0.965 0.004 255);
   --foreground: var(--ink);
   --card: oklch(1 0 0);
   --card-foreground: var(--ink);
   --popover: oklch(1 0 0);
   --popover-foreground: var(--ink);
-  --primary: var(--brand-deep);
+  --primary: var(--brand);
   --primary-foreground: oklch(0.99 0 0);
   --secondary: var(--mist);
   --secondary-foreground: var(--ink);
   --muted: var(--mist);
   --muted-foreground: var(--steel);
-  --accent: var(--mist);
-  --accent-foreground: var(--ink);
+  --accent: oklch(0.68 0.16 55);
+  --accent-foreground: oklch(0.99 0 0);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.99 0 0);
   --border: var(--line);
@@ -93,17 +84,16 @@
 
 .dark {
   color-scheme: dark;
-  --ink: oklch(0.94 0.006 164);
-  --steel: oklch(0.74 0.015 164);
-  --mist: oklch(0.28 0.015 164);
-  --line: oklch(0.37 0.016 164);
-  --brand: oklch(0.74 0.12 164);
-  --brand-deep: oklch(0.79 0.1 164);
+  --ink: oklch(0.93 0.01 255);
+  --steel: oklch(0.74 0.016 255);
+  --mist: oklch(0.28 0.013 255);
+  --line: oklch(0.38 0.014 255);
+  --brand: oklch(0.7 0.14 255);
+  --brand-deep: oklch(0.79 0.12 255);
   --good: oklch(0.73 0.12 160);
-  --background: oklch(0.18 0.009 164);
+  --background: oklch(0.18 0.012 255);
   --foreground: var(--ink);
-  --card: oklch(0.23 0.009 164);
-  --sidebar: var(--card);
+  --card: oklch(0.23 0.012 255);
   --card-foreground: var(--ink);
   --popover: var(--card);
   --popover-foreground: var(--ink);
@@ -113,8 +103,8 @@
   --secondary-foreground: var(--ink);
   --muted: var(--mist);
   --muted-foreground: var(--steel);
-  --accent: var(--mist);
-  --accent-foreground: var(--ink);
+  --accent: oklch(0.7 0.13 55);
+  --accent-foreground: oklch(0.15 0.01 255);
   --destructive: oklch(0.7 0.16 25);
   --destructive-foreground: oklch(0.15 0.01 255);
   --border: var(--line);
@@ -142,16 +132,20 @@
   h2,
   h3 {
     font-family: var(--font-display);
-    letter-spacing: 0;
+    letter-spacing: -0.015em;
   }
 }
 
 @utility glass {
-  background: var(--card);
+  background: color-mix(in oklch, var(--card) 72%, transparent);
+  backdrop-filter: blur(18px) saturate(1.15);
+  -webkit-backdrop-filter: blur(18px) saturate(1.15);
 }
 
 @utility glass-strong {
-  background: var(--card);
+  background: color-mix(in oklch, var(--card) 88%, transparent);
+  backdrop-filter: blur(24px) saturate(1.2);
+  -webkit-backdrop-filter: blur(24px) saturate(1.2);
 }
 
 @utility app-glow {

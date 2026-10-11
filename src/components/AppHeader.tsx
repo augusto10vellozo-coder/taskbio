@@ -7,7 +7,14 @@ import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useThemePreference, type ThemePreference } from "@/lib/theme-context";
 import { defaultReminderPreferences, readReminderPreferences, saveReminderPreferences, type ReminderPreferences } from "@/lib/reminder-preferences";
-import { SidebarTrigger } from "@/components/ui/sidebar";
+
+const links = [
+  { to: "/", label: "Minha Agenda" },
+  { to: "/atividades", label: "Atividades" },
+  { to: "/alimentacao", label: "Alimentação" },
+  { to: "/compras", label: "Compras" },
+  { to: "/progresso", label: "Progresso" },
+] as const;
 
 export function AppHeader() {
   const { user, loading } = useAuth();
@@ -34,9 +41,29 @@ export function AppHeader() {
   const initials = displayName?.split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase();
 
   return (
-    <header className="sticky top-0 z-30 border-b border-line bg-card">
+    <header className="sticky top-0 z-30 glass-strong border-b border-white/40">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-5 sm:px-8">
-        <div className="flex min-w-0 items-center gap-3"><SidebarTrigger aria-label="Abrir ou recolher menu" title="Abrir ou recolher menu" /><span className="truncate text-xs font-medium text-steel">TaskBio <span className="hidden sm:inline">/ Seu dia em equilíbrio</span></span></div>
+        <Link to="/" className="flex items-center gap-3">
+          <img src="/icons/taskbio-192.png" alt="" width={36} height={36} className="size-9 rounded-xl ring-1 ring-black/5" />
+          <div className="leading-none">
+            <p className="font-display text-[15px] font-semibold tracking-tight">TaskBio</p>
+            <p className="mt-0.5 text-[11px] text-steel">organização de vida saudável</p>
+          </div>
+        </Link>
+
+        <nav className="hidden items-center gap-1 text-sm md:flex">
+          {links.map((l) => (
+            <Link
+              key={l.to}
+              to={l.to}
+              activeOptions={{ exact: l.to === "/" }}
+              className="rounded-lg px-3 py-2 font-medium text-steel hover:text-ink"
+              activeProps={{ className: "rounded-lg px-3 py-2 font-medium bg-ink text-white" }}
+            >
+              {l.label}
+            </Link>
+          ))}
+        </nav>
 
         <div className="flex items-center gap-2">
           <DropdownMenu><DropdownMenuTrigger asChild><Button variant="ghost" size="icon" aria-label="Configurações" title="Configurações"><Settings2 /></Button></DropdownMenuTrigger><DropdownMenuContent align="end" className="w-64"><DropdownMenuLabel>Aparência</DropdownMenuLabel><DropdownMenuRadioGroup value={theme} onValueChange={(value) => setTheme(value as ThemePreference)}><DropdownMenuRadioItem value="light">Claro</DropdownMenuRadioItem><DropdownMenuRadioItem value="dark">Escuro</DropdownMenuRadioItem><DropdownMenuRadioItem value="system">Seguir sistema</DropdownMenuRadioItem></DropdownMenuRadioGroup><DropdownMenuLabel className="mt-2">Lembretes neste aparelho</DropdownMenuLabel><DropdownMenuItem onSelect={(event) => { event.preventDefault(); updateReminders({ ...reminders, enabled: !reminders.enabled }); }}>{reminders.enabled ? "Desativar todos" : "Ativar lembretes"}</DropdownMenuItem>{reminders.enabled && <><DropdownMenuItem onSelect={(event) => { event.preventDefault(); updateReminders({ ...reminders, dailyEnabled: !reminders.dailyEnabled }); }}>{reminders.dailyEnabled ? "✓ " : ""}Planejar dia seguinte</DropdownMenuItem><DropdownMenuItem onSelect={(event) => { event.preventDefault(); updateReminders({ ...reminders, workoutEnabled: !reminders.workoutEnabled }); }}>{reminders.workoutEnabled ? "✓ " : ""}Lembretes de treino</DropdownMenuItem><div className="px-2 py-1.5 text-xs text-steel"><label>Horário diário<input type="time" value={reminders.dailyTime} onChange={(event) => updateReminders({ ...reminders, dailyTime: event.target.value })} className="mt-1 h-8 w-full rounded-md bg-background px-2 ring-1 ring-line" /></label></div></>}</DropdownMenuContent></DropdownMenu>
@@ -48,6 +75,19 @@ export function AppHeader() {
         </div>
       </div>
 
+      <nav className="flex gap-1 overflow-x-auto px-5 pb-2 text-sm md:hidden">
+        {links.map((l) => (
+          <Link
+            key={l.to}
+            to={l.to}
+            activeOptions={{ exact: l.to === "/" }}
+            className="shrink-0 rounded-lg px-3 py-1.5 font-medium text-steel"
+            activeProps={{ className: "shrink-0 rounded-lg px-3 py-1.5 font-medium bg-ink text-white" }}
+          >
+            {l.label}
+          </Link>
+        ))}
+      </nav>
     </header>
   );
 }
