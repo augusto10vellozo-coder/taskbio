@@ -22,3 +22,5 @@ Manual food entries are stored as dated meal blocks inside the existing plan pay
 The legacy `/rotina` address redirects to the main agenda at `/`; this keeps old links and saved browser addresses working.
 
 Home-screen installation uses a web app manifest without app-shell caching; this preserves installability without stale preview or deployment caches.
+
+Shared app navigation uses the shadcn collapsible sidebar with its trigger outside the sidebar and a mobile sheet; this keeps every area reachable at all screen sizes.
