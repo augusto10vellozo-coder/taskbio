@@ -21,8 +21,6 @@ import { ReminderManager } from "../components/ReminderManager";
 import { PendingProfessionalInvites } from "../components/PendingProfessionalInvites";
 import { PrivacyConsent } from "../components/PrivacyConsent";
 import { ThemeProvider } from "../lib/theme-context";
-import { AppSidebar } from "../components/AppSidebar";
-import { SidebarProvider } from "../components/ui/sidebar";
 
 function NotFoundComponent() {
   return (
@@ -89,7 +87,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { name: "theme-color", content: "#164B3B" },
+      { name: "theme-color", content: "#3859c7" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { title: "TaskBio — Organização de vida saudável" },
       { name: "description", content: "Organize rotina, atividades físicas, alimentação e progresso em um só lugar." },
@@ -102,7 +100,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Sora:wght@400;500;600;700&display=swap" },
+      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" },
       {
         rel: "stylesheet",
         href: appCss,
@@ -140,14 +138,10 @@ function RootComponent() {
       <ThemeProvider>
       <AuthProvider>
         <TaskBioProvider>
-          <SidebarProvider>
-            <AppSidebar />
-            <div className="flex min-w-0 flex-1 flex-col">
-              <AppHeader />
-              <div className="flex-1"><Outlet /></div>
-              <AppFooter />
-            </div>
-          </SidebarProvider>
+          <div className="app-glow" />
+          <AppHeader />
+          <Outlet />
+          <AppFooter />
           <PrivacyConsent />
           <SyncManager />
           <ReminderManager />
