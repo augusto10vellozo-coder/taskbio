@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { addDays, format, isSameDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { ArrowRight, Bell, CalendarDays, ChevronLeft, ChevronRight, Pencil, Plus, Trash2, X } from "lucide-react";
+import { ArrowRight, Bell, CalendarDays, Check, ChevronLeft, ChevronRight, Copy, Pencil, Plus, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -132,9 +132,9 @@ function MinhaSemana() {
           {installPrompt && !installed && <div className="mb-5 flex items-center justify-between gap-3 border-b border-line pb-3 text-sm"><span>Instalar TaskBio neste aparelho</span><Button variant="outline" size="sm" onClick={async () => { const prompt = installPrompt as Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: string }> }; await prompt.prompt(); await prompt.userChoice; setInstallPrompt(null); }}>Instalar</Button></div>}
           <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
             <div>
-              <p className="text-xs font-medium uppercase tracking-[0.18em] text-steel">Minha agenda</p>
-              <h1 className="mt-2 max-w-[40ch] text-balance font-display text-3xl font-semibold tracking-tight sm:text-4xl">
-                {formatFullDate(selectedDate)}
+              <p className="text-xs font-medium text-steel">{formatFullDate(selectedDate)}</p>
+              <h1 className="mt-2 max-w-[40ch] text-balance font-display text-3xl font-semibold sm:text-4xl">
+                Minha Agenda
               </h1>
               <p className="mt-2 max-w-[48ch] text-pretty text-sm text-steel">
                 {blocks.length} blocos planejados · {resumo.done} concluídos · custo do dia estimado em{" "}
@@ -145,7 +145,7 @@ function MinhaSemana() {
             <div className="flex flex-wrap items-center gap-2 lg:justify-end">
               <Button asChild variant="outline" size="sm"><Link to="/calendario"><CalendarDays /> Mês</Link></Button>
               <Button variant="outline" size="sm" onClick={() => setSelectedDate(new Date())}>Hoje</Button>
-              <div className="glass flex items-center rounded-lg p-1 ring-1 ring-black/5">
+              <div className="flex items-center rounded-lg border border-line bg-card p-1">
                 <Button variant="ghost" size="icon" className="size-8" onClick={() => setSelectedDate((date) => addDays(date, -7))} aria-label="Semana anterior" title="Semana anterior"><ChevronLeft /></Button>
                 <span className="min-w-32 px-2 text-center text-xs font-medium text-steel">{formatWeekRange(selectedDate)}</span>
                 <Button variant="ghost" size="icon" className="size-8" onClick={() => setSelectedDate((date) => addDays(date, 7))} aria-label="Próxima semana" title="Próxima semana"><ChevronRight /></Button>
@@ -163,27 +163,26 @@ function MinhaSemana() {
               const active = isSameDay(date, selectedDate);
               const today = isSameDay(date, new Date());
               const count = (plan[toDateKey(date)] ?? []).length;
-              return <Button key={toDateKey(date)} variant={active ? "default" : "outline"} onClick={() => setSelectedDate(date)} className="h-auto min-w-0 flex-col gap-0.5 px-1.5 py-2 sm:px-3" aria-pressed={active}>
-                <span className="text-[10px] font-medium uppercase sm:text-xs">{format(date, "EEE", { locale: ptBR }).replace(".", "")}</span>
+              return <Button key={toDateKey(date)} variant={active ? "default" : "outline"} onClick={() => setSelectedDate(date)} className="h-24 min-w-0 flex-col gap-1 px-1 sm:px-3" aria-pressed={active}>
+                <span className="text-[10px] font-medium uppercase sm:text-xs">{format(date, "EEE", { locale: ptBR }).replace(".", "").slice(0, 3)}</span>
                 <span className="font-display text-lg font-semibold sm:text-xl">{format(date, "dd")}</span>
                 <span className="hidden text-[10px] font-normal sm:block">{format(date, "MMM", { locale: ptBR }).replace(".", "")}{today ? " · hoje" : count ? ` · ${count}` : ""}</span>
               </Button>;
             })}
           </div>
-          <div className="mt-4 flex flex-wrap gap-2"><Button variant="outline" size="sm" onClick={duplicateDay}>Duplicar dia anterior</Button><Button variant="outline" size="sm" onClick={duplicateWeek}>Duplicar semana inteira</Button>{!emptyWeek && <Button variant="ghost" size="sm" onClick={() => { if (window.confirm("Limpar todos os itens desta semana?")) clearWeek(weekKeys); }}>Limpar semana</Button>}</div>
+          <div className="mt-4 flex flex-wrap gap-2"><Button variant="ghost" size="sm" onClick={duplicateDay}><Copy /> Duplicar dia anterior</Button><Button variant="ghost" size="sm" onClick={duplicateWeek}><Copy /> Duplicar semana inteira</Button>{!emptyWeek && <Button variant="ghost" size="sm" onClick={() => { if (window.confirm("Limpar todos os itens desta semana?")) clearWeek(weekKeys); }}><Trash2 /> Limpar semana</Button>}</div>
           {emptyWeek && !exampleDismissed && <div className="mt-5 border-y border-line py-5"><p className="font-display font-semibold">Comece com uma semana de exemplo</p><p className="mt-1 text-sm text-steel">Refeições, atividades e descanso editáveis. Você pode limpar a semana a qualquer momento.</p><div className="mt-3 flex gap-2"><Button size="sm" onClick={fillExample}>Preencher com semana de exemplo</Button><Button size="sm" variant="ghost" onClick={() => { localStorage.setItem("trilha:example-dismissed", "yes"); setExampleDismissed(true); }}>Agora não</Button></div></div>}
         </section>
 
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
           <section className="lg:col-span-7">
-            <div className="glass-strong rounded-2xl p-5 ring-1 ring-black/5 sm:p-6">
+            <div className="border-t border-line py-6">
               <div className="mb-5 flex items-center justify-between">
                 <h2 className="font-display text-lg font-semibold tracking-tight">Linha do dia</h2>
                 <Button
-                  variant="ghost"
+                   variant="default"
                   size="sm"
                   onClick={() => setAdding((v) => !v)}
-                  className="text-brand-deep ring-1 ring-brand/20"
                 >
                   {adding ? <X /> : <Plus />}{adding ? "Cancelar" : "Adicionar"}
                 </Button>
@@ -201,7 +200,7 @@ function MinhaSemana() {
               )}
 
               {blocks.length === 0 && (
-                <p className="text-sm text-steel">Nenhum bloco para este dia. Adicione o primeiro.</p>
+                <div className="flex min-h-56 flex-col items-center justify-center gap-3 text-center"><CalendarDays className="size-9 text-brand" strokeWidth={1.3} /><p className="font-display text-base font-medium">Um novo dia para organizar</p><p className="text-sm text-steel">Nenhum compromisso planejado.</p><Button variant="link" onClick={() => setAdding(true)}><Plus /> Adicionar ao meu dia</Button></div>
               )}
 
               <ol className="relative">
@@ -215,7 +214,7 @@ function MinhaSemana() {
                   return (
                     <li key={b.id} className="relative pb-5 pl-8">
                       <span
-                        className={`absolute left-0 top-1.5 size-4 rounded-full bg-white ring-2 ${dotColor[b.kind]}`}
+                        className={`absolute left-0 top-1.5 size-4 rounded-full bg-card ring-2 ${dotColor[b.kind]}`}
                       />
                       <div className="flex items-center gap-2 text-xs text-steel">
                         <span className="font-display font-medium text-ink">{b.time}</span>
@@ -224,27 +223,27 @@ function MinhaSemana() {
                       </div>
 
                       <div
-                        className={`mt-2 rounded-xl p-3 ring-1 ring-black/5 ${
+                        className={`mt-2 rounded-lg border border-line p-3 ${
                           workout ? "rail glass pl-4" : "glass"
                         }`}
                       >
-                        <div className="flex items-center justify-between gap-3">
-                          <p className="text-sm font-medium">
+                        <div className="flex flex-wrap items-center justify-between gap-3">
+                          <p className="min-w-0 text-sm font-medium break-words">
                             {workout ? `${workout.name} — ${workout.focus}` : (meal?.items ?? b.title)}
                           </p>
                           <div className="flex shrink-0 items-center gap-2">
                             {b.endTime && <span className="text-[11px] text-steel">{b.time} — {b.endTime}</span>}
                              {b.reminderMinutes ? <span title={`Lembrete ${b.reminderMinutes} minutos antes`} className="text-brand-deep"><Bell className="size-3.5" /></span> : null}
-                             <button
+                             <Button variant="ghost" size="icon" aria-label={b.done ? "Marcar como pendente" : "Marcar como concluído"} title={b.done ? "Marcar como pendente" : "Marcar como concluído"}
                               onClick={() => toggleBlock(dateKey, b.id)}
-                              className={`rounded-full px-2.5 py-0.5 text-[11px] font-medium ring-1 ${
+                              className={`size-7 rounded-full ring-1 ${
                                 b.done
                                   ? "bg-good/10 text-good ring-good/20"
                                   : "text-steel ring-line hover:text-ink"
                               }`}
                             >
-                              {b.done ? "Feito" : "Marcar"}
-                            </button>
+                              <Check className="size-3.5" />
+                            </Button>
                              <Button
                                variant="ghost"
                                size="icon"
@@ -336,30 +335,29 @@ function MinhaSemana() {
           </section>
 
           <aside className="space-y-5 lg:col-span-5">
-            <div className="glass-strong rounded-2xl p-5 ring-1 ring-black/5">
+            <div className="border-t border-line py-6">
               <div className="flex items-center justify-between">
-                <h2 className="font-display text-lg font-semibold tracking-tight">Progresso da semana</h2>
-                 <span className="text-xs text-steel">{formatWeekRange(selectedDate)}</span>
+                <h2 className="font-display text-lg font-semibold">Progresso da semana</h2>
               </div>
               <div className="mt-4 grid grid-cols-2 gap-3">
-                <div className="rounded-xl bg-white/50 p-3 ring-1 ring-black/5">
+                <div className="rounded-lg border border-line bg-card p-4">
                   <p className="text-[11px] uppercase tracking-[0.14em] text-steel">Rotina</p>
                   <p className="mt-1 font-display text-2xl font-semibold">{weekStats.pct}%</p>
                   <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-line">
                     <div className="h-full rounded-full bg-brand" style={{ width: `${weekStats.pct}%` }} />
                   </div>
                 </div>
-                <div className="rounded-xl bg-white/50 p-3 ring-1 ring-black/5">
+                <div className="rounded-lg border border-line bg-card p-4">
                   <p className="text-[11px] uppercase tracking-[0.14em] text-steel">Treinos</p>
                   <p className="mt-1 font-display text-2xl font-semibold">{weekStats.treinos}</p>
                   <p className="mt-1 text-[11px] text-steel">concluídos na semana</p>
                 </div>
-                <div className="rounded-xl bg-white/50 p-3 ring-1 ring-black/5">
+                <div className="rounded-lg border border-line bg-card p-4">
                   <p className="text-[11px] uppercase tracking-[0.14em] text-steel">Kcal do dia</p>
                   <p className="mt-1 font-display text-2xl font-semibold">{resumo.kcal}</p>
                   <p className="mt-1 text-[11px] text-steel">estimativa das refeições</p>
                 </div>
-                <div className="rounded-xl bg-white/50 p-3 ring-1 ring-black/5">
+                <div className="rounded-lg border border-line bg-card p-4">
                   <p className="text-[11px] uppercase tracking-[0.14em] text-steel">Refeições</p>
                   <p className="mt-1 font-display text-2xl font-semibold">{weekStats.refeicoes}</p>
                   <p className="mt-1 text-[11px] text-steel">registradas</p>
@@ -367,7 +365,7 @@ function MinhaSemana() {
               </div>
             </div>
 
-            <div className="glass-strong rounded-2xl p-5 ring-1 ring-black/5">
+            <div className="border-t border-line py-6">
               <div className="flex items-center justify-between">
                 <h2 className="font-display text-lg font-semibold tracking-tight">Compras da semana</h2>
                 <span className="text-sm font-semibold text-ink">{brl(weekStats.semanaCusto)}</span>
