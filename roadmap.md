@@ -1,6 +1,6 @@
 # Roadmap
 
-- [ ] Renovar visual com paleta escolhida, fontes Sora/Manrope e menu lateral recolhível, preservando funcionalidades
+- [x] Renovar visual com paleta escolhida, fontes Sora/Manrope e menu lateral recolhível, preservando funcionalidades
 
 - [x] Exportar lista de compras como texto e PDF
 - [x] Oferecer temas claro, escuro e seguir sistema

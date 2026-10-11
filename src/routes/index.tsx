@@ -164,7 +164,7 @@ function MinhaSemana() {
               const today = isSameDay(date, new Date());
               const count = (plan[toDateKey(date)] ?? []).length;
               return <Button key={toDateKey(date)} variant={active ? "default" : "outline"} onClick={() => setSelectedDate(date)} className="h-24 min-w-0 flex-col gap-1 px-1 sm:px-3" aria-pressed={active}>
-                <span className="text-[10px] font-medium uppercase sm:text-xs">{format(date, "EEE", { locale: ptBR }).replace(".", "")}</span>
+                <span className="text-[10px] font-medium uppercase sm:text-xs">{format(date, "EEE", { locale: ptBR }).replace(".", "").slice(0, 3)}</span>
                 <span className="font-display text-lg font-semibold sm:text-xl">{format(date, "dd")}</span>
                 <span className="hidden text-[10px] font-normal sm:block">{format(date, "MMM", { locale: ptBR }).replace(".", "")}{today ? " · hoje" : count ? ` · ${count}` : ""}</span>
               </Button>;
