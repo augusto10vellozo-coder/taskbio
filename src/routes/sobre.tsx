@@ -28,7 +28,7 @@ function AboutPage() {
         <div><h3 className="font-semibold">Privacidade</h3><p className="mt-2 text-sm leading-6 text-steel">Você pode exportar seus registros ou excluir sua conta pelo perfil. Consulte a <Link to="/privacidade" className="text-brand-deep underline">Política de Privacidade</Link>.</p></div>
       </div>
     </section>
-    <p className="mt-8 border-t border-line pt-6 text-sm leading-6 text-steel">Informações nutricionais e exemplos de atividade são gerais e não substituem orientação de profissionais de saúde ou educação física.</p>
+    <p className="mt-8 border-t border-line pt-6 text-sm leading-6 text-steel">Informações nutricionais e exemplos de atividade são gerais e não substituem orientação de profissionais de saúde ou educação física. Dúvidas, sugestões e suporte: <a href="mailto:contatotaskbio@gmail.com" className="text-brand-deep underline">contatotaskbio@gmail.com</a>.</p>
     <AdSlot page="/sobre" slot="about-inline" />
     <div className="mt-7 flex flex-wrap gap-3"><Button asChild><Link to="/auth">Criar conta gratuita</Link></Button><Button asChild variant="outline"><Link to="/contato">Fale com o TaskBio</Link></Button></div>
   </main>;
