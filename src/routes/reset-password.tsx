@@ -3,6 +3,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { authErrorMessage } from "@/lib/auth-errors";
 
 export const Route = createFileRoute("/reset-password")({
   head: () => ({ meta: [
@@ -39,7 +40,7 @@ function ResetPasswordPage() {
     }
     const { error } = await supabase.auth.updateUser({ password });
     if (error) {
-      toast.error(error.message);
+      toast.error(authErrorMessage(error, "Não foi possível salvar a nova senha."));
       return;
     }
     setSaved(true);

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { lovable } from "@/integrations/lovable";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
+import { authErrorMessage } from "@/lib/auth-errors";
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
@@ -58,7 +59,7 @@ function AuthPage() {
       }
       navigate({ to: "/", replace: true });
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Não foi possível acessar sua conta.");
+      toast.error(authErrorMessage(error));
     } finally {
       setBusy(false);
     }
@@ -71,7 +72,7 @@ function AuthPage() {
       extraParams: { prompt: "select_account" },
     });
     if (result.error) {
-      toast.error(result.error.message || "Não foi possível entrar com o Google.");
+      toast.error(authErrorMessage(result.error, "Não foi possível entrar com o Google."));
       setBusy(false);
       return;
     }
