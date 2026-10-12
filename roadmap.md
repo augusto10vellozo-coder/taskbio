@@ -32,4 +32,4 @@
 - [ ] Ativar AdSense — aguarda ID de editor aprovado, identificação legal do responsável, política e mecanismo de escolhas de privacidade para publicidade
 
 - [x] Renomear o produto e a identidade visual para TaskBio, preservando dados e endereços existentes
-- [ ] Aplicar o novo ícone TaskBio sem a borda branca, mantendo o desenho original
+- [x] Aplicar o novo ícone TaskBio sem a borda branca, mantendo o desenho original
