@@ -7,6 +7,22 @@ import { DayButton, DayPicker, getDefaultClassNames } from "react-day-picker";
 import { cn } from "@/lib/utils";
 import { Button, buttonVariants } from "@/components/ui/button";
 
+const calendarAriaLabels = {
+  labelNav: () => "Navegação do calendário",
+  labelGrid: () => "Grade de datas",
+  labelGridcell: (date: Date) =>
+    date.toLocaleDateString("pt-BR", { day: "numeric", month: "long", year: "numeric" }),
+  labelMonthDropdown: () => "Mês",
+  labelYearDropdown: () => "Ano",
+  labelNext: () => "Mês seguinte",
+  labelPrevious: () => "Mês anterior",
+  labelWeekday: (date: Date) => date.toLocaleDateString("pt-BR", { weekday: "long" }),
+  labelDayButton: (date: Date) =>
+    date.toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long", year: "numeric" }),
+  labelWeekNumber: (weekNumber: number) => `Semana ${weekNumber}`,
+  labelWeekNumberHeader: () => "Semana",
+};
+
 function Calendar({
   className,
   classNames,
@@ -31,8 +47,9 @@ function Calendar({
         className,
       )}
       captionLayout={captionLayout}
+      labels={calendarAriaLabels}
       formatters={{
-        formatMonthDropdown: (date) => date.toLocaleString("default", { month: "short" }),
+        formatMonthDropdown: (date) => date.toLocaleString("pt-BR", { month: "short" }),
         ...formatters,
       }}
       classNames={{

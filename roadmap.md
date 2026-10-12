@@ -33,3 +33,4 @@
 
 - [x] Renomear o produto e a identidade visual para TaskBio, preservando dados e endereços existentes
 - [x] Aplicar o novo ícone TaskBio sem a borda branca, mantendo o desenho original
+- [x] Traduzir para português as telas de erro, avisos de acesso e rótulos do calendário
