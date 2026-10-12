@@ -38,8 +38,14 @@ function ResetPasswordPage() {
       toast.error("As senhas não coincidem.");
       return;
     }
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (!sessionData.session) {
+      toast.error("Este link é inválido ou já expirou. Peça um novo.");
+      return;
+    }
     const { error } = await supabase.auth.updateUser({ password });
     if (error) {
+      console.error("[reset-password]", error.code, error.message);
       toast.error(authErrorMessage(error, "Não foi possível salvar a nova senha."));
       return;
     }
