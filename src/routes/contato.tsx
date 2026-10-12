@@ -19,7 +19,7 @@ function ContactPage() {
     <h1 className="mt-3 font-display text-4xl font-semibold">Contato</h1>
     <p className="mt-5 text-base leading-7 text-steel">Dúvidas sobre o TaskBio, suporte ou solicitações relacionadas aos seus dados? Entre em contato pelos canais abaixo.</p>
     <div className="mt-9 grid gap-7 border-y border-line py-8 sm:grid-cols-2">
-      <div><h2 className="font-display text-lg font-semibold">E-mail</h2><a href="mailto:suporte01trilha@gmail.com" className="mt-2 block break-all text-brand-deep underline">suporte01trilha@gmail.com</a></div>
+      <div><h2 className="font-display text-lg font-semibold">E-mail</h2><a href="mailto:contatotaskbio@gmail.com" className="mt-2 block break-all text-brand-deep underline">contatotaskbio@gmail.com</a></div>
       <div><h2 className="font-display text-lg font-semibold">Telefone</h2><a href="tel:+5554994535730" className="mt-2 block text-brand-deep underline">(54) 99453-5730</a></div>
     </div>
     <AdSlot page="/contato" slot="contact-inline" />
