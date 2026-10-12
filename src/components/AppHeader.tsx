@@ -44,7 +44,7 @@ export function AppHeader() {
     <header className="sticky top-0 z-30 glass-strong border-b border-white/40">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-5 sm:px-8">
         <Link to="/" className="flex items-center gap-3">
-          <img src="/icons/taskbio-192.png" alt="" width={36} height={36} className="size-9 rounded-xl ring-1 ring-black/5" />
+          <img src="/icons/taskbio-192-v2.png" alt="" width={36} height={36} className="size-9 rounded-xl ring-1 ring-black/5" />
           <div className="leading-none">
             <p className="font-display text-[15px] font-semibold tracking-tight">TaskBio</p>
             <p className="mt-0.5 text-[11px] text-steel">organização de vida saudável</p>
