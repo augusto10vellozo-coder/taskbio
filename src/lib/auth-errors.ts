@@ -37,11 +37,13 @@ const BY_TEXT: Array<[RegExp, string]> = [
 /** Devolve a mensagem de erro em português, sem nunca expor o texto em inglês do backend. */
 export function authErrorMessage(error: unknown, fallback = "Não foi possível acessar sua conta. Tente de novo."): string {
   if (!error) return fallback;
-  const code = typeof (error as AuthLikeError).code === "string" ? (error as AuthLikeError).code : "";
+  const rawCode = (error as AuthLikeError).code;
+  const code = typeof rawCode === "string" ? rawCode : "";
   if (code && BY_CODE[code]) return BY_CODE[code];
+  const rawMessage = (error as AuthLikeError).message;
   const message =
-    typeof (error as AuthLikeError).message === "string"
-      ? (error as AuthLikeError).message
+    typeof rawMessage === "string"
+      ? rawMessage
       : error instanceof Error
         ? error.message
         : String(error);
