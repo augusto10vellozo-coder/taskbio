@@ -38,3 +38,5 @@
 - [x] Aplicar o novo ícone TaskBio sem a borda branca, mantendo o desenho original
 - [x] Traduzir para português as telas de erro, avisos de acesso e rótulos do calendário
 - [x] Padronizar o contato público no e-mail contatotaskbio@gmail.com e retirar o telefone de Contato, Termos e Privacidade
+
+- [x] Tela inicial "o que importa hoje", hábitos, metas do mês, saúde e módulos ligáveis
