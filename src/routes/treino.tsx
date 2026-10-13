@@ -3,7 +3,7 @@ import { TrainingExplore, useScheduleWorkout } from "@/components/TrainingExplor
 import { useEffect, useMemo, useState } from "react";
 import { addDays, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { ChevronLeft, ChevronRight, FileUp, Plus, Trash2, TrendingUp, X } from "lucide-react";
+import { CalendarPlus, ChevronLeft, ChevronRight, FileUp, Plus, Trash2, TrendingUp, X } from "lucide-react";
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
@@ -16,6 +16,7 @@ import { getWeekDates, toDateKey } from "@/lib/calendar-utils";
 import { exerciseHistory, kg, progression, toWorkout, weeklyMax, type ImportedWorkout } from "@/lib/training";
 import { interpretWorkoutPlan } from "@/lib/plan-import.functions";
 import type { Block, Exercise, Workout } from "@/lib/trilha-data";
+import { getWorkoutExamples } from "@/lib/trilha-data";
 
 export const Route = createFileRoute("/treino")({
   head: () => ({ meta: [
@@ -52,6 +53,7 @@ function WeekTab({ onExplore }: { onExplore: () => void }) {
   const store = useTaskBio();
   const { plan, workouts, addWorkout, toggleBlock, removeBlock } = store;
   const models = workouts.filter((w) => !w.templateId);
+  const examples = getWorkoutExamples(store.preferredModality ?? "Musculação", store.goal);
   const schedule = useScheduleWorkout();
   const [ref, setRef] = useState<Date | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
@@ -87,9 +89,16 @@ function WeekTab({ onExplore }: { onExplore: () => void }) {
       </div>
 
       <section className="mt-5 rounded-lg bg-card p-5 ring-1 ring-line">
-        <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="font-display text-xl font-semibold capitalize">{format(new Date(`${selected}T12:00:00`), "EEEE, d 'de' MMMM", { locale: ptBR })}</h2>{selBlock && <Button variant="ghost" size="sm" onClick={() => removeBlock(selected, selBlock.id)}><X /> Tirar do dia</Button>}</div>
-        {!selBlock ? <AssignForm workouts={models} onPick={(w) => { assign(selected, w); toast.success("Treino adicionado ao dia"); }} onCreate={(n) => createAndAssign(selected, n)} />
-          : !selWorkout ? <p className="mt-3 text-sm text-steel">Este treino foi criado na agenda sem exercícios. Escolha um treino abaixo para registrar exercícios.<AssignForm workouts={models} onPick={(w) => assign(selected, w)} onCreate={(n) => createAndAssign(selected, n)} /></p>
+        <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="font-display text-xl font-semibold">{selBlock ? format(new Date(`${selected}T12:00:00`), "EEEE, d 'de' MMMM", { locale: ptBR }) : "Nada agendado neste dia"}</h2>{selBlock && <Button variant="ghost" size="sm" onClick={() => removeBlock(selected, selBlock.id)}><X /> Tirar do dia</Button>}</div>
+        {!selBlock ? <>
+          <h3 className="mt-4 text-sm font-semibold">Exemplos disponíveis para agendar</h3>
+          <p className="mt-2 border-l-2 border-brand bg-mist px-3 py-2 text-sm text-steel">Estes treinos ainda não estão na sua semana. Toque em um deles para agendar.</p>
+          <div className="mt-3 grid gap-3 sm:grid-cols-2">{examples.map((w) => <article key={w.id} className="rounded-lg border border-line p-3"><p className="text-[11px] uppercase text-steel">Exemplo</p><h4 className="mt-1 text-sm font-semibold">{w.name}</h4><p className="mt-1 text-xs text-steel">{w.focus} · {w.exercises.length} exercícios</p><Button variant="outline" size="sm" className="mt-3" onClick={() => { assign(selected, w); toast.success("Treino adicionado ao dia"); }}><CalendarPlus /> Agendar</Button></article>)}</div>
+          <p className="mt-3 text-xs leading-5 text-steel">Exemplos gerais; busque a orientação de um profissional de educação física.</p>
+          <h3 className="mt-5 text-sm font-semibold">Meus treinos</h3>
+          <AssignForm workouts={models} onPick={(w) => { assign(selected, w); toast.success("Treino adicionado ao dia"); }} onCreate={(n) => createAndAssign(selected, n)} />
+        </>
+          : !selWorkout ? <div className="mt-3"><p className="text-sm text-steel">Este treino foi criado na agenda sem exercícios. Escolha um treino abaixo para registrar exercícios.</p><AssignForm workouts={models} onPick={(w) => assign(selected, w)} onCreate={(n) => createAndAssign(selected, n)} /></div>
           : <WorkoutDetail workout={selWorkout} dateKey={selected} />}
       </section>
       <p className="mt-4 text-xs leading-5 text-steel">Os registros servem para acompanhamento pessoal e não substituem a orientação de um profissional de educação física. Para montar modelos e ver exemplos, use <button type="button" onClick={onExplore} className="underline">Explorar e criar</button>.</p>
