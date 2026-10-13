@@ -40,3 +40,4 @@
 - [x] Padronizar o contato público no e-mail contatotaskbio@gmail.com e retirar o telefone de Contato, Termos e Privacidade
 
 - [x] Tela inicial "o que importa hoje", hábitos, metas do mês, saúde e módulos ligáveis
+- [x] Módulo Treino: plano semanal, registro de exercícios, progressão e importação de plano por arquivo

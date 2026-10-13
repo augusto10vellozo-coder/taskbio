@@ -21,6 +21,7 @@ import { addDays, isAfter, isWeekend, parseISO } from "date-fns";
 import { normalizePlan, toDateKey } from "./calendar-utils";
 import { emptyHealth, type Habit, type HabitLog, type HealthLog, type MonthGoal } from "./engagement";
 import type { ModuleSettings } from "./modules";
+import type { ExerciseLogEntry } from "./training";
 
 export type TaskBioState = {
   plan: Plan;
@@ -36,6 +37,7 @@ export type TaskBioState = {
   monthGoals: MonthGoal[];
   health: HealthLog;
   modules: ModuleSettings;
+  exerciseLog: ExerciseLogEntry[];
 };
 
 type Store = TaskBioState & {
@@ -59,6 +61,8 @@ type Store = TaskBioState & {
   setWeeklyGoals: (goals: TaskBioState["weeklyGoals"]) => void;
   replaceDays: (days: Record<string, Block[]>) => void;
   clearWeek: (keys: string[]) => void;
+  addExerciseLog: (entry: Omit<ExerciseLogEntry, "id">) => void;
+  updateWorkout: (workout: Workout) => void;
   addHabit: (name: string) => void;
   removeHabit: (id: string) => void;
   toggleHabitStreak: (id: string) => void;
@@ -85,6 +89,7 @@ const initialState: TaskBioState = {
   monthGoals: [],
   health: emptyHealth,
   modules: {},
+  exerciseLog: [],
 };
 
 const STORAGE_KEY = "trilha.state.v2";
@@ -236,6 +241,8 @@ export function TaskBioProvider({ children }: { children: ReactNode }) {
       setWeeklyGoals: (weeklyGoals) => setState((s) => ({ ...s, weeklyGoals })),
       replaceDays: (days) => setState((s) => ({ ...s, plan: { ...s.plan, ...days } })),
       clearWeek: (keys) => setState((s) => ({ ...s, plan: Object.fromEntries(Object.entries(s.plan).filter(([key]) => !keys.includes(key))) })),
+      addExerciseLog: (entry) => setState((s) => ({ ...s, exerciseLog: [{ ...entry, id: `x-${Date.now()}` }, ...(s.exerciseLog ?? [])].slice(0, 2000) })),
+      updateWorkout: (workout) => setState((s) => ({ ...s, workouts: s.workouts.map((w) => w.id === workout.id ? workout : w) })),
       addHabit: (name) => setState((s) => ({ ...s, habits: [...s.habits, { id: `h-${Date.now()}`, name, createdAt: new Date().toISOString() }] })),
       toggleHabitStreak: (id) => setState((s) => ({ ...s, habits: s.habits.map((h) => h.id === id ? { ...h, countsForStreak: h.countsForStreak === false } : h) })),
       removeHabit: (id) => setState((s) => ({ ...s, habits: s.habits.filter((h) => h.id !== id) })),

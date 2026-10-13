@@ -18,6 +18,7 @@ export function TodayPanel() {
   const score = now ? dayScore(plan, habits, habitLog, today) : 0;
   const days = now ? streak(plan, habitLog, now, habits) : 0;
   const habitsOn = isModuleOn(modules, "habitos");
+  const workoutToday = isModuleOn(modules, "treino") ? blocks.find((b) => b.kind === "treino") : undefined;
 
   useEffect(() => {
     if (!ready || !now || !isMilestone(days)) return;
@@ -48,6 +49,10 @@ export function TodayPanel() {
           )}
         </div>
       </div>
+      {workoutToday && <div className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-lg bg-card p-4 ring-1 ring-brand/40">
+        <div><p className="text-xs text-steel">Treino de hoje · {workoutToday.time}</p><p className="font-display text-lg font-semibold">{workoutToday.title}</p></div>
+        <div className="flex gap-2"><Link to="/treino" className="inline-flex h-9 items-center rounded-md px-3 text-sm font-medium ring-1 ring-line">Registrar exercícios</Link><button onClick={() => { toggleBlock(today, workoutToday.id); if (!workoutToday.done) toast.success("Treino concluído!"); }} className={`inline-flex h-9 items-center gap-2 rounded-md px-3 text-sm font-medium transition-colors ${workoutToday.done ? "bg-good/15 text-ink" : "bg-primary text-primary-foreground"}`}><Tick on={workoutToday.done} />{workoutToday.done ? "Concluído" : "Concluir treino"}</button></div>
+      </div>}
       <div className="mt-3 grid grid-cols-4 gap-2 sm:grid-cols-8">
         {MODULES.filter((m) => isModuleOn(modules, m.id) && m.id !== "agenda").map((m) => <Link key={m.id} to={m.to} className="flex flex-col items-center gap-1 rounded-lg bg-card p-3 text-center text-[11px] font-medium ring-1 ring-line hover:ring-brand"><m.icon className="size-5 text-brand" />{m.label}</Link>)}
       </div>

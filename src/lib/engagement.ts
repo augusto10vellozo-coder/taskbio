@@ -60,8 +60,15 @@ export function streak(plan: Plan, log: HabitLog, today: Date, habits?: Habit[])
 export const STREAK_MILESTONES = [7, 14, 30] as const;
 export const isMilestone = (n: number) => (STREAK_MILESTONES as readonly number[]).includes(n);
 
-export function goalProgress(goal: MonthGoal, history: WorkoutHistoryEntry[], log: HabitLog) {
-  if (goal.source === "workouts") return history.filter((h) => h.completedAt.slice(0, 7) === goal.month).length;
+export function goalProgress(goal: MonthGoal, history: WorkoutHistoryEntry[], log: HabitLog, plan: Plan = {}) {
+  if (goal.source === "workouts") {
+    // Completed workout blocks in the week plan, plus finished sessions on days without such a block.
+    const doneDays = Object.entries(plan).filter(([d, blocks]) => d.startsWith(goal.month) && blocks.some((b) => b.kind === "treino" && b.done));
+    const daysWithBlock = new Set(doneDays.map(([d]) => d));
+    const blocks = doneDays.reduce((n, [, b]) => n + b.filter((x) => x.kind === "treino" && x.done).length, 0);
+    const sessions = history.filter((h) => h.completedAt.slice(0, 7) === goal.month && !daysWithBlock.has(h.completedAt.slice(0, 10))).length;
+    return blocks + sessions;
+  }
   if (goal.source === "habits") return Object.entries(log).filter(([d, ids]) => d.startsWith(goal.month) && ids.length > 0).length;
   return goal.manual;
 }
