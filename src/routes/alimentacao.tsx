@@ -17,6 +17,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { brl } from "@/lib/trilha-data";
 import { useTaskBio } from "@/lib/trilha-store";
+import { foodName, mealNutrition, mealSummary } from "@/lib/meal-summary";
+import type { Block } from "@/lib/trilha-data";
 import { formatWeekRange, getWeekDates, toDateKey } from "@/lib/calendar-utils";
 
 export const Route = createFileRoute("/alimentacao")({
@@ -67,28 +69,29 @@ const toNonNegativeNumber = (value: string) => {
 };
 
 function Alimentacao() {
-  const { meals, plan, addBlock, removeBlock, getMeal } = useTaskBio();
+  const { meals, plan, addBlock, updateBlock, removeBlock, getMeal } = useTaskBio();
   const [referenceDate, setReferenceDate] = useState(() => new Date());
   const [selectedDate, setSelectedDate] = useState(() => new Date());
   const [manualOpen, setManualOpen] = useState(false);
+  const [editingMeal, setEditingMeal] = useState<Block | null>(null);
   const [manualMeal, setManualMeal] = useState<ManualMealForm>(emptyManualMeal);
   const weekDates = useMemo(() => getWeekDates(referenceDate), [referenceDate]);
   const weekKeys = useMemo(() => weekDates.map(toDateKey), [weekDates]);
   const scheduled = useMemo(() => weekKeys.flatMap((key) => (plan[key] ?? []).filter((block) => block.kind === "refeicao")), [plan, weekKeys]);
   const selectedKey = toDateKey(selectedDate);
   const selectedMeals = (plan[selectedKey] ?? []).filter((block) => block.kind === "refeicao");
-  const totals = scheduled.reduce((result, block) => {
-    const meal = getMeal(block.mealId);
-    const macros = meal?.macros ?? block.manualMeal?.macros;
-    if (!macros) return result;
-    return {
-      kcal: result.kcal + macros.kcal,
-      prot: result.prot + macros.prot,
-      carb: result.carb + macros.carb,
-      gord: result.gord + macros.gord,
-      cost: result.cost + (meal?.cost ?? block.manualMeal?.cost ?? 0),
-    };
-  }, { kcal: 0, prot: 0, carb: 0, gord: 0, cost: 0 });
+  const totals = mealSummary(scheduled, getMeal);
+  const dayTotals = mealSummary(selectedMeals, getMeal);
+  const fmt = (value: number) => value.toLocaleString("pt-BR", { maximumFractionDigits: 1 });
+
+  function editMeal(block: Block) {
+    const nutrition = mealNutrition(block, getMeal);
+    setEditingMeal(block);
+    setManualMeal({ name: block.title, time: block.time, portion: block.manualMeal?.portion ?? "",
+      kcal: nutrition.known ? String(nutrition.kcal) : "", prot: nutrition.known ? String(nutrition.prot) : "",
+      carb: nutrition.known ? String(nutrition.carb) : "", gord: nutrition.known ? String(nutrition.gord) : "", cost: String(nutrition.cost) });
+    setManualOpen(true);
+  }
 
   function scheduleMeal(mealId: string) {
     const meal = getMeal(mealId);
@@ -105,13 +108,14 @@ function Alimentacao() {
 
   function registerManualMeal(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const name = manualMeal.name.trim();
+    const name = foodName(manualMeal.name.trim());
     const portion = manualMeal.portion.trim();
     if (!name || !portion) {
       toast.error("Informe o alimento e a porção consumida.");
       return;
     }
-    addBlock(selectedKey, {
+    const payload: Omit<Block, "id" | "done"> = {
+      ...(editingMeal ?? {}),
       time: manualMeal.time,
       kind: "refeicao",
       title: name,
@@ -126,7 +130,10 @@ function Alimentacao() {
         },
         cost: toNonNegativeNumber(manualMeal.cost),
       },
-    });
+    };
+    if (editingMeal) updateBlock(selectedKey, editingMeal.id, payload);
+    else addBlock(selectedKey, payload);
+    setEditingMeal(null);
     setManualMeal(emptyManualMeal);
     setManualOpen(false);
     toast.success(`${name} registrado em ${format(selectedDate, "dd/MM")}.`);
@@ -160,7 +167,7 @@ function Alimentacao() {
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_300px]">
         <section>
-          <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-end"><div><h2 className="font-display text-xl font-semibold">Escolher para {format(selectedDate, "EEEE", { locale: ptBR })}</h2><p className="mt-1 text-xs text-steel">Adicione sugestões ou registre o que você realmente comeu.</p></div><Button type="button" onClick={() => setManualOpen(true)}><Plus /> Registrar o que comi</Button></div>
+          <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-end"><div><h2 className="font-display text-xl font-semibold">Escolher para {format(selectedDate, "EEEE", { locale: ptBR })}</h2><p className="mt-1 text-xs text-steel">Adicione sugestões ou registre o que você realmente comeu.</p></div><Button type="button" onClick={() => { setEditingMeal(null); setManualMeal(emptyManualMeal); setManualOpen(true); }}><Plus /> Registrar o que comi</Button></div>
           <div className="mt-4 grid gap-4 md:grid-cols-2">
             {meals.map((meal) => (
               <article key={meal.id} className="rounded-lg bg-card p-4 ring-1 ring-line">
@@ -174,10 +181,17 @@ function Alimentacao() {
 
         <aside className="space-y-4">
           <section className="rounded-lg bg-ink p-5 text-primary-foreground">
-            <p className="text-[11px] uppercase text-primary-foreground/70">Resumo da semana</p><p className="mt-2 font-display text-3xl font-semibold">{brl(totals.cost)}</p><p className="mt-1 text-xs text-primary-foreground/70">{scheduled.length} refeições · {totals.kcal.toLocaleString("pt-BR")} kcal</p>
-            <dl className="mt-4 grid grid-cols-3 gap-2 border-t border-primary-foreground/20 pt-4 text-center"><div><dt className="text-[10px] text-primary-foreground/70">Proteína</dt><dd className="mt-1 font-semibold">{totals.prot}g</dd></div><div><dt className="text-[10px] text-primary-foreground/70">Carboidrato</dt><dd className="mt-1 font-semibold">{totals.carb}g</dd></div><div><dt className="text-[10px] text-primary-foreground/70">Gordura</dt><dd className="mt-1 font-semibold">{totals.gord}g</dd></div></dl>
+            <p className="text-[11px] uppercase text-primary-foreground/70">Resumo da semana</p><p className="mt-2 font-display text-3xl font-semibold">{brl(totals.cost)}</p><p className="mt-1 text-xs text-primary-foreground/70">{scheduled.length} refeições · {totals.known ? `${fmt(totals.kcal)} kcal` : "calorias não informadas"}</p>
+            <dl className="mt-4 grid grid-cols-3 gap-2 border-t border-primary-foreground/20 pt-4 text-center"><div><dt className="text-[10px] text-primary-foreground/70">Proteína</dt><dd className="mt-1 font-semibold">{totals.known ? `${fmt(totals.prot)}g` : "—"}</dd></div><div><dt className="text-[10px] text-primary-foreground/70">Carboidrato</dt><dd className="mt-1 font-semibold">{totals.known ? `${fmt(totals.carb)}g` : "—"}</dd></div><div><dt className="text-[10px] text-primary-foreground/70">Gordura</dt><dd className="mt-1 font-semibold">{totals.known ? `${fmt(totals.gord)}g` : "—"}</dd></div></dl>
+            {totals.missing > 0 && <p className="mt-3 text-xs leading-5 text-primary-foreground/70">{totals.missing} refeição(ões) sem valores nutricionais informados; não incluídas nos nutrientes.</p>}
           </section>
-          <section className="rounded-lg bg-card p-4 ring-1 ring-line"><h2 className="font-display text-base font-semibold">Neste dia</h2>{selectedMeals.length === 0 ? <p className="mt-3 text-sm text-steel">Nenhuma refeição registrada.</p> : <ul className="mt-3 divide-y divide-line">{selectedMeals.map((block) => { const meal = getMeal(block.mealId); return <li key={block.id} className="flex items-center justify-between gap-3 py-3"><div className="min-w-0"><div className="flex flex-wrap items-center gap-2"><p className="text-sm font-medium">{meal?.items ?? block.title}</p>{block.manualMeal ? <span className="rounded-full bg-mist px-2 py-0.5 text-[10px] font-medium text-steel">registrado</span> : null}</div><p className="mt-0.5 text-xs text-steel">{block.time}{block.manualMeal ? ` · ${block.manualMeal.portion} · ${block.manualMeal.macros.kcal} kcal` : ""}</p></div><Button variant="ghost" size="sm" onClick={() => removeBlock(selectedKey, block.id)}>Remover</Button></li>; })}</ul>}</section>
+          <section className="rounded-lg bg-card p-4 ring-1 ring-line"><h2 className="font-display text-base font-semibold">Neste dia</h2>
+            {selectedMeals.length === 0 ? <p className="mt-3 text-sm text-steel">Nenhuma refeição registrada.</p> : <>
+              <p className="mt-3 text-sm font-semibold">{dayTotals.known ? `${fmt(dayTotals.kcal)} kcal` : "Calorias não informadas"}</p>
+              <p className="mt-1 text-xs text-steel">{dayTotals.known ? `P ${fmt(dayTotals.prot)}g · C ${fmt(dayTotals.carb)}g · G ${fmt(dayTotals.gord)}g` : "Nutrientes não informados"}</p>
+              <ul className="mt-3 divide-y divide-line">{selectedMeals.map((block) => { const meal = getMeal(block.mealId); const nutrition = mealNutrition(block, getMeal); return <li key={block.id} className="flex flex-wrap items-center justify-between gap-3 py-3"><div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-2"><p className="text-sm font-medium">{foodName(meal?.items ?? block.title)}</p>{block.manualMeal ? <span className="rounded-full bg-mist px-2 py-0.5 text-[10px] font-medium text-steel">registrado</span> : null}</div><p className="mt-0.5 text-xs leading-5 text-steel">{block.time}{block.manualMeal ? ` · ${block.manualMeal.portion}` : ""} · {nutrition.known ? `${fmt(nutrition.kcal)} kcal` : "Nutrientes não informados"}</p></div><div className="flex gap-1">{block.manualMeal && <Button variant="ghost" size="sm" onClick={() => editMeal(block)}>Editar</Button>}<Button variant="ghost" size="sm" onClick={() => removeBlock(selectedKey, block.id)}>Remover</Button></div></li>; })}</ul>
+            </>}
+          </section>
           <p className="text-xs leading-5 text-steel">Estimativas não substituem avaliação ou orientação de nutricionista ou médico.</p>
         </aside>
       </div>
@@ -185,7 +199,7 @@ function Alimentacao() {
         <DialogContent className="max-h-[90vh] w-[calc(100%-2rem)] overflow-y-auto sm:max-w-xl">
           <form onSubmit={registerManualMeal}>
             <DialogHeader>
-              <DialogTitle>Registrar o que comi</DialogTitle>
+              <DialogTitle>{editingMeal ? "Editar refeição registrada" : "Registrar o que comi"}</DialogTitle>
               <DialogDescription>Adicione um alimento ou refeição em {format(selectedDate, "dd/MM")}. Os valores nutricionais são opcionais.</DialogDescription>
             </DialogHeader>
             <div className="mt-5 grid gap-4 sm:grid-cols-2">
