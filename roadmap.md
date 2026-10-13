@@ -1,5 +1,9 @@
 # Roadmap
 
+- [ ] Corrigir estado vazio do treino e agendamento explícito de exemplos
+- [ ] Corrigir totais semanais/diários de refeições e acentos dos alimentos
+- [ ] Ajustar texto cortado no progresso da agenda e validar os três fluxos
+
 - [x] Refinar Minha Agenda: resumo compacto, opções protegidas, estados vazios e testes de sincronização/cancelamento
 
 - [ ] Verificar e configurar a expiração real de recuperação para 60 minutos — bloqueado: as ferramentas disponíveis não expõem leitura nem alteração de `mailer_otp_exp`; não considerar o texto do e-mail como validação.
