@@ -19,6 +19,8 @@ Content reviews run only from an authenticated, server-verified admin function; 
 
 Manual food entries are stored as dated meal blocks inside the existing plan payload; this preserves offline use and account synchronization without a parallel food-log store.
 
+Food totals use the shared meal-summary resolver for catalog and manual blocks; missing nutrition stays unknown instead of being inferred, and display-only accent corrections preserve stored user data.
+
 The legacy `/rotina` address redirects to the main agenda at `/`; this keeps old links and saved browser addresses working.
 
 Home-screen installation uses a web app manifest without app-shell caching; this preserves installability without stale preview or deployment caches.
