@@ -13,6 +13,8 @@ import { formatFullDate, formatWeekRange, getWeekDates, toDateKey } from "@/lib/
 import { AdSlot } from "@/components/AdSlot";
 import { toast } from "sonner";
 import { TodayPanel } from "@/components/TodayPanel";
+import { WeekActions } from "@/components/WeekActions";
+import { agendaSummary } from "@/lib/agenda-overview";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -58,6 +60,8 @@ function MinhaSemana() {
   const [exampleDismissed, setExampleDismissed] = useState(false);
   const [installPrompt, setInstallPrompt] = useState<Event | null>(null);
   const [installed, setInstalled] = useState(false);
+  const scrollToTimeline = () => requestAnimationFrame(() => document.getElementById("linha-do-dia")?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth", block: "start" }));
+  const planDay = () => { setAdding(true); scrollToTimeline(); };
   useEffect(() => {
     setExampleDismissed(localStorage.getItem("trilha:example-dismissed") === "yes");
     setInstalled(window.matchMedia("(display-mode: standalone)").matches || (navigator as Navigator & { standalone?: boolean }).standalone === true);
@@ -108,11 +112,12 @@ function MinhaSemana() {
 
   const weekStats = useMemo(() => {
     const all = weekKeys.flatMap((key) => plan[key] ?? []);
-    const done = all.filter((b) => b.done).length;
+    const summary = agendaSummary(all);
     return {
-      pct: all.length ? Math.round((done / all.length) * 100) : 0,
-      treinos: all.filter((b) => b.kind === "treino" && b.done).length,
-      refeicoes: all.filter((b) => b.kind === "refeicao" && b.done).length,
+      pct: summary.percent,
+      done: summary.completed,
+      treinos: summary.workouts,
+      refeicoes: summary.meals,
       semanaCusto: all.reduce((s, b) => s + (getMeal(b.mealId)?.cost ?? 0), 0),
     };
   }, [getMeal, plan, weekKeys]);
@@ -128,7 +133,7 @@ function MinhaSemana() {
   return (
     <>
       <main className="mx-auto max-w-6xl px-5 pb-20 sm:px-8">
-        <TodayPanel />
+        <TodayPanel onTodaySelect={() => { setSelectedDate(new Date()); scrollToTimeline(); }} />
         <section className="pt-8 pb-4">
           {!user && <div className="mb-5 flex flex-wrap items-center justify-between gap-2 border-b border-line pb-3 text-sm text-steel"><span>Entre para salvar sua agenda e acessá-la em outros dispositivos.</span><Button asChild variant="outline" size="sm"><Link to="/auth">Entrar e sincronizar <ArrowRight /></Link></Button></div>}
           {installPrompt && !installed && <div className="mb-5 flex items-center justify-between gap-3 border-b border-line pb-3 text-sm"><span>Instalar TaskBio neste aparelho</span><Button variant="outline" size="sm" onClick={async () => { const prompt = installPrompt as Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: string }> }; await prompt.prompt(); await prompt.userChoice; setInstallPrompt(null); }}>Instalar</Button></div>}
@@ -158,6 +163,7 @@ function MinhaSemana() {
                   <Calendar mode="single" selected={selectedDate} onSelect={(date) => date && setSelectedDate(date)} defaultMonth={selectedDate} locale={ptBR} className="pointer-events-auto p-3" />
                 </PopoverContent>
               </Popover>
+              <WeekActions empty={emptyWeek} onDuplicateDay={duplicateDay} onDuplicateWeek={duplicateWeek} onClear={() => { clearWeek(weekKeys); toast.success("Semana limpa."); }} />
             </div>
           </div>
           <div className="mt-5 grid grid-cols-7 gap-1.5 sm:gap-2">
@@ -172,12 +178,11 @@ function MinhaSemana() {
               </Button>;
             })}
           </div>
-          <div className="mt-4 flex flex-wrap gap-2"><Button variant="outline" size="sm" onClick={duplicateDay}>Duplicar dia anterior</Button><Button variant="outline" size="sm" onClick={duplicateWeek}>Duplicar semana inteira</Button>{!emptyWeek && <Button variant="ghost" size="sm" onClick={() => { if (window.confirm("Limpar todos os itens desta semana?")) clearWeek(weekKeys); }}>Limpar semana</Button>}</div>
           {emptyWeek && !exampleDismissed && <div className="mt-5 border-y border-line py-5"><p className="font-display font-semibold">Comece com uma semana de exemplo</p><p className="mt-1 text-sm text-steel">Refeições, atividades e descanso editáveis. Você pode limpar a semana a qualquer momento.</p><div className="mt-3 flex gap-2"><Button size="sm" onClick={fillExample}>Preencher com semana de exemplo</Button><Button size="sm" variant="ghost" onClick={() => { localStorage.setItem("trilha:example-dismissed", "yes"); setExampleDismissed(true); }}>Agora não</Button></div></div>}
         </section>
 
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
-          <section className="lg:col-span-7">
+          <section id="linha-do-dia" aria-label="Linha do dia" className="scroll-mt-6 lg:col-span-7">
             <div className="glass-strong rounded-2xl p-5 ring-1 ring-black/5 sm:p-6">
               <div className="mb-5 flex items-center justify-between">
                 <h2 className="font-display text-lg font-semibold tracking-tight">Linha do dia</h2>
@@ -237,16 +242,16 @@ function MinhaSemana() {
                           <div className="flex shrink-0 items-center gap-2">
                             {b.endTime && <span className="text-[11px] text-steel">{b.time} — {b.endTime}</span>}
                              {b.reminderMinutes ? <span title={`Lembrete ${b.reminderMinutes} minutos antes`} className="text-brand-deep"><Bell className="size-3.5" /></span> : null}
-                             <button
+                             <Button variant="ghost" size="sm" aria-label={`${b.done ? "Desmarcar" : "Concluir"} ${b.title}`} aria-pressed={b.done}
                               onClick={() => toggleBlock(dateKey, b.id)}
-                              className={`rounded-full px-2.5 py-0.5 text-[11px] font-medium ring-1 ${
+                              className={`h-auto rounded-full px-2.5 py-0.5 text-[11px] font-medium ring-1 ${
                                 b.done
                                   ? "bg-good/10 text-good ring-good/20"
                                   : "text-steel ring-line hover:text-ink"
                               }`}
                             >
                               {b.done ? "Feito" : "Marcar"}
-                            </button>
+                            </Button>
                              <Button
                                variant="ghost"
                                size="icon"
@@ -338,12 +343,12 @@ function MinhaSemana() {
           </section>
 
           <aside className="space-y-5 lg:col-span-5">
-            <div className="glass-strong rounded-2xl p-5 ring-1 ring-black/5">
+            <div aria-label="Progresso da semana" className="glass-strong rounded-2xl p-5 ring-1 ring-black/5">
               <div className="flex items-center justify-between">
                 <h2 className="font-display text-lg font-semibold tracking-tight">Progresso da semana</h2>
                  <span className="text-xs text-steel">{formatWeekRange(selectedDate)}</span>
               </div>
-              <div className="mt-4 grid grid-cols-2 gap-3">
+              {weekStats.done === 0 ? <div className="mt-4"><p className="font-display text-lg font-semibold">Monte sua primeira semana</p><Button variant="outline" size="sm" className="mt-3" onClick={planDay}><Plus />Planejar meu dia</Button></div> : <div className="mt-4 grid grid-cols-2 gap-3">
                 <div className="rounded-xl bg-white/50 p-3 ring-1 ring-black/5">
                   <p className="text-[11px] uppercase tracking-[0.14em] text-steel">Rotina</p>
                   <p className="mt-1 font-display text-2xl font-semibold">{weekStats.pct}%</p>
@@ -353,23 +358,23 @@ function MinhaSemana() {
                 </div>
                 <div className="rounded-xl bg-white/50 p-3 ring-1 ring-black/5">
                   <p className="text-[11px] uppercase tracking-[0.14em] text-steel">Treinos</p>
-                  <p className="mt-1 font-display text-2xl font-semibold">{weekStats.treinos}</p>
+                  <p className="mt-1 font-display text-2xl font-semibold">{weekStats.treinos || "Que tal treinar?"}</p>
                   <p className="mt-1 text-[11px] text-steel">concluídos na semana</p>
                 </div>
                 <div className="rounded-xl bg-white/50 p-3 ring-1 ring-black/5">
                   <p className="text-[11px] uppercase tracking-[0.14em] text-steel">Kcal do dia</p>
-                  <p className="mt-1 font-display text-2xl font-semibold">{resumo.kcal}</p>
+                  <p className="mt-1 font-display text-2xl font-semibold">{resumo.kcal || "Planeje uma refeição"}</p>
                   <p className="mt-1 text-[11px] text-steel">estimativa das refeições</p>
                 </div>
                 <div className="rounded-xl bg-white/50 p-3 ring-1 ring-black/5">
                   <p className="text-[11px] uppercase tracking-[0.14em] text-steel">Refeições</p>
-                  <p className="mt-1 font-display text-2xl font-semibold">{weekStats.refeicoes}</p>
+                  <p className="mt-1 font-display text-2xl font-semibold">{weekStats.refeicoes || "Registre sua refeição"}</p>
                   <p className="mt-1 text-[11px] text-steel">registradas</p>
                 </div>
-              </div>
+              </div>}
             </div>
 
-            <div className="glass-strong rounded-2xl p-5 ring-1 ring-black/5">
+            {compras.length > 0 && <div className="glass-strong rounded-2xl p-5 ring-1 ring-black/5">
               <div className="flex items-center justify-between">
                 <h2 className="font-display text-lg font-semibold tracking-tight">Compras da semana</h2>
                 <span className="text-sm font-semibold text-ink">{brl(weekStats.semanaCusto)}</span>
@@ -385,7 +390,7 @@ function MinhaSemana() {
               <p className="mt-3 text-[11px] text-steel">
                 Valores estimados para planejamento — não substituem orientação de um profissional de saúde.
               </p>
-            </div>
+            </div>}
           </aside>
         </div>
       </main>

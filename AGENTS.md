@@ -29,3 +29,4 @@ All copy a visitor can see stays in Brazilian Portuguese, and authentication fai
 - Optional app modules are declared in src/lib/modules.ts; nav, home shortcuts and settings read that registry so new modules need no refactor.
 - Workout plan import extracts text in the browser (PDF/DOCX/XLSX/CSV) and sends only text to an authenticated server function that calls the AI model; files never leave the device.
 - Workouts without templateId are models ("Meus treinos"); scheduling always copies the model with templateId so week edits never alter it, and progression links by exercise name. /atividades redirects to /treino?aba=explorar.
+- Agenda summaries derive from the shared plan via agendaSummary; week clearing is isolated in WeekActions with two explicit confirmation steps so summaries cannot drift and accidental clicks cannot delete a week.
