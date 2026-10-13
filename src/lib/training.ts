@@ -58,7 +58,7 @@ export function toWorkout(input: ImportedWorkout, knownNames: string[], id: stri
     restSec: 60,
     muscles: "",
     howTo: "",
-    loadKg: e.loadKg ?? undefined,
+    ...(e.loadKg ? { loadKg: e.loadKg } : {}),
     doneSets: 0,
   }));
   return { id, name: input.name.trim() || "Treino importado", focus: "Plano importado", modality: "Academia", exercises };
