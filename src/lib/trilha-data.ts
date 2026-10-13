@@ -28,6 +28,8 @@ export type Exercise = {
 
 export type Workout = {
   id: string;
+  /** Set on copies scheduled in the week; points at the model in "Meus treinos". */
+  templateId?: string;
   name: string;
   focus: string;
   modality: string;
