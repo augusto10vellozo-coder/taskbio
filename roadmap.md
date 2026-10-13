@@ -41,3 +41,4 @@
 
 - [x] Tela inicial "o que importa hoje", hábitos, metas do mês, saúde e módulos ligáveis
 - [x] Módulo Treino: plano semanal, registro de exercícios, progressão e importação de plano por arquivo
+- [x] Unificar Treino e Atividades em uma página com abas e modelos agendáveis
