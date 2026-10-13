@@ -9,7 +9,7 @@ import { EmailChangeEmail } from '@/lib/email-templates/email-change'
 import { ReauthenticationEmail } from '@/lib/email-templates/reauthentication'
 
 // Configuration
-const SITE_NAME = "Daily Flow Hub"
+const SITE_NAME = "TaskBio"
 const SENDER_DOMAIN = "notify.taskbio.com.br"
 const ROOT_DOMAIN = "taskbio.com.br"
 const FROM_DOMAIN = "taskbio.com.br"
