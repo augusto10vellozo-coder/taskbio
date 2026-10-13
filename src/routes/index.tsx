@@ -348,27 +348,27 @@ function MinhaSemana() {
                 <h2 className="font-display text-lg font-semibold tracking-tight">Progresso da semana</h2>
                  <span className="text-xs text-steel">{formatWeekRange(selectedDate)}</span>
               </div>
-              {weekStats.done === 0 ? <div className="mt-4"><p className="font-display text-lg font-semibold">Monte sua primeira semana</p><Button variant="outline" size="sm" className="mt-3" onClick={planDay}><Plus />Planejar meu dia</Button></div> : <div className="mt-4 grid grid-cols-2 gap-3">
+              {emptyWeek ? <div className="mt-4"><p className="font-display text-lg font-semibold">Monte sua primeira semana</p><Button variant="outline" size="sm" className="mt-3" onClick={planDay}><Plus />Planejar meu dia</Button></div> : <div className="mt-4 grid grid-cols-2 gap-3">
                 <div className="rounded-xl bg-white/50 p-3 ring-1 ring-black/5">
                   <p className="text-[11px] uppercase tracking-[0.14em] text-steel">Rotina</p>
-                  <p className="mt-1 font-display text-2xl font-semibold">{weekStats.pct}%</p>
+                  <p className={weekStats.pct > 0 ? "mt-1 font-display text-2xl font-semibold" : "mt-1 text-sm text-steel"}>{weekStats.pct > 0 ? `${weekStats.pct}%` : "Conclua seu primeiro item"}</p>
                   <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-line">
                     <div className="h-full rounded-full bg-brand" style={{ width: `${weekStats.pct}%` }} />
                   </div>
                 </div>
                 <div className="rounded-xl bg-white/50 p-3 ring-1 ring-black/5">
                   <p className="text-[11px] uppercase tracking-[0.14em] text-steel">Treinos</p>
-                  <p className="mt-1 font-display text-2xl font-semibold">{weekStats.treinos || "Que tal treinar?"}</p>
+                  <p className={weekStats.treinos > 0 ? "mt-1 font-display text-2xl font-semibold" : "mt-1 text-sm text-steel"}>{weekStats.treinos || "Que tal treinar?"}</p>
                   <p className="mt-1 text-[11px] text-steel">concluídos na semana</p>
                 </div>
                 <div className="rounded-xl bg-white/50 p-3 ring-1 ring-black/5">
                   <p className="text-[11px] uppercase tracking-[0.14em] text-steel">Kcal do dia</p>
-                  <p className="mt-1 font-display text-2xl font-semibold">{resumo.kcal || "Planeje uma refeição"}</p>
+                  <p className={resumo.kcal > 0 ? "mt-1 font-display text-2xl font-semibold" : "mt-1 text-sm text-steel"}>{resumo.kcal || "Planeje uma refeição"}</p>
                   <p className="mt-1 text-[11px] text-steel">estimativa das refeições</p>
                 </div>
                 <div className="rounded-xl bg-white/50 p-3 ring-1 ring-black/5">
                   <p className="text-[11px] uppercase tracking-[0.14em] text-steel">Refeições</p>
-                  <p className="mt-1 font-display text-2xl font-semibold">{weekStats.refeicoes || "Registre sua refeição"}</p>
+                  <p className={weekStats.refeicoes > 0 ? "mt-1 font-display text-2xl font-semibold" : "mt-1 text-sm text-steel"}>{weekStats.refeicoes || "Registre sua refeição"}</p>
                   <p className="mt-1 text-[11px] text-steel">registradas</p>
                 </div>
               </div>}

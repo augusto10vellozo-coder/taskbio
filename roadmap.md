@@ -1,6 +1,6 @@
 # Roadmap
 
-- [ ] Refinar Minha Agenda: resumo compacto, opções protegidas, estados vazios e testes de sincronização/cancelamento
+- [x] Refinar Minha Agenda: resumo compacto, opções protegidas, estados vazios e testes de sincronização/cancelamento
 
 - [ ] Verificar e configurar a expiração real de recuperação para 60 minutos — bloqueado: as ferramentas disponíveis não expõem leitura nem alteração de `mailer_otp_exp`; não considerar o texto do e-mail como validação.
 - [ ] Validar recuperação com um link real e rejeição da segunda utilização — bloqueado até acesso à configuração de autenticação e teste autorizado de recuperação.
