@@ -18,10 +18,13 @@ import { Route as CalendarioRouteImport } from './routes/calendario'
 import { Route as ComprasRouteImport } from './routes/compras'
 import { Route as ContatoRouteImport } from './routes/contato'
 import { Route as EsqueciSenhaRouteImport } from './routes/esqueci-senha'
+import { Route as HabitosRouteImport } from './routes/habitos'
+import { Route as MetasRouteImport } from './routes/metas'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as ProgressoRouteImport } from './routes/progresso'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RotinaRouteImport } from './routes/rotina'
+import { Route as SaudeRouteImport } from './routes/saude'
 import { Route as SobreRouteImport } from './routes/sobre'
 import { Route as TermosRouteImport } from './routes/termos'
 import { Route as AuthenticatedEquipeRouteImport } from './routes/_authenticated/equipe'
@@ -74,6 +77,16 @@ const EsqueciSenhaRoute = EsqueciSenhaRouteImport.update({
   path: '/esqueci-senha',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HabitosRoute = HabitosRouteImport.update({
+  id: '/habitos',
+  path: '/habitos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MetasRoute = MetasRouteImport.update({
+  id: '/metas',
+  path: '/metas',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PrivacidadeRoute = PrivacidadeRouteImport.update({
   id: '/privacidade',
   path: '/privacidade',
@@ -92,6 +105,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
 const RotinaRoute = RotinaRouteImport.update({
   id: '/rotina',
   path: '/rotina',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SaudeRoute = SaudeRouteImport.update({
+  id: '/saude',
+  path: '/saude',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SobreRoute = SobreRouteImport.update({
@@ -140,10 +158,13 @@ export interface FileRoutesByFullPath {
   '/compras': typeof ComprasRoute
   '/contato': typeof ContatoRoute
   '/esqueci-senha': typeof EsqueciSenhaRoute
+  '/habitos': typeof HabitosRoute
+  '/metas': typeof MetasRoute
   '/privacidade': typeof PrivacidadeRoute
   '/progresso': typeof ProgressoRoute
   '/reset-password': typeof ResetPasswordRoute
   '/rotina': typeof RotinaRoute
+  '/saude': typeof SaudeRoute
   '/sobre': typeof SobreRoute
   '/termos': typeof TermosRoute
   '/equipe': typeof AuthenticatedEquipeRoute
@@ -161,10 +182,13 @@ export interface FileRoutesByTo {
   '/compras': typeof ComprasRoute
   '/contato': typeof ContatoRoute
   '/esqueci-senha': typeof EsqueciSenhaRoute
+  '/habitos': typeof HabitosRoute
+  '/metas': typeof MetasRoute
   '/privacidade': typeof PrivacidadeRoute
   '/progresso': typeof ProgressoRoute
   '/reset-password': typeof ResetPasswordRoute
   '/rotina': typeof RotinaRoute
+  '/saude': typeof SaudeRoute
   '/sobre': typeof SobreRoute
   '/termos': typeof TermosRoute
   '/equipe': typeof AuthenticatedEquipeRoute
@@ -184,10 +208,13 @@ export interface FileRoutesById {
   '/compras': typeof ComprasRoute
   '/contato': typeof ContatoRoute
   '/esqueci-senha': typeof EsqueciSenhaRoute
+  '/habitos': typeof HabitosRoute
+  '/metas': typeof MetasRoute
   '/privacidade': typeof PrivacidadeRoute
   '/progresso': typeof ProgressoRoute
   '/reset-password': typeof ResetPasswordRoute
   '/rotina': typeof RotinaRoute
+  '/saude': typeof SaudeRoute
   '/sobre': typeof SobreRoute
   '/termos': typeof TermosRoute
   '/_authenticated/equipe': typeof AuthenticatedEquipeRoute
@@ -207,10 +234,13 @@ export interface FileRouteTypes {
     | '/compras'
     | '/contato'
     | '/esqueci-senha'
+    | '/habitos'
+    | '/metas'
     | '/privacidade'
     | '/progresso'
     | '/reset-password'
     | '/rotina'
+    | '/saude'
     | '/sobre'
     | '/termos'
     | '/equipe'
@@ -228,10 +258,13 @@ export interface FileRouteTypes {
     | '/compras'
     | '/contato'
     | '/esqueci-senha'
+    | '/habitos'
+    | '/metas'
     | '/privacidade'
     | '/progresso'
     | '/reset-password'
     | '/rotina'
+    | '/saude'
     | '/sobre'
     | '/termos'
     | '/equipe'
@@ -250,10 +283,13 @@ export interface FileRouteTypes {
     | '/compras'
     | '/contato'
     | '/esqueci-senha'
+    | '/habitos'
+    | '/metas'
     | '/privacidade'
     | '/progresso'
     | '/reset-password'
     | '/rotina'
+    | '/saude'
     | '/sobre'
     | '/termos'
     | '/_authenticated/equipe'
@@ -273,10 +309,13 @@ export interface RootRouteChildren {
   ComprasRoute: typeof ComprasRoute
   ContatoRoute: typeof ContatoRoute
   EsqueciSenhaRoute: typeof EsqueciSenhaRoute
+  HabitosRoute: typeof HabitosRoute
+  MetasRoute: typeof MetasRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
   ProgressoRoute: typeof ProgressoRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   RotinaRoute: typeof RotinaRoute
+  SaudeRoute: typeof SaudeRoute
   SobreRoute: typeof SobreRoute
   TermosRoute: typeof TermosRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
@@ -348,6 +387,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EsqueciSenhaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/habitos': {
+      id: '/habitos'
+      path: '/habitos'
+      fullPath: '/habitos'
+      preLoaderRoute: typeof HabitosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/metas': {
+      id: '/metas'
+      path: '/metas'
+      fullPath: '/metas'
+      preLoaderRoute: typeof MetasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/privacidade': {
       id: '/privacidade'
       path: '/privacidade'
@@ -374,6 +427,13 @@ declare module '@tanstack/react-router' {
       path: '/rotina'
       fullPath: '/rotina'
       preLoaderRoute: typeof RotinaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/saude': {
+      id: '/saude'
+      path: '/saude'
+      fullPath: '/saude'
+      preLoaderRoute: typeof SaudeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sobre': {
@@ -453,10 +513,13 @@ const rootRouteChildren: RootRouteChildren = {
   ComprasRoute: ComprasRoute,
   ContatoRoute: ContatoRoute,
   EsqueciSenhaRoute: EsqueciSenhaRoute,
+  HabitosRoute: HabitosRoute,
+  MetasRoute: MetasRoute,
   PrivacidadeRoute: PrivacidadeRoute,
   ProgressoRoute: ProgressoRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   RotinaRoute: RotinaRoute,
+  SaudeRoute: SaudeRoute,
   SobreRoute: SobreRoute,
   TermosRoute: TermosRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,

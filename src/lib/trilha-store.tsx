@@ -19,6 +19,8 @@ import {
 } from "./trilha-data";
 import { addDays, isAfter, isWeekend, parseISO } from "date-fns";
 import { normalizePlan, toDateKey } from "./calendar-utils";
+import { emptyHealth, type Habit, type HabitLog, type HealthLog, type MonthGoal } from "./engagement";
+import type { ModuleSettings } from "./modules";
 
 export type TaskBioState = {
   plan: Plan;
@@ -29,6 +31,11 @@ export type TaskBioState = {
   workoutHistory: WorkoutHistoryEntry[];
   shoppingItems: ShoppingItem[];
   weeklyGoals: { workouts: number; mealDays: number; restDays: number };
+  habits: Habit[];
+  habitLog: HabitLog;
+  monthGoals: MonthGoal[];
+  health: HealthLog;
+  modules: ModuleSettings;
 };
 
 type Store = TaskBioState & {
@@ -52,6 +59,13 @@ type Store = TaskBioState & {
   setWeeklyGoals: (goals: TaskBioState["weeklyGoals"]) => void;
   replaceDays: (days: Record<string, Block[]>) => void;
   clearWeek: (keys: string[]) => void;
+  addHabit: (name: string) => void;
+  removeHabit: (id: string) => void;
+  toggleHabit: (date: string, id: string) => void;
+  saveMonthGoal: (goal: MonthGoal) => void;
+  removeMonthGoal: (id: string) => void;
+  setHealth: (fn: (h: HealthLog) => HealthLog) => void;
+  setModule: (id: keyof ModuleSettings, on: boolean) => void;
   getWorkout: (id?: string) => Workout | undefined;
   getMeal: (id?: string) => Meal | undefined;
 };
@@ -65,6 +79,11 @@ const initialState: TaskBioState = {
   workoutHistory: [],
   shoppingItems: [],
   weeklyGoals: { workouts: 3, mealDays: 5, restDays: 2 },
+  habits: [],
+  habitLog: {},
+  monthGoals: [],
+  health: emptyHealth,
+  modules: {},
 };
 
 const STORAGE_KEY = "trilha.state.v2";
@@ -216,6 +235,17 @@ export function TaskBioProvider({ children }: { children: ReactNode }) {
       setWeeklyGoals: (weeklyGoals) => setState((s) => ({ ...s, weeklyGoals })),
       replaceDays: (days) => setState((s) => ({ ...s, plan: { ...s.plan, ...days } })),
       clearWeek: (keys) => setState((s) => ({ ...s, plan: Object.fromEntries(Object.entries(s.plan).filter(([key]) => !keys.includes(key))) })),
+      addHabit: (name) => setState((s) => ({ ...s, habits: [...s.habits, { id: `h-${Date.now()}`, name, createdAt: new Date().toISOString() }] })),
+      removeHabit: (id) => setState((s) => ({ ...s, habits: s.habits.filter((h) => h.id !== id) })),
+      toggleHabit: (date, id) => setState((s) => {
+        const cur = s.habitLog[date] ?? [];
+        const next = cur.includes(id) ? cur.filter((x) => x !== id) : [...cur, id];
+        return { ...s, habitLog: { ...s.habitLog, [date]: next } };
+      }),
+      saveMonthGoal: (goal) => setState((s) => ({ ...s, monthGoals: s.monthGoals.some((g) => g.id === goal.id) ? s.monthGoals.map((g) => g.id === goal.id ? goal : g) : [...s.monthGoals, goal] })),
+      removeMonthGoal: (id) => setState((s) => ({ ...s, monthGoals: s.monthGoals.filter((g) => g.id !== id) })),
+      setHealth: (fn) => setState((s) => ({ ...s, health: fn({ ...emptyHealth, ...s.health }) })),
+      setModule: (id, on) => setState((s) => ({ ...s, modules: { ...s.modules, [id]: on } })),
       getWorkout: (id) => state.workouts.find((w) => w.id === id),
       getMeal: (id) => state.meals.find((m) => m.id === id),
     }),

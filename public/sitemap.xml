@@ -78,4 +78,7 @@
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
   </url>
+  <url><loc>https://taskbio.com.br/habitos</loc></url>
+  <url><loc>https://taskbio.com.br/metas</loc></url>
+  <url><loc>https://taskbio.com.br/saude</loc></url>
 </urlset>

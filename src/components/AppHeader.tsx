@@ -8,17 +8,14 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { useThemePreference, type ThemePreference } from "@/lib/theme-context";
 import { defaultReminderPreferences, readReminderPreferences, saveReminderPreferences, type ReminderPreferences } from "@/lib/reminder-preferences";
 
-const links = [
-  { to: "/", label: "Minha Agenda" },
-  { to: "/atividades", label: "Atividades" },
-  { to: "/alimentacao", label: "Alimentação" },
-  { to: "/compras", label: "Compras" },
-  { to: "/progresso", label: "Progresso" },
-] as const;
+import { MODULES, isModuleOn } from "@/lib/modules";
+import { useTaskBio } from "@/lib/trilha-store";
 
 export function AppHeader() {
   const { user, loading } = useAuth();
   const { theme, setTheme } = useThemePreference();
+  const { modules, setModule } = useTaskBio();
+  const links = MODULES.filter((m) => isModuleOn(modules, m.id));
   const [isAdmin, setIsAdmin] = useState(false);
   const [reminders, setReminders] = useState<ReminderPreferences>(defaultReminderPreferences);
   useEffect(() => setReminders(readReminderPreferences()), []);
@@ -66,7 +63,7 @@ export function AppHeader() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <DropdownMenu><DropdownMenuTrigger asChild><Button variant="ghost" size="icon" aria-label="Configurações" title="Configurações"><Settings2 /></Button></DropdownMenuTrigger><DropdownMenuContent align="end" className="w-64"><DropdownMenuLabel>Aparência</DropdownMenuLabel><DropdownMenuRadioGroup value={theme} onValueChange={(value) => setTheme(value as ThemePreference)}><DropdownMenuRadioItem value="light">Claro</DropdownMenuRadioItem><DropdownMenuRadioItem value="dark">Escuro</DropdownMenuRadioItem><DropdownMenuRadioItem value="system">Seguir sistema</DropdownMenuRadioItem></DropdownMenuRadioGroup><DropdownMenuLabel className="mt-2">Lembretes neste aparelho</DropdownMenuLabel><DropdownMenuItem onSelect={(event) => { event.preventDefault(); updateReminders({ ...reminders, enabled: !reminders.enabled }); }}>{reminders.enabled ? "Desativar todos" : "Ativar lembretes"}</DropdownMenuItem>{reminders.enabled && <><DropdownMenuItem onSelect={(event) => { event.preventDefault(); updateReminders({ ...reminders, dailyEnabled: !reminders.dailyEnabled }); }}>{reminders.dailyEnabled ? "✓ " : ""}Planejar dia seguinte</DropdownMenuItem><DropdownMenuItem onSelect={(event) => { event.preventDefault(); updateReminders({ ...reminders, workoutEnabled: !reminders.workoutEnabled }); }}>{reminders.workoutEnabled ? "✓ " : ""}Lembretes de treino</DropdownMenuItem><div className="px-2 py-1.5 text-xs text-steel"><label>Horário diário<input type="time" value={reminders.dailyTime} onChange={(event) => updateReminders({ ...reminders, dailyTime: event.target.value })} className="mt-1 h-8 w-full rounded-md bg-background px-2 ring-1 ring-line" /></label></div></>}</DropdownMenuContent></DropdownMenu>
+          <DropdownMenu><DropdownMenuTrigger asChild><Button variant="ghost" size="icon" aria-label="Configurações" title="Configurações"><Settings2 /></Button></DropdownMenuTrigger><DropdownMenuContent align="end" className="w-64"><DropdownMenuLabel>Módulos</DropdownMenuLabel>{MODULES.filter((m) => m.optional).map((m) => <DropdownMenuItem key={m.id} onSelect={(event) => { event.preventDefault(); setModule(m.id, !isModuleOn(modules, m.id)); }}>{isModuleOn(modules, m.id) ? "✓ " : "\u2003"}{m.label}</DropdownMenuItem>)}<DropdownMenuLabel className="mt-2">Aparência</DropdownMenuLabel><DropdownMenuRadioGroup value={theme} onValueChange={(value) => setTheme(value as ThemePreference)}><DropdownMenuRadioItem value="light">Claro</DropdownMenuRadioItem><DropdownMenuRadioItem value="dark">Escuro</DropdownMenuRadioItem><DropdownMenuRadioItem value="system">Seguir sistema</DropdownMenuRadioItem></DropdownMenuRadioGroup><DropdownMenuLabel className="mt-2">Lembretes neste aparelho</DropdownMenuLabel><DropdownMenuItem onSelect={(event) => { event.preventDefault(); updateReminders({ ...reminders, enabled: !reminders.enabled }); }}>{reminders.enabled ? "Desativar todos" : "Ativar lembretes"}</DropdownMenuItem>{reminders.enabled && <><DropdownMenuItem onSelect={(event) => { event.preventDefault(); updateReminders({ ...reminders, dailyEnabled: !reminders.dailyEnabled }); }}>{reminders.dailyEnabled ? "✓ " : ""}Planejar dia seguinte</DropdownMenuItem><DropdownMenuItem onSelect={(event) => { event.preventDefault(); updateReminders({ ...reminders, workoutEnabled: !reminders.workoutEnabled }); }}>{reminders.workoutEnabled ? "✓ " : ""}Lembretes de treino</DropdownMenuItem><div className="px-2 py-1.5 text-xs text-steel"><label>Horário diário<input type="time" value={reminders.dailyTime} onChange={(event) => updateReminders({ ...reminders, dailyTime: event.target.value })} className="mt-1 h-8 w-full rounded-md bg-background px-2 ring-1 ring-line" /></label></div></>}</DropdownMenuContent></DropdownMenu>
           {isAdmin && <Button asChild variant="ghost" size="sm"><Link to="/equipe">Equipe</Link></Button>}
           {!loading && user ? <>
             <span className="hidden text-[11px] font-medium text-steel sm:inline">Acesso gratuito</span>
