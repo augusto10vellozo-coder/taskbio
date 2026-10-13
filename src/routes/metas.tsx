@@ -23,7 +23,7 @@ export const Route = createFileRoute("/metas")({
 const SOURCES = { manual: "Manual", workouts: "Treinos concluídos (automático)", habits: "Dias com hábitos (automático)" } as const;
 
 function Metas() {
-  const { monthGoals, saveMonthGoal, removeMonthGoal, workoutHistory, habitLog } = useTaskBio();
+  const { monthGoals, saveMonthGoal, removeMonthGoal, workoutHistory, habitLog, plan } = useTaskBio();
   const [month, setMonth] = useState<string | null>(null);
   const [title, setTitle] = useState("");
   const [target, setTarget] = useState("12");
@@ -45,7 +45,7 @@ function Metas() {
       </form>
       <ul className="mt-4 space-y-3">
         {goals.length === 0 && <li className="py-10 text-center text-sm text-steel">Nenhuma meta para este mês ainda.</li>}
-        {goals.map((g) => { const v = goalProgress(g, workoutHistory, habitLog); const p = goalPercent(v, g.target); return (
+        {goals.map((g) => { const v = goalProgress(g, workoutHistory, habitLog, plan); const p = goalPercent(v, g.target); return (
           <li key={g.id} className="rounded-lg bg-card p-4 ring-1 ring-line">
             <div className="flex items-center justify-between gap-2"><div><p className="font-medium">{g.title}</p><p className="text-xs text-steel">{v} de {g.target} {g.unit} · {SOURCES[g.source]}</p></div>
               <div className="flex items-center gap-1">{g.source === "manual" && <><Button variant="outline" size="icon" className="size-8" aria-label="Diminuir" onClick={() => saveMonthGoal({ ...g, manual: Math.max(0, g.manual - 1) })}><Minus /></Button><Button size="icon" className="size-8" aria-label="Aumentar" onClick={() => { saveMonthGoal({ ...g, manual: g.manual + 1 }); if (g.manual + 1 === g.target) toast.success("Meta alcançada!"); }}><Plus /></Button></>}<Button variant="ghost" size="icon" className="size-8" aria-label={`Remover ${g.title}`} onClick={() => { if (window.confirm("Remover esta meta?")) removeMonthGoal(g.id); }}><Trash2 /></Button></div></div>
