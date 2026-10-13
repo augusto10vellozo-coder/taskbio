@@ -1,5 +1,8 @@
 # Roadmap
 
+- [ ] Verificar e configurar a expiração real de recuperação para 60 minutos — bloqueado: as ferramentas disponíveis não expõem leitura nem alteração de `mailer_otp_exp`; não considerar o texto do e-mail como validação.
+- [ ] Validar recuperação com um link real e rejeição da segunda utilização — bloqueado até acesso à configuração de autenticação e teste autorizado de recuperação.
+
 - [x] Restaurar o visual anterior à reformulação verde e branca e ao menu lateral, preservando funcionalidades e dados
 
 - [x] Exportar lista de compras como texto e PDF
