@@ -26,7 +26,7 @@ export const Route = createFileRoute("/treino")({
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary_large_image" },
   ] }),
-  validateSearch: (search: Record<string, unknown>): { aba?: "explorar" } => (search.aba === "explorar" ? { aba: "explorar" } : {}),
+  validateSearch: (search: Record<string, unknown>): { aba?: "explorar" } => (search["aba"] === "explorar" ? { aba: "explorar" } : {}),
   component: Treino,
 });
 

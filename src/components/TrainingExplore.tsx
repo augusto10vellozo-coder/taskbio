@@ -4,7 +4,7 @@ import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
 import { toDateKey } from "@/lib/calendar-utils";
 import type { Block } from "@/lib/trilha-data";
-import { CalendarPlus, ChevronDown, ChevronUp, CircleAlert, Dumbbell, History, Plus, Trash2, X } from "lucide-react";
+import { CalendarPlus, ChevronDown, ChevronUp, CircleAlert, Dumbbell, History, Plus, Sparkles, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
