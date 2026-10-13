@@ -256,11 +256,11 @@ Canjica|130|3|24|2.5|concha:150`;
 const slug = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-");
 
 export const FOODS: Food[] = RAW.split("\n").map((line) => {
-  const [name, kcal, prot, carb, gord, measures] = line.split("|");
+  const [name = "", kcal = "0", prot = "0", carb = "0", gord = "0", measures = ""] = line.split("|");
   return {
     id: slug(name), name,
     per100: { kcal: +kcal, prot: +prot, carb: +carb, gord: +gord },
-    measures: (measures ?? "").split(",").filter(Boolean).map((m) => { const [k, g] = m.split(":"); return { label: MEASURE_LABELS[k] ?? k, grams: +g }; }),
+    measures: (measures ?? "").split(",").filter(Boolean).map((m) => { const [k = "", g = "0"] = m.split(":"); return { label: MEASURE_LABELS[k] ?? k, grams: +g }; }),
   };
 });
 
