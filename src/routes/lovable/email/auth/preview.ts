@@ -41,7 +41,7 @@ const SAMPLE_DATA: Record<string, object> = {
   },
   recovery: {
     siteName: SITE_NAME,
-    confirmationUrl: SAMPLE_PROJECT_URL,
+    confirmationUrl: `https://${ROOT_DOMAIN}/reset-password`,
   },
   invite: {
     siteName: SITE_NAME,
