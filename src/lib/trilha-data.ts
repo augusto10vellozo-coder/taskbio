@@ -92,6 +92,8 @@ export type Block = {
     portion: string;
     macros: Macros;
     cost: number;
+    items?: { foodId?: string; name: string; grams: number; portion: string; macros: Macros }[] | undefined;
+    kcalOverride?: number | undefined;
   };
   workoutId?: string;
   reminderMinutes?: number;
