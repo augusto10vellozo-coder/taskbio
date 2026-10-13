@@ -138,7 +138,7 @@ function Alimentacao() {
         <p className="text-xs font-medium uppercase tracking-[0.18em] text-steel">Alimentação</p>
         <div className="mt-2 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
           <div><h1 className="font-display text-3xl font-semibold sm:text-4xl">Planeje suas refeições</h1><p className="mt-2 max-w-[62ch] text-sm leading-6 text-steel">Escolha o que deseja preparar em cada dia. Calorias, nutrientes e custos são estimativas para organização.</p></div>
-          <Button asChild variant="outline"><Link to="/compras"><ShoppingBasket /> Ver compras</Link></Button>
+          <Button asChild variant="outline"><Link to="/compras"><ShoppingBasket /> Gerar lista da semana</Link></Button>
         </div>
       </section>
 
