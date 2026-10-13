@@ -136,12 +136,13 @@ export function TaskBioProvider({ children }: { children: ReactNode }) {
 
   const displayMeals = useMemo(() => state.meals.map((meal) => ({ ...meal, name: foodName(meal.name), items: foodName(meal.items), ingredients: meal.ingredients.map((item) => ({ ...item, name: foodName(item.name) })) })), [state.meals]);
   const displayPlan = useMemo(() => Object.fromEntries(Object.entries(state.plan).map(([date, blocks]) => [date, blocks.map((b) => b.kind === "refeicao" ? { ...b, title: foodName(b.title) } : b)])), [state.plan]);
+  const displayShoppingItems = useMemo(() => state.shoppingItems.map((item) => ({ ...item, name: foodName(item.name) })), [state.shoppingItems]);
   const value = useMemo<Store>(
     () => ({
       ...state,
       meals: displayMeals,
       plan: displayPlan,
-      shoppingItems: state.shoppingItems.map((item) => ({ ...item, name: foodName(item.name) })),
+      shoppingItems: displayShoppingItems,
       ready,
       hydrate: (nextState) => setState((current) => ({
         ...current,
@@ -264,7 +265,7 @@ export function TaskBioProvider({ children }: { children: ReactNode }) {
       getWorkout: (id) => state.workouts.find((w) => w.id === id),
       getMeal: (id) => displayMeals.find((m) => m.id === id),
     }),
-    [ready, state, displayMeals, displayPlan],
+    [ready, state, displayMeals, displayPlan, displayShoppingItems],
   );
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
