@@ -14,6 +14,7 @@ import { AdSlot } from "@/components/AdSlot";
 import { toast } from "sonner";
 import { TodayPanel } from "@/components/TodayPanel";
 import { WeekActions } from "@/components/WeekActions";
+import { mealSummary } from "@/lib/meal-summary";
 import { agendaSummary } from "@/lib/agenda-overview";
 
 export const Route = createFileRoute("/")({
@@ -105,8 +106,7 @@ function MinhaSemana() {
   };
 
   const resumo = useMemo(() => {
-    const cost = blocks.reduce((sum, b) => sum + (getMeal(b.mealId)?.cost ?? 0), 0);
-    const kcal = blocks.reduce((sum, b) => sum + (getMeal(b.mealId)?.macros.kcal ?? 0), 0);
+    const { cost, kcal } = mealSummary(blocks, getMeal);
     return { cost, kcal, done: blocks.filter((b) => b.done).length };
   }, [blocks, getMeal]);
 
@@ -118,7 +118,7 @@ function MinhaSemana() {
       done: summary.completed,
       treinos: summary.workouts,
       refeicoes: summary.meals,
-      semanaCusto: all.reduce((s, b) => s + (getMeal(b.mealId)?.cost ?? 0), 0),
+      semanaCusto: mealSummary(all, getMeal).cost,
     };
   }, [getMeal, plan, weekKeys]);
 
@@ -343,8 +343,8 @@ function MinhaSemana() {
           </section>
 
           <aside className="space-y-5 lg:col-span-5">
-            <div aria-label="Progresso da semana" className="glass-strong rounded-2xl p-5 ring-1 ring-black/5">
-              <div className="flex items-center justify-between">
+            <div aria-label="Progresso da semana" className="glass-strong h-auto min-h-fit rounded-2xl p-5 pb-6 ring-1 ring-black/5">
+              <div className="flex flex-wrap items-center justify-between gap-2">
                 <h2 className="font-display text-lg font-semibold tracking-tight">Progresso da semana</h2>
                  <span className="text-xs text-steel">{formatWeekRange(selectedDate)}</span>
               </div>
@@ -364,7 +364,7 @@ function MinhaSemana() {
                 <div className="rounded-xl bg-white/50 p-3 ring-1 ring-black/5">
                   <p className="text-[11px] uppercase tracking-[0.14em] text-steel">Kcal do dia</p>
                   <p className={resumo.kcal > 0 ? "mt-1 font-display text-2xl font-semibold" : "mt-1 text-sm text-steel"}>{resumo.kcal || "Planeje uma refeição"}</p>
-                  <p className="mt-1 text-[11px] text-steel">estimativa das refeições</p>
+                  <p className="mt-1 break-words pb-1 text-[11px] leading-5 text-steel">estimativa das refeições</p>
                 </div>
                 <div className="rounded-xl bg-white/50 p-3 ring-1 ring-black/5">
                   <p className="text-[11px] uppercase tracking-[0.14em] text-steel">Refeições</p>

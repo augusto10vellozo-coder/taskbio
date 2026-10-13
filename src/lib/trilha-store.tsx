@@ -21,6 +21,7 @@ import { addDays, isAfter, isWeekend, parseISO } from "date-fns";
 import { normalizePlan, toDateKey } from "./calendar-utils";
 import { emptyHealth, type Habit, type HabitLog, type HealthLog, type MonthGoal } from "./engagement";
 import type { ModuleSettings } from "./modules";
+import { foodName } from "./meal-summary";
 import type { ExerciseLogEntry } from "./training";
 
 export type TaskBioState = {
@@ -133,9 +134,15 @@ export function TaskBioProvider({ children }: { children: ReactNode }) {
     }
   }, [ready, state]);
 
+  const displayMeals = useMemo(() => state.meals.map((meal) => ({ ...meal, name: foodName(meal.name), items: foodName(meal.items), ingredients: meal.ingredients.map((item) => ({ ...item, name: foodName(item.name) })) })), [state.meals]);
+  const displayPlan = useMemo(() => Object.fromEntries(Object.entries(state.plan).map(([date, blocks]) => [date, blocks.map((b) => b.kind === "refeicao" ? { ...b, title: foodName(b.title) } : b)])), [state.plan]);
+  const displayShoppingItems = useMemo(() => state.shoppingItems.map((item) => ({ ...item, name: foodName(item.name) })), [state.shoppingItems]);
   const value = useMemo<Store>(
     () => ({
       ...state,
+      meals: displayMeals,
+      plan: displayPlan,
+      shoppingItems: displayShoppingItems,
       ready,
       hydrate: (nextState) => setState((current) => ({
         ...current,
@@ -256,9 +263,9 @@ export function TaskBioProvider({ children }: { children: ReactNode }) {
       setHealth: (fn) => setState((s) => ({ ...s, health: fn({ ...emptyHealth, ...s.health }) })),
       setModule: (id, on) => setState((s) => ({ ...s, modules: { ...s.modules, [id]: on } })),
       getWorkout: (id) => state.workouts.find((w) => w.id === id),
-      getMeal: (id) => state.meals.find((m) => m.id === id),
+      getMeal: (id) => displayMeals.find((m) => m.id === id),
     }),
-    [ready, state],
+    [ready, state, displayMeals, displayPlan, displayShoppingItems],
   );
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
