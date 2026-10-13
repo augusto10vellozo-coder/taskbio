@@ -12,6 +12,7 @@ import { useAuth } from "@/lib/auth-context";
 import { formatFullDate, formatWeekRange, getWeekDates, toDateKey } from "@/lib/calendar-utils";
 import { AdSlot } from "@/components/AdSlot";
 import { toast } from "sonner";
+import { TodayPanel } from "@/components/TodayPanel";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -127,6 +128,7 @@ function MinhaSemana() {
   return (
     <>
       <main className="mx-auto max-w-6xl px-5 pb-20 sm:px-8">
+        <TodayPanel />
         <section className="pt-8 pb-4">
           {!user && <div className="mb-5 flex flex-wrap items-center justify-between gap-2 border-b border-line pb-3 text-sm text-steel"><span>Entre para salvar sua agenda e acessá-la em outros dispositivos.</span><Button asChild variant="outline" size="sm"><Link to="/auth">Entrar e sincronizar <ArrowRight /></Link></Button></div>}
           {installPrompt && !installed && <div className="mb-5 flex items-center justify-between gap-3 border-b border-line pb-3 text-sm"><span>Instalar TaskBio neste aparelho</span><Button variant="outline" size="sm" onClick={async () => { const prompt = installPrompt as Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: string }> }; await prompt.prompt(); await prompt.userChoice; setInstallPrompt(null); }}>Instalar</Button></div>}
