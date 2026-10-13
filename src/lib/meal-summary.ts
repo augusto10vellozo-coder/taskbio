@@ -41,3 +41,10 @@ export function foodName(value: string) {
     return word[0] === word[0]?.toLocaleUpperCase("pt-BR") ? corrected.charAt(0).toLocaleUpperCase("pt-BR") + corrected.slice(1) : corrected;
   });
 }
+type ItemMacros = { macros: { kcal: number; prot: number; carb: number; gord: number } };
+const r1 = (n: number) => Math.round(n * 10) / 10;
+/** Sums a meal's items; a manual total kcal (when provided) overrides the summed kcal. */
+export function mealItemsTotal(items: ItemMacros[], kcalOverride?: number) {
+  const sum = items.reduce((t, i) => ({ kcal: t.kcal + i.macros.kcal, prot: t.prot + i.macros.prot, carb: t.carb + i.macros.carb, gord: t.gord + i.macros.gord }), { kcal: 0, prot: 0, carb: 0, gord: 0 });
+  return { kcal: kcalOverride && kcalOverride > 0 ? kcalOverride : Math.round(sum.kcal), prot: r1(sum.prot), carb: r1(sum.carb), gord: r1(sum.gord) };
+}
