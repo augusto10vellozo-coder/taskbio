@@ -1,4 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { TrainingExplore, useScheduleWorkout } from "@/components/TrainingExplore";
 import { useEffect, useMemo, useState } from "react";
 import { addDays, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -25,38 +26,54 @@ export const Route = createFileRoute("/treino")({
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary_large_image" },
   ] }),
+  validateSearch: (search: Record<string, unknown>): { aba?: "explorar" } => (search["aba"] === "explorar" ? { aba: "explorar" } : {}),
   component: Treino,
 });
 
 const DAY_ORDER = ["seg", "ter", "qua", "qui", "sex", "sab", "dom"] as const;
 
 function Treino() {
+  const { aba } = Route.useSearch();
+  const navigate = useNavigate({ from: "/treino" });
+  const tab = aba === "explorar" ? "explorar" : "semana";
+  return (
+    <main className="mx-auto max-w-6xl px-5 pb-20 sm:px-8">
+      <section className="pt-8 pb-4"><p className="text-xs font-medium uppercase tracking-[0.18em] text-steel">Treino</p>
+        <div role="tablist" aria-label="Seções do treino" className="mt-3 inline-flex rounded-lg bg-mist p-1 text-sm">
+          {([["semana", "Minha semana"], ["explorar", "Explorar e criar"]] as const).map(([id, label]) => <button key={id} role="tab" aria-selected={tab === id} onClick={() => navigate({ search: id === "explorar" ? { aba: "explorar" } : {}, replace: true })} className={`rounded-md px-3 py-1.5 font-medium ${tab === id ? "bg-ink text-white" : "text-steel"}`}>{label}</button>)}
+        </div>
+      </section>
+      {tab === "semana" ? <WeekTab onExplore={() => navigate({ search: { aba: "explorar" } })} /> : <TrainingExplore />}
+    </main>
+  );
+}
+
+function WeekTab({ onExplore }: { onExplore: () => void }) {
   const store = useTaskBio();
-  const { plan, workouts, addWorkout, replaceDays, toggleBlock, removeBlock } = store;
+  const { plan, workouts, addWorkout, toggleBlock, removeBlock } = store;
+  const models = workouts.filter((w) => !w.templateId);
+  const schedule = useScheduleWorkout();
   const [ref, setRef] = useState<Date | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
   const [importing, setImporting] = useState(false);
   useEffect(() => { const d = new Date(); setRef(d); setSelected(toDateKey(d)); }, []);
-  if (!ref || !selected) return <main className="mx-auto max-w-5xl px-5 pt-8"><div className="h-60 animate-pulse rounded-lg bg-mist" /></main>;
+  if (!ref || !selected) return <div className="h-60 animate-pulse rounded-lg bg-mist" />;
 
   const week = getWeekDates(ref);
   const blockOf = (k: string) => (plan[k] ?? []).find((b) => b.kind === "treino");
   const selBlock = blockOf(selected);
   const selWorkout = selBlock?.workoutId ? workouts.find((w) => w.id === selBlock.workoutId) : undefined;
 
-  const assign = (dateKey: string, workout: Workout) => {
-    const block: Block = { id: `b-${Date.now()}-${dateKey}`, time: "07:00", kind: "treino", title: workout.name, done: false, workoutId: workout.id };
-    replaceDays({ [dateKey]: [...(plan[dateKey] ?? []).filter((b) => b.kind !== "treino"), block].sort((a, b) => a.time.localeCompare(b.time)) });
-  };
+  const assign = (dateKey: string, workout: Workout) => schedule(dateKey, workout);
   const createAndAssign = (dateKey: string, name: string) => {
     const w: Workout = { id: `w-${Date.now()}`, name, focus: "", modality: "Academia", exercises: [] };
     addWorkout(w); assign(dateKey, w); toast.success("Treino adicionado ao dia");
   };
 
   return (
-    <main className="mx-auto max-w-5xl px-5 pb-20 sm:px-8">
-      <section className="flex flex-wrap items-end justify-between gap-3 pt-8 pb-5">
-        <div><p className="text-xs font-medium uppercase tracking-[0.18em] text-steel">Treino</p><h1 className="mt-2 font-display text-3xl font-semibold sm:text-4xl">Plano da semana</h1><p className="mt-2 text-sm text-steel">Toque no dia para ver o treino. O círculo marca o treino como concluído.</p></div>
+    <div>
+      <section className="flex flex-wrap items-end justify-between gap-3 pb-5">
+        <div><h1 className="font-display text-3xl font-semibold sm:text-4xl">Plano da semana</h1><p className="mt-2 text-sm text-steel">Toque no dia para ver o treino. O círculo marca o treino como concluído.</p></div>
         <Button variant="outline" onClick={() => setImporting(true)}><FileUp /> Importar plano</Button>
       </section>
 
@@ -71,13 +88,13 @@ function Treino() {
 
       <section className="mt-5 rounded-lg bg-card p-5 ring-1 ring-line">
         <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="font-display text-xl font-semibold capitalize">{format(new Date(`${selected}T12:00:00`), "EEEE, d 'de' MMMM", { locale: ptBR })}</h2>{selBlock && <Button variant="ghost" size="sm" onClick={() => removeBlock(selected, selBlock.id)}><X /> Tirar do dia</Button>}</div>
-        {!selBlock ? <AssignForm workouts={workouts} onPick={(w) => { assign(selected, w); toast.success("Treino adicionado ao dia"); }} onCreate={(n) => createAndAssign(selected, n)} />
-          : !selWorkout ? <p className="mt-3 text-sm text-steel">Este treino foi criado na agenda sem exercícios. Escolha um treino abaixo para registrar exercícios.<AssignForm workouts={workouts} onPick={(w) => assign(selected, w)} onCreate={(n) => createAndAssign(selected, n)} /></p>
+        {!selBlock ? <AssignForm workouts={models} onPick={(w) => { assign(selected, w); toast.success("Treino adicionado ao dia"); }} onCreate={(n) => createAndAssign(selected, n)} />
+          : !selWorkout ? <p className="mt-3 text-sm text-steel">Este treino foi criado na agenda sem exercícios. Escolha um treino abaixo para registrar exercícios.<AssignForm workouts={models} onPick={(w) => assign(selected, w)} onCreate={(n) => createAndAssign(selected, n)} /></p>
           : <WorkoutDetail workout={selWorkout} dateKey={selected} />}
       </section>
-      <p className="mt-4 text-xs leading-5 text-steel">Os registros servem para acompanhamento pessoal e não substituem a orientação de um profissional de educação física. Para criar treinos com detalhes de execução, use também <Link to="/atividades" className="underline">Atividades</Link>.</p>
+      <p className="mt-4 text-xs leading-5 text-steel">Os registros servem para acompanhamento pessoal e não substituem a orientação de um profissional de educação física. Para montar modelos e ver exemplos, use <button type="button" onClick={onExplore} className="underline">Explorar e criar</button>.</p>
       <ImportDialog open={importing} onOpenChange={setImporting} week={week} onAssign={assign} />
-    </main>
+    </div>
   );
 }
 
