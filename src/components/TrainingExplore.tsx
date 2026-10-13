@@ -336,6 +336,8 @@ function formatTime(totalSeconds: number) {
 }
 
 
+type Row = { name: string; sets: string; reps: string; rest: string };
+
 function NewWorkoutForm({ onCreate }: { onCreate: (w: Workout) => void }) {
   const [name, setName] = useState("");
   const [focus, setFocus] = useState("");
