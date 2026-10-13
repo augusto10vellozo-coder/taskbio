@@ -2,12 +2,16 @@ import { useEffect, useRef, useState } from "react";
 import { parseISO, setHours, setMinutes, subMinutes } from "date-fns";
 import { useTaskBio } from "@/lib/trilha-store";
 import { addDays, format } from "date-fns";
+import { isActiveDay } from "@/lib/engagement";
+import { toDateKey } from "@/lib/calendar-utils";
 import { defaultReminderPreferences, readReminderPreferences, reminderPreferencesEvent, type ReminderPreferences } from "@/lib/reminder-preferences";
 
 const MAX_DELAY = 24 * 60 * 60 * 1000;
 
 export function ReminderManager() {
-  const { plan } = useTaskBio();
+  const { plan, habitLog, habits } = useTaskBio();
+  const latest = useRef({ plan, habitLog, habits });
+  latest.current = { plan, habitLog, habits };
   const timers = useRef<number[]>([]);
   const [preferences, setPreferences] = useState<ReminderPreferences>(defaultReminderPreferences);
 
@@ -45,6 +49,17 @@ export function ReminderManager() {
       const delay = reminderTime.getTime() - now.getTime();
       timers.current.push(window.setTimeout(() => {
         new Notification("Planeje o dia seguinte", { body: `Organize sua agenda de ${format(tomorrow, "dd/MM")} no TaskBio.` });
+      }, delay));
+    }
+
+    if (preferences.streakEnabled) {
+      const [hour = 21, minute = 0] = preferences.streakTime.split(":").map(Number);
+      const fireAt = setMinutes(setHours(now, hour), minute);
+      const delay = fireAt.getTime() - now.getTime();
+      if (delay > 0) timers.current.push(window.setTimeout(() => {
+        const s = latest.current;
+        if (isActiveDay(s.plan, s.habitLog, toDateKey(new Date()), s.habits)) return;
+        new Notification("Mantenha sua sequência", { body: "Você ainda não marcou nada hoje. Um hábito ou tarefa concluída já conta." });
       }, delay));
     }
 
