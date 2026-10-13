@@ -23,6 +23,7 @@ import { emptyHealth, type Habit, type HabitLog, type HealthLog, type MonthGoal 
 import type { ModuleSettings } from "./modules";
 import { foodName } from "./meal-summary";
 import type { ExerciseLogEntry } from "./training";
+import type { Food } from "./food-db";
 
 export type TaskBioState = {
   plan: Plan;
@@ -39,6 +40,7 @@ export type TaskBioState = {
   health: HealthLog;
   modules: ModuleSettings;
   exerciseLog: ExerciseLogEntry[];
+  customFoods: Food[];
 };
 
 type Store = TaskBioState & {
@@ -74,6 +76,7 @@ type Store = TaskBioState & {
   setModule: (id: keyof ModuleSettings, on: boolean) => void;
   getWorkout: (id?: string) => Workout | undefined;
   getMeal: (id?: string) => Meal | undefined;
+  addCustomFood: (food: Food) => void;
 };
 
 const initialState: TaskBioState = {
@@ -91,6 +94,7 @@ const initialState: TaskBioState = {
   health: emptyHealth,
   modules: {},
   exerciseLog: [],
+  customFoods: [],
 };
 
 const STORAGE_KEY = "trilha.state.v2";
@@ -248,6 +252,7 @@ export function TaskBioProvider({ children }: { children: ReactNode }) {
       setWeeklyGoals: (weeklyGoals) => setState((s) => ({ ...s, weeklyGoals })),
       replaceDays: (days) => setState((s) => ({ ...s, plan: { ...s.plan, ...days } })),
       clearWeek: (keys) => setState((s) => ({ ...s, plan: Object.fromEntries(Object.entries(s.plan).filter(([key]) => !keys.includes(key))) })),
+      addCustomFood: (food) => setState((s) => ({ ...s, customFoods: [food, ...(s.customFoods ?? []).filter((f) => f.id !== food.id)].slice(0, 500) })),
       addExerciseLog: (entry) => setState((s) => ({ ...s, exerciseLog: [{ ...entry, id: `x-${Date.now()}` }, ...(s.exerciseLog ?? [])].slice(0, 2000) })),
       updateWorkout: (workout) => setState((s) => ({ ...s, workouts: s.workouts.map((w) => w.id === workout.id ? workout : w) })),
       addHabit: (name) => setState((s) => ({ ...s, habits: [...s.habits, { id: `h-${Date.now()}`, name, createdAt: new Date().toISOString() }] })),
