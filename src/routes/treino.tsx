@@ -148,7 +148,7 @@ function ImportDialog({ open, onOpenChange, week, onAssign }: { open: boolean; o
 
   async function handleFile(file: File) {
     setError(null);
-    const { MAX_IMPORT_BYTES, UNREADABLE_MESSAGE, extractPlanText, isUnreadable } = await import("@/lib/plan-import.client");
+    const { MAX_IMPORT_BYTES, UNREADABLE_MESSAGE, extractPlanText, isUnreadable } = await import("@/lib/plan-import-browser");
     if (file.size > MAX_IMPORT_BYTES) { setError("O arquivo passa de 10 MB. Envie um arquivo menor."); return; }
     setStep("reading");
     try {
