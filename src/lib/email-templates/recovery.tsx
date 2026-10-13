@@ -7,6 +7,7 @@ import {
   Head,
   Heading,
   Html,
+  Link,
   Preview,
   Text,
 } from '@react-email/components'
@@ -21,23 +22,37 @@ export const RecoveryEmail = ({
   confirmationUrl,
 }: RecoveryEmailProps) => (
   <Html lang="pt-BR" dir="ltr">
-    <Head>
-      <style>{darkModeCss}</style>
-    </Head>
-    <Preview>Redefina sua senha do {siteName}</Preview>
+    <Head />
+    <Preview>Recebemos uma solicitação para redefinir a senha da sua conta {siteName}.</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Heading style={h1}>Redefinir sua senha</Heading>
+        <Heading style={h1}>{siteName}</Heading>
+        <Text style={text}>Olá,</Text>
         <Text style={text}>
-          Recebemos um pedido para redefinir a senha da sua conta {siteName}.
-          Toque no botão abaixo para escolher uma nova senha.
+          Recebemos uma solicitação para redefinir a senha da sua conta {siteName}.
         </Text>
-        <Button className="dm-btn" style={button} href={confirmationUrl}>
-          Criar nova senha
+        <Button style={button} href={confirmationUrl}>
+          Redefinir senha
         </Button>
+        <Text style={linkText}>
+          Se o botão não funcionar, copie e cole este link no navegador:{' '}
+          <Link href={confirmationUrl} style={link}>{confirmationUrl}</Link>
+        </Text>
+        <Text style={text}>
+          Este link expira em 60 minutos e pode ser usado apenas uma vez.
+        </Text>
+        <Text style={text}>
+          Não solicitou essa alteração? Ignore este e-mail — sua senha permanece
+          inalterada e nenhuma conta será afetada.
+        </Text>
+        <Text style={text}>
+          Precisa de ajuda? Fale com a gente:{' '}
+          <Link href="mailto:contatotaskbio@gmail.com" style={link}>
+            contatotaskbio@gmail.com
+          </Link>.
+        </Text>
         <Text style={footer}>
-          Se você não pediu essa alteração, ignore este e-mail. Sua senha
-          continua a mesma.
+          TaskBio — sua semana, organizada.
         </Text>
       </Container>
     </Body>
@@ -47,7 +62,7 @@ export const RecoveryEmail = ({
 export default RecoveryEmail
 
 const main = { backgroundColor: '#ffffff', fontFamily: 'Arial, sans-serif' }
-const container = { padding: '20px 25px' }
+const container = { padding: '32px 24px', maxWidth: '560px', margin: '0 auto' }
 const h1 = {
   fontSize: '22px',
   fontWeight: 'bold' as const,
@@ -69,12 +84,6 @@ const button = {
   padding: '12px 20px',
   textDecoration: 'none',
 }
-const footer = { fontSize: '12px', color: '#999999', margin: '30px 0 0' }
-// Rendered as a text child, which React may HTML-escape: keep this CSS free of >, &, and quotes.
-const darkModeCss = `
-  @media (prefers-color-scheme: dark) {
-    .dm-btn { background-color: #ffffff !important; color: #000000 !important; }
-  }
-  [data-ogsc] .dm-btn { background-color: #ffffff !important; color: #000000 !important; }
-  [data-ogsb] .dm-btn { background-color: #ffffff !important; color: #000000 !important; }
-`
+const linkText = { ...text, margin: '24px 0', overflowWrap: 'anywhere' as const, wordBreak: 'break-all' as const }
+const link = { color: '#2f5bd8', textDecoration: 'underline' }
+const footer = { fontSize: '12px', color: '#55575d', margin: '30px 0 0' }
