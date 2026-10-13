@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight, Plus, Trash2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Flame, Plus, Trash2 } from "lucide-react";
 import { addDays, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
@@ -23,7 +23,7 @@ export const Route = createFileRoute("/habitos")({
 });
 
 function Habitos() {
-  const { habits, habitLog, addHabit, removeHabit, toggleHabit } = useTaskBio();
+  const { habits, habitLog, addHabit, removeHabit, toggleHabit, toggleHabitStreak } = useTaskBio();
   const [ref, setRef] = useState<Date | null>(null);
   const [name, setName] = useState("");
   useEffect(() => setRef(new Date()), []);
@@ -34,7 +34,7 @@ function Habitos() {
 
   return (
     <main className="mx-auto max-w-4xl px-5 pb-20 sm:px-8">
-      <section className="pt-8 pb-5"><p className="text-xs font-medium uppercase tracking-[0.18em] text-steel">Hábitos</p><h1 className="mt-2 font-display text-3xl font-semibold sm:text-4xl">Tabela da semana</h1><p className="mt-2 text-sm text-steel">Toque na célula para marcar ou desmarcar o hábito do dia.</p></section>
+      <section className="pt-8 pb-5"><p className="text-xs font-medium uppercase tracking-[0.18em] text-steel">Hábitos</p><h1 className="mt-2 font-display text-3xl font-semibold sm:text-4xl">Tabela da semana</h1><p className="mt-2 text-sm text-steel">Toque na célula para marcar ou desmarcar o hábito do dia. A chama ao lado do nome indica se o hábito conta para a sequência de dias.</p></section>
       <form className="mb-4 flex gap-2" onSubmit={(e) => { e.preventDefault(); if (!name.trim()) return; addHabit(name.trim()); setName(""); toast.success("Hábito criado"); }}>
         <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Novo hábito (ex.: beber água, ler 10 páginas)" className="h-10 flex-1 rounded-md bg-background px-3 text-sm ring-1 ring-line" />
         <Button><Plus /> Adicionar</Button>
@@ -45,7 +45,7 @@ function Habitos() {
           <table className="w-full min-w-[520px] text-sm">
             <thead><tr><th className="text-left font-medium text-steel">Hábito</th>{week.map((d) => <th key={d.toISOString()} className="w-12 text-center text-xs font-medium capitalize text-steel">{format(d, "EEEEEE", { locale: ptBR })}<br />{format(d, "d")}</th>)}<th className="w-8" /></tr></thead>
             <tbody>{habits.map((h) => <tr key={h.id} className="border-t border-line">
-              <td className="py-2 pr-2">{h.name}</td>
+              <td className="py-2 pr-2"><span className="flex items-center gap-1.5">{h.name}<button type="button" onClick={() => { toggleHabitStreak(h.id); toast.success(h.countsForStreak === false ? "Agora conta para a sequência" : "Não conta mais para a sequência"); }} aria-pressed={h.countsForStreak !== false} aria-label={`${h.name}: ${h.countsForStreak === false ? "não conta" : "conta"} para a sequência de dias`} title={h.countsForStreak === false ? "Não conta para a sequência — toque para incluir" : "Conta para a sequência — toque para excluir"} className="rounded p-0.5"><Flame className={`size-4 ${h.countsForStreak === false ? "text-steel opacity-40" : "text-brand"}`} /></button></span></td>
               {week.map((d) => { const k = toDateKey(d); const on = (habitLog[k] ?? []).includes(h.id); return <td key={k} className="text-center"><button aria-label={`${h.name} em ${format(d, "d/MM")}`} className="inline-grid p-1" onClick={() => toggleHabit(k, h.id)}><Tick on={on} /></button></td>; })}
               <td><Button variant="ghost" size="icon" className="size-7" aria-label={`Remover ${h.name}`} onClick={() => { if (window.confirm(`Remover o hábito "${h.name}"?`)) removeHabit(h.id); }}><Trash2 /></Button></td>
             </tr>)}</tbody>

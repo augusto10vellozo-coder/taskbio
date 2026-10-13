@@ -61,6 +61,7 @@ type Store = TaskBioState & {
   clearWeek: (keys: string[]) => void;
   addHabit: (name: string) => void;
   removeHabit: (id: string) => void;
+  toggleHabitStreak: (id: string) => void;
   toggleHabit: (date: string, id: string) => void;
   saveMonthGoal: (goal: MonthGoal) => void;
   removeMonthGoal: (id: string) => void;
@@ -236,6 +237,7 @@ export function TaskBioProvider({ children }: { children: ReactNode }) {
       replaceDays: (days) => setState((s) => ({ ...s, plan: { ...s.plan, ...days } })),
       clearWeek: (keys) => setState((s) => ({ ...s, plan: Object.fromEntries(Object.entries(s.plan).filter(([key]) => !keys.includes(key))) })),
       addHabit: (name) => setState((s) => ({ ...s, habits: [...s.habits, { id: `h-${Date.now()}`, name, createdAt: new Date().toISOString() }] })),
+      toggleHabitStreak: (id) => setState((s) => ({ ...s, habits: s.habits.map((h) => h.id === id ? { ...h, countsForStreak: h.countsForStreak === false } : h) })),
       removeHabit: (id) => setState((s) => ({ ...s, habits: s.habits.filter((h) => h.id !== id) })),
       toggleHabit: (date, id) => setState((s) => {
         const cur = s.habitLog[date] ?? [];

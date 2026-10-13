@@ -3,6 +3,8 @@ export type ReminderPreferences = {
   dailyEnabled: boolean;
   dailyTime: string;
   workoutEnabled: boolean;
+  streakEnabled: boolean;
+  streakTime: string;
 };
 
 export const reminderStorageKey = "trilha:reminder-preferences";
@@ -12,6 +14,8 @@ export const defaultReminderPreferences: ReminderPreferences = {
   dailyEnabled: true,
   dailyTime: "20:00",
   workoutEnabled: true,
+  streakEnabled: true,
+  streakTime: "21:00",
 };
 
 export function readReminderPreferences() {

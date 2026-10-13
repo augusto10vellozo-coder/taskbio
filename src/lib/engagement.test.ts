@@ -23,6 +23,12 @@ describe("engagement", () => {
   it("streak continues from yesterday when today is empty", () => {
     expect(streak({}, { "2026-10-12": ["h"] }, new Date("2026-10-13T12:00:00"))).toBe(1);
   });
+  it("habits excluded from the streak do not count", () => {
+    const habits = [{ id: "a", name: "A", createdAt: "", countsForStreak: false }, { id: "b", name: "B", createdAt: "" }];
+    const today = new Date("2026-10-13T12:00:00");
+    expect(streak({}, { "2026-10-13": ["a"] }, today, habits)).toBe(0);
+    expect(streak({}, { "2026-10-13": ["b"] }, today, habits)).toBe(1);
+  });
   it("milestones at 7, 14 and 30", () => {
     expect([7, 14, 30].every(isMilestone)).toBe(true);
     expect(isMilestone(8)).toBe(false);

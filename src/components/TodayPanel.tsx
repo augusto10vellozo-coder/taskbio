@@ -16,7 +16,7 @@ export function TodayPanel() {
   const today = now ? toDateKey(now) : "";
   const blocks = useMemo(() => [...(plan[today] ?? [])].sort((a, b) => a.time.localeCompare(b.time)), [plan, today]);
   const score = now ? dayScore(plan, habits, habitLog, today) : 0;
-  const days = now ? streak(plan, habitLog, now) : 0;
+  const days = now ? streak(plan, habitLog, now, habits) : 0;
   const habitsOn = isModuleOn(modules, "habitos");
 
   useEffect(() => {

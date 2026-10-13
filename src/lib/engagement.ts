@@ -1,7 +1,8 @@
 import { addDays, format, parseISO } from "date-fns";
 import type { Plan, WorkoutHistoryEntry } from "./trilha-data";
 
-export type Habit = { id: string; name: string; createdAt: string };
+/** countsForStreak defaults to true when missing. */
+export type Habit = { id: string; name: string; createdAt: string; countsForStreak?: boolean };
 /** dateKey -> ids of habits marked on that day */
 export type HabitLog = Record<string, string[]>;
 export type MonthGoal = {
@@ -40,15 +41,16 @@ export function dayScore(plan: Plan, habits: Habit[], log: HabitLog, dateKey: st
   return Math.round((done / total) * 100);
 }
 
-export function isActiveDay(plan: Plan, log: HabitLog, dateKey: string) {
-  return (plan[dateKey] ?? []).some((b) => b.done) || (log[dateKey] ?? []).length > 0;
+export function isActiveDay(plan: Plan, log: HabitLog, dateKey: string, habits?: Habit[]) {
+  const excluded = new Set((habits ?? []).filter((h) => h.countsForStreak === false).map((h) => h.id));
+  return (plan[dateKey] ?? []).some((b) => b.done) || (log[dateKey] ?? []).some((id) => !excluded.has(id));
 }
 
 /** Consecutive active days ending today (or yesterday, if today has nothing yet). */
-export function streak(plan: Plan, log: HabitLog, today: Date) {
-  let cursor = isActiveDay(plan, log, key(today)) ? today : addDays(today, -1);
+export function streak(plan: Plan, log: HabitLog, today: Date, habits?: Habit[]) {
+  let cursor = isActiveDay(plan, log, key(today), habits) ? today : addDays(today, -1);
   let count = 0;
-  while (isActiveDay(plan, log, key(cursor)) && count < 3650) {
+  while (isActiveDay(plan, log, key(cursor), habits) && count < 3650) {
     count += 1;
     cursor = addDays(cursor, -1);
   }
