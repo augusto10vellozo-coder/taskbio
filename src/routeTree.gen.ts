@@ -27,6 +27,7 @@ import { Route as RotinaRouteImport } from './routes/rotina'
 import { Route as SaudeRouteImport } from './routes/saude'
 import { Route as SobreRouteImport } from './routes/sobre'
 import { Route as TermosRouteImport } from './routes/termos'
+import { Route as TreinoRouteImport } from './routes/treino'
 import { Route as AuthenticatedEquipeRouteImport } from './routes/_authenticated/equipe'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
 import { Route as AuthenticatedProfissionalRouteImport } from './routes/_authenticated/profissional'
@@ -122,6 +123,11 @@ const TermosRoute = TermosRouteImport.update({
   path: '/termos',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TreinoRoute = TreinoRouteImport.update({
+  id: '/treino',
+  path: '/treino',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedEquipeRoute = AuthenticatedEquipeRouteImport.update({
   id: '/equipe',
   path: '/equipe',
@@ -167,6 +173,7 @@ export interface FileRoutesByFullPath {
   '/saude': typeof SaudeRoute
   '/sobre': typeof SobreRoute
   '/termos': typeof TermosRoute
+  '/treino': typeof TreinoRoute
   '/equipe': typeof AuthenticatedEquipeRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/profissional': typeof AuthenticatedProfissionalRoute
@@ -191,6 +198,7 @@ export interface FileRoutesByTo {
   '/saude': typeof SaudeRoute
   '/sobre': typeof SobreRoute
   '/termos': typeof TermosRoute
+  '/treino': typeof TreinoRoute
   '/equipe': typeof AuthenticatedEquipeRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/profissional': typeof AuthenticatedProfissionalRoute
@@ -217,6 +225,7 @@ export interface FileRoutesById {
   '/saude': typeof SaudeRoute
   '/sobre': typeof SobreRoute
   '/termos': typeof TermosRoute
+  '/treino': typeof TreinoRoute
   '/_authenticated/equipe': typeof AuthenticatedEquipeRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
   '/_authenticated/profissional': typeof AuthenticatedProfissionalRoute
@@ -243,6 +252,7 @@ export interface FileRouteTypes {
     | '/saude'
     | '/sobre'
     | '/termos'
+    | '/treino'
     | '/equipe'
     | '/perfil'
     | '/profissional'
@@ -267,6 +277,7 @@ export interface FileRouteTypes {
     | '/saude'
     | '/sobre'
     | '/termos'
+    | '/treino'
     | '/equipe'
     | '/perfil'
     | '/profissional'
@@ -292,6 +303,7 @@ export interface FileRouteTypes {
     | '/saude'
     | '/sobre'
     | '/termos'
+    | '/treino'
     | '/_authenticated/equipe'
     | '/_authenticated/perfil'
     | '/_authenticated/profissional'
@@ -318,6 +330,7 @@ export interface RootRouteChildren {
   SaudeRoute: typeof SaudeRoute
   SobreRoute: typeof SobreRoute
   TermosRoute: typeof TermosRoute
+  TreinoRoute: typeof TreinoRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
 }
@@ -450,6 +463,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TermosRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/treino': {
+      id: '/treino'
+      path: '/treino'
+      fullPath: '/treino'
+      preLoaderRoute: typeof TreinoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/equipe': {
       id: '/_authenticated/equipe'
       path: '/equipe'
@@ -522,6 +542,7 @@ const rootRouteChildren: RootRouteChildren = {
   SaudeRoute: SaudeRoute,
   SobreRoute: SobreRoute,
   TermosRoute: TermosRoute,
+  TreinoRoute: TreinoRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
 }

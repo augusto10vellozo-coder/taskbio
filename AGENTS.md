@@ -27,3 +27,4 @@ Shared app navigation lives in AppHeader with desktop links and a horizontally s
 
 All copy a visitor can see stays in Brazilian Portuguese, and authentication failures are surfaced through the shared pt-BR message helper instead of the backend's raw text, so no English reaches users on any screen.
 - Optional app modules are declared in src/lib/modules.ts; nav, home shortcuts and settings read that registry so new modules need no refactor.
+- Workout plan import extracts text in the browser (PDF/DOCX/XLSX/CSV) and sends only text to an authenticated server function that calls the AI model; files never leave the device.
