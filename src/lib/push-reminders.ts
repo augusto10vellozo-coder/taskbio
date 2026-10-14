@@ -6,7 +6,7 @@ export function reminderLeadMinutes(block: ReminderBlock): number | undefined {
   if (block.reminderMinutes) return block.reminderMinutes;
   if (block.kind === "treino") return 30;
   if (block.kind === "refeicao") return undefined;
-  return 15;
+  return 5;
 }
 
 function localWallClock(now: Date, timeZone: string) {
