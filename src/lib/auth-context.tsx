@@ -28,10 +28,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let active = true;
-    supabase.auth.getUser().then(({ data }) => {
+    // Restore the saved session first so reopening the app keeps the person signed in,
+    // even when the network is slow right after the phone wakes the app.
+    supabase.auth.getSession().then(async ({ data: sessionData }) => {
       if (!active) return;
-      setUser(data.user ?? null);
+      const saved = sessionData.session?.user ?? null;
+      setUser(saved);
       setLoading(false);
+      if (!saved) return;
+      const { data, error } = await supabase.auth.getUser();
+      if (!active) return;
+      if (data.user) setUser(data.user);
+      else if (error && (error.status === 401 || error.status === 403)) setUser(null);
     });
 
     const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
