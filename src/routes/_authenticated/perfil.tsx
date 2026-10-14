@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { GOALS } from "@/lib/trilha-data";
 import { useTaskBio } from "@/lib/trilha-store";
 import { deleteMyAccount } from "@/lib/account.functions";
+import { disableServerPush, enableServerPush, type PushResult } from "@/lib/push-client";
 
 export const Route = createFileRoute("/_authenticated/perfil")({
   head: () => ({ meta: [

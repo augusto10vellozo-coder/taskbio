@@ -14,7 +14,7 @@ function localWallClock(now: Date, timeZone: string) {
     new Intl.DateTimeFormat("en-CA", { timeZone, year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" })
       .formatToParts(now).map((p) => [p.type, p.value]),
   );
-  return Date.UTC(+parts.year!, +parts.month! - 1, +parts.day!, +parts.hour!, +parts.minute!);
+  return Date.UTC(+parts["year"]!, +parts["month"]! - 1, +parts["day"]!, +parts["hour"]!, +parts["minute"]!);
 }
 
 const dayKey = (ms: number) => new Date(ms).toISOString().slice(0, 10);
