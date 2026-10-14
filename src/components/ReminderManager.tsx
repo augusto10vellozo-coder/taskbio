@@ -29,7 +29,7 @@ export function ReminderManager() {
 
     const now = new Date();
     Object.entries(plan).forEach(([dateKey, blocks]) => blocks.forEach((block) => {
-       const reminderMinutes = block.reminderMinutes ?? (block.kind === "treino" ? (preferences.workoutEnabled ? 30 : undefined) : 15);
+       const reminderMinutes = block.reminderMinutes ?? (block.kind === "treino" ? (preferences.workoutEnabled ? 30 : undefined) : block.kind === "refeicao" ? undefined : 15);
        if (!reminderMinutes || block.done || (block.kind === "treino" && !preferences.workoutEnabled)) return;
       const [hour = 0, minute = 0] = block.time.split(":").map(Number);
       const eventTime = setMinutes(setHours(parseISO(dateKey), hour), minute);
