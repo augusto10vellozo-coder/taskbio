@@ -179,6 +179,69 @@ export type Database = {
         }
         Relationships: []
       }
+      push_cron_token: {
+        Row: {
+          id: number
+          token: string
+        }
+        Insert: {
+          id?: number
+          token?: string
+        }
+        Update: {
+          id?: number
+          token?: string
+        }
+        Relationships: []
+      }
+      push_sent: {
+        Row: {
+          reminder_key: string
+          sent_at: string
+          user_id: string
+        }
+        Insert: {
+          reminder_key: string
+          sent_at?: string
+          user_id: string
+        }
+        Update: {
+          reminder_key?: string
+          sent_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      push_subscriptions: {
+        Row: {
+          auth: string
+          created_at: string
+          endpoint: string
+          id: string
+          p256dh: string
+          timezone: string
+          user_id: string
+        }
+        Insert: {
+          auth: string
+          created_at?: string
+          endpoint: string
+          id?: string
+          p256dh: string
+          timezone?: string
+          user_id: string
+        }
+        Update: {
+          auth?: string
+          created_at?: string
+          endpoint?: string
+          id?: string
+          p256dh?: string
+          timezone?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_data: {
         Row: {
           created_at: string

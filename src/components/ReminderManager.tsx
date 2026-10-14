@@ -13,6 +13,10 @@ export function ReminderManager() {
   const latest = useRef({ plan, habitLog, habits });
   latest.current = { plan, habitLog, habits };
   const timers = useRef<number[]>([]);
+  const [serverPush, setServerPush] = useState(false);
+  useEffect(() => {
+    navigator.serviceWorker?.getRegistration("/push-sw.js").then((r) => r?.pushManager.getSubscription()).then((sub) => setServerPush(!!sub)).catch(() => {});
+  }, []);
   const [preferences, setPreferences] = useState<ReminderPreferences>(defaultReminderPreferences);
 
   useEffect(() => {
@@ -28,7 +32,7 @@ export function ReminderManager() {
     if (!preferences.enabled || !("Notification" in window) || Notification.permission !== "granted") return;
 
     const now = new Date();
-    Object.entries(plan).forEach(([dateKey, blocks]) => blocks.forEach((block) => {
+    if (!serverPush) Object.entries(plan).forEach(([dateKey, blocks]) => blocks.forEach((block) => {
        const reminderMinutes = block.reminderMinutes ?? (block.kind === "treino" ? (preferences.workoutEnabled ? 30 : undefined) : block.kind === "refeicao" ? undefined : 15);
        if (!reminderMinutes || block.done || (block.kind === "treino" && !preferences.workoutEnabled)) return;
       const [hour = 0, minute = 0] = block.time.split(":").map(Number);
@@ -64,7 +68,7 @@ export function ReminderManager() {
     }
 
     return () => timers.current.forEach(window.clearTimeout);
-  }, [plan, preferences]);
+  }, [plan, preferences, serverPush]);
 
   return null;
 }
