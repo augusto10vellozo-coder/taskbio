@@ -19,7 +19,7 @@ function localWallClock(now: Date, timeZone: string) {
 
 const dayKey = (ms: number) => new Date(ms).toISOString().slice(0, 10);
 
-/** Reminders whose lead time falls inside the current minute (window of 2 minutes tolerates a missed run). */
+/** Reminders whose lead time falls inside the current window (cron runs every 5 minutes, so allow up to 5 minutes of delay). */
 export function dueReminders(plan: unknown, timeZone: string, now: Date): DueReminder[] {
   if (!plan || typeof plan !== "object") return [];
   let nowMs: number;
@@ -37,7 +37,7 @@ export function dueReminders(plan: unknown, timeZone: string, now: Date): DueRem
       if (Number.isNaN(h) || Number.isNaN(m)) continue;
       const [y, mo, d] = date.split("-").map(Number);
       const diff = (Date.UTC(y!, mo! - 1, d!, h!, m!) - nowMs) / 60000;
-      if (diff > lead - 2 && diff <= lead) {
+      if (diff <= lead && diff > -5) {
         result.push({ key: `${date}|${raw.id}|${lead}`, title: String(raw.title).slice(0, 120), body: `Começa às ${raw.time}.`, url: "/" });
       }
     }
