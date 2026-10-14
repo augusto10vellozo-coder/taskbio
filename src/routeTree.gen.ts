@@ -31,6 +31,7 @@ import { Route as TreinoRouteImport } from './routes/treino'
 import { Route as AuthenticatedEquipeRouteImport } from './routes/_authenticated/equipe'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
 import { Route as AuthenticatedProfissionalRouteImport } from './routes/_authenticated/profissional'
+import { Route as ApiPublicPushRemindersRouteImport } from './routes/api/public/push-reminders'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 
@@ -144,6 +145,11 @@ const AuthenticatedProfissionalRoute =
     path: '/profissional',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ApiPublicPushRemindersRoute = ApiPublicPushRemindersRouteImport.update({
+  id: '/api/public/push-reminders',
+  path: '/api/public/push-reminders',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
   id: '/lovable/email/auth/preview',
   path: '/lovable/email/auth/preview',
@@ -177,6 +183,7 @@ export interface FileRoutesByFullPath {
   '/equipe': typeof AuthenticatedEquipeRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/profissional': typeof AuthenticatedProfissionalRoute
+  '/api/public/push-reminders': typeof ApiPublicPushRemindersRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
 }
@@ -202,6 +209,7 @@ export interface FileRoutesByTo {
   '/equipe': typeof AuthenticatedEquipeRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/profissional': typeof AuthenticatedProfissionalRoute
+  '/api/public/push-reminders': typeof ApiPublicPushRemindersRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
 }
@@ -229,6 +237,7 @@ export interface FileRoutesById {
   '/_authenticated/equipe': typeof AuthenticatedEquipeRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
   '/_authenticated/profissional': typeof AuthenticatedProfissionalRoute
+  '/api/public/push-reminders': typeof ApiPublicPushRemindersRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
 }
@@ -256,6 +265,7 @@ export interface FileRouteTypes {
     | '/equipe'
     | '/perfil'
     | '/profissional'
+    | '/api/public/push-reminders'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
   fileRoutesByTo: FileRoutesByTo
@@ -281,6 +291,7 @@ export interface FileRouteTypes {
     | '/equipe'
     | '/perfil'
     | '/profissional'
+    | '/api/public/push-reminders'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
   id:
@@ -307,6 +318,7 @@ export interface FileRouteTypes {
     | '/_authenticated/equipe'
     | '/_authenticated/perfil'
     | '/_authenticated/profissional'
+    | '/api/public/push-reminders'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
   fileRoutesById: FileRoutesById
@@ -331,6 +343,7 @@ export interface RootRouteChildren {
   SobreRoute: typeof SobreRoute
   TermosRoute: typeof TermosRoute
   TreinoRoute: typeof TreinoRoute
+  ApiPublicPushRemindersRoute: typeof ApiPublicPushRemindersRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
 }
@@ -491,6 +504,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProfissionalRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/push-reminders': {
+      id: '/api/public/push-reminders'
+      path: '/api/public/push-reminders'
+      fullPath: '/api/public/push-reminders'
+      preLoaderRoute: typeof ApiPublicPushRemindersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lovable/email/auth/preview': {
       id: '/lovable/email/auth/preview'
       path: '/lovable/email/auth/preview'
@@ -543,6 +563,7 @@ const rootRouteChildren: RootRouteChildren = {
   SobreRoute: SobreRoute,
   TermosRoute: TermosRoute,
   TreinoRoute: TreinoRoute,
+  ApiPublicPushRemindersRoute: ApiPublicPushRemindersRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
 }

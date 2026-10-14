@@ -73,9 +73,22 @@ function ProfilePage() {
   }
 
   async function enableNotifications() {
-    if (!("Notification" in window)) { toast.error("Este navegador não oferece notificações."); return; }
-    const permission = await Notification.requestPermission();
-    permission === "granted" ? toast.success("Lembretes ativados neste aparelho.") : toast.error("Permissão de lembretes não concedida.");
+    const result = await enableServerPush();
+    const messages: Record<PushResult, string> = {
+      ok: "Avisos ativados neste aparelho, mesmo com o TaskBio fechado.",
+      unsupported: "Este navegador não oferece notificações.",
+      "ios-install": "No iPhone, adicione o TaskBio à Tela de Início pelo Safari e ative os avisos pelo app instalado.",
+      frame: "Abra o TaskBio em uma aba própria para ativar os avisos.",
+      denied: "Permissão negada. Libere as notificações do TaskBio nos ajustes do aparelho.",
+      "signed-out": "Entre na sua conta para ativar os avisos.",
+      error: "Não foi possível ativar os avisos. Tente novamente.",
+    };
+    result === "ok" ? toast.success(messages[result]) : toast.error(messages[result]);
+  }
+
+  async function disableNotifications() {
+    await disableServerPush();
+    toast.success("Avisos desativados neste aparelho.");
   }
 
   async function exportData() {
