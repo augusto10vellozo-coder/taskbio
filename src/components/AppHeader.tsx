@@ -50,6 +50,7 @@ export function AppHeader() {
             <p className="mt-0.5 text-[11px] text-steel">organização de vida saudável</p>
           </div>
         </Link>
+        </div>
 
         <nav className="hidden items-center gap-1 text-sm md:flex">
           {links.map((l) => (
