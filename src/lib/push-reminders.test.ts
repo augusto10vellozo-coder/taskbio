@@ -46,12 +46,12 @@ const at20 = new Date("2026-10-14T23:01:00Z"); // 20:01 em SP
 
 describe("dueStreakRisk", () => {
   it("avisa às 20h com streak >= 2 e hábitos pendentes", () => {
-    const [r] = dueStreakRisk(streakInput, TZ, at20);
+    const r = dueStreakRisk(streakInput, TZ, at20)[0]!;
     expect(r.title).toBe("🔥 Seu streak de 2 dias está em risco — faltam 2 hábitos hoje");
     expect(r.key).toBe("streak|2026-10-14");
   });
   it("menciona o congelamento quando há um disponível", () => {
-    const [r] = dueStreakRisk({ ...streakInput, freezesAvailable: 1 }, TZ, at20);
+    const r = dueStreakRisk({ ...streakInput, freezesAvailable: 1 }, TZ, at20)[0]!;
     expect(r.title).toBe("🔥 Streak em risco — use seu congelamento ou marque seus hábitos agora");
   });
   it("não avisa com dia 100% marcado, streak curto ou fora do horário", () => {
@@ -65,7 +65,7 @@ describe("dueDayClose", () => {
   const at2130 = new Date("2026-10-15T00:31:00Z"); // 21:31 em SP
   const dayPlan = { "2026-10-14": [{ done: true }, { done: false }, { done: false }] };
   it("avisa às 21h30 com itens pendentes e XP restante até o teto de 100", () => {
-    const [r] = dueDayClose(dayPlan, 60, TZ, at2130);
+    const r = dueDayClose(dayPlan, 60, TZ, at2130)[0]!;
     expect(r.title).toBe("Faltam 2 itens pra fechar o dia — vale 40 XP");
   });
   it("não avisa sem pendências e zera o XP no teto", () => {
@@ -95,7 +95,7 @@ describe("dueMealReminders", () => {
 describe("dueLeagueOpen", () => {
   it("avisa segunda às 9h com a posição da semana anterior", () => {
     const mon = new Date("2026-10-19T12:01:00Z"); // segunda 09:01 em SP
-    const [r] = dueLeagueOpen(3, TZ, mon);
+    const r = dueLeagueOpen(3, TZ, mon)[0]!;
     expect(r.title).toBe("🏆 Nova semana da liga começou!");
     expect(r.body).toContain("3º lugar");
   });
