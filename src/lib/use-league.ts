@@ -4,7 +4,7 @@ import { useAuth } from "@/lib/auth-context";
 import { brasiliaDay, leagueWeekStart, rankLeague } from "@/lib/xp";
 import { XP_EVENT } from "@/lib/xp-client";
 
-export type LeagueMember = { user_id: string; display_name: string; username: string | null; avatar_url: string | null; week_xp: number; total_xp: number; today_xp: number; habit_days: number; first_mark_sec: number; habits: number; meals: number; workouts: number; streak: number };
+export type LeagueMember = { user_id: string; display_name: string; username: string | null; avatar_url: string | null; week_xp: number; total_xp: number; today_xp: number; habit_days: number; first_mark_sec: number; habits: number; meals: number; workouts: number; streak: number; comeback: boolean };
 
 /** Weekly league (Sunday–Saturday, Brasília) for me and my accepted friends. Only XP and counts — no health data. */
 export function useLeague(weekOffset = 0) {

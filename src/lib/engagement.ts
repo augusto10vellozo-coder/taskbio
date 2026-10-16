@@ -52,10 +52,11 @@ export function isActiveDay(plan: Plan, log: HabitLog, dateKey: string, habits?:
 }
 
 /** Consecutive active days ending today (or yesterday, if today has nothing yet). */
-export function streak(plan: Plan, log: HabitLog, today: Date, habits?: Habit[]) {
-  let cursor = isActiveDay(plan, log, key(today), habits) ? today : addDays(today, -1);
+export function streak(plan: Plan, log: HabitLog, today: Date, habits?: Habit[], frozen?: Set<string>) {
+  const on = (d: Date) => isActiveDay(plan, log, key(d), habits) || !!frozen?.has(key(d));
+  let cursor = on(today) ? today : addDays(today, -1);
   let count = 0;
-  while (isActiveDay(plan, log, key(cursor), habits) && count < 3650) {
+  while (on(cursor) && count < 3650) {
     count += 1;
     cursor = addDays(cursor, -1);
   }

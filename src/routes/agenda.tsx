@@ -12,6 +12,7 @@ import { formatFullDate, formatWeekRange, getWeekDates, toDateKey } from "@/lib/
 import { toast } from "sonner";
 import { DayTimeline } from "@/components/DayTimeline";
 import { WeekActions } from "@/components/WeekActions";
+import { useAwards } from "@/lib/use-awards";
 import { mealSummary } from "@/lib/meal-summary";
 import { agendaSummary } from "@/lib/agenda-overview";
 
@@ -107,6 +108,7 @@ function Agenda() {
     weekKeys.flatMap((key) => plan[key] ?? []).map((block) => getMeal(block.mealId)).filter((meal) => meal != null),
   ).slice(0, 5), [getMeal, plan, weekKeys]);
 
+  const awards = useAwards();
   if (!ready) {
     return <main className="mx-auto max-w-6xl px-5 py-12 sm:px-8"><div className="h-48 animate-pulse rounded-2xl bg-mist" /></main>;
   }
@@ -125,6 +127,7 @@ function Agenda() {
               {brl(resumo.cost)}
               {goal ? ` · objetivo: ${goal}` : ""}
             </p>
+            {awards && <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-card px-3 py-1 text-xs font-medium ring-1 ring-line" title="Cada vitória na liga semanal vale 1 congelamento. Ele protege sua sequência se você perder 1 dia.">❄️ {awards.freezes} {awards.freezes === 1 ? "congelamento disponível" : "congelamentos disponíveis"}</p>}
           </div>
           <div className="flex flex-wrap items-center gap-2 lg:justify-end">
             <Button asChild variant="outline" size="sm"><Link to="/calendario"><CalendarDays /> Mês</Link></Button>
