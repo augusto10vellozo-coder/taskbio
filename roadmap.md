@@ -49,3 +49,5 @@
 - [x] Módulo Treino: plano semanal, registro de exercícios, progressão e importação de plano por arquivo
 - [x] Unificar Treino e Atividades em uma página com abas e modelos agendáveis
 - [x] Módulos ativáveis, Finanças, Leitura, Estudos e medicamentos com lembretes
+- [x] Pontos (XP) com regras de integridade, Amigos, convites, liga semanal e card compartilhável
+- [ ] Testar convite por link e ranking com duas contas reais — precisa de uma segunda conta
