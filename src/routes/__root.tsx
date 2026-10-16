@@ -13,6 +13,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AppHeader } from "../components/AppHeader";
 import { AppFooter } from "../components/AppFooter";
+import { BottomNav } from "../components/BottomNav";
 import { TaskBioProvider } from "../lib/trilha-store";
 import { AuthProvider } from "../lib/auth-context";
 import { SyncManager } from "../components/SyncManager";
