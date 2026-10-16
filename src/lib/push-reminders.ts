@@ -2,6 +2,23 @@
 type ReminderBlock = { id: string; time: string; kind: string; title: string; done?: boolean; reminderMinutes?: number };
 export type DueReminder = { key: string; title: string; body: string; url: string };
 
+/** Per-layer notification toggles stored in user_data.settings.notifPrefs; all on by default. */
+export type NotifPrefs = { streak: boolean; dayClose: boolean; meals: boolean; league: boolean; tasks: boolean; workouts: boolean };
+export const defaultNotifPrefs: NotifPrefs = { streak: true, dayClose: true, meals: true, league: true, tasks: true, workouts: true };
+export function readNotifPrefs(settings: unknown): NotifPrefs {
+  const raw = settings && typeof settings === "object" && !Array.isArray(settings)
+    ? (settings as Record<string, unknown>)["notifPrefs"] : undefined;
+  const p = raw && typeof raw === "object" && !Array.isArray(raw) ? raw as Record<string, unknown> : {};
+  const on = (k: keyof NotifPrefs) => typeof p[k] === "boolean" ? (p[k] as boolean) : true;
+  return { streak: on("streak"), dayClose: on("dayClose"), meals: on("meals"), league: on("league"), tasks: on("tasks"), workouts: on("workouts") };
+}
+
+/** No notifications between 22:30 and 07:00 (user-local wall clock ms from localWallClock). */
+export function inQuietHours(nowMs: number): boolean {
+  const mins = Math.floor((nowMs % 86400000) / 60000);
+  return mins >= 22 * 60 + 30 || mins < 7 * 60;
+}
+
 export function reminderLeadMinutes(block: ReminderBlock): number | undefined {
   if (block.reminderMinutes) return block.reminderMinutes;
   if (block.kind === "treino") return 30;
