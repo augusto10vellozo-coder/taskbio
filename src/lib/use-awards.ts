@@ -5,7 +5,7 @@ import { useAuth } from "@/lib/auth-context";
 import { freezesLeft, monthlyBadges } from "@/lib/xp";
 
 export type Awards = { wins: string[]; freezeDays: string[]; freezes: number; badges: string[] };
-type Raw = { won: boolean; frozen_day: string | null; wins: string[]; freeze_days: string[] };
+type Raw = { won: boolean; week_start: string; frozen_day: string | null; wins: string[]; freeze_days: string[] };
 
 const listeners = new Set<(a: Awards) => void>();
 let cache: { uid: string; at: number; data: Awards } | null = null;
@@ -31,7 +31,8 @@ function load(uid: string) {
       const d = r.frozen_day.split("-").reverse().slice(0, 2).join("/");
       notify("Congelamento aplicado", `Você não marcou nada em ${d}, então usamos 1 congelamento e sua sequência continua.`);
     }
-    if (r.won && a.badges.includes(r.wins[r.wins.length - 1]?.slice(0, 7) ?? "") && r.wins.filter((w) => w.slice(0, 7) === r.wins[r.wins.length - 1].slice(0, 7)).length === 3) {
+    const month = r.week_start.slice(0, 7);
+    if (r.won && r.wins.filter((w) => w.slice(0, 7) === month).length === 3) {
       notify("Nova insígnia mensal", "3 vitórias no mesmo mês — o emblema está no seu perfil.");
     }
     cache = { uid, at: Date.now(), data: a };
@@ -43,7 +44,7 @@ function load(uid: string) {
 /** Weekly wins, available streak freezes and monthly badges for the signed-in person. */
 export function useAwards() {
   const { user } = useAuth();
-  const [awards, setAwards] = useState<Awards | null>(cache?.uid === user?.id ? cache.data : null);
+  const [awards, setAwards] = useState<Awards | null>(cache && cache.uid === user?.id ? cache.data : null);
   useEffect(() => {
     if (!user) { setAwards(null); return; }
     listeners.add(setAwards);

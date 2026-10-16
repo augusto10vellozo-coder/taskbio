@@ -17,7 +17,7 @@ function draw(d: Data) {
   if (d.champion) {
     g.strokeStyle = gold; g.lineWidth = 12; g.strokeRect(30, 30, 1020, 1290);
     g.fillStyle = gold; g.beginPath(); // crown
-    [[820, 190], [820, 110], [870, 150], [910, 90], [950, 150], [1000, 110], [1000, 190]].forEach(([x, y], i) => (i ? g.lineTo(x, y) : g.moveTo(x, y)));
+    ([[820, 190], [820, 110], [870, 150], [910, 90], [950, 150], [1000, 110], [1000, 190]] as const).forEach(([x, y], i) => (i ? g.lineTo(x, y) : g.moveTo(x, y)));
     g.closePath(); g.fill();
   }
   g.fillStyle = d.champion ? gold : "#FFFFFF"; g.font = "600 44px Manrope, sans-serif"; g.fillText(d.champion ? "Campeão da semana" : "Minha semana no TaskBio", 80, 150);
