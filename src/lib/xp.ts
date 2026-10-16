@@ -49,7 +49,8 @@ export function weekTitles<T extends LeagueRow & { streak: number; comeback?: bo
   const out = new Map<string, WeekTitle[]>();
   if (ranked.length < 2) return out;
   const add = (id: string, t: WeekTitle) => out.set(id, [...(out.get(id) ?? []), t]);
-  if (ranked[0].week_xp > 0) add(ranked[0].user_id, "Campeão");
+  const first = ranked[0]!;
+  if (first.week_xp > 0) add(first.user_id, "Campeão");
   const best = Math.max(...ranked.map((r) => r.streak));
   if (best > 0) ranked.filter((r) => r.streak === best).forEach((r) => add(r.user_id, "Muralha da constância"));
   ranked.filter((r) => r.comeback).forEach((r) => add(r.user_id, "Recomeço"));
@@ -57,7 +58,7 @@ export function weekTitles<T extends LeagueRow & { streak: number; comeback?: bo
 }
 
 /** Champion of a finished week: 1st place with XP among 2+ members. */
-export const weekChampion = (ranked: LeagueRow[]) => (ranked.length >= 2 && ranked[0].week_xp > 0 ? ranked[0].user_id : null);
+export const weekChampion = (ranked: LeagueRow[]) => (ranked.length >= 2 && ranked[0]!.week_xp > 0 ? ranked[0]!.user_id : null);
 
 /** Months (yyyy-MM, by week start) with 3+ weekly wins. */
 export function monthlyBadges(wins: string[]) {
