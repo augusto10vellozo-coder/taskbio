@@ -9,7 +9,7 @@ type SyncStatus = "idle" | "loading" | "saved" | "error";
 
 export function SyncManager() {
   const { user, loading: authLoading } = useAuth();
-  const { plan, workouts, meals, goal, preferredModality, workoutHistory, shoppingItems, weeklyGoals, habits, habitLog, monthGoals, health, modules, exerciseLog, customFoods, finance, trackers, ready, hydrate } = useTaskBio();
+  const { plan, workouts, meals, goal, preferredModality, workoutHistory, shoppingItems, weeklyGoals, habits, habitLog, monthGoals, health, modules, exerciseLog, customFoods, finance, trackers, notifPrefs, ready, hydrate } = useTaskBio();
   const [status, setStatus] = useState<SyncStatus>("idle");
   const initializedUser = useRef<string | null>(null);
   const skipNextPush = useRef(false);
@@ -56,6 +56,7 @@ export function SyncManager() {
           ...(settings["finance"] && typeof settings["finance"] === "object" ? { finance: settings["finance"] as TaskBioState["finance"] } : {}),
           ...(settings["trackers"] && typeof settings["trackers"] === "object" ? { trackers: settings["trackers"] as TaskBioState["trackers"] } : {}),
           ...(settings["modules"] && typeof settings["modules"] === "object" ? { modules: settings["modules"] as TaskBioState["modules"] } : {}),
+          ...(settings["notifPrefs"] && typeof settings["notifPrefs"] === "object" ? { notifPrefs: settings["notifPrefs"] as TaskBioState["notifPrefs"] } : {}),
         });
       } else {
         const { error: insertError } = await supabase.from("user_data").insert({
