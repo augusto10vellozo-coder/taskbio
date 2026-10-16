@@ -9,7 +9,7 @@ type SyncStatus = "idle" | "loading" | "saved" | "error";
 
 export function SyncManager() {
   const { user, loading: authLoading } = useAuth();
-  const { plan, workouts, meals, goal, preferredModality, workoutHistory, shoppingItems, weeklyGoals, habits, habitLog, monthGoals, health, modules, exerciseLog, customFoods, finance, trackers, ready, hydrate } = useTaskBio();
+  const { plan, workouts, meals, goal, preferredModality, workoutHistory, shoppingItems, weeklyGoals, habits, habitLog, monthGoals, health, modules, exerciseLog, customFoods, finance, trackers, notifPrefs, ready, hydrate } = useTaskBio();
   const [status, setStatus] = useState<SyncStatus>("idle");
   const initializedUser = useRef<string | null>(null);
   const skipNextPush = useRef(false);
@@ -56,6 +56,7 @@ export function SyncManager() {
           ...(settings["finance"] && typeof settings["finance"] === "object" ? { finance: settings["finance"] as TaskBioState["finance"] } : {}),
           ...(settings["trackers"] && typeof settings["trackers"] === "object" ? { trackers: settings["trackers"] as TaskBioState["trackers"] } : {}),
           ...(settings["modules"] && typeof settings["modules"] === "object" ? { modules: settings["modules"] as TaskBioState["modules"] } : {}),
+          ...(settings["notifPrefs"] && typeof settings["notifPrefs"] === "object" ? { notifPrefs: settings["notifPrefs"] as TaskBioState["notifPrefs"] } : {}),
         });
       } else {
         const { error: insertError } = await supabase.from("user_data").insert({
@@ -64,7 +65,7 @@ export function SyncManager() {
           workouts: workouts as unknown as Json,
           meals: meals as unknown as Json,
           shopping_state: shoppingItems as unknown as Json,
-          settings: { goal, preferredModality, workoutHistory, weeklyGoals, habits, habitLog, monthGoals, health, modules, exerciseLog, customFoods, finance, trackers } as unknown as Json,
+          settings: { goal, preferredModality, workoutHistory, weeklyGoals, habits, habitLog, monthGoals, health, modules, exerciseLog, customFoods, finance, trackers, notifPrefs } as unknown as Json,
         });
         if (insertError) {
           setStatus("error");
@@ -92,13 +93,13 @@ export function SyncManager() {
         workouts: workouts as unknown as Json,
         meals: meals as unknown as Json,
         shopping_state: shoppingItems as unknown as Json,
-        settings: { goal, preferredModality, workoutHistory, weeklyGoals, habits, habitLog, monthGoals, health, modules, exerciseLog, customFoods, finance, trackers } as unknown as Json,
+        settings: { goal, preferredModality, workoutHistory, weeklyGoals, habits, habitLog, monthGoals, health, modules, exerciseLog, customFoods, finance, trackers, notifPrefs } as unknown as Json,
         updated_at: new Date().toISOString(),
       });
       setStatus(error ? "error" : "saved");
     }, 900);
     return () => window.clearTimeout(timer);
-  }, [goal, meals, plan, preferredModality, shoppingItems, user, weeklyGoals, workoutHistory, workouts, habits, habitLog, monthGoals, health, modules, exerciseLog, customFoods, finance, trackers]);
+  }, [goal, meals, plan, preferredModality, shoppingItems, user, weeklyGoals, workoutHistory, workouts, habits, habitLog, monthGoals, health, modules, exerciseLog, customFoods, finance, trackers, notifPrefs]);
 
   if (!user || status === "idle") return null;
   return <div className="fixed bottom-4 right-4 z-40 flex items-center gap-1.5 rounded-full bg-card/90 px-3 py-1.5 text-[11px] font-medium text-steel shadow-sm ring-1 ring-line backdrop-blur" role="status">
