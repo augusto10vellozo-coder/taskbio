@@ -26,6 +26,7 @@ import type { ExerciseLogEntry } from "./training";
 import type { Food } from "./food-db";
 import { emitBlockXp, emitXp, foodItemCount } from "./xp-client";
 import { emptyFinance, type FinanceState } from "./finance";
+import { defaultNotifPrefs, type NotifPrefs } from "./push-reminders";
 
 export type TaskBioState = {
   plan: Plan;
@@ -45,6 +46,7 @@ export type TaskBioState = {
   customFoods: Food[];
   finance: FinanceState;
   trackers: Trackers;
+  notifPrefs: NotifPrefs;
 };
 
 type Store = TaskBioState & {
