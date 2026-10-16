@@ -1,6 +1,6 @@
 # Roadmap
 
-- [ ] Corrigir participantes compartilhados da liga, incluindo ranking, prêmios e avisos; validar os três membros existentes
+- [x] Corrigir participantes compartilhados da liga, incluindo ranking, prêmios e avisos; grupo de três validado para cada participante e tela conferida com a conta do anfitrião
 
 - [x] Corrigir estado vazio do treino e agendamento explícito de exemplos
 - [x] Corrigir totais semanais/diários de refeições e acentos dos alimentos; registros sem nutrientes são identificados e podem ser completados
@@ -52,4 +52,4 @@
 - [x] Unificar Treino e Atividades em uma página com abas e modelos agendáveis
 - [x] Módulos ativáveis, Finanças, Leitura, Estudos e medicamentos com lembretes
 - [x] Pontos (XP) com regras de integridade, Amigos, convites, liga semanal e card compartilhável
-- [ ] Testar convite por link e ranking com duas contas reais — precisa de uma segunda conta
+- [ ] Testar cadastro completo por convite com uma segunda sessão autorizada — ranking dos três participantes validado; cadastro por link ainda depende dessa sessão
