@@ -94,6 +94,11 @@ function wallClock(now: Date, timeZone: string): number {
   try { return localWallClock(now, timeZone); } catch { return localWallClock(now, "America/Sao_Paulo"); }
 }
 
+/** User-local wall clock ms, for quiet-hour checks outside the pure due* functions. */
+export function wallClockMs(now: Date, timeZone: string): number {
+  return wallClock(now, timeZone);
+}
+
 /** Minutes between now and a local HH:MM today; negative when the time already passed. */
 function minutesTo(nowMs: number, time: string): number {
   const [h, m] = time.split(":").map(Number);
