@@ -80,6 +80,24 @@ export type Database = {
         }
         Relationships: []
       }
+      league_wins: {
+        Row: {
+          created_at: string
+          user_id: string
+          week_start: string
+        }
+        Insert: {
+          created_at?: string
+          user_id: string
+          week_start: string
+        }
+        Update: {
+          created_at?: string
+          user_id?: string
+          week_start?: string
+        }
+        Relationships: []
+      }
       professional_clients: {
         Row: {
           client_id: string | null
@@ -275,6 +293,24 @@ export type Database = {
         }
         Relationships: []
       }
+      streak_freezes: {
+        Row: {
+          created_at: string
+          day: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          day: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          day?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_data: {
         Row: {
           created_at: string
@@ -370,6 +406,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      claim_league_awards: { Args: never; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -381,6 +418,7 @@ export type Database = {
         Args: { _start: string }
         Returns: {
           avatar_url: string
+          comeback: boolean
           display_name: string
           first_mark_sec: number
           habit_days: number
