@@ -20,7 +20,7 @@ export function SessionTracker({ kind, title, subtitle, placeholder }: { kind: "
   return (
     <main className="mx-auto max-w-4xl px-5 pb-20 sm:px-8">
       <section className="pt-8 pb-5"><p className="text-xs font-medium uppercase tracking-[0.18em] text-steel">{title}</p><h1 className="mt-2 font-display text-3xl font-semibold sm:text-4xl">{subtitle}</h1></section>
-      <form className="flex flex-wrap gap-2 rounded-lg bg-card p-4 ring-1 ring-line" onSubmit={(e) => { e.preventDefault(); const m = Math.round(Number(minutes)); if (!(m > 0)) return toast.error("Informe os minutos"); setTrackers((t) => ({ ...t, [kind]: [{ id: `s-${Date.now()}`, date: today, minutes: m, title: name.trim() }, ...t[kind]] })); setMinutes(""); toast.success("Sessão registrada"); }}>
+      <form className="flex flex-wrap gap-2 rounded-lg bg-card p-4 ring-1 ring-line" onSubmit={(e) => { e.preventDefault(); const m = Math.round(Number(minutes)); if (!(m > 0)) { toast.error("Informe os minutos"); return; } setTrackers((t) => ({ ...t, [kind]: [{ id: `s-${Date.now()}`, date: today, minutes: m, title: name.trim() }, ...t[kind]] })); setMinutes(""); toast.success("Sessão registrada"); }}>
         <input type="number" min="1" aria-label="Minutos" value={minutes} onChange={(e) => setMinutes(e.target.value)} placeholder="Minutos" className="h-10 w-28 rounded-md bg-background px-3 text-sm ring-1 ring-line" />
         <input aria-label="Título" value={name} onChange={(e) => setName(e.target.value)} placeholder={placeholder} className="h-10 min-w-0 flex-1 rounded-md bg-background px-3 text-sm ring-1 ring-line" />
         <Button><Plus /> Registrar</Button>
