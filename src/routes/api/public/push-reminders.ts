@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { buildPushPayload } from "@block65/webcrypto-web-push";
-import { dueReminders } from "@/lib/push-reminders";
+import { dueReminders, dueSettingsReminders } from "@/lib/push-reminders";
 import { VAPID_PUBLIC_KEY } from "@/lib/push-config";
 
 function safeEqual(a: string, b: string) {
@@ -27,13 +27,14 @@ export const Route = createFileRoute("/api/public/push-reminders")({
         const { data: subs } = await supabaseAdmin.from("push_subscriptions").select("id, user_id, endpoint, p256dh, auth, timezone");
         if (!subs?.length) return Response.json({ sent: 0 });
         const userIds = [...new Set(subs.map((s) => s.user_id))];
-        const { data: rows } = await supabaseAdmin.from("user_data").select("user_id, plan").in("user_id", userIds);
+        const { data: rows } = await supabaseAdmin.from("user_data").select("user_id, plan, settings").in("user_id", userIds);
         const now = new Date();
         let sent = 0;
 
         for (const row of rows ?? []) {
           const userSubs = subs.filter((s) => s.user_id === row.user_id);
-          const due = dueReminders(row.plan, userSubs[0]?.timezone ?? "America/Sao_Paulo", now);
+          const tz = userSubs[0]?.timezone ?? "America/Sao_Paulo";
+          const due = [...dueReminders(row.plan, tz, now), ...dueSettingsReminders(row.settings, tz, now)];
           for (const reminder of due) {
             const { error: dup } = await supabaseAdmin.from("push_sent").insert({ user_id: row.user_id, reminder_key: reminder.key });
             if (dup) continue; // already sent

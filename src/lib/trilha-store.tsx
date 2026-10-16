@@ -19,11 +19,12 @@ import {
 } from "./trilha-data";
 import { addDays, isAfter, isWeekend, parseISO } from "date-fns";
 import { normalizePlan, toDateKey } from "./calendar-utils";
-import { emptyHealth, type Habit, type HabitLog, type HealthLog, type MonthGoal } from "./engagement";
+import { emptyHealth, emptyTrackers, type Trackers, type Habit, type HabitLog, type HealthLog, type MonthGoal } from "./engagement";
 import type { ModuleSettings } from "./modules";
 import { foodName } from "./meal-summary";
 import type { ExerciseLogEntry } from "./training";
 import type { Food } from "./food-db";
+import { emptyFinance, type FinanceState } from "./finance";
 
 export type TaskBioState = {
   plan: Plan;
@@ -41,6 +42,8 @@ export type TaskBioState = {
   modules: ModuleSettings;
   exerciseLog: ExerciseLogEntry[];
   customFoods: Food[];
+  finance: FinanceState;
+  trackers: Trackers;
 };
 
 type Store = TaskBioState & {
@@ -77,6 +80,8 @@ type Store = TaskBioState & {
   getWorkout: (id?: string) => Workout | undefined;
   getMeal: (id?: string) => Meal | undefined;
   addCustomFood: (food: Food) => void;
+  setFinance: (fn: (f: FinanceState) => FinanceState) => void;
+  setTrackers: (fn: (t: Trackers) => Trackers) => void;
 };
 
 const initialState: TaskBioState = {
@@ -95,6 +100,8 @@ const initialState: TaskBioState = {
   modules: {},
   exerciseLog: [],
   customFoods: [],
+  finance: emptyFinance,
+  trackers: emptyTrackers,
 };
 
 const STORAGE_KEY = "trilha.state.v2";
@@ -266,6 +273,8 @@ export function TaskBioProvider({ children }: { children: ReactNode }) {
       saveMonthGoal: (goal) => setState((s) => ({ ...s, monthGoals: s.monthGoals.some((g) => g.id === goal.id) ? s.monthGoals.map((g) => g.id === goal.id ? goal : g) : [...s.monthGoals, goal] })),
       removeMonthGoal: (id) => setState((s) => ({ ...s, monthGoals: s.monthGoals.filter((g) => g.id !== id) })),
       setHealth: (fn) => setState((s) => ({ ...s, health: fn({ ...emptyHealth, ...s.health }) })),
+      setFinance: (fn) => setState((s) => ({ ...s, finance: fn({ ...emptyFinance, ...s.finance }) })),
+      setTrackers: (fn) => setState((s) => ({ ...s, trackers: fn({ ...emptyTrackers, ...s.trackers }) })),
       setModule: (id, on) => setState((s) => ({ ...s, modules: { ...s.modules, [id]: on } })),
       getWorkout: (id) => state.workouts.find((w) => w.id === id),
       getMeal: (id) => displayMeals.find((m) => m.id === id),
