@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Check, Flame } from "lucide-react";
+import { Check, Flame, Settings2, Users } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth-context";
 import { useTaskBio } from "@/lib/trilha-store";
