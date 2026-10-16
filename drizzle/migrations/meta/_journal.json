@@ -29,6 +29,13 @@
       "when": 1792174153014,
       "tag": "0003_league_awards",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1792191019645,
+      "tag": "0004_shared_league_ranking",
+      "breakpoints": true
     }
   ]
 }
