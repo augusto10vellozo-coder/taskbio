@@ -7,7 +7,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 
 const SHORT_LABELS: Record<string, string> = {
   agenda: "Agenda",
-  alimentacao: "Comida",
+  alimentacao: "Alimentos",
 };
 
 export function BottomNav() {
