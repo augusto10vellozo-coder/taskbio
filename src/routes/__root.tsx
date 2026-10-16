@@ -144,6 +144,7 @@ function RootComponent() {
           <AppHeader />
           <Outlet />
           <AppFooter />
+          <BottomNav />
           <PrivacyConsent />
           <SyncManager />
           <ReminderManager />
