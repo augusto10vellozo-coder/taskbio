@@ -2,18 +2,18 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { addDays, format, isSameDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { ArrowRight, Bell, CalendarDays, ChevronLeft, ChevronRight, Pencil, Plus, Trash2, X } from "lucide-react";
+import { ArrowRight, CalendarDays, ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { KIND_LABEL, brl, consolidateIngredients, formatIngredientAmount, type Block, type BlockKind } from "@/lib/trilha-data";
+import { brl, consolidateIngredients, formatIngredientAmount, type Block } from "@/lib/trilha-data";
 import { useTaskBio } from "@/lib/trilha-store";
 import { useAuth } from "@/lib/auth-context";
 import { formatFullDate, formatWeekRange, getWeekDates, toDateKey } from "@/lib/calendar-utils";
 import { AdSlot } from "@/components/AdSlot";
 import { toast } from "sonner";
 import { TodayPanel } from "@/components/TodayPanel";
-import { PhotoBonus } from "@/components/PhotoBonus";
+import { DayTimeline } from "@/components/DayTimeline";
 import { WeekActions } from "@/components/WeekActions";
 import { mealSummary } from "@/lib/meal-summary";
 import { agendaSummary } from "@/lib/agenda-overview";
@@ -48,17 +48,14 @@ const dotColor: Record<BlockKind, string> = {
 
 function MinhaSemana() {
   const { user, loading } = useAuth();
-  const { plan, ready, replaceDays, clearWeek, getMeal, getWorkout, toggleBlock, removeBlock, addBlock, updateBlock, setDoneSets, goal } =
-    useTaskBio();
+  const { plan, ready, replaceDays, clearWeek, getMeal, goal } = useTaskBio();
   const [selectedDate, setSelectedDate] = useState(() => {
     if (typeof window === "undefined") return new Date();
     const saved = sessionStorage.getItem("trilha:selected-date");
     if (saved) { sessionStorage.removeItem("trilha:selected-date"); return new Date(`${saved}T12:00:00`); }
     return new Date();
   });
-  const [openWorkout, setOpenWorkout] = useState<string | null>("w1");
   const [adding, setAdding] = useState(false);
-  const [editing, setEditing] = useState<Block | null>(null);
   const [exampleDismissed, setExampleDismissed] = useState(false);
   const [installPrompt, setInstallPrompt] = useState<Event | null>(null);
   const [installed, setInstalled] = useState(false);
@@ -134,7 +131,7 @@ function MinhaSemana() {
   return (
     <>
       <main className="mx-auto max-w-6xl px-5 pb-20 sm:px-8">
-        <TodayPanel onTodaySelect={() => { setSelectedDate(new Date()); scrollToTimeline(); }} />
+        <TodayPanel />
         <section className="pt-8 pb-4">
           {!user && <div className="mb-5 flex flex-wrap items-center justify-between gap-2 border-b border-line pb-3 text-sm text-steel"><span>Entre para salvar sua agenda e acessá-la em outros dispositivos.</span><Button asChild variant="outline" size="sm"><Link to="/auth">Entrar e sincronizar <ArrowRight /></Link></Button></div>}
           {installPrompt && !installed && <div className="mb-5 flex items-center justify-between gap-3 border-b border-line pb-3 text-sm"><span>Instalar TaskBio neste aparelho</span><Button variant="outline" size="sm" onClick={async () => { const prompt = installPrompt as Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: string }> }; await prompt.prompt(); await prompt.userChoice; setInstallPrompt(null); }}>Instalar</Button></div>}
