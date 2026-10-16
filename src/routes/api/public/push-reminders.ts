@@ -31,11 +31,10 @@ export const Route = createFileRoute("/api/public/push-reminders")({
         const now = new Date();
         const todaySp = now.toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" });
         const lastWeekStart = (() => { const d = new Date(`${todaySp}T12:00:00Z`); d.setUTCDate(d.getUTCDate() - d.getUTCDay() - 7); return d.toISOString().slice(0, 10); })();
-        const [{ data: xpRows }, { data: freezeRows }, { data: winRows }, { data: friendRows }] = await Promise.all([
+        const [{ data: xpRows }, { data: freezeRows }, { data: winRows }] = await Promise.all([
           supabaseAdmin.from("xp_events").select("user_id, points").in("user_id", userIds).eq("day", todaySp),
           supabaseAdmin.from("streak_freezes").select("user_id, day").in("user_id", userIds),
           supabaseAdmin.from("league_wins").select("user_id").in("user_id", userIds),
-          supabaseAdmin.from("friendships").select("requester, addressee").eq("status", "accepted").or(userIds.map((id) => `requester.eq.${id},addressee.eq.${id}`).join(",")),
         ]);
         const todayXp = new Map<string, number>();
         for (const e of xpRows ?? []) todayXp.set(e.user_id, (todayXp.get(e.user_id) ?? 0) + e.points);
@@ -43,16 +42,6 @@ export const Route = createFileRoute("/api/public/push-reminders")({
         for (const f of freezeRows ?? []) freezesBy.set(f.user_id, [...(freezesBy.get(f.user_id) ?? []), f.day]);
         const winsBy = new Map<string, number>();
         for (const w of winRows ?? []) winsBy.set(w.user_id, (winsBy.get(w.user_id) ?? 0) + 1);
-        const friendsBy = new Map<string, string[]>();
-        for (const f of friendRows ?? []) {
-          friendsBy.set(f.requester, [...(friendsBy.get(f.requester) ?? []), f.addressee]);
-          friendsBy.set(f.addressee, [...(friendsBy.get(f.addressee) ?? []), f.requester]);
-        }
-        // Last week's XP per user (for Monday league-opening position).
-        const thisWeekStart = (() => { const d = new Date(`${lastWeekStart}T12:00:00Z`); d.setUTCDate(d.getUTCDate() + 7); return d.toISOString().slice(0, 10); })();
-        const { data: lastWeekXp } = await supabaseAdmin.from("xp_events").select("user_id, points, day").in("user_id", userIds).gte("day", lastWeekStart).lt("day", thisWeekStart);
-        const weekXp = new Map<string, number>();
-        for (const e of lastWeekXp ?? []) weekXp.set(e.user_id, (weekXp.get(e.user_id) ?? 0) + e.points);
         let sent = 0;
 
         for (const row of rows ?? []) {
@@ -68,10 +57,14 @@ export const Route = createFileRoute("/api/public/push-reminders")({
             if (prefs.dayClose) due.push(...dueDayClose(row.plan, todayXp.get(row.user_id) ?? 0, tz, now));
             if (prefs.meals) due.push(...dueMealReminders(row.plan, tz, now));
             if (prefs.league) {
-              const group = [row.user_id, ...(friendsBy.get(row.user_id) ?? [])];
-              const ranked = group.map((id) => ({ id, xp: weekXp.get(id) ?? 0 })).sort((a, b) => b.xp - a.xp);
-              const pos = ranked.findIndex((r) => r.id === row.user_id) + 1;
-              due.push(...dueLeagueOpen(group.length >= 2 ? pos : null, tz, now));
+              // Query only when the layer is due; use the exact same group and ranking as the app.
+              if (dueLeagueOpen(1, tz, now).length) {
+                const { data: ranked, error } = await supabaseAdmin.rpc("league_week_for", { _start: lastWeekStart, _user_id: row.user_id });
+                if (!error && ranked && ranked.length >= 2) {
+                  const pos = ranked.findIndex((r) => r.user_id === row.user_id) + 1;
+                  if (pos > 0) due.push(...dueLeagueOpen(pos, tz, now));
+                }
+              }
             }
           }
           due.push(...dueReminders(row.plan, tz, now, prefs), ...dueSettingsReminders(row.settings, tz, now));

@@ -6,7 +6,7 @@ import { XP_EVENT } from "@/lib/xp-client";
 
 export type LeagueMember = { user_id: string; display_name: string; username: string | null; avatar_url: string | null; week_xp: number; total_xp: number; today_xp: number; habit_days: number; first_mark_sec: number; habits: number; meals: number; workouts: number; streak: number; comeback: boolean };
 
-/** Weekly league (Sunday–Saturday, Brasília) for me and my accepted friends. Only XP and counts — no health data. */
+/** Weekly league for the connected group of accepted invites. Only XP and counts — no health data. */
 export function useLeague(weekOffset = 0) {
   const { user } = useAuth();
   const [rows, setRows] = useState<LeagueMember[] | null>(null);

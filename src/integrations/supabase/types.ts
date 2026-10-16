@@ -433,6 +433,25 @@ export type Database = {
           workouts: number
         }[]
       }
+      league_week_for: {
+        Args: { _start: string; _user_id: string }
+        Returns: {
+          avatar_url: string
+          comeback: boolean
+          display_name: string
+          first_mark_sec: number
+          habit_days: number
+          habits: number
+          meals: number
+          streak: number
+          today_xp: number
+          total_xp: number
+          user_id: string
+          username: string
+          week_xp: number
+          workouts: number
+        }[]
+      }
       my_friend_requests: {
         Args: never
         Returns: {
