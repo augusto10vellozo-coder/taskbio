@@ -27,7 +27,7 @@ type Req = { id: string; display_name: string; username: string | null };
 type Found = { id: string; display_name: string; username: string | null };
 
 function Avatar({ name, url }: { name: string; url: string | null }) {
-  return url ? <img src={url} alt="" className="size-10 rounded-full object-cover" /> : <span className="grid size-10 place-items-center rounded-full bg-mist text-sm font-semibold text-steel">{(name || "?").slice(0, 1).toUpperCase()}</span>;
+  return url ? <img src={url} alt="" referrerPolicy="no-referrer" onError={(e) => { e.currentTarget.style.visibility = "hidden"; }} className="size-10 rounded-full bg-mist object-cover" /> : <span className="grid size-10 place-items-center rounded-full bg-mist text-sm font-semibold text-steel">{(name || "?").slice(0, 1).toUpperCase()}</span>;
 }
 
 function Amigos() {
