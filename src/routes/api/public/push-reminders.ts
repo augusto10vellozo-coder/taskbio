@@ -49,9 +49,10 @@ export const Route = createFileRoute("/api/public/push-reminders")({
           friendsBy.set(f.addressee, [...(friendsBy.get(f.addressee) ?? []), f.requester]);
         }
         // Last week's XP per user (for Monday league-opening position).
-        const { data: lastWeekXp } = await supabaseAdmin.from("xp_events").select("user_id, points, day").in("user_id", userIds).gte("day", lastWeekStart).lte("day", todaySp);
+        const thisWeekStart = (() => { const d = new Date(`${lastWeekStart}T12:00:00Z`); d.setUTCDate(d.getUTCDate() + 7); return d.toISOString().slice(0, 10); })();
+        const { data: lastWeekXp } = await supabaseAdmin.from("xp_events").select("user_id, points, day").in("user_id", userIds).gte("day", lastWeekStart).lt("day", thisWeekStart);
         const weekXp = new Map<string, number>();
-        for (const e of lastWeekXp ?? []) if (e.day <= lastWeekStart.slice(0, 8) + String(Number(lastWeekStart.slice(8)) + 6).padStart(2, "0") || e.day >= lastWeekStart) weekXp.set(e.user_id, (weekXp.get(e.user_id) ?? 0) + e.points);
+        for (const e of lastWeekXp ?? []) weekXp.set(e.user_id, (weekXp.get(e.user_id) ?? 0) + e.points);
         let sent = 0;
 
         for (const row of rows ?? []) {
@@ -62,7 +63,7 @@ export const Route = createFileRoute("/api/public/push-reminders")({
           const frozenDays = freezesBy.get(row.user_id) ?? [];
           const freezesAvailable = Math.max(0, (winsBy.get(row.user_id) ?? 0) - frozenDays.length);
           const due: { key: string; title: string; body: string; url: string }[] = [];
-          if (!inQuietHours(Date.now())) {
+          if (!inQuietHours(wallClockMs(now, tz))) {
             if (prefs.streak) due.push(...dueStreakRisk({ plan: row.plan, habitLog: settings["habitLog"], habits: settings["habits"], frozenDays, freezesAvailable }, tz, now));
             if (prefs.dayClose) due.push(...dueDayClose(row.plan, todayXp.get(row.user_id) ?? 0, tz, now));
             if (prefs.meals) due.push(...dueMealReminders(row.plan, tz, now));
