@@ -74,21 +74,6 @@ export function AppHeader() {
         </div>
       </div>
 
-      <nav className="flex gap-1 overflow-x-auto px-5 pb-2 text-sm md:hidden">
-        {links.map((l) => (
-          <Link
-            key={l.to}
-            to={l.to}
-            activeOptions={{ exact: l.to === "/" }}
-            className="shrink-0 rounded-lg px-3 py-1.5 font-medium text-steel"
-            activeProps={{ className: "shrink-0 rounded-lg px-3 py-1.5 font-medium bg-ink text-white" }}
-          >
-            {l.label}
-          </Link>
-        ))}
-        <Link to="/modulos" className="shrink-0 rounded-lg px-3 py-1.5 font-medium text-steel" activeProps={{ className: "shrink-0 rounded-lg px-3 py-1.5 font-medium bg-ink text-white" }}>Módulos</Link>
-        {user && <Link to="/amigos" className="shrink-0 rounded-lg px-3 py-1.5 font-medium text-steel" activeProps={{ className: "shrink-0 rounded-lg px-3 py-1.5 font-medium bg-ink text-white" }}>Amigos</Link>}
-      </nav>
     </header>
   );
 }

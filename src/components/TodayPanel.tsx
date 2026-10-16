@@ -58,6 +58,8 @@ export function TodayPanel({ onTodaySelect }: { onTodaySelect: () => void }) {
       {habitsOn && habits.length > 0 && <div className="mt-3"><p className="mb-2 text-xs text-steel">Hábitos de hoje</p><div className="flex flex-wrap gap-2">{habits.map((habit) => { const done = (habitLog[today] ?? []).includes(habit.id); return <Button key={habit.id} variant="outline" size="sm" aria-pressed={done} onClick={() => toggleHabit(today, habit.id)}><Tick on={done} />{habit.name}</Button>; })}</div></div>}
       <div className="mt-3 grid grid-cols-4 gap-2 sm:grid-cols-8">
         {MODULES.filter((m) => isModuleOn(modules, m.id) && m.id !== "agenda").map((m) => <Link key={m.id} to={m.to} className="flex flex-col items-center gap-1 rounded-lg bg-card p-3 text-center text-[11px] font-medium ring-1 ring-line hover:ring-brand"><m.icon className="size-5 text-brand" />{m.label}</Link>)}
+        <Link to="/modulos" className="flex flex-col items-center gap-1 rounded-lg bg-card p-3 text-center text-[11px] font-medium ring-1 ring-line hover:ring-brand"><Settings2 className="size-5 text-brand" />Módulos</Link>
+        {user && <Link to="/amigos" className="flex flex-col items-center gap-1 rounded-lg bg-card p-3 text-center text-[11px] font-medium ring-1 ring-line hover:ring-brand"><Users className="size-5 text-brand" />Amigos</Link>}
       </div>
     </section>
   );
