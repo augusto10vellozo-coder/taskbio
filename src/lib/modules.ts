@@ -1,11 +1,11 @@
 import { BookOpen, GraduationCap, Wallet, Dumbbell, CalendarDays, CheckSquare, Droplets, LineChart, ShoppingBasket, Target, UtensilsCrossed, type LucideIcon } from "lucide-react";
 
 export type ModuleId = "agenda" | "treino" | "alimentacao" | "compras" | "progresso" | "habitos" | "metas" | "saude" | "financas" | "leitura" | "estudos";
-export type AppModule = { id: ModuleId; to: "/" | "/treino" | "/alimentacao" | "/compras" | "/progresso" | "/habitos" | "/metas" | "/saude" | "/financas" | "/leitura" | "/estudos"; label: string; description: string; icon: LucideIcon; optional: boolean };
+export type AppModule = { id: ModuleId; to: "/" | "/agenda" | "/treino" | "/alimentacao" | "/compras" | "/progresso" | "/habitos" | "/metas" | "/saude" | "/financas" | "/leitura" | "/estudos"; label: string; description: string; icon: LucideIcon; optional: boolean };
 
 /** Registry of app modules. Add new modules here; navigation and settings read from it. */
 export const MODULES: AppModule[] = [
-  { id: "agenda", to: "/", label: "Minha Agenda", description: "Semana e dia", icon: CalendarDays, optional: false },
+  { id: "agenda", to: "/agenda", label: "Minha Agenda", description: "Semana e dia", icon: CalendarDays, optional: false },
   { id: "treino", to: "/treino", label: "Treino", description: "Registro e progressão", icon: Dumbbell, optional: true },
   { id: "alimentacao", to: "/alimentacao", label: "Alimentação", description: "Refeições", icon: UtensilsCrossed, optional: true },
   { id: "compras", to: "/compras", label: "Compras", description: "Lista da semana", icon: ShoppingBasket, optional: true },

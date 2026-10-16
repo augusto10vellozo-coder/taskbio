@@ -45,7 +45,7 @@ function Hoje() {
         </p>
         <div className="mt-3">
           <Button asChild variant="outline" size="sm">
-            <Link to="/"><CalendarDays /> Ver a semana completa</Link>
+            <Link to="/agenda"><CalendarDays /> Ver a semana completa</Link>
           </Button>
         </div>
       </section>
