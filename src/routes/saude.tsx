@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Droplets, Minus, Moon, Plus, Scale } from "lucide-react";
+import { Droplets, Minus, Moon, Pill, Plus, Scale, Trash2 } from "lucide-react";
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -26,6 +26,7 @@ function Saude() {
   const [today, setToday] = useState<string | null>(null);
   const [sleep, setSleep] = useState("");
   const [weight, setWeight] = useState("");
+  const [med, setMed] = useState({ name: "", time: "08:00" });
   useEffect(() => setToday(toDateKey(new Date())), []);
   if (!today) return <main className="mx-auto max-w-4xl px-5 pt-8"><div className="h-60 animate-pulse rounded-lg bg-mist" /></main>;
   const water = health.water[today] ?? 0;
@@ -51,6 +52,12 @@ function Saude() {
           <form className="mt-3 flex gap-2" onSubmit={(e) => { e.preventDefault(); const v = Number(weight.replace(",", ".")); if (!(v > 0 && v < 500)) return; setHealth((h) => ({ ...h, weight: { ...h.weight, [today]: v } })); setWeight(""); toast.success("Peso registrado"); }}><input inputMode="decimal" value={weight} onChange={(e) => setWeight(e.target.value)} placeholder="kg" className="h-9 w-full rounded-md bg-background px-3 text-sm ring-1 ring-line" /><Button>Salvar</Button></form>
         </Card>
       </div>
+      <section className="mt-3 rounded-lg bg-card p-4 ring-1 ring-line">
+        <p className="mb-1 flex items-center gap-1.5 text-xs font-medium text-steel"><Pill className="size-4 text-brand" />Medicamentos de hoje</p>
+        <p className="text-xs text-steel">Com os avisos ativados no Perfil, você recebe uma notificação no horário. Siga sempre a prescrição do seu médico.</p>
+        <form className="mt-3 flex flex-wrap gap-2" onSubmit={(e) => { e.preventDefault(); if (!med.name.trim()) return; setHealth((h) => ({ ...h, meds: [...(h.meds ?? []), { id: `m-${Date.now()}`, name: med.name.trim(), time: med.time }].sort((a, b) => a.time.localeCompare(b.time)) })); setMed({ name: "", time: med.time }); toast.success("Medicamento adicionado"); }}><input aria-label="Medicamento" value={med.name} onChange={(e) => setMed({ ...med, name: e.target.value })} placeholder="Nome do medicamento" className="h-9 min-w-0 flex-1 rounded-md bg-background px-3 text-sm ring-1 ring-line" /><input aria-label="Horário" type="time" value={med.time} onChange={(e) => setMed({ ...med, time: e.target.value })} className="h-9 rounded-md bg-background px-2 text-sm ring-1 ring-line" /><Button><Plus /> Adicionar</Button></form>
+        <ul className="mt-2 divide-y divide-line">{(health.meds ?? []).map((m) => { const taken = (health.medsTaken?.[today] ?? []).includes(m.id); return <li key={m.id} className="flex items-center gap-3 py-2 text-sm"><input type="checkbox" checked={taken} aria-label={`${m.name} tomado hoje`} onChange={() => setHealth((h) => { const cur = h.medsTaken?.[today] ?? []; return { ...h, medsTaken: { ...h.medsTaken, [today]: taken ? cur.filter((x) => x !== m.id) : [...cur, m.id] } }; })} /><span className={`flex-1 ${taken ? "text-steel line-through" : ""}`}>{m.time} · {m.name}</span><Button variant="ghost" size="icon" className="size-7" aria-label={`Remover ${m.name}`} onClick={() => setHealth((h) => ({ ...h, meds: (h.meds ?? []).filter((x) => x.id !== m.id) }))}><Trash2 /></Button></li>; })}</ul>
+      </section>
       <div className="mt-5 grid gap-3 md:grid-cols-3">
         <Chart title="Água (copos)" data={series(health.water)} />
         <Chart title="Sono (horas)" data={series(health.sleep)} />
