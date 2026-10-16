@@ -1,5 +1,7 @@
 # Roadmap
 
+- [ ] Corrigir participantes compartilhados da liga, incluindo ranking, prêmios e avisos; validar os três membros existentes
+
 - [x] Corrigir estado vazio do treino e agendamento explícito de exemplos
 - [x] Corrigir totais semanais/diários de refeições e acentos dos alimentos; registros sem nutrientes são identificados e podem ser completados
 - [x] Ajustar texto cortado no progresso da agenda e validar os três fluxos
