@@ -37,7 +37,7 @@ function localWallClock(now: Date, timeZone: string) {
 const dayKey = (ms: number) => new Date(ms).toISOString().slice(0, 10);
 
 /** Reminders whose lead time falls inside the current window (cron runs every 5 minutes, so allow up to 5 minutes of delay). */
-export function dueReminders(plan: unknown, timeZone: string, now: Date): DueReminder[] {
+export function dueReminders(plan: unknown, timeZone: string, now: Date, prefs: NotifPrefs = defaultNotifPrefs): DueReminder[] {
   if (!plan || typeof plan !== "object") return [];
   let nowMs: number;
   try { nowMs = localWallClock(now, timeZone); } catch { nowMs = localWallClock(now, "America/Sao_Paulo"); }
@@ -48,6 +48,7 @@ export function dueReminders(plan: unknown, timeZone: string, now: Date): DueRem
     if (!Array.isArray(blocks)) continue;
     for (const raw of blocks as ReminderBlock[]) {
       if (!raw || raw.done || typeof raw.time !== "string") continue;
+      if (raw.kind === "treino" ? !prefs.workouts : !prefs.tasks) continue;
       const lead = reminderLeadMinutes(raw);
       if (!lead) continue;
       const [h, m] = raw.time.split(":").map(Number);
