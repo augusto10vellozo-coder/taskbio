@@ -44,3 +44,27 @@ export function dueReminders(plan: unknown, timeZone: string, now: Date): DueRem
   }
   return result;
 }
+
+/** Bills: notify at 09:00 the day before the due date. Medications: notify daily at their time. */
+export function dueSettingsReminders(settings: unknown, timeZone: string, now: Date): DueReminder[] {
+  if (!settings || typeof settings !== "object") return [];
+  let nowMs: number;
+  try { nowMs = localWallClock(now, timeZone); } catch { nowMs = localWallClock(now, "America/Sao_Paulo"); }
+  const today = dayKey(nowMs);
+  const tomorrow = dayKey(nowMs + 86400000);
+  const [y, mo, d] = today.split("-").map(Number);
+  const at = (time: string) => { const [h, m] = time.split(":").map(Number); return Number.isNaN(h) || Number.isNaN(m) ? NaN : (Date.UTC(y!, mo! - 1, d!, h!, m!) - nowMs) / 60000; };
+  const inWindow = (diff: number) => diff <= 0 && diff > -5;
+  const s = settings as { finance?: { bills?: { id: string; title: string; amount: number; dueDate: string; paid?: boolean }[] }; health?: { meds?: { id: string; name: string; time: string }[]; medsTaken?: Record<string, string[]> } };
+  const result: DueReminder[] = [];
+  for (const bill of s.finance?.bills ?? []) {
+    if (!bill || bill.paid || bill.dueDate !== tomorrow || !inWindow(at("09:00"))) continue;
+    result.push({ key: `bill|${bill.id}|${bill.dueDate}`, title: `Conta vence amanhã: ${String(bill.title).slice(0, 80)}`, body: `Valor: R$ ${Number(bill.amount).toFixed(2).replace(".", ",")}.`, url: "/financas" });
+  }
+  const taken = new Set(s.health?.medsTaken?.[today] ?? []);
+  for (const med of s.health?.meds ?? []) {
+    if (!med || taken.has(med.id) || typeof med.time !== "string" || !inWindow(at(med.time))) continue;
+    result.push({ key: `med|${med.id}|${today}`, title: `Lembrete: ${String(med.name).slice(0, 80)}`, body: `Horário marcado: ${med.time}.`, url: "/saude" });
+  }
+  return result;
+}

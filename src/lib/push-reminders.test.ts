@@ -22,3 +22,12 @@ describe("dueReminders", () => {
     expect(titles).not.toContain("Depois");
   });
 });
+
+import { dueSettingsReminders } from "./push-reminders";
+describe("dueSettingsReminders", () => {
+  it("avisa conta 1 dia antes às 9h e medicamento no horário", () => {
+    const at9 = new Date("2026-10-14T12:02:00Z"); // 09:02 em São Paulo
+    const settings = { finance: { bills: [{ id: "x", title: "Luz", amount: 120, dueDate: "2026-10-15" }, { id: "y", title: "Água", amount: 50, dueDate: "2026-10-16" }] }, health: { meds: [{ id: "m", name: "Vitamina", time: "09:00" }] } };
+    expect(dueSettingsReminders(settings, "America/Sao_Paulo", at9).map((r) => r.key)).toEqual(["bill|x|2026-10-15", "med|m|2026-10-14"]);
+  });
+});

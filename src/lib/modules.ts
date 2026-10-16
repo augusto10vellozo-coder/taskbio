@@ -1,7 +1,7 @@
-import { Dumbbell, CalendarDays, CheckSquare, Droplets, LineChart, ShoppingBasket, Target, UtensilsCrossed, type LucideIcon } from "lucide-react";
+import { BookOpen, GraduationCap, Wallet, Dumbbell, CalendarDays, CheckSquare, Droplets, LineChart, ShoppingBasket, Target, UtensilsCrossed, type LucideIcon } from "lucide-react";
 
-export type ModuleId = "agenda" | "treino" | "alimentacao" | "compras" | "progresso" | "habitos" | "metas" | "saude";
-export type AppModule = { id: ModuleId; to: "/" | "/treino" | "/alimentacao" | "/compras" | "/progresso" | "/habitos" | "/metas" | "/saude"; label: string; description: string; icon: LucideIcon; optional: boolean };
+export type ModuleId = "agenda" | "treino" | "alimentacao" | "compras" | "progresso" | "habitos" | "metas" | "saude" | "financas" | "leitura" | "estudos";
+export type AppModule = { id: ModuleId; to: "/" | "/treino" | "/alimentacao" | "/compras" | "/progresso" | "/habitos" | "/metas" | "/saude" | "/financas" | "/leitura" | "/estudos"; label: string; description: string; icon: LucideIcon; optional: boolean };
 
 /** Registry of app modules. Add new modules here; navigation and settings read from it. */
 export const MODULES: AppModule[] = [
@@ -12,11 +12,14 @@ export const MODULES: AppModule[] = [
   { id: "progresso", to: "/progresso", label: "Progresso", description: "Evolução", icon: LineChart, optional: true },
   { id: "habitos", to: "/habitos", label: "Hábitos", description: "Tabela semanal", icon: CheckSquare, optional: true },
   { id: "metas", to: "/metas", label: "Metas", description: "Metas do mês", icon: Target, optional: true },
-  { id: "saude", to: "/saude", label: "Saúde", description: "Água, sono e peso", icon: Droplets, optional: true },
+  { id: "saude", to: "/saude", label: "Saúde", description: "Água, sono e medicamentos", icon: Droplets, optional: true },
+  { id: "financas", to: "/financas", label: "Finanças", description: "Gastos, contas e orçamento", icon: Wallet, optional: true },
+  { id: "leitura", to: "/leitura", label: "Leitura", description: "Minutos e livros", icon: BookOpen, optional: true },
+  { id: "estudos", to: "/estudos", label: "Estudos", description: "Sessões de estudo", icon: GraduationCap, optional: true },
 ];
 
 export type ModuleSettings = Partial<Record<ModuleId, boolean>>;
-const OFF_BY_DEFAULT: ModuleId[] = ["habitos", "metas", "saude"];
+const OFF_BY_DEFAULT: ModuleId[] = ["metas", "saude", "financas", "leitura", "estudos"];
 
 export const isModuleOn = (settings: ModuleSettings, id: ModuleId) => {
   const mod = MODULES.find((m) => m.id === id);

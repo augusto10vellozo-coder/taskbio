@@ -19,7 +19,12 @@ export type HealthLog = {
   water: Record<string, number>;
   sleep: Record<string, number>;
   weight: Record<string, number>;
+  meds?: { id: string; name: string; time: string }[];
+  medsTaken?: Record<string, string[]>;
 };
+export type SessionEntry = { id: string; date: string; minutes: number; title: string };
+export type Trackers = { leitura: SessionEntry[]; estudos: SessionEntry[] };
+export const emptyTrackers: Trackers = { leitura: [], estudos: [] };
 
 export const emptyHealth: HealthLog = { waterGoal: 8, water: {}, sleep: {}, weight: {} };
 
