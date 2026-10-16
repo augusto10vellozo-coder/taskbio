@@ -11,17 +11,20 @@ import { Button } from "@/components/ui/button";
 import { agendaSummary } from "@/lib/agenda-overview";
 import { isActiveDay } from "@/lib/engagement";
 import { useLeague } from "@/lib/use-league";
+import { useAwards } from "@/lib/use-awards";
 
 export function TodayPanel() {
   const { user } = useAuth();
   const { plan, habits, habitLog, modules, toggleBlock, toggleHabit, ready } = useTaskBio();
   const league = useLeague();
+  const awards = useAwards();
+  const frozen = useMemo(() => new Set(awards?.freezeDays ?? []), [awards]);
   const [now, setNow] = useState<Date | null>(null);
   useEffect(() => setNow(new Date()), []);
   const today = now ? toDateKey(now) : "";
   const blocks = useMemo(() => [...(plan[today] ?? [])].sort((a, b) => a.time.localeCompare(b.time)), [plan, today]);
   const score = now ? dayScore(plan, habits, habitLog, today) : 0;
-  const days = now ? streak(plan, habitLog, now, habits) : 0;
+  const days = now ? streak(plan, habitLog, now, habits, frozen) : 0;
   const summary = agendaSummary(blocks);
   const hasStarted = [...Object.keys(plan), ...Object.keys(habitLog)].some((date) => isActiveDay(plan, habitLog, date, habits));
   const habitsOn = isModuleOn(modules, "habitos");
