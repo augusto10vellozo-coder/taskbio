@@ -24,6 +24,7 @@ export const Route = createFileRoute("/hoje")({
 function Hoje() {
   const { plan } = useTaskBio();
   const [today, setToday] = useState<string | null>(null);
+  const [adding, setAdding] = useState(false);
   useEffect(() => setToday(toDateKey(new Date())), []);
 
   if (!today) {
@@ -48,7 +49,7 @@ function Hoje() {
           </Button>
         </div>
       </section>
-      <DayTimeline dateKey={today} adding={false} onAddingChange={() => {}} />
+      <DayTimeline dateKey={today} adding={adding} onAddingChange={setAdding} />
     </main>
   );
 }

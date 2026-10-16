@@ -22,6 +22,7 @@ import { Route as EsqueciSenhaRouteImport } from './routes/esqueci-senha'
 import { Route as EstudosRouteImport } from './routes/estudos'
 import { Route as FinancasRouteImport } from './routes/financas'
 import { Route as HabitosRouteImport } from './routes/habitos'
+import { Route as HojeRouteImport } from './routes/hoje'
 import { Route as LeituraRouteImport } from './routes/leitura'
 import { Route as MetasRouteImport } from './routes/metas'
 import { Route as ModulosRouteImport } from './routes/modulos'
@@ -103,6 +104,11 @@ const FinancasRoute = FinancasRouteImport.update({
 const HabitosRoute = HabitosRouteImport.update({
   id: '/habitos',
   path: '/habitos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HojeRoute = HojeRouteImport.update({
+  id: '/hoje',
+  path: '/hoje',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LeituraRoute = LeituraRouteImport.update({
@@ -210,6 +216,7 @@ export interface FileRoutesByFullPath {
   '/estudos': typeof EstudosRoute
   '/financas': typeof FinancasRoute
   '/habitos': typeof HabitosRoute
+  '/hoje': typeof HojeRoute
   '/leitura': typeof LeituraRoute
   '/metas': typeof MetasRoute
   '/modulos': typeof ModulosRoute
@@ -242,6 +249,7 @@ export interface FileRoutesByTo {
   '/estudos': typeof EstudosRoute
   '/financas': typeof FinancasRoute
   '/habitos': typeof HabitosRoute
+  '/hoje': typeof HojeRoute
   '/leitura': typeof LeituraRoute
   '/metas': typeof MetasRoute
   '/modulos': typeof ModulosRoute
@@ -276,6 +284,7 @@ export interface FileRoutesById {
   '/estudos': typeof EstudosRoute
   '/financas': typeof FinancasRoute
   '/habitos': typeof HabitosRoute
+  '/hoje': typeof HojeRoute
   '/leitura': typeof LeituraRoute
   '/metas': typeof MetasRoute
   '/modulos': typeof ModulosRoute
@@ -310,6 +319,7 @@ export interface FileRouteTypes {
     | '/estudos'
     | '/financas'
     | '/habitos'
+    | '/hoje'
     | '/leitura'
     | '/metas'
     | '/modulos'
@@ -342,6 +352,7 @@ export interface FileRouteTypes {
     | '/estudos'
     | '/financas'
     | '/habitos'
+    | '/hoje'
     | '/leitura'
     | '/metas'
     | '/modulos'
@@ -375,6 +386,7 @@ export interface FileRouteTypes {
     | '/estudos'
     | '/financas'
     | '/habitos'
+    | '/hoje'
     | '/leitura'
     | '/metas'
     | '/modulos'
@@ -409,6 +421,7 @@ export interface RootRouteChildren {
   EstudosRoute: typeof EstudosRoute
   FinancasRoute: typeof FinancasRoute
   HabitosRoute: typeof HabitosRoute
+  HojeRoute: typeof HojeRoute
   LeituraRoute: typeof LeituraRoute
   MetasRoute: typeof MetasRoute
   ModulosRoute: typeof ModulosRoute
@@ -516,6 +529,13 @@ declare module '@tanstack/react-router' {
       path: '/habitos'
       fullPath: '/habitos'
       preLoaderRoute: typeof HabitosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hoje': {
+      id: '/hoje'
+      path: '/hoje'
+      fullPath: '/hoje'
+      preLoaderRoute: typeof HojeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/leitura': {
@@ -678,6 +698,7 @@ const rootRouteChildren: RootRouteChildren = {
   EstudosRoute: EstudosRoute,
   FinancasRoute: FinancasRoute,
   HabitosRoute: HabitosRoute,
+  HojeRoute: HojeRoute,
   LeituraRoute: LeituraRoute,
   MetasRoute: MetasRoute,
   ModulosRoute: ModulosRoute,
