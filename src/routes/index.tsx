@@ -39,13 +39,6 @@ export const Route = createFileRoute("/")({
   component: MinhaSemana,
 });
 
-const dotColor: Record<BlockKind, string> = {
-  refeicao: "ring-good",
-  treino: "ring-brand",
-  compromisso: "ring-steel",
-  descanso: "ring-line",
-};
-
 function MinhaSemana() {
   const { user, loading } = useAuth();
   const { plan, ready, replaceDays, clearWeek, getMeal, goal } = useTaskBio();
