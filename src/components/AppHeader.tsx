@@ -61,6 +61,7 @@ export function AppHeader() {
             </Link>
           ))}
           <Link to="/modulos" className="rounded-lg px-3 py-2 font-medium text-steel hover:text-ink" activeProps={{ className: "rounded-lg px-3 py-2 font-medium bg-ink text-white" }}>Módulos</Link>
+          {user && <Link to="/amigos" className="rounded-lg px-3 py-2 font-medium text-steel hover:text-ink" activeProps={{ className: "rounded-lg px-3 py-2 font-medium bg-ink text-white" }}>Amigos</Link>}
         </nav>
 
         <div className="flex items-center gap-2">
@@ -86,6 +87,7 @@ export function AppHeader() {
           </Link>
         ))}
         <Link to="/modulos" className="shrink-0 rounded-lg px-3 py-1.5 font-medium text-steel" activeProps={{ className: "shrink-0 rounded-lg px-3 py-1.5 font-medium bg-ink text-white" }}>Módulos</Link>
+        {user && <Link to="/amigos" className="shrink-0 rounded-lg px-3 py-1.5 font-medium text-steel" activeProps={{ className: "shrink-0 rounded-lg px-3 py-1.5 font-medium bg-ink text-white" }}>Amigos</Link>}
       </nav>
     </header>
   );

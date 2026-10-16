@@ -24,6 +24,7 @@ import type { ModuleSettings } from "./modules";
 import { foodName } from "./meal-summary";
 import type { ExerciseLogEntry } from "./training";
 import type { Food } from "./food-db";
+import { emitBlockXp, emitXp, foodItemCount } from "./xp-client";
 import { emptyFinance, type FinanceState } from "./finance";
 
 export type TaskBioState = {
@@ -160,20 +161,29 @@ export function TaskBioProvider({ children }: { children: ReactNode }) {
         ...nextState,
         ...(nextState.plan ? { plan: normalizePlan(nextState.plan) } : {}),
       })),
-      toggleBlock: (day, blockId) =>
+      toggleBlock: (day, blockId) => {
+        const target = (state.plan[day] ?? []).find((b) => b.id === blockId);
+        if (target && (target.kind !== "refeicao" || foodItemCount(target) === 0)) emitBlockXp(day, target, !target.done);
         setState((s) => ({
           ...s,
           plan: {
             ...s.plan,
             [day]: (s.plan[day] ?? []).map((b) => (b.id === blockId ? { ...b, done: !b.done } : b)),
           },
-        })),
-      removeBlock: (day, blockId) =>
+        }));
+      },
+      removeBlock: (day, blockId) => {
+        const target = (state.plan[day] ?? []).find((b) => b.id === blockId);
+        if (target) { emitBlockXp(day, target, false); emitXp({ kind: "photo", ref: blockId, date: day, on: false }); }
         setState((s) => ({
           ...s,
           plan: { ...s.plan, [day]: (s.plan[day] ?? []).filter((b) => b.id !== blockId) },
-        })),
-      addBlock: (day, block) =>
+        }));
+      },
+      addBlock: (day, block) => {
+        const stamp = Date.now();
+        const firstId = `b-${stamp}-${day}`;
+        if (block.kind === "refeicao" && foodItemCount(block) > 0) emitXp({ kind: "meal", ref: firstId, date: day, on: true, foodItems: foodItemCount(block) });
         setState((s) => ({
           ...s,
           plan: (() => {
@@ -188,14 +198,15 @@ export function TaskBioProvider({ children }: { children: ReactNode }) {
                 const targetDate = toDateKey(cursor);
                 next[targetDate] = sortBlocks([
                   ...(next[targetDate] ?? []),
-                  { ...block, id: `b-${Date.now()}-${targetDate}`, done: false },
+                  { ...block, id: `b-${stamp}-${targetDate}`, done: false },
                 ]);
               }
               cursor = addDays(cursor, 1);
             } while (repeating && !isAfter(cursor, end));
             return next;
           })(),
-        })),
+        }));
+      },
       updateBlock: (day, blockId, block) => setState((s) => ({
         ...s,
         plan: { ...s.plan, [day]: sortBlocks((s.plan[day] ?? []).map((item) => item.id === blockId ? { ...item, ...block } : item)) },
@@ -265,11 +276,14 @@ export function TaskBioProvider({ children }: { children: ReactNode }) {
       addHabit: (name) => setState((s) => ({ ...s, habits: [...s.habits, { id: `h-${Date.now()}`, name, createdAt: new Date().toISOString() }] })),
       toggleHabitStreak: (id) => setState((s) => ({ ...s, habits: s.habits.map((h) => h.id === id ? { ...h, countsForStreak: h.countsForStreak === false } : h) })),
       removeHabit: (id) => setState((s) => ({ ...s, habits: s.habits.filter((h) => h.id !== id) })),
-      toggleHabit: (date, id) => setState((s) => {
+      toggleHabit: (date, id) => {
+        emitXp({ kind: "habit", ref: `${id}:${date}`, date, on: !(state.habitLog[date] ?? []).includes(id) });
+        setState((s) => {
         const cur = s.habitLog[date] ?? [];
         const next = cur.includes(id) ? cur.filter((x) => x !== id) : [...cur, id];
         return { ...s, habitLog: { ...s.habitLog, [date]: next } };
-      }),
+      });
+      },
       saveMonthGoal: (goal) => setState((s) => ({ ...s, monthGoals: s.monthGoals.some((g) => g.id === goal.id) ? s.monthGoals.map((g) => g.id === goal.id ? goal : g) : [...s.monthGoals, goal] })),
       removeMonthGoal: (id) => setState((s) => ({ ...s, monthGoals: s.monthGoals.filter((g) => g.id !== id) })),
       setHealth: (fn) => setState((s) => ({ ...s, health: fn({ ...emptyHealth, ...s.health }) })),

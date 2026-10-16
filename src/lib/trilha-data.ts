@@ -97,6 +97,7 @@ export type Block = {
   };
   workoutId?: string;
   reminderMinutes?: number;
+  photoPath?: string;
   recurrence?: "none" | "weekdays" | "daily";
   recurrenceUntil?: string;
 };

@@ -15,6 +15,13 @@
       "when": 1791996289547,
       "tag": "0001_push_grants",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792157072911,
+      "tag": "0002_social_league",
+      "breakpoints": true
     }
   ]
 }

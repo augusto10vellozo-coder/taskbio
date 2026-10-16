@@ -18,6 +18,7 @@ import { AuthProvider } from "../lib/auth-context";
 import { SyncManager } from "../components/SyncManager";
 import { Toaster } from "../components/ui/sonner";
 import { ReminderManager } from "../components/ReminderManager";
+import { InviteManager } from "../components/InviteManager";
 import { PendingProfessionalInvites } from "../components/PendingProfessionalInvites";
 import { PrivacyConsent } from "../components/PrivacyConsent";
 import { ThemeProvider } from "../lib/theme-context";
@@ -145,6 +146,7 @@ function RootComponent() {
           <PrivacyConsent />
           <SyncManager />
           <ReminderManager />
+          <InviteManager />
           <PendingProfessionalInvites />
           <Toaster position="top-center" richColors />
         </TaskBioProvider>

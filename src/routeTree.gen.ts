@@ -17,6 +17,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CalendarioRouteImport } from './routes/calendario'
 import { Route as ComprasRouteImport } from './routes/compras'
 import { Route as ContatoRouteImport } from './routes/contato'
+import { Route as ConviteRouteImport } from './routes/convite'
 import { Route as EsqueciSenhaRouteImport } from './routes/esqueci-senha'
 import { Route as EstudosRouteImport } from './routes/estudos'
 import { Route as FinancasRouteImport } from './routes/financas'
@@ -32,6 +33,7 @@ import { Route as SaudeRouteImport } from './routes/saude'
 import { Route as SobreRouteImport } from './routes/sobre'
 import { Route as TermosRouteImport } from './routes/termos'
 import { Route as TreinoRouteImport } from './routes/treino'
+import { Route as AuthenticatedAmigosRouteImport } from './routes/_authenticated/amigos'
 import { Route as AuthenticatedEquipeRouteImport } from './routes/_authenticated/equipe'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
 import { Route as AuthenticatedProfissionalRouteImport } from './routes/_authenticated/profissional'
@@ -76,6 +78,11 @@ const ComprasRoute = ComprasRouteImport.update({
 const ContatoRoute = ContatoRouteImport.update({
   id: '/contato',
   path: '/contato',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConviteRoute = ConviteRouteImport.update({
+  id: '/convite',
+  path: '/convite',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EsqueciSenhaRoute = EsqueciSenhaRouteImport.update({
@@ -153,6 +160,11 @@ const TreinoRoute = TreinoRouteImport.update({
   path: '/treino',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAmigosRoute = AuthenticatedAmigosRouteImport.update({
+  id: '/amigos',
+  path: '/amigos',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedEquipeRoute = AuthenticatedEquipeRouteImport.update({
   id: '/equipe',
   path: '/equipe',
@@ -193,6 +205,7 @@ export interface FileRoutesByFullPath {
   '/calendario': typeof CalendarioRoute
   '/compras': typeof ComprasRoute
   '/contato': typeof ContatoRoute
+  '/convite': typeof ConviteRoute
   '/esqueci-senha': typeof EsqueciSenhaRoute
   '/estudos': typeof EstudosRoute
   '/financas': typeof FinancasRoute
@@ -208,6 +221,7 @@ export interface FileRoutesByFullPath {
   '/sobre': typeof SobreRoute
   '/termos': typeof TermosRoute
   '/treino': typeof TreinoRoute
+  '/amigos': typeof AuthenticatedAmigosRoute
   '/equipe': typeof AuthenticatedEquipeRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/profissional': typeof AuthenticatedProfissionalRoute
@@ -223,6 +237,7 @@ export interface FileRoutesByTo {
   '/calendario': typeof CalendarioRoute
   '/compras': typeof ComprasRoute
   '/contato': typeof ContatoRoute
+  '/convite': typeof ConviteRoute
   '/esqueci-senha': typeof EsqueciSenhaRoute
   '/estudos': typeof EstudosRoute
   '/financas': typeof FinancasRoute
@@ -238,6 +253,7 @@ export interface FileRoutesByTo {
   '/sobre': typeof SobreRoute
   '/termos': typeof TermosRoute
   '/treino': typeof TreinoRoute
+  '/amigos': typeof AuthenticatedAmigosRoute
   '/equipe': typeof AuthenticatedEquipeRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/profissional': typeof AuthenticatedProfissionalRoute
@@ -255,6 +271,7 @@ export interface FileRoutesById {
   '/calendario': typeof CalendarioRoute
   '/compras': typeof ComprasRoute
   '/contato': typeof ContatoRoute
+  '/convite': typeof ConviteRoute
   '/esqueci-senha': typeof EsqueciSenhaRoute
   '/estudos': typeof EstudosRoute
   '/financas': typeof FinancasRoute
@@ -270,6 +287,7 @@ export interface FileRoutesById {
   '/sobre': typeof SobreRoute
   '/termos': typeof TermosRoute
   '/treino': typeof TreinoRoute
+  '/_authenticated/amigos': typeof AuthenticatedAmigosRoute
   '/_authenticated/equipe': typeof AuthenticatedEquipeRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
   '/_authenticated/profissional': typeof AuthenticatedProfissionalRoute
@@ -287,6 +305,7 @@ export interface FileRouteTypes {
     | '/calendario'
     | '/compras'
     | '/contato'
+    | '/convite'
     | '/esqueci-senha'
     | '/estudos'
     | '/financas'
@@ -302,6 +321,7 @@ export interface FileRouteTypes {
     | '/sobre'
     | '/termos'
     | '/treino'
+    | '/amigos'
     | '/equipe'
     | '/perfil'
     | '/profissional'
@@ -317,6 +337,7 @@ export interface FileRouteTypes {
     | '/calendario'
     | '/compras'
     | '/contato'
+    | '/convite'
     | '/esqueci-senha'
     | '/estudos'
     | '/financas'
@@ -332,6 +353,7 @@ export interface FileRouteTypes {
     | '/sobre'
     | '/termos'
     | '/treino'
+    | '/amigos'
     | '/equipe'
     | '/perfil'
     | '/profissional'
@@ -348,6 +370,7 @@ export interface FileRouteTypes {
     | '/calendario'
     | '/compras'
     | '/contato'
+    | '/convite'
     | '/esqueci-senha'
     | '/estudos'
     | '/financas'
@@ -363,6 +386,7 @@ export interface FileRouteTypes {
     | '/sobre'
     | '/termos'
     | '/treino'
+    | '/_authenticated/amigos'
     | '/_authenticated/equipe'
     | '/_authenticated/perfil'
     | '/_authenticated/profissional'
@@ -380,6 +404,7 @@ export interface RootRouteChildren {
   CalendarioRoute: typeof CalendarioRoute
   ComprasRoute: typeof ComprasRoute
   ContatoRoute: typeof ContatoRoute
+  ConviteRoute: typeof ConviteRoute
   EsqueciSenhaRoute: typeof EsqueciSenhaRoute
   EstudosRoute: typeof EstudosRoute
   FinancasRoute: typeof FinancasRoute
@@ -456,6 +481,13 @@ declare module '@tanstack/react-router' {
       path: '/contato'
       fullPath: '/contato'
       preLoaderRoute: typeof ContatoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/convite': {
+      id: '/convite'
+      path: '/convite'
+      fullPath: '/convite'
+      preLoaderRoute: typeof ConviteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/esqueci-senha': {
@@ -563,6 +595,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TreinoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/amigos': {
+      id: '/_authenticated/amigos'
+      path: '/amigos'
+      fullPath: '/amigos'
+      preLoaderRoute: typeof AuthenticatedAmigosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/equipe': {
       id: '/_authenticated/equipe'
       path: '/equipe'
@@ -609,12 +648,14 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAmigosRoute: typeof AuthenticatedAmigosRoute
   AuthenticatedEquipeRoute: typeof AuthenticatedEquipeRoute
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
   AuthenticatedProfissionalRoute: typeof AuthenticatedProfissionalRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAmigosRoute: AuthenticatedAmigosRoute,
   AuthenticatedEquipeRoute: AuthenticatedEquipeRoute,
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
   AuthenticatedProfissionalRoute: AuthenticatedProfissionalRoute,
@@ -632,6 +673,7 @@ const rootRouteChildren: RootRouteChildren = {
   CalendarioRoute: CalendarioRoute,
   ComprasRoute: ComprasRoute,
   ContatoRoute: ContatoRoute,
+  ConviteRoute: ConviteRoute,
   EsqueciSenhaRoute: EsqueciSenhaRoute,
   EstudosRoute: EstudosRoute,
   FinancasRoute: FinancasRoute,

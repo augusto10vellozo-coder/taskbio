@@ -53,6 +53,33 @@ export type Database = {
         }
         Relationships: []
       }
+      friendships: {
+        Row: {
+          addressee: string
+          created_at: string
+          id: string
+          requester: string
+          responded_at: string | null
+          status: string
+        }
+        Insert: {
+          addressee: string
+          created_at?: string
+          id?: string
+          requester: string
+          responded_at?: string | null
+          status?: string
+        }
+        Update: {
+          addressee?: string
+          created_at?: string
+          id?: string
+          requester?: string
+          responded_at?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
       professional_clients: {
         Row: {
           client_id: string | null
@@ -93,8 +120,10 @@ export type Database = {
           display_name: string
           goal: string | null
           id: string
+          invite_code: string | null
           preferences: Json
           updated_at: string
+          username: string | null
         }
         Insert: {
           avatar_url?: string | null
@@ -102,8 +131,10 @@ export type Database = {
           display_name?: string
           goal?: string | null
           id: string
+          invite_code?: string | null
           preferences?: Json
           updated_at?: string
+          username?: string | null
         }
         Update: {
           avatar_url?: string | null
@@ -111,8 +142,10 @@ export type Database = {
           display_name?: string
           goal?: string | null
           id?: string
+          invite_code?: string | null
           preferences?: Json
           updated_at?: string
+          username?: string | null
         }
         Relationships: []
       }
@@ -299,6 +332,39 @@ export type Database = {
         }
         Relationships: []
       }
+      xp_events: {
+        Row: {
+          created_at: string
+          day: string
+          id: string
+          kind: string
+          photo_path: string | null
+          points: number
+          ref: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          day: string
+          id?: string
+          kind: string
+          photo_path?: string | null
+          points: number
+          ref: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          day?: string
+          id?: string
+          kind?: string
+          photo_path?: string | null
+          points?: number
+          ref?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -310,6 +376,44 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      league_week: {
+        Args: { _start: string }
+        Returns: {
+          avatar_url: string
+          display_name: string
+          first_mark_sec: number
+          habit_days: number
+          habits: number
+          meals: number
+          streak: number
+          today_xp: number
+          total_xp: number
+          user_id: string
+          username: string
+          week_xp: number
+          workouts: number
+        }[]
+      }
+      my_friend_requests: {
+        Args: never
+        Returns: {
+          avatar_url: string
+          created_at: string
+          display_name: string
+          id: string
+          requester: string
+          username: string
+        }[]
+      }
+      search_profiles: {
+        Args: { _q: string }
+        Returns: {
+          avatar_url: string
+          display_name: string
+          id: string
+          username: string
+        }[]
       }
     }
     Enums: {

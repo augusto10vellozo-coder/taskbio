@@ -1,0 +1,26 @@
+import { supabase } from "@/integrations/supabase/client";
+import { recordXp } from "@/lib/social.functions";
+import type { Block } from "@/lib/trilha-data";
+import type { XpKind } from "@/lib/xp";
+
+export const XP_EVENT = "taskbio:xp-changed";
+
+/** Fire-and-forget XP sync for signed-in people; the server decides the points. */
+export function emitXp(input: { kind: XpKind; ref: string; date: string; on: boolean; foodItems?: number; photoPath?: string }) {
+  if (typeof window === "undefined") return;
+  void supabase.auth.getSession().then(async ({ data }) => {
+    if (!data.session) return;
+    try {
+      const res = await recordXp({ data: input });
+      window.dispatchEvent(new CustomEvent(XP_EVENT, { detail: res }));
+    } catch { /* offline: points are not awarded later to keep the same-day rule */ }
+  });
+}
+
+export const foodItemCount = (b: Pick<Block, "manualMeal">) => (b.manualMeal?.items ?? []).filter((i) => i.foodId).length;
+
+export function emitBlockXp(date: string, block: Block, on: boolean) {
+  if (block.kind === "treino") emitXp({ kind: "workout", ref: block.id, date, on });
+  else if (block.kind === "refeicao") emitXp({ kind: "meal", ref: block.id, date, on, foodItems: foodItemCount(block) });
+  else emitXp({ kind: "block", ref: block.id, date, on });
+}
