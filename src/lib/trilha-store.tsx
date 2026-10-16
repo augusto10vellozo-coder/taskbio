@@ -85,6 +85,7 @@ type Store = TaskBioState & {
   addCustomFood: (food: Food) => void;
   setFinance: (fn: (f: FinanceState) => FinanceState) => void;
   setTrackers: (fn: (t: Trackers) => Trackers) => void;
+  setNotifPref: (key: keyof NotifPrefs, on: boolean) => void;
 };
 
 const initialState: TaskBioState = {
@@ -105,6 +106,7 @@ const initialState: TaskBioState = {
   customFoods: [],
   finance: emptyFinance,
   trackers: emptyTrackers,
+  notifPrefs: defaultNotifPrefs,
 };
 
 const STORAGE_KEY = "trilha.state.v2";
@@ -291,6 +293,7 @@ export function TaskBioProvider({ children }: { children: ReactNode }) {
       setHealth: (fn) => setState((s) => ({ ...s, health: fn({ ...emptyHealth, ...s.health }) })),
       setFinance: (fn) => setState((s) => ({ ...s, finance: fn({ ...emptyFinance, ...s.finance }) })),
       setTrackers: (fn) => setState((s) => ({ ...s, trackers: fn({ ...emptyTrackers, ...s.trackers }) })),
+      setNotifPref: (key, on) => setState((s) => ({ ...s, notifPrefs: { ...defaultNotifPrefs, ...s.notifPrefs, [key]: on } })),
       setModule: (id, on) => setState((s) => ({ ...s, modules: { ...s.modules, [id]: on } })),
       getWorkout: (id) => state.workouts.find((w) => w.id === id),
       getMeal: (id) => displayMeals.find((m) => m.id === id),
