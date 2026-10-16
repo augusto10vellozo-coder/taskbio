@@ -12,7 +12,7 @@ import { agendaSummary } from "@/lib/agenda-overview";
 import { isActiveDay } from "@/lib/engagement";
 import { useLeague } from "@/lib/use-league";
 
-export function TodayPanel({ onTodaySelect }: { onTodaySelect: () => void }) {
+export function TodayPanel() {
   const { user } = useAuth();
   const { plan, habits, habitLog, modules, toggleBlock, toggleHabit, ready } = useTaskBio();
   const league = useLeague();
@@ -48,7 +48,7 @@ export function TodayPanel({ onTodaySelect }: { onTodaySelect: () => void }) {
         <div className="rounded-lg bg-card p-3 ring-1 ring-line sm:p-4"><p className="text-xs text-steel">Sequência</p>{hasStarted ? <><p className="flex items-center gap-1 font-display text-3xl font-semibold sm:text-4xl"><Flame className={days > 0 ? "size-6 text-brand sm:size-7" : "size-6 text-steel sm:size-7"} />{days}</p><p className="text-xs text-steel">{days === 1 ? "dia seguido" : "dias seguidos"}{isMilestone(days) ? " · marco!" : ""}</p></> : <p className="mt-1 text-xs leading-snug text-steel">Marque algo hoje para começar</p>}{league.me && <p className="mt-1 text-[11px] font-medium leading-snug text-brand-deep">{league.me.today_xp} XP hoje · {league.me.week_xp} XP na semana</p>}{league.rows && league.rows.length > 1 && league.position > 0 && <Link to="/amigos" className="mt-0.5 block text-[11px] text-steel underline-offset-2 hover:underline">Você está em {league.position}º entre seus amigos</Link>}</div>
         <div className="col-span-2 rounded-lg bg-card p-3 ring-1 ring-line sm:col-span-1 sm:p-4">
           <p className="text-xs text-steel">Hoje</p>
-          <Button variant="ghost" onClick={onTodaySelect} className="mt-1 h-auto w-full justify-start whitespace-normal px-0 py-2 text-left" aria-label="Ir para a Linha do dia de hoje"><span aria-live="polite">{summary.total} {summary.total === 1 ? "item hoje" : "itens hoje"} · {summary.completed} {summary.completed === 1 ? "concluído" : "concluídos"}</span></Button>
+          <Link to="/hoje" className="mt-1 block w-full whitespace-normal px-0 py-2 text-left" aria-label="Abrir a linha do dia de hoje em uma tela própria"><span aria-live="polite">{summary.total} {summary.total === 1 ? "item hoje" : "itens hoje"} · {summary.completed} {summary.completed === 1 ? "concluído" : "concluídos"}</span></Link>
         </div>
       </div>
       {workoutToday && <div className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-lg bg-card p-4 ring-1 ring-brand/40">
