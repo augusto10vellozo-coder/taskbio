@@ -86,3 +86,98 @@ export function dueSettingsReminders(settings: unknown, timeZone: string, now: D
   }
   return result;
 }
+
+type HabitLike = { id: string; countsForStreak?: boolean };
+type PlanLike = Record<string, { done?: boolean }[] | undefined>;
+
+function wallClock(now: Date, timeZone: string): number {
+  try { return localWallClock(now, timeZone); } catch { return localWallClock(now, "America/Sao_Paulo"); }
+}
+
+/** Minutes between now and a local HH:MM today; negative when the time already passed. */
+function minutesTo(nowMs: number, time: string): number {
+  const [h, m] = time.split(":").map(Number);
+  if (Number.isNaN(h) || Number.isNaN(m)) return NaN;
+  const d = new Date(nowMs);
+  return (Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), h, m) - nowMs) / 60000;
+}
+
+/** True during the 5-minute cron window that starts at the given local time. */
+const atTime = (nowMs: number, time: string) => { const diff = minutesTo(nowMs, time); return diff <= 0 && diff > -5; };
+
+const activeDay = (plan: PlanLike, log: Record<string, string[]>, day: string, habits: HabitLike[], frozen: Set<string>) => {
+  if (frozen.has(day)) return true;
+  if ((plan[day] ?? []).some((b) => b?.done)) return true;
+  const excluded = new Set(habits.filter((h) => h.countsForStreak === false).map((h) => h.id));
+  return (log[day] ?? []).some((id) => !excluded.has(id));
+};
+
+/** Consecutive active days ending today or yesterday (mirrors src/lib/engagement.ts streak). */
+export function streakDays(plan: unknown, habitLog: unknown, habits: unknown, frozenDays: string[], todayKey: string): number {
+  const p = (plan && typeof plan === "object" ? plan : {}) as PlanLike;
+  const log = (habitLog && typeof habitLog === "object" ? habitLog : {}) as Record<string, string[]>;
+  const hs = Array.isArray(habits) ? (habits as HabitLike[]) : [];
+  const frozen = new Set(frozenDays);
+  const start = new Date(`${todayKey}T00:00:00Z`);
+  let cursor = activeDay(p, log, todayKey, hs, frozen) ? start : new Date(start.getTime() - 86400000);
+  let count = 0;
+  while (activeDay(p, log, dayKey(cursor.getTime()), hs, frozen) && count < 3650) {
+    count += 1;
+    cursor = new Date(cursor.getTime() - 86400000);
+  }
+  return count;
+}
+
+/** 20:00 — streak >= 2 with unmarked habits today. Max 1x/day via the dated key. */
+export function dueStreakRisk(input: { plan: unknown; habitLog: unknown; habits: unknown; frozenDays: string[]; freezesAvailable: number }, timeZone: string, now: Date): DueReminder[] {
+  const nowMs = wallClock(now, timeZone);
+  if (!atTime(nowMs, "20:00")) return [];
+  const today = dayKey(nowMs);
+  const streak = streakDays(input.plan, input.habitLog, input.habits, input.frozenDays, today);
+  if (streak < 2) return [];
+  const hs = Array.isArray(input.habits) ? (input.habits as HabitLike[]) : [];
+  const marked = new Set((input.habitLog && typeof input.habitLog === "object" ? (input.habitLog as Record<string, string[]>)[today] : undefined) ?? []);
+  const missing = hs.filter((h) => !marked.has(h.id)).length;
+  if (missing === 0) return [];
+  const title = input.freezesAvailable > 0
+    ? "🔥 Streak em risco — use seu congelamento ou marque seus hábitos agora"
+    : `🔥 Seu streak de ${streak} dias está em risco — faltam ${missing} hábito${missing > 1 ? "s" : ""} hoje`;
+  return [{ key: `streak|${today}`, title, body: "Abra o TaskBio e marque seus hábitos para manter a sequência.", url: "/habitos" }];
+}
+
+/** 21:30 — pending blocks today; Y = XP still available under the 100 XP/day cap. */
+export function dueDayClose(plan: unknown, todayXp: number, timeZone: string, now: Date): DueReminder[] {
+  const nowMs = wallClock(now, timeZone);
+  if (!atTime(nowMs, "21:30")) return [];
+  const today = dayKey(nowMs);
+  const blocks = (plan && typeof plan === "object" ? (plan as PlanLike)[today] : undefined) ?? [];
+  const pending = blocks.filter((b) => b && !b.done).length;
+  if (pending === 0) return [];
+  const xpLeft = Math.max(0, 100 - Math.max(0, Math.floor(todayXp)));
+  return [{ key: `dayclose|${today}`, title: `Faltam ${pending} ${pending > 1 ? "itens" : "item"} pra fechar o dia — vale ${xpLeft} XP`, body: "Conclua seus itens de hoje no TaskBio.", url: "/hoje" }];
+}
+
+/** 45 minutes after each planned meal without registration (block not done). 1x per meal per day. */
+export function dueMealReminders(plan: unknown, timeZone: string, now: Date): DueReminder[] {
+  const nowMs = wallClock(now, timeZone);
+  const today = dayKey(nowMs);
+  const blocks = (plan && typeof plan === "object" ? (plan as Record<string, unknown>)[today] : undefined);
+  if (!Array.isArray(blocks)) return [];
+  const result: DueReminder[] = [];
+  for (const raw of blocks as ReminderBlock[]) {
+    if (!raw || raw.done || raw.kind !== "refeicao" || typeof raw.time !== "string") continue;
+    const diff = minutesTo(nowMs, raw.time);
+    if (diff > -45 || diff <= -50) continue;
+    result.push({ key: `mealrem|${raw.id}|${today}`, title: `Já registrou: ${String(raw.title).slice(0, 60)}?`, body: "Registre o que comeu e mantenha as calorias em dia.", url: "/alimentacao" });
+  }
+  return result;
+}
+
+/** Monday 09:00 — new league week, with last week's position when known. */
+export function dueLeagueOpen(lastWeekPosition: number | null, timeZone: string, now: Date): DueReminder[] {
+  const nowMs = wallClock(now, timeZone);
+  if (new Date(nowMs).getUTCDay() !== 1 || !atTime(nowMs, "09:00")) return [];
+  const weekStart = dayKey(nowMs);
+  const place = lastWeekPosition && lastWeekPosition > 0 ? ` Você está em ${lastWeekPosition}º lugar.` : "";
+  return [{ key: `league|${weekStart}`, title: "🏆 Nova semana da liga começou!", body: `Marque hábitos e conclua tarefas para subir no ranking.${place}`, url: "/amigos" }];
+}
