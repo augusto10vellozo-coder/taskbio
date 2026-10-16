@@ -122,6 +122,18 @@ function ProfilePage() {
     <footer className="mt-8 flex flex-wrap gap-4 text-xs text-steel"><Link to="/privacidade" className="underline">Privacidade</Link><Link to="/termos" className="underline">Termos</Link></footer>
   </main>;
 }
+function NotificationPrefsSection() {
+  const { notifPrefs, setNotifPref } = useTaskBio();
+  const layers = [
+    { key: "streak", label: "Streak em risco", hint: "Aviso às 20h se faltarem hábitos no dia" },
+    { key: "dayClose", label: "Fechamento do dia", hint: "Aviso às 21h30 com os itens pendentes" },
+    { key: "meals", label: "Registro de refeição", hint: "45 min após cada refeição planejada" },
+    { key: "league", label: "Liga semanal", hint: "Abertura da liga na segunda-feira às 9h" },
+    { key: "tasks", label: "Tarefas e compromissos", hint: "Aviso antes de cada item da agenda" },
+    { key: "workouts", label: "Treinos", hint: "Aviso 30 min antes dos treinos" },
+  ] as const;
+  return <section className="mt-6 rounded-lg bg-card p-5 ring-1 ring-line"><h2 className="font-display text-xl font-semibold">Notificações</h2><p className="mt-2 text-sm text-steel">Escolha quais avisos quer receber. Nada é enviado entre 22h30 e 7h.</p><div className="mt-4 grid gap-2 sm:grid-cols-2">{layers.map((layer) => <label key={layer.key} className="flex items-start gap-3 rounded-lg bg-mist/60 p-3 ring-1 ring-line"><input type="checkbox" checked={notifPrefs[layer.key]} onChange={(event) => setNotifPref(layer.key, event.target.checked)} className="mt-0.5 size-4 accent-brand" /><span><span className="block text-sm font-medium">{layer.label}</span><span className="block text-xs text-steel">{layer.hint}</span></span></label>)}</div></section>;
+}
 function AwardsBox({ months }: { months: string[] }) {
   const awards = useAwards();
   if (!awards) return null;
