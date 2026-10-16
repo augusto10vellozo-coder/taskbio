@@ -18,8 +18,12 @@ import { Route as CalendarioRouteImport } from './routes/calendario'
 import { Route as ComprasRouteImport } from './routes/compras'
 import { Route as ContatoRouteImport } from './routes/contato'
 import { Route as EsqueciSenhaRouteImport } from './routes/esqueci-senha'
+import { Route as EstudosRouteImport } from './routes/estudos'
+import { Route as FinancasRouteImport } from './routes/financas'
 import { Route as HabitosRouteImport } from './routes/habitos'
+import { Route as LeituraRouteImport } from './routes/leitura'
 import { Route as MetasRouteImport } from './routes/metas'
+import { Route as ModulosRouteImport } from './routes/modulos'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as ProgressoRouteImport } from './routes/progresso'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
@@ -79,14 +83,34 @@ const EsqueciSenhaRoute = EsqueciSenhaRouteImport.update({
   path: '/esqueci-senha',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EstudosRoute = EstudosRouteImport.update({
+  id: '/estudos',
+  path: '/estudos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FinancasRoute = FinancasRouteImport.update({
+  id: '/financas',
+  path: '/financas',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HabitosRoute = HabitosRouteImport.update({
   id: '/habitos',
   path: '/habitos',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LeituraRoute = LeituraRouteImport.update({
+  id: '/leitura',
+  path: '/leitura',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MetasRoute = MetasRouteImport.update({
   id: '/metas',
   path: '/metas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ModulosRoute = ModulosRouteImport.update({
+  id: '/modulos',
+  path: '/modulos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacidadeRoute = PrivacidadeRouteImport.update({
@@ -170,8 +194,12 @@ export interface FileRoutesByFullPath {
   '/compras': typeof ComprasRoute
   '/contato': typeof ContatoRoute
   '/esqueci-senha': typeof EsqueciSenhaRoute
+  '/estudos': typeof EstudosRoute
+  '/financas': typeof FinancasRoute
   '/habitos': typeof HabitosRoute
+  '/leitura': typeof LeituraRoute
   '/metas': typeof MetasRoute
+  '/modulos': typeof ModulosRoute
   '/privacidade': typeof PrivacidadeRoute
   '/progresso': typeof ProgressoRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -196,8 +224,12 @@ export interface FileRoutesByTo {
   '/compras': typeof ComprasRoute
   '/contato': typeof ContatoRoute
   '/esqueci-senha': typeof EsqueciSenhaRoute
+  '/estudos': typeof EstudosRoute
+  '/financas': typeof FinancasRoute
   '/habitos': typeof HabitosRoute
+  '/leitura': typeof LeituraRoute
   '/metas': typeof MetasRoute
+  '/modulos': typeof ModulosRoute
   '/privacidade': typeof PrivacidadeRoute
   '/progresso': typeof ProgressoRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -224,8 +256,12 @@ export interface FileRoutesById {
   '/compras': typeof ComprasRoute
   '/contato': typeof ContatoRoute
   '/esqueci-senha': typeof EsqueciSenhaRoute
+  '/estudos': typeof EstudosRoute
+  '/financas': typeof FinancasRoute
   '/habitos': typeof HabitosRoute
+  '/leitura': typeof LeituraRoute
   '/metas': typeof MetasRoute
+  '/modulos': typeof ModulosRoute
   '/privacidade': typeof PrivacidadeRoute
   '/progresso': typeof ProgressoRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -252,8 +288,12 @@ export interface FileRouteTypes {
     | '/compras'
     | '/contato'
     | '/esqueci-senha'
+    | '/estudos'
+    | '/financas'
     | '/habitos'
+    | '/leitura'
     | '/metas'
+    | '/modulos'
     | '/privacidade'
     | '/progresso'
     | '/reset-password'
@@ -278,8 +318,12 @@ export interface FileRouteTypes {
     | '/compras'
     | '/contato'
     | '/esqueci-senha'
+    | '/estudos'
+    | '/financas'
     | '/habitos'
+    | '/leitura'
     | '/metas'
+    | '/modulos'
     | '/privacidade'
     | '/progresso'
     | '/reset-password'
@@ -305,8 +349,12 @@ export interface FileRouteTypes {
     | '/compras'
     | '/contato'
     | '/esqueci-senha'
+    | '/estudos'
+    | '/financas'
     | '/habitos'
+    | '/leitura'
     | '/metas'
+    | '/modulos'
     | '/privacidade'
     | '/progresso'
     | '/reset-password'
@@ -333,8 +381,12 @@ export interface RootRouteChildren {
   ComprasRoute: typeof ComprasRoute
   ContatoRoute: typeof ContatoRoute
   EsqueciSenhaRoute: typeof EsqueciSenhaRoute
+  EstudosRoute: typeof EstudosRoute
+  FinancasRoute: typeof FinancasRoute
   HabitosRoute: typeof HabitosRoute
+  LeituraRoute: typeof LeituraRoute
   MetasRoute: typeof MetasRoute
+  ModulosRoute: typeof ModulosRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
   ProgressoRoute: typeof ProgressoRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
@@ -413,6 +465,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EsqueciSenhaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/estudos': {
+      id: '/estudos'
+      path: '/estudos'
+      fullPath: '/estudos'
+      preLoaderRoute: typeof EstudosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/financas': {
+      id: '/financas'
+      path: '/financas'
+      fullPath: '/financas'
+      preLoaderRoute: typeof FinancasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/habitos': {
       id: '/habitos'
       path: '/habitos'
@@ -420,11 +486,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HabitosRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/leitura': {
+      id: '/leitura'
+      path: '/leitura'
+      fullPath: '/leitura'
+      preLoaderRoute: typeof LeituraRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/metas': {
       id: '/metas'
       path: '/metas'
       fullPath: '/metas'
       preLoaderRoute: typeof MetasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/modulos': {
+      id: '/modulos'
+      path: '/modulos'
+      fullPath: '/modulos'
+      preLoaderRoute: typeof ModulosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacidade': {
@@ -553,8 +633,12 @@ const rootRouteChildren: RootRouteChildren = {
   ComprasRoute: ComprasRoute,
   ContatoRoute: ContatoRoute,
   EsqueciSenhaRoute: EsqueciSenhaRoute,
+  EstudosRoute: EstudosRoute,
+  FinancasRoute: FinancasRoute,
   HabitosRoute: HabitosRoute,
+  LeituraRoute: LeituraRoute,
   MetasRoute: MetasRoute,
+  ModulosRoute: ModulosRoute,
   PrivacidadeRoute: PrivacidadeRoute,
   ProgressoRoute: ProgressoRoute,
   ResetPasswordRoute: ResetPasswordRoute,
