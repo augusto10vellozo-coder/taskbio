@@ -17,6 +17,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CalendarioRouteImport } from './routes/calendario'
 import { Route as ComprasRouteImport } from './routes/compras'
 import { Route as ContatoRouteImport } from './routes/contato'
+import { Route as ConviteRouteImport } from './routes/convite'
 import { Route as EsqueciSenhaRouteImport } from './routes/esqueci-senha'
 import { Route as EstudosRouteImport } from './routes/estudos'
 import { Route as FinancasRouteImport } from './routes/financas'
@@ -76,6 +77,11 @@ const ComprasRoute = ComprasRouteImport.update({
 const ContatoRoute = ContatoRouteImport.update({
   id: '/contato',
   path: '/contato',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConviteRoute = ConviteRouteImport.update({
+  id: '/convite',
+  path: '/convite',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EsqueciSenhaRoute = EsqueciSenhaRouteImport.update({
@@ -193,6 +199,7 @@ export interface FileRoutesByFullPath {
   '/calendario': typeof CalendarioRoute
   '/compras': typeof ComprasRoute
   '/contato': typeof ContatoRoute
+  '/convite': typeof ConviteRoute
   '/esqueci-senha': typeof EsqueciSenhaRoute
   '/estudos': typeof EstudosRoute
   '/financas': typeof FinancasRoute
@@ -223,6 +230,7 @@ export interface FileRoutesByTo {
   '/calendario': typeof CalendarioRoute
   '/compras': typeof ComprasRoute
   '/contato': typeof ContatoRoute
+  '/convite': typeof ConviteRoute
   '/esqueci-senha': typeof EsqueciSenhaRoute
   '/estudos': typeof EstudosRoute
   '/financas': typeof FinancasRoute
@@ -255,6 +263,7 @@ export interface FileRoutesById {
   '/calendario': typeof CalendarioRoute
   '/compras': typeof ComprasRoute
   '/contato': typeof ContatoRoute
+  '/convite': typeof ConviteRoute
   '/esqueci-senha': typeof EsqueciSenhaRoute
   '/estudos': typeof EstudosRoute
   '/financas': typeof FinancasRoute
@@ -287,6 +296,7 @@ export interface FileRouteTypes {
     | '/calendario'
     | '/compras'
     | '/contato'
+    | '/convite'
     | '/esqueci-senha'
     | '/estudos'
     | '/financas'
@@ -317,6 +327,7 @@ export interface FileRouteTypes {
     | '/calendario'
     | '/compras'
     | '/contato'
+    | '/convite'
     | '/esqueci-senha'
     | '/estudos'
     | '/financas'
@@ -348,6 +359,7 @@ export interface FileRouteTypes {
     | '/calendario'
     | '/compras'
     | '/contato'
+    | '/convite'
     | '/esqueci-senha'
     | '/estudos'
     | '/financas'
@@ -380,6 +392,7 @@ export interface RootRouteChildren {
   CalendarioRoute: typeof CalendarioRoute
   ComprasRoute: typeof ComprasRoute
   ContatoRoute: typeof ContatoRoute
+  ConviteRoute: typeof ConviteRoute
   EsqueciSenhaRoute: typeof EsqueciSenhaRoute
   EstudosRoute: typeof EstudosRoute
   FinancasRoute: typeof FinancasRoute
@@ -456,6 +469,13 @@ declare module '@tanstack/react-router' {
       path: '/contato'
       fullPath: '/contato'
       preLoaderRoute: typeof ContatoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/convite': {
+      id: '/convite'
+      path: '/convite'
+      fullPath: '/convite'
+      preLoaderRoute: typeof ConviteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/esqueci-senha': {
@@ -632,6 +652,7 @@ const rootRouteChildren: RootRouteChildren = {
   CalendarioRoute: CalendarioRoute,
   ComprasRoute: ComprasRoute,
   ContatoRoute: ContatoRoute,
+  ConviteRoute: ConviteRoute,
   EsqueciSenhaRoute: EsqueciSenhaRoute,
   EstudosRoute: EstudosRoute,
   FinancasRoute: FinancasRoute,

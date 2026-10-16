@@ -13,6 +13,7 @@ import { formatFullDate, formatWeekRange, getWeekDates, toDateKey } from "@/lib/
 import { AdSlot } from "@/components/AdSlot";
 import { toast } from "sonner";
 import { TodayPanel } from "@/components/TodayPanel";
+import { PhotoBonus } from "@/components/PhotoBonus";
 import { WeekActions } from "@/components/WeekActions";
 import { mealSummary } from "@/lib/meal-summary";
 import { agendaSummary } from "@/lib/agenda-overview";
@@ -252,6 +253,7 @@ function MinhaSemana() {
                             >
                               {b.done ? "Feito" : "Marcar"}
                             </Button>
+                             <PhotoBonus date={dateKey} block={b} />
                              <Button
                                variant="ghost"
                                size="icon"
