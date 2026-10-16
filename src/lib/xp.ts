@@ -21,7 +21,7 @@ export function shiftDay(day: string, days: number) {
   return d.toISOString().slice(0, 10);
 }
 
-type Input = { kind: XpKind; date: string; foodItems?: number };
+type Input = { kind: XpKind; date: string; foodItems?: number | undefined };
 
 /** Points awarded: 0 for past/future days (history only) and for meals without a food-base item. */
 export function xpFor(input: Input, today: string) {
