@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AgendaRouteImport } from './routes/agenda'
 import { Route as AlimentacaoRouteImport } from './routes/alimentacao'
 import { Route as AtividadesRouteImport } from './routes/atividades'
 import { Route as AuthRouteImport } from './routes/auth'
@@ -49,6 +50,11 @@ const IndexRoute = IndexRouteImport.update({
 } as any)
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AgendaRoute = AgendaRouteImport.update({
+  id: '/agenda',
+  path: '/agenda',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AlimentacaoRoute = AlimentacaoRouteImport.update({
@@ -205,6 +211,7 @@ const LovableEmailAuthWebhookRoute = LovableEmailAuthWebhookRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/agenda': typeof AgendaRoute
   '/alimentacao': typeof AlimentacaoRoute
   '/atividades': typeof AtividadesRoute
   '/auth': typeof AuthRoute
@@ -238,6 +245,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/agenda': typeof AgendaRoute
   '/alimentacao': typeof AlimentacaoRoute
   '/atividades': typeof AtividadesRoute
   '/auth': typeof AuthRoute
@@ -273,6 +281,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/agenda': typeof AgendaRoute
   '/alimentacao': typeof AlimentacaoRoute
   '/atividades': typeof AtividadesRoute
   '/auth': typeof AuthRoute
@@ -308,6 +317,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/agenda'
     | '/alimentacao'
     | '/atividades'
     | '/auth'
@@ -341,6 +351,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/agenda'
     | '/alimentacao'
     | '/atividades'
     | '/auth'
@@ -375,6 +386,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/agenda'
     | '/alimentacao'
     | '/atividades'
     | '/auth'
@@ -410,6 +422,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AgendaRoute: typeof AgendaRoute
   AlimentacaoRoute: typeof AlimentacaoRoute
   AtividadesRoute: typeof AtividadesRoute
   AuthRoute: typeof AuthRoute
@@ -452,6 +465,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/agenda': {
+      id: '/agenda'
+      path: '/agenda'
+      fullPath: '/agenda'
+      preLoaderRoute: typeof AgendaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/alimentacao': {
@@ -687,6 +707,7 @@ const AuthenticatedRouteRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AgendaRoute: AgendaRoute,
   AlimentacaoRoute: AlimentacaoRoute,
   AtividadesRoute: AtividadesRoute,
   AuthRoute: AuthRoute,
