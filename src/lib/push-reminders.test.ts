@@ -30,7 +30,15 @@ describe("dueSettingsReminders", () => {
     const settings = { finance: { bills: [{ id: "x", title: "Luz", amount: 120, dueDate: "2026-10-15" }, { id: "y", title: "Água", amount: 50, dueDate: "2026-10-16" }] }, health: { meds: [{ id: "m", name: "Vitamina", time: "09:00" }] } };
     expect(dueSettingsReminders(settings, "America/Sao_Paulo", at9).map((r) => r.key)).toEqual(["bill|x|2026-10-15", "med|m|2026-10-14"]);
   });
+  it("avisa prova 1 dia antes às 9h e no dia às 8h; ignora concluída", () => {
+    const exams = [{ id: "p", subjectId: "s", subjectName: "Inglês", title: "Prova oral", date: "2026-10-15" }, { id: "q", subjectId: "s", title: "Trabalho", date: "2026-10-15", done: true }];
+    const settings = { trackers: { exams } };
+    expect(dueSettingsReminders(settings, TZ_SP, new Date("2026-10-14T12:02:00Z")).map((r) => r.key)).toEqual(["exam1|p|2026-10-15"]);
+    expect(dueSettingsReminders(settings, TZ_SP, new Date("2026-10-15T11:01:00Z")).map((r) => r.key)).toEqual(["exam0|p|2026-10-15"]);
+    expect(dueSettingsReminders(settings, TZ_SP, new Date("2026-10-15T15:00:00Z"))).toEqual([]);
+  });
 });
+const TZ_SP = "America/Sao_Paulo";
 
 const TZ = "America/Sao_Paulo";
 const habits = [{ id: "h1" }, { id: "h2" }];
