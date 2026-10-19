@@ -76,7 +76,7 @@ function WeekTab({ onExplore }: { onExplore: () => void }) {
   return (
     <div>
       <section className="flex flex-wrap items-end justify-between gap-3 pb-5">
-        <div><h2 className="font-display text-xl font-semibold">Plano da semana</h2><p className="mt-2 text-sm text-steel">Toque no dia para ver o treino. O círculo marca o treino como concluído.</p></div>
+        <div><h2 className="font-display text-xl font-semibold">Plano da semana</h2><p className="mt-2 text-sm text-steel">Toque no dia pra ver o treino e marque quando concluir 💪</p></div>
         <Button variant="outline" onClick={() => setImporting(true)}><FileUp /> Importar plano</Button>
       </section>
 
@@ -93,16 +93,16 @@ function WeekTab({ onExplore }: { onExplore: () => void }) {
         <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="font-display text-xl font-semibold">{selBlock ? format(new Date(`${selected}T12:00:00`), "EEEE, d 'de' MMMM", { locale: ptBR }) : "Nada agendado neste dia"}</h2>{selBlock && <Button variant="ghost" size="sm" onClick={() => removeBlock(selected, selBlock.id)}><X /> Tirar do dia</Button>}</div>
         {!selBlock ? <>
           <h3 className="mt-4 text-sm font-semibold">Exemplos disponíveis para agendar</h3>
-          <p className="mt-2 border-l-2 border-brand bg-mist px-3 py-2 text-sm text-steel">Estes treinos ainda não estão na sua semana. Toque em um deles para agendar.</p>
+          <p className="mt-2 border-l-2 border-brand bg-mist px-3 py-2 text-sm text-steel">Toque num treino pra colocá-lo na sua semana.</p>
           <div className="mt-3 grid gap-3 sm:grid-cols-2">{examples.map((w) => <article key={w.id} className="rounded-lg border border-line p-3"><p className="text-[11px] uppercase text-steel">Exemplo</p><h4 className="mt-1 text-sm font-semibold">{w.name}</h4><p className="mt-1 text-xs text-steel">{w.focus} · {w.exercises.length} exercícios</p><Button variant="outline" size="sm" className="mt-3" onClick={() => { assign(selected, w); toast.success("Treino adicionado ao dia"); }}><CalendarPlus /> Agendar</Button></article>)}</div>
-          <p className="mt-3 text-xs leading-5 text-steel">Exemplos gerais; busque a orientação de um profissional de educação física.</p>
+          <p className="mt-3 text-xs leading-5 text-steel">Registros pessoais. Não substituem orientação de profissional.</p>
           <h3 className="mt-5 text-sm font-semibold">Meus treinos</h3>
           <AssignForm workouts={models} onPick={(w) => { assign(selected, w); toast.success("Treino adicionado ao dia"); }} onCreate={(n) => createAndAssign(selected, n)} />
         </>
-          : !selWorkout ? <div className="mt-3"><p className="text-sm text-steel">Este treino foi criado na agenda sem exercícios. Escolha um treino abaixo para registrar exercícios.</p><AssignForm workouts={models} onPick={(w) => assign(selected, w)} onCreate={(n) => createAndAssign(selected, n)} /></div>
+          : !selWorkout ? <div className="mt-3"><p className="text-sm text-steel">Escolha um treino abaixo pra registrar seus exercícios.</p><AssignForm workouts={models} onPick={(w) => assign(selected, w)} onCreate={(n) => createAndAssign(selected, n)} /></div>
           : <WorkoutDetail workout={selWorkout} dateKey={selected} />}
       </section>
-      <p className="mt-4 text-xs leading-5 text-steel">Os registros servem para acompanhamento pessoal e não substituem a orientação de um profissional de educação física. Para montar modelos e ver exemplos, use <button type="button" onClick={onExplore} className="underline">Explorar e criar</button>.</p>
+      <p className="mt-4 text-xs leading-5 text-steel">Registros pessoais. Não substituem orientação de profissional. Quer ideias? <button type="button" onClick={onExplore} className="underline">Explorar e criar</button>.</p>
       <ImportDialog open={importing} onOpenChange={setImporting} week={week} onAssign={assign} />
     </div>
   );
@@ -212,7 +212,7 @@ function ImportDialog({ open, onOpenChange, week, onAssign }: { open: boolean; o
         </div>
         : step === "reading" ? <div className="py-10 text-center text-sm text-steel"><div className="mx-auto mb-3 size-8 animate-spin rounded-full border-2 border-line border-t-brand" />Lendo e interpretando o plano…</div>
         : <div className="space-y-4">
-          <p className="text-sm text-steel">Confira e corrija antes de salvar. Treinos com dia definido entram na semana exibida; exercícios com nomes já registrados continuam a mesma progressão.</p>
+          <p className="text-sm text-steel">Confira e ajuste antes de salvar.</p>
           {items.length === 0 && <p className="text-sm">Nenhum treino restante.</p>}
           {items.map((w, i) => <div key={i} className="rounded-lg p-3 ring-1 ring-line">
             <div className="flex gap-2"><select value={w.day ?? ""} onChange={(e) => upd(i, { ...w, day: (e.target.value || null) as ImportedWorkout["day"] })} aria-label="Dia da semana" className="h-9 rounded-md bg-background px-2 text-sm ring-1 ring-line"><option value="">Sem dia</option>{DAY_ORDER.map((d) => <option key={d} value={d}>{d}</option>)}</select><input value={w.name} onChange={(e) => upd(i, { ...w, name: e.target.value })} aria-label="Nome do treino" className="h-9 min-w-0 flex-1 rounded-md bg-background px-2 text-sm font-medium ring-1 ring-line" /><Button variant="ghost" size="icon" aria-label="Descartar treino" onClick={() => setItems(items.filter((_, j) => j !== i))}><Trash2 /></Button></div>

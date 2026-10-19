@@ -124,11 +124,11 @@ function Agenda() {
               {formatFullDate(selectedDate)}
             </h2>
             <p className="mt-2 max-w-[48ch] text-pretty text-sm text-steel">
-              {blocks.length} blocos planejados · {resumo.done} concluídos · custo do dia estimado em{" "}
-              {brl(resumo.cost)}
-              {goal ? ` · objetivo: ${goal}` : ""}
+              {resumo.done} de {blocks.length} blocos concluídos
+              {resumo.cost > 0 ? ` · ${brl(resumo.cost)}` : ""}
+              {goal ? ` · 🎯 ${goal}` : ""}
             </p>
-            {awards && <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-card px-3 py-1 text-xs font-medium ring-1 ring-line" title="Cada vitória na liga semanal vale 1 congelamento. Ele protege sua sequência se você perder 1 dia.">❄️ {awards.freezes} {awards.freezes === 1 ? "congelamento disponível" : "congelamentos disponíveis"}</p>}
+            {awards && <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-card px-3 py-1 text-xs font-medium ring-1 ring-line" title="Seu streak fica protegido se você perder um dia.">❄️ {awards.freezes} {awards.freezes === 1 ? "congelamento disponível" : "congelamentos disponíveis"}</p>}
             <ReadingGoalBar />
           </div>
           <div className="flex flex-wrap items-center gap-2 lg:justify-end">

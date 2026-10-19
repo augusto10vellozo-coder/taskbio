@@ -36,14 +36,14 @@ function Habitos() {
   return (
     <main className="mx-auto max-w-4xl px-5 pb-20 sm:px-8">
       <ModuleHeader title="Hábitos" />
-      <section className="pb-5"><h2 className="font-display text-lg font-semibold">Tabela da semana</h2><p className="mt-2 text-sm text-steel">Toque na célula para marcar ou desmarcar o hábito do dia. A chama ao lado do nome indica se o hábito conta para a sequência de dias.</p></section>
+      <section className="pb-5"><h2 className="font-display text-lg font-semibold">Tabela da semana</h2><p className="mt-2 text-sm text-steel">Toque pra marcar o dia · 🔥 = conta pro seu streak</p></section>
       <form className="mb-4 flex gap-2" onSubmit={(e) => { e.preventDefault(); if (!name.trim()) return; addHabit(name.trim()); setName(""); toast.success("Hábito criado"); }}>
         <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Novo hábito (ex.: beber água)" className="h-10 min-w-0 flex-1 rounded-md bg-background px-3 text-sm ring-1 ring-line" />
         <Button className="h-10 shrink-0"><Plus /> Adicionar</Button>
       </form>
       <section aria-label="Tabela semanal de hábitos" className="min-w-0 rounded-lg bg-card px-2 py-3 ring-1 ring-line sm:p-4">
         <div className="mb-3 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-1"><Button variant="ghost" size="icon" aria-label="Semana anterior" onClick={() => setRef(addDays(ref, -7))}><ChevronLeft /></Button><span className="min-w-0 text-center text-xs font-medium sm:text-sm">{week[0] && format(week[0], "d MMM", { locale: ptBR })} – {week[6] && format(week[6], "d MMM", { locale: ptBR })}</span><Button variant="ghost" size="icon" aria-label="Próxima semana" onClick={() => setRef(addDays(ref, 7))}><ChevronRight /></Button></div>
-        {habits.length === 0 ? <p className="py-8 text-center text-sm text-steel">Crie seu primeiro hábito acima.</p> : (
+        {habits.length === 0 ? <p className="py-8 text-center text-sm text-steel">Crie seu primeiro hábito e comece hoje.</p> : (
           <table className="w-full table-fixed text-xs sm:text-sm">
             <colgroup><col className="w-1/4" />{week.map((d) => <col key={toDateKey(d)} />)}</colgroup>
             <thead><tr><th scope="col" className="pb-2 text-left text-[10px] font-medium text-steel sm:text-xs">Hábito</th>{week.map((d, index) => <th scope="col" key={toDateKey(d)} className="px-0 pb-2 text-center text-[10px] font-medium text-steel sm:text-xs">{["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"][index]}<br />{format(d, "d")}</th>)}</tr></thead>
@@ -55,7 +55,7 @@ function Habitos() {
         )}
       </section>
       <section className="mt-5 rounded-lg bg-card p-4 ring-1 ring-line">
-        <h2 className="font-display text-lg font-semibold">Mapa de consistência</h2><p className="text-xs text-steel">Últimos 35 dias — quanto mais forte, mais hábitos marcados.</p>
+        <h2 className="font-display text-lg font-semibold">Mapa de consistência</h2><p className="text-xs text-steel">Seus últimos 35 dias — quanto mais forte, mais constância.</p>
         <div className="mt-3 grid grid-cols-7 gap-1.5 sm:max-w-sm">{month.map((k) => { const n = (habitLog[k] ?? []).length; const o = n === 0 ? 0 : 0.25 + 0.75 * Math.min(1, n / max); return <div key={k} title={`${k.split("-").reverse().join("/")}: ${n}`} className="aspect-square rounded-sm bg-mist"><div className="size-full rounded-sm bg-brand" style={{ opacity: o }} /></div>; })}</div>
       </section>
     </main>

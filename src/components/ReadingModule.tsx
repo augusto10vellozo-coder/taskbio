@@ -75,7 +75,7 @@ export function ReadingModule() {
 
       <section aria-labelledby="sessao" className="rounded-lg bg-card p-4 ring-1 ring-line">
         <h2 id="sessao" className="font-display text-lg font-semibold">Registrar sessão</h2>
-        {reading.length === 0 ? <p className="mt-2 text-sm text-steel">Adicione um livro em “Meus Livros” para registrar sessões.</p> : (
+        {reading.length === 0 ? <p className="mt-2 text-sm text-steel">Adicione seu primeiro livro pra registrar a leitura.</p> : (
           <form className="mt-3 grid grid-cols-2 gap-2" onSubmit={(e) => {
             e.preventDefault();
             const mins = Math.round(Number(sel.minutes));
@@ -116,7 +116,7 @@ export function ReadingModule() {
           <input type="search" aria-label="Buscar livro" placeholder="Buscar livro..." value={q} onChange={(e) => setQ(e.target.value)} className={`${input} w-full pl-9`} />
         </div>
         {loading && <p className="mt-3 flex items-center gap-2 text-sm text-steel"><Loader2 className="size-4 animate-spin" /> Buscando…</p>}
-        {!loading && results && results.length === 0 && <p className="mt-3 text-sm text-steel">Nenhum livro encontrado. Tente outro título ou adicione manualmente.</p>}
+        {!loading && results && results.length === 0 && <p className="mt-3 text-sm text-steel">Não achamos esse livro. Tente outro título ou adicione você mesmo.</p>}
         {!loading && results && results.length > 0 && (
           <ul className="mt-3 grid gap-2 sm:grid-cols-2">
             {results.map((r, i) => (
