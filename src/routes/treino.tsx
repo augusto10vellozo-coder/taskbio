@@ -102,7 +102,7 @@ function WeekTab({ onExplore }: { onExplore: () => void }) {
           : !selWorkout ? <div className="mt-3"><p className="text-sm text-steel">Escolha um treino abaixo pra registrar seus exercícios.</p><AssignForm workouts={models} onPick={(w) => assign(selected, w)} onCreate={(n) => createAndAssign(selected, n)} /></div>
           : <WorkoutDetail workout={selWorkout} dateKey={selected} />}
       </section>
-      <p className="mt-4 text-xs leading-5 text-steel">Os registros servem para acompanhamento pessoal e não substituem a orientação de um profissional de educação física. Para montar modelos e ver exemplos, use <button type="button" onClick={onExplore} className="underline">Explorar e criar</button>.</p>
+      <p className="mt-4 text-xs leading-5 text-steel">Registros pessoais. Não substituem orientação de profissional. Quer ideias? <button type="button" onClick={onExplore} className="underline">Explorar e criar</button>.</p>
       <ImportDialog open={importing} onOpenChange={setImporting} week={week} onAssign={assign} />
     </div>
   );

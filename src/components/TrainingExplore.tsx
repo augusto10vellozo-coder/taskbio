@@ -74,7 +74,7 @@ export function TrainingExplore() {
   return (
     <>
       <div>
-        <p className="mb-4 max-w-[52ch] text-pretty text-sm text-steel">Escolha a modalidade, explore exemplos ou monte seu treino. As sugestões são gerais e não substituem a orientação de um profissional de educação física.</p>
+        <p className="mb-4 max-w-[52ch] text-pretty text-sm text-steel">Escolha a modalidade e monte seu treino. Sugestões gerais, não substituem orientação de profissional.</p>
 
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
           <section className="lg:col-span-5 space-y-5">
