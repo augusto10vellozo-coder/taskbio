@@ -13,7 +13,7 @@ function draw(d: Data) {
   const g = c.getContext("2d")!;
   const mint = "#7FE0C2", coral = "#FF7A59";
   g.fillStyle = "#1A1A1A"; g.fillRect(0, 0, 1080, 1350);
-  const gold = "#E8B931";
+  const gold = mint; // champion accent uses mint on dark card
   if (d.champion) {
     g.strokeStyle = gold; g.lineWidth = 12; g.strokeRect(30, 30, 1020, 1290);
     g.fillStyle = gold; g.beginPath(); // crown
@@ -57,8 +57,8 @@ export function WeeklyCard(props: Data) {
     finally { setBusy(false); }
   }
   return (
-    <section className={`rounded-lg bg-card p-4 ring-1 ${props.champion ? "ring-2 ring-gold" : "ring-line"}`}>
-      <p className="text-xs font-medium text-steel">{props.champion ? <span className="mr-1 inline-flex items-center gap-1 font-semibold text-gold"><Crown className="size-3.5" /> Campeão da semana ·</span> : null}Card da semana passada · {props.label}</p>
+    <section className={`rounded-lg bg-card p-4 ring-1 ${props.champion ? "ring-2 ring-brand" : "ring-line"}`}>
+      <p className="text-xs font-medium text-steel">{props.champion ? <span className="mr-1 inline-flex items-center gap-1 font-semibold text-brand"><Crown className="size-3.5" /> Campeão da semana ·</span> : null}Card da semana passada · {props.label}</p>
       <p className="mt-1 text-sm">{props.me?.week_xp ?? 0} XP · sequência {props.me?.streak ?? 0} · {props.days.filter(Boolean).length} dias marcados{props.friends > 1 && props.position ? ` · ${props.position}º na liga` : ""}</p>
       <Button className="mt-3" size="sm" onClick={share} disabled={busy}><Share2 /> Compartilhar</Button>
     </section>

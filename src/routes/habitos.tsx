@@ -38,7 +38,7 @@ function Habitos() {
       <ModuleHeader title="Hábitos" />
       <section className="pb-5"><h2 className="font-display text-lg font-semibold">Tabela da semana</h2><p className="mt-2 text-sm text-steel">Toque na célula para marcar ou desmarcar o hábito do dia. A chama ao lado do nome indica se o hábito conta para a sequência de dias.</p></section>
       <form className="mb-4 flex gap-2" onSubmit={(e) => { e.preventDefault(); if (!name.trim()) return; addHabit(name.trim()); setName(""); toast.success("Hábito criado"); }}>
-        <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Novo hábito (ex.: beber água, ler 10 páginas)" className="h-10 min-w-0 flex-1 rounded-md bg-background px-3 text-sm ring-1 ring-line" />
+        <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Novo hábito (ex.: beber água)" className="h-10 min-w-0 flex-1 rounded-md bg-background px-3 text-sm ring-1 ring-line" />
         <Button className="h-10 shrink-0"><Plus /> Adicionar</Button>
       </form>
       <section aria-label="Tabela semanal de hábitos" className="min-w-0 rounded-lg bg-card px-2 py-3 ring-1 ring-line sm:p-4">

@@ -106,7 +106,7 @@ function Amigos() {
 
       {isMonday && <div className="mb-4"><WeeklyCard champion={!!user && champ === user.id} me={last.me} position={last.position} friends={last.rows?.length ?? 0} days={lastDays} label={label} /></div>}
 
-      <section className="rounded-lg bg-card p-4 ring-1 ring-line">
+      <section className="rounded-lg bg-card p-4 pb-5 ring-1 ring-line">
         {!rows ? <div className="h-24 animate-pulse rounded bg-mist" /> : <ol className="divide-y divide-line">{rows.map((r, i) => (
           <li key={r.user_id} className={`flex items-center gap-3 py-3 ${r.user_id === user?.id ? "font-medium" : ""}`}>
             <span className="w-6 text-center font-display text-lg font-semibold">{i === 0 && r.week_xp > 0 ? <Crown className="mx-auto size-5 text-brand" aria-label="1º lugar" /> : `${i + 1}º`}</span>
@@ -116,7 +116,7 @@ function Amigos() {
           </li>
         ))}</ol>}
         {rows && rows.length < 2 && <p className="mt-2 text-sm text-steel">Convide amigos para começar a competir.</p>}
-        {rows && position > 0 && rows.length > 1 && <p className="mt-3 text-sm">Você está em <strong>{position}º</strong> entre seus amigos.</p>}
+        {rows && position > 0 && rows.length > 1 && <p className="mt-2 border-t border-line pt-3 text-sm">Você está em <strong>{position}º</strong> entre seus amigos.</p>}
         <p className="mt-3 text-xs text-steel">❄️ {awards?.freezes ?? 0} congelamento(s) de sequência · o campeão da semana ganha troféu dourado e 1 congelamento.</p>
         <p className="mt-1 text-[11px] text-steel">Até 100 XP por dia contam para a liga. Peso, medidas e dados de saúde nunca aparecem aqui.</p>
       </section>
