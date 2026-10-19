@@ -14,7 +14,7 @@ const input = "h-10 min-w-0 rounded-md bg-background px-3 text-sm ring-1 ring-li
 const fmt = (s: number) => `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
 const hm = (m: number) => (m >= 60 ? `${Math.floor(m / 60)}h${m % 60 ? ` ${m % 60}min` : ""}` : `${m} min`);
 
-type Run = { phase: "foco" | "pausa"; endsAt: number; startedAt: number; paused?: number };
+type Run = { phase: "foco" | "pausa"; endsAt: number; startedAt: number; paused?: number | undefined };
 
 export function StudyModule() {
   const { trackers, setTrackers } = useTaskBio();
@@ -132,7 +132,7 @@ export function StudyModule() {
               <p className="text-xs font-medium uppercase tracking-wide text-steel">{run.phase === "foco" ? `Foco · ${subOf(subjectId)?.name ?? ""}` : "Pausa"}</p>
               <p className="mt-1 font-display text-5xl font-semibold tabular-nums" aria-live="polite">{fmt(remaining)}</p>
               <div className="mt-3 flex justify-center gap-2">
-                <Button variant="outline" onClick={() => setRun((r) => r && (r.paused ? { ...r, endsAt: r.endsAt + (Date.now() - r.paused), paused: undefined } as Run : { ...r, paused: Date.now() }))}>{run.paused ? <><Play /> Continuar</> : <><Pause /> Pausar</>}</Button>
+                <Button variant="outline" onClick={() => setRun((r) => r && (r.paused ? { ...r, endsAt: r.endsAt + (Date.now() - r.paused), paused: undefined } : { ...r, paused: Date.now() }))}>{run.paused ? <><Play /> Continuar</> : <><Pause /> Pausar</>}</Button>
                 <Button variant="secondary" onClick={() => { if (run.phase === "foco") { const mins = Math.floor(((run.paused ?? Date.now()) - run.startedAt) / 60000); if (mins >= 1) record(mins, "Sessão registrada"); else toast("Sessão com menos de 1 minuto não foi registrada"); } setRun(null); }}><Square /> Encerrar</Button>
               </div>
             </>) : (<>
