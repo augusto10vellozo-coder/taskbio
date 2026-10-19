@@ -25,7 +25,9 @@ The legacy `/rotina` address redirects to the main agenda at `/`; this keeps old
 
 Home-screen installation uses a web app manifest without app-shell caching; this preserves installability without stale preview or deployment caches.
 
-Mobile navigation lives in a fixed bottom bar (src/components/BottomNav.tsx) with the first enabled modules plus a "Mais" menu, and AppHeader keeps desktop links plus a mobile back button; this keeps every main area reachable from any screen without a scrollable top bar.
+Navigation uses the registry-driven fixed BottomNav below the desktop-header breakpoint; sync and consent overlays sit above it so every enabled module stays reachable without obstructed controls.
+
+Module screens use the shared ModuleHeader for their primary title and history-back control with a direct-entry fallback to Modules; back navigation belongs to the screen, never the global brand header.
 
 All copy a visitor can see stays in Brazilian Portuguese, and authentication failures are surfaced through the shared pt-BR message helper instead of the backend's raw text, so no English reaches users on any screen.
 - Optional app modules are declared in src/lib/modules.ts; nav, home shortcuts and settings read that registry so new modules need no refactor.

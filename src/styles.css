@@ -90,11 +90,11 @@
   --steel: oklch(0.74 0.016 255);
   --mist: oklch(0.28 0.013 255);
   --line: oklch(0.38 0.014 255);
-  --brand: oklch(0.7 0.14 255);
-  --brand-deep: oklch(0.79 0.12 255);
+  --brand: oklch(0.8 0.12 166);
+  --brand-deep: oklch(0.85 0.1 166);
   --good: oklch(0.73 0.12 160);
   --gold: oklch(0.82 0.14 88);
-  --background: oklch(0.18 0.012 255);
+  --background: #1A1A1A;
   --foreground: var(--ink);
   --card: oklch(0.23 0.012 255);
   --card-foreground: var(--ink);
@@ -106,7 +106,7 @@
   --secondary-foreground: var(--ink);
   --muted: var(--mist);
   --muted-foreground: var(--steel);
-  --accent: oklch(0.7 0.13 55);
+  --accent: oklch(0.75 0.14 28);
   --accent-foreground: oklch(0.15 0.01 255);
   --destructive: oklch(0.7 0.16 25);
   --destructive-foreground: oklch(0.15 0.01 255);
@@ -135,7 +135,7 @@
   h2,
   h3 {
     font-family: var(--font-display);
-    letter-spacing: -0.015em;
+    letter-spacing: 0;
   }
 }
 

@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { reviewPublicContent } from "@/lib/content-review.functions";
+import { ModuleHeader } from "@/components/ModuleHeader";
 type ContentReviewResult = { summary: string; scores: { clarity: number; utility: number; suitability: number }; strengths: string[]; improvements: Array<{ priority: string; page: string; action: string; reason: string }>; risks: string[] };
 
 export const Route = createFileRoute("/_authenticated/equipe")({
@@ -76,14 +77,14 @@ function TeamPage() {
   }
 
   if (allowed === null) return <main className="mx-auto max-w-5xl px-5 py-12"><p className="text-steel">Verificando acesso…</p></main>;
-  if (!allowed) return <main className="mx-auto max-w-3xl px-5 py-16 text-center"><h1 className="font-display text-3xl font-semibold">Área reservada à equipe</h1><p className="mt-3 text-steel">Sua conta não tem acesso a este painel.</p><Button asChild variant="outline" className="mt-6"><Link to="/">Voltar ao TaskBio</Link></Button></main>;
+  if (!allowed) return <main className="mx-auto max-w-3xl px-5 pb-16"><ModuleHeader title="Equipe" /><div className="pt-8 text-center"><h2 className="font-display text-2xl font-semibold">Área reservada à equipe</h2><p className="mt-3 text-steel">Sua conta não tem acesso a este painel.</p><Button asChild variant="outline" className="mt-6"><Link to="/">Voltar ao TaskBio</Link></Button></div></main>;
 
   const rows = paths.map((path) => ({ path, visits: events.filter((row) => row.page_path === path && row.event_type === "page_view").length, clicks: events.filter((row) => row.page_path === path && row.event_type === "ad_click").length }));
   const totalVisits = rows.reduce((sum, row) => sum + row.visits, 0);
   const totalClicks = rows.reduce((sum, row) => sum + row.clicks, 0);
 
-  return <main className="mx-auto max-w-5xl px-5 pb-20 pt-10 sm:px-8">
-    <p className="text-xs font-medium uppercase text-brand-deep">Área da equipe</p><h1 className="mt-2 font-display text-4xl font-semibold">Conteúdo e audiência</h1>
+  return <main className="mx-auto max-w-5xl px-5 pb-20 sm:px-8">
+    <ModuleHeader title="Equipe" /><h2 className="font-display text-lg font-semibold">Conteúdo e audiência</h2>
     <Tabs defaultValue="review" className="mt-8">
       <TabsList className="w-full justify-start sm:w-auto"><TabsTrigger value="review"><FileText className="mr-2 size-4" />Revisão de conteúdo</TabsTrigger><TabsTrigger value="metrics"><Activity className="mr-2 size-4" />Métricas</TabsTrigger></TabsList>
       <TabsContent value="review" className="mt-8">
