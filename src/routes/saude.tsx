@@ -47,11 +47,11 @@ function Saude() {
         </Card>
         <Card icon={<Moon className="size-4 text-brand" />} title="Sono">
           <p className="font-display text-3xl font-semibold">{health.sleep[today] ?? "—"}<span className="text-base text-steel"> h</span></p>
-          <form className="mt-3 flex gap-2" onSubmit={(e) => { e.preventDefault(); const v = Number(sleep); if (!(v > 0 && v <= 24)) return; setHealth((h) => ({ ...h, sleep: { ...h.sleep, [today]: v } })); setSleep(""); toast.success("Sono registrado"); }}><input type="number" step="0.5" min="0" max="24" value={sleep} onChange={(e) => setSleep(e.target.value)} placeholder="Horas" className="h-9 min-w-0 flex-1 rounded-md bg-background px-3 text-sm ring-1 ring-line" /><Button>Salvar</Button></form>
+          <form className="mt-3 flex gap-2" onSubmit={(e) => { e.preventDefault(); const v = Number(sleep); if (!(v > 0 && v <= 24)) return; setHealth((h) => ({ ...h, sleep: { ...h.sleep, [today]: v } })); setSleep(""); toast.success("Sono registrado"); }}><input type="number" step="0.5" min="0" max="24" value={sleep} onChange={(e) => setSleep(e.target.value)} placeholder="Horas" className="h-9 min-w-0 flex-1 rounded-md bg-background px-3 text-sm ring-1 ring-line" /><Button className="shrink-0">Salvar</Button></form>
         </Card>
         <Card icon={<Scale className="size-4 text-brand" />} title="Peso">
           <p className="font-display text-3xl font-semibold">{health.weight[today] ?? "—"}<span className="text-base text-steel"> kg</span></p>
-          <form className="mt-3 flex gap-2" onSubmit={(e) => { e.preventDefault(); const v = Number(weight.replace(",", ".")); if (!(v > 0 && v < 500)) return; setHealth((h) => ({ ...h, weight: { ...h.weight, [today]: v } })); setWeight(""); toast.success("Peso registrado"); }}><input inputMode="decimal" value={weight} onChange={(e) => setWeight(e.target.value)} placeholder="kg" className="h-9 w-full rounded-md bg-background px-3 text-sm ring-1 ring-line" /><Button>Salvar</Button></form>
+          <form className="mt-3 flex gap-2" onSubmit={(e) => { e.preventDefault(); const v = Number(weight.replace(",", ".")); if (!(v > 0 && v < 500)) return; setHealth((h) => ({ ...h, weight: { ...h.weight, [today]: v } })); setWeight(""); toast.success("Peso registrado"); }}><input inputMode="decimal" value={weight} onChange={(e) => setWeight(e.target.value)} placeholder="kg" className="h-9 min-w-0 flex-1 rounded-md bg-background px-3 text-sm ring-1 ring-line" /><Button className="shrink-0">Salvar</Button></form>
         </Card>
       </div>
       <section className="mt-3 rounded-lg bg-card p-4 ring-1 ring-line">

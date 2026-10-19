@@ -85,5 +85,5 @@ function Financas() {
 }
 
 function Stat({ label, value }: { label: string; value: string }) {
-  return <section className="rounded-lg bg-card p-4 ring-1 ring-line"><p className="text-xs font-medium text-steel">{label}</p><p className="mt-1 font-display text-2xl font-semibold">{value}</p></section>;
+  return <section className="min-w-0 rounded-lg bg-card p-4 ring-1 ring-line"><p className="text-xs font-medium text-steel">{label}</p><p className={`mt-1 font-display font-semibold break-words leading-tight ${value.length > 14 ? "text-lg" : "text-2xl"}`}>{value}</p></section>;
 }
