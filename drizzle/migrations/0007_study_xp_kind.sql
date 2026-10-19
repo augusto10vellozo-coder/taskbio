@@ -1,0 +1,2 @@
+ALTER TABLE public.xp_events DROP CONSTRAINT IF EXISTS xp_events_kind_check;
+ALTER TABLE public.xp_events ADD CONSTRAINT xp_events_kind_check CHECK (kind IN ('habit','block','meal','workout','photo','bonus','reading','study'));
