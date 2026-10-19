@@ -2,7 +2,7 @@ import { buildPushPayload } from "@block65/webcrypto-web-push";
 import { VAPID_PUBLIC_KEY } from "@/lib/push-config";
 
 /** Sends one Web Push message to every device of a user. Errors are logged, never thrown. */
-export async function pushToUser(userId: string, message: { title: string; body: string; url: string }) {
+export async function pushToUser(userId: string, message: { title: string; body: string; url: string; tag?: string }) {
   const privateKey = process.env["VAPID_PRIVATE_KEY"];
   if (!privateKey) return;
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");

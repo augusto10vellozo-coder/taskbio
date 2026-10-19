@@ -44,7 +44,8 @@ export const acceptInviteCode = createServerFn({ method: "POST" })
     if (existing) await supabaseAdmin.from("friendships").update({ status: "accepted", responded_at: new Date().toISOString() }).eq("id", existing.id);
     else await supabaseAdmin.from("friendships").insert({ requester: a, addressee: b, status: "accepted", responded_at: new Date().toISOString() });
     const { pushToUser } = await import("@/lib/push-send.server");
-    await pushToUser(owner.id, { title: "Novo amigo na sua liga", body: "Alguém entrou no TaskBio pelo seu convite.", url: "/amigos" });
+    const { data: me } = await supabaseAdmin.from("profiles").select("display_name").eq("id", context.userId).maybeSingle();
+    await pushToUser(owner.id, { title: "TaskBio", body: `👋 ${me?.display_name?.trim() || "Um amigo"} entrou na sua liga`, url: "/amigos", tag: "invite" });
     return { ok: true, name: owner.display_name };
   });
 
@@ -62,6 +63,7 @@ export const sendFriendRequest = createServerFn({ method: "POST" })
     const { error } = await supabaseAdmin.from("friendships").insert({ requester: a, addressee: b });
     if (error) return { ok: false };
     const { pushToUser } = await import("@/lib/push-send.server");
-    await pushToUser(b, { title: "Convite de amizade no TaskBio", body: "Você recebeu um convite para a liga semanal.", url: "/amigos" });
+    const { data: me } = await supabaseAdmin.from("profiles").select("display_name").eq("id", a).maybeSingle();
+    await pushToUser(b, { title: "TaskBio", body: `👋 ${me?.display_name?.trim() || "Um amigo"} te chamou pra liga`, url: "/amigos", tag: "invite" });
     return { ok: true };
   });
