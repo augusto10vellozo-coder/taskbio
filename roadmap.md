@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Evoluir Estudos: matérias com cor, cronômetro, provas com lembrete, metas por matéria, streak e +5 XP
 - [x] Evoluir Leitura: busca de livros, estante, sessões por livro, meta semanal, streak, citações e +5 XP
 
 - [x] Ajustar hábitos, desobstruir navegação e padronizar Voltar; 18 telas validadas em 360/390px e desktop, marcação local persistida e retorno direto conferidos sem alterar dados da conta

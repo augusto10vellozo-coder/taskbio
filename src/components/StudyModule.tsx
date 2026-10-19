@@ -26,7 +26,7 @@ export function StudyModule() {
   const [subjectId, setSubjectId] = useState("");
   const [minutes, setMinutes] = useState("");
   const [learned, setLearned] = useState("");
-  const [newSub, setNewSub] = useState({ name: "", color: "" });
+  const [newSub, setNewSub] = useState({ name: "", color: "", touched: false });
   const [exam, setExam] = useState({ subjectId: "", title: "", date: "" });
   const [run, setRun] = useState<Run | null>(null);
   const [, tick] = useState(0);
@@ -39,7 +39,7 @@ export function StudyModule() {
     if (r.changed) setTrackers((t) => ({ ...t, subjects: r.subjects, estudos: r.sessions }));
   }, [subjects, sessions, setTrackers]);
   useEffect(() => { if (!subjectId && subjects[0]) setSubjectId(subjects[0].id); }, [subjects, subjectId]);
-  useEffect(() => { if (!newSub.color) setNewSub((s) => ({ ...s, color: suggestColor(subjects) })); }, [subjects, newSub.color]);
+  useEffect(() => { if (!newSub.touched) setNewSub((s) => ({ ...s, color: suggestColor(subjects) })); }, [subjects, newSub.touched]);
 
   const record = (mins: number, how: string) => {
     const sub = subjects.find((s) => s.id === subjectId);
@@ -91,8 +91,8 @@ export function StudyModule() {
 
       <section aria-labelledby="materias" className="rounded-lg bg-card p-4 ring-1 ring-line">
         <h2 id="materias" className="font-display text-lg font-semibold">Minhas matérias</h2>
-        <form className="mt-3 flex gap-2" onSubmit={(e) => { e.preventDefault(); const name = newSub.name.trim(); if (!name) { toast.error("Informe o nome da matéria"); return; } if (subjects.some((s) => s.name.toLowerCase() === name.toLowerCase())) { toast.error("Essa matéria já existe"); return; } const sub = { id: `sub-${Date.now()}`, name, color: newSub.color || suggestColor(subjects) }; setTrackers((t) => ({ ...t, subjects: [...(t.subjects ?? []), sub] })); setSubjectId(sub.id); setNewSub({ name: "", color: "" }); toast.success(`Matéria “${name}” criada`); }}>
-          <input type="color" aria-label="Cor da matéria" value={newSub.color || "#5EEAD4"} onChange={(e) => setNewSub({ ...newSub, color: e.target.value })} className="h-10 w-12 shrink-0 cursor-pointer rounded-md bg-background p-1 ring-1 ring-line" />
+        <form className="mt-3 flex gap-2" onSubmit={(e) => { e.preventDefault(); const name = newSub.name.trim(); if (!name) { toast.error("Informe o nome da matéria"); return; } if (subjects.some((s) => s.name.toLowerCase() === name.toLowerCase())) { toast.error("Essa matéria já existe"); return; } const sub = { id: `sub-${Date.now()}`, name, color: newSub.touched ? newSub.color : suggestColor(subjects) }; setTrackers((t) => ({ ...t, subjects: [...(t.subjects ?? []), sub] })); setSubjectId(sub.id); setNewSub({ name: "", color: "", touched: false }); toast.success(`Matéria “${name}” criada`); }}>
+          <input type="color" aria-label="Cor da matéria" value={newSub.color || "#5EEAD4"} onChange={(e) => setNewSub({ ...newSub, color: e.target.value, touched: true })} className="h-10 w-12 shrink-0 cursor-pointer rounded-md bg-background p-1 ring-1 ring-line" />
           <input aria-label="Nova matéria" placeholder="Nova matéria (ex.: Inglês)" value={newSub.name} onChange={(e) => setNewSub({ ...newSub, name: e.target.value })} className={`${input} flex-1`} />
           <Button className="h-10 shrink-0" aria-label="Criar matéria"><Plus /></Button>
         </form>
