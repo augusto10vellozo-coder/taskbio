@@ -80,6 +80,27 @@ export type Database = {
         }
         Relationships: []
       }
+      league_positions: {
+        Row: {
+          position: number
+          updated_at: string
+          user_id: string
+          week_start: string
+        }
+        Insert: {
+          position: number
+          updated_at?: string
+          user_id: string
+          week_start: string
+        }
+        Update: {
+          position?: number
+          updated_at?: string
+          user_id?: string
+          week_start?: string
+        }
+        Relationships: []
+      }
       league_wins: {
         Row: {
           created_at: string
