@@ -1,5 +1,6 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import { ArrowRight, MoreHorizontal, Settings2, Users } from "lucide-react";
+import { MoreHorizontal, Settings2, Users } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth-context";
 import { useTaskBio } from "@/lib/trilha-store";
 import { MODULES, isModuleOn } from "@/lib/modules";
@@ -17,30 +18,29 @@ export function BottomNav() {
   const enabled = MODULES.filter((m) => isModuleOn(modules, m.id));
   const primary = enabled.slice(0, 4);
   const rest = enabled.slice(4);
-  const hasMore = rest.length > 0 || Boolean(user);
 
   const itemClass = (active: boolean) =>
-    `flex flex-1 flex-col items-center gap-0.5 rounded-lg py-1.5 text-[10px] font-medium transition-colors ${active ? "bg-brand/10 text-brand-deep" : "text-steel"}`;
+    `flex h-14 w-full min-w-0 flex-col items-center justify-center gap-1 rounded-lg px-0 py-1 text-[10px] font-medium transition-colors ${active ? "bg-brand/10 text-brand-deep" : "text-steel"}`;
 
   const isActive = (to: string) => (to === "/" ? pathname === "/" : pathname.startsWith(to));
 
   return (
     <>
-      <div aria-hidden className="h-16 md:hidden" />
-      <nav aria-label="Navegação principal" className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden">
-        <div className="mx-auto flex max-w-lg items-stretch gap-0.5 px-2 py-1">
+      <div aria-hidden className="h-[calc(4rem+env(safe-area-inset-bottom))] xl:hidden" />
+      <nav aria-label="Navegação principal" className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur xl:hidden">
+        <div className="mx-auto grid max-w-lg auto-cols-fr grid-flow-col items-stretch gap-0.5 px-2 py-1">
           {primary.map((m) => (
             <Link key={m.id} to={m.to} className={itemClass(isActive(m.to))} aria-current={isActive(m.to) ? "page" : undefined}>
-              <m.icon className="size-5" />
-              {SHORT_LABELS[m.id] ?? m.label}
+              <m.icon className="size-5 shrink-0" />
+              <span className="max-w-full truncate">{SHORT_LABELS[m.id] ?? m.label}</span>
             </Link>
           ))}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button type="button" className={itemClass(false)} aria-label="Mais áreas">
+              <Button type="button" variant="ghost" className={itemClass(false)} aria-label="Mais áreas">
                 <MoreHorizontal className="size-5" />
                 Mais
-              </button>
+              </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent side="top" align="end" className="mb-2 w-56">
               {rest.map((m) => (
@@ -57,18 +57,3 @@ export function BottomNav() {
   );
 }
 
-export function BackButton() {
-  const pathname = useLocation().pathname;
-  if (pathname === "/") return null;
-  return (
-    <button
-      type="button"
-      onClick={() => window.history.back()}
-      className="grid size-9 shrink-0 place-items-center rounded-lg text-steel hover:bg-mist hover:text-ink md:hidden"
-      aria-label="Voltar"
-      title="Voltar"
-    >
-      <ArrowRight className="size-5 rotate-180" />
-    </button>
-  );
-}
