@@ -84,6 +84,12 @@ export function dueSettingsReminders(settings: unknown, timeZone: string, now: D
     if (!med || taken.has(med.id) || typeof med.time !== "string" || !inWindow(at(med.time))) continue;
     result.push({ key: `med|${med.id}|${today}`, title: `Lembrete: ${String(med.name).slice(0, 80)}`, body: `Horário marcado: ${med.time}.`, url: "/saude" });
   }
+  for (const ex of (s as { trackers?: { exams?: { id: string; subjectName?: string; title: string; date: string; done?: boolean }[] } }).trackers?.exams ?? []) {
+    if (!ex || ex.done || typeof ex.date !== "string") continue;
+    const label = `${String(ex.title).slice(0, 80)}${ex.subjectName ? ` (${String(ex.subjectName).slice(0, 40)})` : ""}`;
+    if (ex.date === tomorrow && inWindow(at("09:00"))) result.push({ key: `exam1|${ex.id}|${ex.date}`, title: `📚 Amanhã: ${label}`, body: "Bora revisar hoje?", url: "/estudos", tag: `exam-${ex.id}` });
+    if (ex.date === today && inWindow(at("08:00"))) result.push({ key: `exam0|${ex.id}|${ex.date}`, title: `📚 É hoje: ${label}`, body: "Boa sorte!", url: "/estudos", tag: `exam-${ex.id}` });
+  }
   return result;
 }
 
