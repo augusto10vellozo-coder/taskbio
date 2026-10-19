@@ -10,7 +10,7 @@ type SyncStatus = "idle" | "loading" | "saved" | "error";
 export function SyncManager() {
   const { user, loading: authLoading } = useAuth();
   const { plan, workouts, meals, goal, preferredModality, workoutHistory, shoppingItems, weeklyGoals, habits, habitLog, monthGoals, health, modules, exerciseLog, customFoods, finance, trackers, notifPrefs, ready, hydrate } = useTaskBio();
-  const [status, setStatus] = useState<SyncStatus>("idle");
+  const [, setStatus] = useState<SyncStatus>("idle");
   const initializedUser = useRef<string | null>(null);
   const skipNextPush = useRef(false);
   const [loadTick, setLoadTick] = useState(0);
