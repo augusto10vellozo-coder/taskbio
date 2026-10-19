@@ -43,6 +43,13 @@
       "when": 1792412920063,
       "tag": "0005_notification_celebrations",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1792413983847,
+      "tag": "0006_reading_xp_kind",
+      "breakpoints": true
     }
   ]
 }
