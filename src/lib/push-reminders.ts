@@ -1,16 +1,16 @@
 // Pure scheduling logic for server-sent agenda reminders (shared with tests).
 type ReminderBlock = { id: string; time: string; kind: string; title: string; done?: boolean; reminderMinutes?: number };
-export type DueReminder = { key: string; title: string; body: string; url: string };
+export type DueReminder = { key: string; title: string; body: string; url: string; tag?: string };
 
 /** Per-layer notification toggles stored in user_data.settings.notifPrefs; all on by default. */
-export type NotifPrefs = { streak: boolean; dayClose: boolean; meals: boolean; league: boolean; tasks: boolean; workouts: boolean };
-export const defaultNotifPrefs: NotifPrefs = { streak: true, dayClose: true, meals: true, league: true, tasks: true, workouts: true };
+export type NotifPrefs = { streak: boolean; dayClose: boolean; meals: boolean; league: boolean; tasks: boolean; workouts: boolean; weekly: boolean };
+export const defaultNotifPrefs: NotifPrefs = { streak: true, dayClose: true, meals: true, league: true, tasks: true, workouts: true, weekly: true };
 export function readNotifPrefs(settings: unknown): NotifPrefs {
   const raw = settings && typeof settings === "object" && !Array.isArray(settings)
     ? (settings as Record<string, unknown>)["notifPrefs"] : undefined;
   const p = raw && typeof raw === "object" && !Array.isArray(raw) ? raw as Record<string, unknown> : {};
   const on = (k: keyof NotifPrefs) => typeof p[k] === "boolean" ? (p[k] as boolean) : true;
-  return { streak: on("streak"), dayClose: on("dayClose"), meals: on("meals"), league: on("league"), tasks: on("tasks"), workouts: on("workouts") };
+  return { streak: on("streak"), dayClose: on("dayClose"), meals: on("meals"), league: on("league"), tasks: on("tasks"), workouts: on("workouts"), weekly: on("weekly") };
 }
 
 /** No notifications between 22:30 and 07:00 (user-local wall clock ms from localWallClock). */
@@ -134,7 +134,7 @@ export function streakDays(plan: unknown, habitLog: unknown, habits: unknown, fr
 }
 
 /** 20:00 — streak >= 2 with unmarked habits today. Max 1x/day via the dated key. */
-export function dueStreakRisk(input: { plan: unknown; habitLog: unknown; habits: unknown; frozenDays: string[]; freezesAvailable: number }, timeZone: string, now: Date): DueReminder[] {
+export function dueStreakRisk(input: { plan: unknown; habitLog: unknown; habits: unknown; frozenDays: string[]; freezesAvailable: number; name?: string }, timeZone: string, now: Date): DueReminder[] {
   const nowMs = wallClock(now, timeZone);
   if (!atTime(nowMs, "20:00")) return [];
   const today = dayKey(nowMs);
@@ -144,10 +144,11 @@ export function dueStreakRisk(input: { plan: unknown; habitLog: unknown; habits:
   const marked = new Set((input.habitLog && typeof input.habitLog === "object" ? (input.habitLog as Record<string, string[]>)[today] : undefined) ?? []);
   const missing = hs.filter((h) => !marked.has(h.id)).length;
   if (missing === 0) return [];
+  const name = firstName(input.name);
   const title = input.freezesAvailable > 0
-    ? "🔥 Streak em risco — use seu congelamento ou marque seus hábitos agora"
-    : `🔥 Seu streak de ${streak} dias está em risco — faltam ${missing} hábito${missing > 1 ? "s" : ""} hoje`;
-  return [{ key: `streak|${today}`, title, body: "Abra o TaskBio e marque seus hábitos para manter a sequência.", url: "/habitos" }];
+    ? `🧊 Streak em risco! Você tem ${input.freezesAvailable} congelamento${input.freezesAvailable > 1 ? "s" : ""} — use ou marque seus hábitos`
+    : `🔥 ${name ? `${name}, seu` : "Seu"} streak de ${streak} dias está em risco — faltam ${missing} hábito${missing > 1 ? "s" : ""} hoje`;
+  return [{ key: `streak|${today}`, title, body: "", url: "/habitos", tag: "streak" }];
 }
 
 /** 21:30 — pending blocks today; Y = XP still available under the 100 XP/day cap. */
@@ -159,7 +160,7 @@ export function dueDayClose(plan: unknown, todayXp: number, timeZone: string, no
   const pending = blocks.filter((b) => b && !b.done).length;
   if (pending === 0) return [];
   const xpLeft = Math.max(0, 100 - Math.max(0, Math.floor(todayXp)));
-  return [{ key: `dayclose|${today}`, title: `Faltam ${pending} ${pending > 1 ? "itens" : "item"} pra fechar o dia — vale ${xpLeft} XP`, body: "Conclua seus itens de hoje no TaskBio.", url: "/hoje" }];
+  return [{ key: `dayclose|${today}`, title: `🌙 Faltam ${pending} ${pending > 1 ? "itens" : "item"} pra fechar o dia — ${xpLeft === 1 ? "vale" : "valem"} ${xpLeft} XP`, body: "", url: "/agenda", tag: "dayclose" }];
 }
 
 /** 45 minutes after each planned meal without registration (block not done). 1x per meal per day. */
@@ -173,7 +174,7 @@ export function dueMealReminders(plan: unknown, timeZone: string, now: Date): Du
     if (!raw || raw.done || raw.kind !== "refeicao" || typeof raw.time !== "string") continue;
     const diff = minutesTo(nowMs, raw.time);
     if (diff > -45 || diff <= -50) continue;
-    result.push({ key: `mealrem|${raw.id}|${today}`, title: `Já registrou: ${String(raw.title).slice(0, 60)}?`, body: "Registre o que comeu e mantenha as calorias em dia.", url: "/alimentacao" });
+    result.push({ key: `mealrem|${raw.id}|${today}`, title: `🍽️ ${mealQuestion(String(raw.title))} Registre e mantenha as calorias do dia em dia`, body: "", url: "/alimentacao", tag: `meal-${raw.id}` });
   }
   return result;
 }
@@ -183,6 +184,74 @@ export function dueLeagueOpen(lastWeekPosition: number | null, timeZone: string,
   const nowMs = wallClock(now, timeZone);
   if (new Date(nowMs).getUTCDay() !== 1 || !atTime(nowMs, "09:00")) return [];
   const weekStart = dayKey(nowMs);
-  const place = lastWeekPosition && lastWeekPosition > 0 ? ` Você está em ${lastWeekPosition}º lugar.` : "";
-  return [{ key: `league|${weekStart}`, title: "🏆 Nova semana da liga começou!", body: `Marque hábitos e conclua tarefas para subir no ranking.${place}`, url: "/amigos" }];
+  const title = lastWeekPosition && lastWeekPosition > 0
+    ? `🏆 Nova liga começou! Você fechou a semana passada em ${lastWeekPosition}º lugar`
+    : "🏆 Nova liga começou! Marque hábitos e suba no ranking";
+  return [{ key: `league|${weekStart}`, title, body: "", url: "/amigos", tag: "league" }];
+}
+
+const firstName = (name?: string) => (name ?? "").trim().split(/\s+/)[0]?.slice(0, 30) ?? "";
+
+function mealQuestion(title: string) {
+  const t = title.toLowerCase();
+  if (t.includes("almo")) return "Já almoçou?";
+  if (t.includes("jant")) return "Já jantou?";
+  if (t.includes("café") || t.includes("cafe")) return "Já tomou café?";
+  if (t.includes("lanche")) return "Já lanchou?";
+  return `Já registrou ${title.slice(0, 40)}?`;
+}
+
+export const STREAK_MILESTONES = [5, 10, 20, 30, 50];
+
+/** Streak milestone reached today: bonus of 10 XP from the 10-day mark, capped by the 100 XP/day limit. */
+export function dueStreakMilestone(input: { plan: unknown; habitLog: unknown; habits: unknown; frozenDays: string[]; todayXp: number }, timeZone: string, now: Date): (DueReminder & { bonus: number })[] {
+  const nowMs = wallClock(now, timeZone);
+  const today = dayKey(nowMs);
+  const p = (input.plan && typeof input.plan === "object" ? input.plan : {}) as PlanLike;
+  const log = (input.habitLog && typeof input.habitLog === "object" ? input.habitLog : {}) as Record<string, string[]>;
+  const hs = Array.isArray(input.habits) ? (input.habits as HabitLike[]) : [];
+  if (!activeDay(p, log, today, hs, new Set())) return [];
+  const streak = streakDays(input.plan, input.habitLog, input.habits, input.frozenDays, today);
+  if (!STREAK_MILESTONES.includes(streak)) return [];
+  const bonus = streak >= 10 ? Math.max(0, Math.min(10, 100 - Math.max(0, Math.floor(input.todayXp)))) : 0;
+  const title = bonus > 0 ? `🎉 ${streak} dias seguidos! +${bonus} XP de bônus` : `🎉 ${streak} dias seguidos! Continue assim`;
+  return [{ key: `milestone|${streak}|${today}`, title, body: "", url: "/progresso", tag: "milestone", bonus }];
+}
+
+/** All of today's blocks are done (at least one block). */
+export function dueDayComplete(plan: unknown, timeZone: string, now: Date): DueReminder[] {
+  const today = dayKey(wallClock(now, timeZone));
+  const blocks = ((plan && typeof plan === "object" ? (plan as PlanLike)[today] : undefined) ?? []).filter(Boolean);
+  if (!blocks.length || blocks.some((b) => !b.done)) return [];
+  return [{ key: `dayfull|${today}`, title: "✅ Dia fechado! 100% dos blocos. Descanse merecidamente", body: "", url: "/agenda", tag: "dayfull" }];
+}
+
+/** League position change versus the last stored position this week. */
+export function dueLeagueMove(prev: number | null, pos: number, leader: { name: string; xpGap: number } | null, timeZone: string, now: Date): DueReminder[] {
+  if (!prev || prev === pos) return [];
+  const today = dayKey(wallClock(now, timeZone));
+  if (pos === 1 && prev > 1) return [{ key: `leaguemove|lead|${today}`, title: "📈 Você assumiu a liderança!", body: "", url: "/amigos", tag: "leaguemove" }];
+  if (prev === 1 && pos > 1 && leader) {
+    const habits = Math.max(1, Math.ceil((leader.xpGap + 1) / 10));
+    return [{ key: `leaguemove|lost|${today}`, title: `📉 ${firstName(leader.name) || "Um amigo"} te ultrapassou — ${habits} hábito${habits > 1 ? "s" : ""} hoje te devolve${habits > 1 ? "m" : ""} o 1º`, body: "", url: "/amigos", tag: "leaguemove" }];
+  }
+  return [];
+}
+
+/** Sunday 20:00 weekly summary (Sunday → Saturday week ending today). */
+export function dueWeeklySummary(input: { plan: unknown; habitLog: unknown; kcalFor: (blocks: { kind: string }[]) => number }, timeZone: string, now: Date): DueReminder[] {
+  const nowMs = wallClock(now, timeZone);
+  if (new Date(nowMs).getUTCDay() !== 0 || !atTime(nowMs, "20:00")) return [];
+  const p = (input.plan && typeof input.plan === "object" ? input.plan : {}) as Record<string, { kind?: string; done?: boolean }[] | undefined>;
+  const log = (input.habitLog && typeof input.habitLog === "object" ? input.habitLog : {}) as Record<string, string[]>;
+  let days = 0, workouts = 0, kcal = 0;
+  for (let i = 0; i < 7; i++) {
+    const d = dayKey(nowMs - i * 86400000);
+    const blocks = (p[d] ?? []).filter(Boolean);
+    if ((log[d] ?? []).length || blocks.some((b) => b.done)) days++;
+    workouts += blocks.filter((b) => b.kind === "treino" && b.done).length;
+    kcal += input.kcalFor(blocks as { kind: string }[]);
+  }
+  const today = dayKey(nowMs);
+  return [{ key: `weekly|${today}`, title: `📊 Sua semana: ${days} dia${days === 1 ? "" : "s"} marcado${days === 1 ? "" : "s"} · ${workouts} treino${workouts === 1 ? "" : "s"} · ${Math.round(kcal)} kcal planejadas. Confira o card e compartilhe!`, body: "", url: "/progresso", tag: "weekly" }];
 }
