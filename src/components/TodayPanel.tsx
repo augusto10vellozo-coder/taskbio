@@ -55,7 +55,7 @@ export function TodayPanel() {
         </div>
       </div>
       {workoutToday && <div className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-lg bg-card p-4 ring-1 ring-brand/40">
-        <div><p className="text-xs text-steel">Treino de hoje · {workoutToday.time}</p><p className="font-display text-lg font-semibold">{workoutToday.title}</p></div>
+        <div className="min-w-0"><p className="text-xs text-steel">Treino de hoje · {workoutToday.time}</p><p className="line-clamp-2 break-words font-display text-lg font-semibold leading-snug">{workoutToday.title}</p></div>
         <div className="flex flex-wrap gap-2"><Button asChild variant="outline" size="sm"><Link to="/treino">Registrar exercícios</Link></Button><Button size="sm" variant={workoutToday.done ? "outline" : "default"} aria-pressed={workoutToday.done} onClick={() => { toggleBlock(today, workoutToday.id); if (!workoutToday.done) toast.success("Treino concluído!"); }}><Tick on={workoutToday.done} />{workoutToday.done ? "Concluído" : "Concluir treino"}</Button></div>
       </div>}
       {habitsOn && habits.length > 0 && <div className="mt-3"><p className="mb-2 text-xs text-steel">Hábitos de hoje</p><div className="flex flex-wrap gap-2">{habits.map((habit) => { const done = (habitLog[today] ?? []).includes(habit.id); return <Button key={habit.id} variant="outline" size="sm" aria-pressed={done} onClick={() => toggleHabit(today, habit.id)}><Tick on={done} />{habit.name}</Button>; })}</div></div>}

@@ -26,7 +26,7 @@ export function BottomNav() {
 
   return (
     <>
-      <div aria-hidden className="h-[calc(4rem+env(safe-area-inset-bottom))] xl:hidden" />
+      <div aria-hidden className="h-[calc(6.75rem+env(safe-area-inset-bottom))] xl:h-14" />
       <nav aria-label="Navegação principal" className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur xl:hidden">
         <div className="mx-auto grid max-w-lg auto-cols-fr grid-flow-col items-stretch gap-0.5 px-2 py-1">
           {primary.map((m) => (

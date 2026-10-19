@@ -39,7 +39,7 @@ function Saude() {
     <main className="mx-auto max-w-4xl px-5 pb-20 sm:px-8">
       <ModuleHeader title="Saúde" />
       <section className="pb-5"><h2 className="font-display text-lg font-semibold">Registro rápido</h2><p className="mt-2 text-sm text-steel">Registros pessoais de acompanhamento; não substituem orientação médica.</p></section>
-      <div className="grid gap-3 md:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
         <Card icon={<Droplets className="size-4 text-brand" />} title="Água">
           <p className="font-display text-3xl font-semibold">{water}<span className="text-base text-steel"> / {health.waterGoal} copos</span></p>
           <div className="mt-3 flex gap-2"><Button variant="outline" size="icon" aria-label="Remover copo" onClick={() => setWater(water - 1)}><Minus /></Button><Button className="flex-1" onClick={() => { setWater(water + 1); if (water + 1 === health.waterGoal) toast.success("Meta de água alcançada!"); else toast.success("+1 copo"); }}><Plus /> 1 copo</Button></div>
@@ -47,11 +47,11 @@ function Saude() {
         </Card>
         <Card icon={<Moon className="size-4 text-brand" />} title="Sono">
           <p className="font-display text-3xl font-semibold">{health.sleep[today] ?? "—"}<span className="text-base text-steel"> h</span></p>
-          <form className="mt-3 flex gap-2" onSubmit={(e) => { e.preventDefault(); const v = Number(sleep); if (!(v > 0 && v <= 24)) return; setHealth((h) => ({ ...h, sleep: { ...h.sleep, [today]: v } })); setSleep(""); toast.success("Sono registrado"); }}><input type="number" step="0.5" min="0" max="24" value={sleep} onChange={(e) => setSleep(e.target.value)} placeholder="Horas" className="h-9 min-w-0 flex-1 rounded-md bg-background px-3 text-sm ring-1 ring-line" /><Button>Salvar</Button></form>
+          <form className="mt-3 flex gap-2" onSubmit={(e) => { e.preventDefault(); const v = Number(sleep); if (!(v > 0 && v <= 24)) return; setHealth((h) => ({ ...h, sleep: { ...h.sleep, [today]: v } })); setSleep(""); toast.success("Sono registrado"); }}><input type="number" step="0.5" min="0" max="24" value={sleep} onChange={(e) => setSleep(e.target.value)} placeholder="Horas" className="h-9 min-w-0 flex-1 rounded-md bg-background px-3 text-sm ring-1 ring-line" /><Button className="shrink-0">Salvar</Button></form>
         </Card>
         <Card icon={<Scale className="size-4 text-brand" />} title="Peso">
           <p className="font-display text-3xl font-semibold">{health.weight[today] ?? "—"}<span className="text-base text-steel"> kg</span></p>
-          <form className="mt-3 flex gap-2" onSubmit={(e) => { e.preventDefault(); const v = Number(weight.replace(",", ".")); if (!(v > 0 && v < 500)) return; setHealth((h) => ({ ...h, weight: { ...h.weight, [today]: v } })); setWeight(""); toast.success("Peso registrado"); }}><input inputMode="decimal" value={weight} onChange={(e) => setWeight(e.target.value)} placeholder="kg" className="h-9 w-full rounded-md bg-background px-3 text-sm ring-1 ring-line" /><Button>Salvar</Button></form>
+          <form className="mt-3 flex gap-2" onSubmit={(e) => { e.preventDefault(); const v = Number(weight.replace(",", ".")); if (!(v > 0 && v < 500)) return; setHealth((h) => ({ ...h, weight: { ...h.weight, [today]: v } })); setWeight(""); toast.success("Peso registrado"); }}><input inputMode="decimal" value={weight} onChange={(e) => setWeight(e.target.value)} placeholder="kg" className="h-9 min-w-0 flex-1 rounded-md bg-background px-3 text-sm ring-1 ring-line" /><Button className="shrink-0">Salvar</Button></form>
         </Card>
       </div>
       <section className="mt-3 rounded-lg bg-card p-4 ring-1 ring-line">
@@ -70,9 +70,9 @@ function Saude() {
 }
 
 function Card({ icon, title, children }: { icon: React.ReactNode; title: string; children: React.ReactNode }) {
-  return <section className="rounded-lg bg-card p-4 ring-1 ring-line"><p className="mb-1 flex items-center gap-1.5 text-xs font-medium text-steel">{icon}{title} hoje</p>{children}</section>;
+  return <section className="min-w-0 rounded-lg bg-card p-4 ring-1 ring-line"><p className="mb-1 flex items-center gap-1.5 text-xs font-medium text-steel">{icon}{title} hoje</p>{children}</section>;
 }
 
 function Chart({ title, data }: { title: string; data: { d: string; v: number | null }[] }) {
-  return <section className="rounded-lg bg-card p-4 ring-1 ring-line"><p className="text-xs font-medium text-steel">{title} · 30 dias</p><div className="mt-2 h-36"><ResponsiveContainer width="100%" height="100%"><LineChart data={data}><XAxis dataKey="d" tick={{ fontSize: 10 }} interval={6} /><YAxis tick={{ fontSize: 10 }} width={28} domain={["auto", "auto"]} /><Tooltip /><Line type="monotone" dataKey="v" stroke="var(--color-brand, currentColor)" strokeWidth={2} dot={false} connectNulls /></LineChart></ResponsiveContainer></div></section>;
+  return <section className="min-w-0 rounded-lg bg-card p-4 ring-1 ring-line"><p className="text-xs font-medium text-steel">{title} · 30 dias</p><div className="mt-2 h-36"><ResponsiveContainer width="100%" height="100%"><LineChart data={data}><XAxis dataKey="d" tick={{ fontSize: 10 }} interval={6} /><YAxis tick={{ fontSize: 10 }} width={28} domain={["auto", "auto"]} /><Tooltip /><Line type="monotone" dataKey="v" stroke="var(--color-brand, currentColor)" strokeWidth={2} dot={false} connectNulls /></LineChart></ResponsiveContainer></div></section>;
 }

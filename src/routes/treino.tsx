@@ -84,8 +84,8 @@ function WeekTab({ onExplore }: { onExplore: () => void }) {
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-7">
         {week.map((d) => { const k = toDateKey(d); const b = blockOf(k); const active = k === selected; return (
           <div key={k} className={`rounded-lg bg-card p-3 ring-1 transition ${active ? "ring-brand" : "ring-line"}`}>
-            <button className="w-full text-left" onClick={() => setSelected(k)}><p className="text-[11px] font-medium uppercase text-steel">{format(d, "EEE d", { locale: ptBR })}</p><p className={`mt-1 min-h-10 text-sm font-medium ${b?.done ? "text-steel line-through" : ""}`}>{b?.title ?? <span className="text-steel">Sem treino</span>}</p></button>
-            {b && <button className="mt-1 flex items-center gap-1.5 text-xs text-steel" onClick={() => { toggleBlock(k, b.id); if (!b.done) toast.success("Treino concluído!"); }} aria-label={`${b.done ? "Desmarcar" : "Concluir"} ${b.title}`}><Tick on={b.done} />{b.done ? "Concluído" : "Concluir"}</button>}
+            <button className="w-full text-left" onClick={() => setSelected(k)}><p className="text-[11px] font-medium uppercase leading-4 text-steel">{format(d, "EEE d", { locale: ptBR })}</p><p className={`mt-1.5 min-h-10 break-words text-sm font-medium leading-snug [overflow-wrap:anywhere] ${b?.done ? "text-steel line-through" : ""}`}>{b?.title ?? <span className="text-steel">Sem treino</span>}</p></button>
+            {b && <button className="mt-2 flex items-center gap-1.5 text-xs text-steel" onClick={() => { toggleBlock(k, b.id); if (!b.done) toast.success("Treino concluído!"); }} aria-label={`${b.done ? "Desmarcar" : "Concluir"} ${b.title}`}><Tick on={b.done} />{b.done ? "Concluído" : "Concluir"}</button>}
           </div>); })}
       </div>
 

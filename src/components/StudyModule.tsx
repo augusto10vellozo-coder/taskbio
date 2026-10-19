@@ -104,7 +104,7 @@ export function StudyModule() {
                 <span className="size-3 shrink-0 rounded-full" style={{ background: s.color }} aria-hidden />
                 <span className="min-w-0 flex-1 truncate font-medium">{s.name}</span>
                 <span className="shrink-0 text-xs text-steel">{hm(m)}{g ? ` / ${hm(g)}` : ""}</span>
-                <label className="flex shrink-0 items-center gap-1 text-xs text-steel">Meta <input type="number" min="0" step="0.5" aria-label={`Meta semanal em horas de ${s.name}`} value={g ? g / 60 : ""} placeholder="h" onChange={(e) => patchSub(s.id, { weeklyGoalMin: Math.max(0, Math.round(Number(e.target.value) * 60)) })} className="h-8 w-14 rounded bg-background px-2 ring-1 ring-line" />h</label>
+                <label className="flex shrink-0 items-center gap-1 text-xs text-steel">Meta <input type="number" min="0" step="0.5" aria-label={`Meta semanal em horas de ${s.name}`} value={g ? g / 60 : ""} placeholder="0" onChange={(e) => patchSub(s.id, { weeklyGoalMin: Math.max(0, Math.round(Number(e.target.value) * 60)) })} className="h-8 w-14 rounded bg-background px-2 text-center ring-1 ring-line" /><span>h</span></label>
                 <Button variant="ghost" size="icon" className="size-7 shrink-0" aria-label={`Remover ${s.name}`} onClick={() => { if (confirm(`Remover a matéria “${s.name}”? O histórico continua salvo.`)) setTrackers((t) => ({ ...t, subjects: (t.subjects ?? []).filter((x) => x.id !== s.id) })); }}><Trash2 /></Button>
               </div>
               <div className="relative mt-1.5 h-2 overflow-hidden rounded-full bg-mist" role="img" aria-label={`${m} minutos nos últimos 7 dias`}>
@@ -151,7 +151,7 @@ export function StudyModule() {
         </section>
       )}
 
-      <section aria-labelledby="provas" className="mt-4 rounded-lg bg-card p-4 ring-1 ring-line">
+      <section aria-labelledby="provas" className="mt-4 rounded-lg bg-card p-4 pb-6 ring-1 ring-line">
         <h2 id="provas" className="flex items-center gap-2 font-display text-lg font-semibold"><CalendarClock className="size-5" /> Provas e entregas</h2>
         {subjects.length === 0 ? <p className="mt-2 text-sm text-steel">Crie uma matéria para cadastrar provas.</p> : (
           <form className="mt-3 grid grid-cols-2 gap-2" onSubmit={(e) => { e.preventDefault(); const sid = exam.subjectId || subjectId; if (!exam.title.trim() || !exam.date) { toast.error("Informe descrição e data"); return; } setTrackers((t) => ({ ...t, exams: [...(t.exams ?? []), { id: `ex-${Date.now()}`, subjectId: sid, subjectName: subOf(sid)?.name ?? "", title: exam.title.trim(), date: exam.date }] })); setExam({ subjectId: "", title: "", date: "" }); toast.success("Prova salva · lembrete 1 dia antes e no dia"); }}>
