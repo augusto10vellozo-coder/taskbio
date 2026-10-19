@@ -111,7 +111,7 @@ export function TrainingExplore() {
 
             <div className="glass-strong rounded-2xl p-5 ring-1 ring-black/5">
               <h2 className="font-display text-lg font-semibold tracking-tight">Meu objetivo</h2>
-              <p className="mt-1 text-xs text-steel">O objetivo ajusta foco, frequência, intensidade, duração e recuperação dos exemplos.</p>
+              <p className="mt-1 text-xs text-steel">Seu objetivo deixa os exemplos com a sua cara.</p>
               <div className="mt-3 flex flex-wrap gap-1.5">
                 {GOALS.map((g) => (
                   <Button
@@ -156,7 +156,7 @@ export function TrainingExplore() {
               {!preferredModality ? (
                 <p className="mt-5 rounded-lg border border-dashed border-line p-4 text-sm text-steel">As opções aparecerão aqui depois que você escolher uma modalidade.</p>
               ) : !goal ? (
-                <p className="mt-5 rounded-lg border border-dashed border-line p-4 text-sm text-steel">Agora escolha seu objetivo para ajustar os exemplos. Você também pode explorar a versão geral abaixo.</p>
+                <p className="mt-5 rounded-lg border border-dashed border-line p-4 text-sm text-steel">Agora escolha seu objetivo — ou explore os exemplos gerais abaixo.</p>
               ) : null}
 
               {examples.length > 0 && (
@@ -304,7 +304,7 @@ export function TrainingExplore() {
                 <span className="text-xs text-steel">últimas sessões</span>
               </div>
               {workoutHistory.length === 0 ? (
-                <p className="mt-4 text-sm text-steel">Conclua seu primeiro treino para acompanhar cargas e evolução.</p>
+                <p className="mt-4 text-sm text-steel">Conclua seu primeiro treino pra ver a evolução aqui.</p>
               ) : (
                 <div className="mt-4 space-y-2">
                   {workoutHistory.slice(0, 5).map((entry) => (

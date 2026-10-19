@@ -44,7 +44,7 @@ function Financas() {
   return (
     <main className="mx-auto max-w-4xl px-5 pb-20 sm:px-8">
       <ModuleHeader title="Finanças" />
-      <section className="pb-5"><h2 className="font-display text-lg font-semibold">Seu mês em reais</h2><p className="mt-2 text-sm text-steel">Controle simples e pessoal; não é orientação financeira.</p></section>
+      <section className="pb-5"><h2 className="font-display text-lg font-semibold">Seu mês em reais</h2><p className="mt-2 text-sm text-steel">Seu controle pessoal, simples e no seu ritmo.</p></section>
 
       <form className="rounded-lg bg-card p-4 ring-1 ring-line" onSubmit={(e) => { e.preventDefault(); const v = num(amount); if (!(v > 0)) { toast.error("Informe um valor"); return; } setFinance((s) => ({ ...s, entries: [{ id: `f-${Date.now()}`, date: toDateKey(new Date()), amount: v, description: desc.trim() || cat, category: type === "receita" ? "Receita" : cat, type }, ...s.entries] })); setAmount(""); setDesc(""); toast.success(type === "gasto" ? "Gasto registrado" : "Receita registrada"); }}>
         <div className="mb-3 grid grid-cols-2 rounded-lg bg-mist p-1 sm:w-64">{(["gasto", "receita"] as const).map((t) => <button key={t} type="button" onClick={() => setType(t)} className={`rounded-md px-3 py-1.5 text-sm font-medium ${type === t ? "bg-card text-ink shadow-sm" : "text-steel"}`}>{t === "gasto" ? "Gasto" : "Receita"}</button>)}</div>
@@ -67,7 +67,7 @@ function Financas() {
         {sum.categories.length === 0 ? <p className="mt-2 text-sm text-steel">Nenhum gasto neste mês ainda.</p> : <ul className="mt-3 space-y-2">{sum.categories.map((c) => <li key={c.category} className="text-sm"><div className="flex justify-between"><span>{c.category}</span><span className="font-medium">{brl(c.total)}</span></div><div className="mt-1 h-2 rounded-full bg-mist"><div className="h-2 rounded-full bg-brand" style={{ width: `${(c.total / max) * 100}%` }} /></div></li>)}</ul>}
       </section>
 
-      <section className="mt-4 rounded-lg bg-card p-4 ring-1 ring-line"><h2 className="font-display text-lg font-semibold">Contas a pagar</h2><p className="text-xs text-steel">Com os avisos ativados no Perfil, você recebe uma notificação às 9h do dia anterior ao vencimento.</p>
+      <section className="mt-4 rounded-lg bg-card p-4 ring-1 ring-line"><h2 className="font-display text-lg font-semibold">Contas a pagar</h2><p className="text-xs text-steel">A gente te lembra um dia antes do vencimento.</p>
         <form className="mt-3 grid gap-2 sm:grid-cols-[1fr_120px_160px_auto]" onSubmit={(e) => { e.preventDefault(); const v = num(bill.amount); if (!bill.title.trim() || !(v > 0) || !bill.dueDate) { toast.error("Preencha conta, valor e vencimento"); return; } setFinance((s) => ({ ...s, bills: [...s.bills, { id: `c-${Date.now()}`, title: bill.title.trim(), amount: v, dueDate: bill.dueDate }].sort((a, b) => a.dueDate.localeCompare(b.dueDate)) })); setBill({ title: "", amount: "", dueDate: "" }); toast.success("Conta adicionada"); }}>
           <input aria-label="Conta" value={bill.title} onChange={(e) => setBill({ ...bill, title: e.target.value })} placeholder="Conta (ex.: luz)" className={field} />
           <input aria-label="Valor da conta" inputMode="decimal" value={bill.amount} onChange={(e) => setBill({ ...bill, amount: e.target.value })} placeholder="R$" className={field} />

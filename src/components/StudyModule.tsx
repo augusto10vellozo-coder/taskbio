@@ -97,7 +97,7 @@ export function StudyModule() {
           <Button className="h-10 shrink-0" aria-label="Criar matéria"><Plus /></Button>
         </form>
         <ul className="mt-3 space-y-3">
-          {subjects.length === 0 && <li className="text-sm text-steel">Crie sua primeira matéria para começar.</li>}
+          {subjects.length === 0 && <li className="text-sm text-steel">Crie sua primeira matéria pra começar a estudar.</li>}
           {subjects.map((s) => { const m = bySub.get(s.id) ?? 0; const g = s.weeklyGoalMin ?? 0; return (
             <li key={s.id}>
               <div className="flex items-center gap-2 text-sm">
@@ -114,7 +114,7 @@ export function StudyModule() {
             </li>
           ); })}
         </ul>
-        {subjects.length > 0 && <p className="mt-3 text-xs text-steel">Barras: minutos dos últimos 7 dias. O traço marca a meta semanal.</p>}
+        {subjects.length > 0 && <p className="mt-3 text-xs text-steel">Seus últimos 7 dias · o traço é a sua meta.</p>}
       </section>
 
       {subjects.length > 0 && (
@@ -153,7 +153,7 @@ export function StudyModule() {
 
       <section aria-labelledby="provas" className="mt-4 rounded-lg bg-card p-4 pb-6 ring-1 ring-line">
         <h2 id="provas" className="flex items-center gap-2 font-display text-lg font-semibold"><CalendarClock className="size-5" /> Provas e entregas</h2>
-        {subjects.length === 0 ? <p className="mt-2 text-sm text-steel">Crie uma matéria para cadastrar provas.</p> : (
+        {subjects.length === 0 ? <p className="mt-2 text-sm text-steel">Crie uma matéria pra organizar suas provas.</p> : (
           <form className="mt-3 grid grid-cols-2 gap-2" onSubmit={(e) => { e.preventDefault(); const sid = exam.subjectId || subjectId; if (!exam.title.trim() || !exam.date) { toast.error("Informe descrição e data"); return; } setTrackers((t) => ({ ...t, exams: [...(t.exams ?? []), { id: `ex-${Date.now()}`, subjectId: sid, subjectName: subOf(sid)?.name ?? "", title: exam.title.trim(), date: exam.date }] })); setExam({ subjectId: "", title: "", date: "" }); toast.success("Prova salva · lembrete 1 dia antes e no dia"); }}>
             <select aria-label="Matéria da prova" value={exam.subjectId || subjectId} onChange={(e) => setExam({ ...exam, subjectId: e.target.value })} className={input}>{subjects.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}</select>
             <input type="date" aria-label="Data da prova" min={today} value={exam.date} onChange={(e) => setExam({ ...exam, date: e.target.value })} className={input} />
@@ -162,7 +162,7 @@ export function StudyModule() {
           </form>
         )}
         <ul className="mt-3 divide-y divide-line">
-          {upcoming.length === 0 && <li className="py-3 text-sm text-steel">Nenhuma prova ou entrega pela frente.</li>}
+          {upcoming.length === 0 && <li className="py-3 text-sm text-steel">Nada pela frente — aproveite pra adiantar os estudos.</li>}
           {upcoming.map((ex) => { const d = daysUntil(ex.date, today); const s = subOf(ex.subjectId); return (
             <li key={ex.id} className="flex items-center gap-3 py-2 text-sm">
               <span className="size-3 shrink-0 rounded-full" style={{ background: s?.color ?? "currentColor" }} aria-hidden />

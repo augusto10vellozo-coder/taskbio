@@ -38,7 +38,7 @@ function Saude() {
   return (
     <main className="mx-auto max-w-4xl px-5 pb-20 sm:px-8">
       <ModuleHeader title="Saúde" />
-      <section className="pb-5"><h2 className="font-display text-lg font-semibold">Registro rápido</h2><p className="mt-2 text-sm text-steel">Registros pessoais de acompanhamento; não substituem orientação médica.</p></section>
+      <section className="pb-5"><h2 className="font-display text-lg font-semibold">Registro rápido</h2><p className="mt-2 text-sm text-steel">Registros pessoais. Não substituem orientação de profissional.</p></section>
       <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
         <Card icon={<Droplets className="size-4 text-brand" />} title="Água">
           <p className="font-display text-3xl font-semibold">{water}<span className="text-base text-steel"> / {health.waterGoal} copos</span></p>
@@ -56,7 +56,7 @@ function Saude() {
       </div>
       <section className="mt-3 rounded-lg bg-card p-4 ring-1 ring-line">
         <p className="mb-1 flex items-center gap-1.5 text-xs font-medium text-steel"><Pill className="size-4 text-brand" />Medicamentos de hoje</p>
-        <p className="text-xs text-steel">Com os avisos ativados no Perfil, você recebe uma notificação no horário. Siga sempre a prescrição do seu médico.</p>
+        <p className="text-xs text-steel">A gente te lembra no horário. Siga sempre a prescrição do seu médico.</p>
         <form className="mt-3 flex flex-wrap gap-2" onSubmit={(e) => { e.preventDefault(); if (!med.name.trim()) return; setHealth((h) => ({ ...h, meds: [...(h.meds ?? []), { id: `m-${Date.now()}`, name: med.name.trim(), time: med.time }].sort((a, b) => a.time.localeCompare(b.time)) })); setMed({ name: "", time: med.time }); toast.success("Medicamento adicionado"); }}><input aria-label="Medicamento" value={med.name} onChange={(e) => setMed({ ...med, name: e.target.value })} placeholder="Nome do medicamento" className="h-9 min-w-0 flex-1 rounded-md bg-background px-3 text-sm ring-1 ring-line" /><input aria-label="Horário" type="time" value={med.time} onChange={(e) => setMed({ ...med, time: e.target.value })} className="h-9 rounded-md bg-background px-2 text-sm ring-1 ring-line" /><Button><Plus /> Adicionar</Button></form>
         <ul className="mt-2 divide-y divide-line">{(health.meds ?? []).map((m) => { const taken = (health.medsTaken?.[today] ?? []).includes(m.id); return <li key={m.id} className="flex items-center gap-3 py-2 text-sm"><input type="checkbox" checked={taken} aria-label={`${m.name} tomado hoje`} onChange={() => setHealth((h) => { const cur = h.medsTaken?.[today] ?? []; return { ...h, medsTaken: { ...h.medsTaken, [today]: taken ? cur.filter((x) => x !== m.id) : [...cur, m.id] } }; })} /><span className={`flex-1 ${taken ? "text-steel line-through" : ""}`}>{m.time} · {m.name}</span><Button variant="ghost" size="icon" className="size-7" aria-label={`Remover ${m.name}`} onClick={() => setHealth((h) => ({ ...h, meds: (h.meds ?? []).filter((x) => x.id !== m.id) }))}><Trash2 /></Button></li>; })}</ul>
       </section>

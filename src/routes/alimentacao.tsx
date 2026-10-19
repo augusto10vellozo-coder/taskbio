@@ -150,7 +150,7 @@ function Alimentacao() {
     <main className="mx-auto max-w-6xl px-5 pb-20 sm:px-8">
       <ModuleHeader title="Alimentação" /><section className="pb-5">
         <div className="mt-2 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-          <div><h2 className="font-display text-lg font-semibold">Planeje suas refeições</h2><p className="mt-2 max-w-[62ch] text-sm leading-6 text-steel">Escolha o que deseja preparar em cada dia. Calorias, nutrientes e custos são estimativas para organização.</p></div>
+          <div><h2 className="font-display text-lg font-semibold">Planeje suas refeições</h2><p className="mt-2 max-w-[62ch] text-sm leading-6 text-steel">Escolha o que vai preparar em cada dia. Valores estimados.</p></div>
           <Button asChild variant="outline"><Link to="/compras"><ShoppingBasket /> Gerar lista da semana</Link></Button>
         </div>
       </section>
@@ -189,7 +189,7 @@ function Alimentacao() {
           <section className="rounded-lg bg-ink p-5 text-primary-foreground">
             <p className="text-[11px] uppercase text-primary-foreground/70">Resumo da semana</p><p className="mt-2 font-display text-3xl font-semibold">{brl(totals.cost)}</p><p className="mt-1 text-xs text-primary-foreground/70">{scheduled.length} refeições · {totals.known ? `${fmt(totals.kcal)} kcal` : "calorias não informadas"}</p>
             <dl className="mt-4 grid grid-cols-3 gap-2 border-t border-primary-foreground/20 pt-4 text-center"><div><dt className="text-[10px] text-primary-foreground/70">Proteína</dt><dd className="mt-1 font-semibold">{totals.known ? `${fmt(totals.prot)}g` : "—"}</dd></div><div><dt className="text-[10px] text-primary-foreground/70">Carboidrato</dt><dd className="mt-1 font-semibold">{totals.known ? `${fmt(totals.carb)}g` : "—"}</dd></div><div><dt className="text-[10px] text-primary-foreground/70">Gordura</dt><dd className="mt-1 font-semibold">{totals.known ? `${fmt(totals.gord)}g` : "—"}</dd></div></dl>
-            <p className="mt-3 text-[10px] text-primary-foreground/60">Valores estimados. Não substitui orientação de nutricionista.</p>{totals.missing > 0 && <p className="mt-3 text-xs leading-5 text-primary-foreground/70">{totals.missing} refeição(ões) sem valores nutricionais informados; não incluídas nos nutrientes.</p>}
+            <p className="mt-3 text-[10px] text-primary-foreground/60">Registros pessoais. Não substituem orientação de profissional.</p>{totals.missing > 0 && <p className="mt-3 text-xs leading-5 text-primary-foreground/70">{totals.missing} refeição(ões) sem valores nutricionais informados; não incluídas nos nutrientes.</p>}
           </section>
           <section className="rounded-lg bg-card p-4 ring-1 ring-line"><h2 className="font-display text-base font-semibold">Neste dia</h2>
             {selectedMeals.length === 0 ? <p className="mt-3 text-sm text-steel">Nenhuma refeição registrada.</p> : <>
@@ -198,7 +198,7 @@ function Alimentacao() {
               <ul className="mt-3 divide-y divide-line">{selectedMeals.map((block) => { const meal = getMeal(block.mealId); const nutrition = mealNutrition(block, getMeal); return <li key={block.id} className="flex flex-wrap items-center justify-between gap-3 py-3"><div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-2"><p className="text-sm font-medium">{foodName(meal?.items ?? block.title)}</p>{block.manualMeal ? <span className="rounded-full bg-mist px-2 py-0.5 text-[10px] font-medium text-steel">registrado</span> : null}</div><p className="mt-0.5 text-xs leading-5 text-steel">{block.time}{block.manualMeal ? ` · ${block.manualMeal.portion}` : ""} · {nutrition.known ? `${fmt(nutrition.kcal)} kcal` : "Nutrientes não informados"}</p></div><div className="flex gap-1">{block.manualMeal && <Button variant="ghost" size="sm" onClick={() => editMeal(block)}>Editar</Button>}<Button variant="ghost" size="sm" onClick={() => removeBlock(selectedKey, block.id)}>Remover</Button></div></li>; })}</ul>
             </>}
           </section>
-          <p className="text-xs leading-5 text-steel">Valores estimados. Não substitui orientação de nutricionista.</p>
+          <p className="text-xs leading-5 text-steel">Registros pessoais. Não substituem orientação de profissional.</p>
         </aside>
       </div>
       <Dialog open={manualOpen} onOpenChange={setManualOpen}>
@@ -222,7 +222,7 @@ function Alimentacao() {
                 <div><Label htmlFor="manual-meal-kcal">Calorias (kcal)</Label><Input id="manual-meal-kcal" className="mt-1.5" type="number" min="0" max="10000" step="0.1" inputMode="decimal" value={manualMeal.kcal} onChange={(event) => setManualMeal((current) => ({ ...current, kcal: event.target.value }))} placeholder="Opcional" /></div><div><Label htmlFor="manual-meal-prot">Proteínas (g)</Label><Input id="manual-meal-prot" className="mt-1.5" type="number" min="0" max="10000" step="0.1" inputMode="decimal" value={manualMeal.prot} onChange={(event) => setManualMeal((current) => ({ ...current, prot: event.target.value }))} placeholder="Opcional" /></div><div><Label htmlFor="manual-meal-carb">Carboidratos (g)</Label><Input id="manual-meal-carb" className="mt-1.5" type="number" min="0" max="10000" step="0.1" inputMode="decimal" value={manualMeal.carb} onChange={(event) => setManualMeal((current) => ({ ...current, carb: event.target.value }))} placeholder="Opcional" /></div><div><Label htmlFor="manual-meal-gord">Gorduras (g)</Label><Input id="manual-meal-gord" className="mt-1.5" type="number" min="0" max="10000" step="0.1" inputMode="decimal" value={manualMeal.gord} onChange={(event) => setManualMeal((current) => ({ ...current, gord: event.target.value }))} placeholder="Opcional" /></div>
               </>}
             </div>
-            <p className="mt-4 text-xs leading-5 text-steel">Use valores do rótulo ou uma estimativa. O registro serve para organização e não substitui orientação nutricional.</p>
+            <p className="mt-4 text-xs leading-5 text-steel">Use os valores do rótulo ou uma estimativa.</p>
             <DialogFooter className="mt-5"><Button type="button" variant="outline" onClick={() => setManualOpen(false)}>Cancelar</Button><Button type="submit">Salvar registro</Button></DialogFooter>
           </form>
         </DialogContent>
