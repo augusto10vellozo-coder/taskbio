@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Cloud, CloudOff } from "lucide-react";
+import { CloudOff } from "lucide-react";
 import type { Json } from "@/integrations/supabase/types";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
@@ -13,6 +13,22 @@ export function SyncManager() {
   const [status, setStatus] = useState<SyncStatus>("idle");
   const initializedUser = useRef<string | null>(null);
   const skipNextPush = useRef(false);
+  const [loadTick, setLoadTick] = useState(0);
+  const [pushTick, setPushTick] = useState(0);
+  const [failSince, setFailSince] = useState<number | null>(null);
+  const [now, setNow] = useState(0);
+  const fail = (retry: () => void) => {
+    setStatus("error");
+    setFailSince((v) => v ?? Date.now());
+    window.setTimeout(retry, 5000);
+  };
+  const ok = () => { setStatus("saved"); setFailSince(null); };
+  useEffect(() => {
+    if (failSince === null) return;
+    setNow(Date.now());
+    const t = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(t);
+  }, [failSince]);
 
   useEffect(() => {
     if (authLoading || !ready || !user) {
@@ -25,7 +41,7 @@ export function SyncManager() {
     supabase.from("user_data").select("plan, workouts, meals, shopping_state, settings").eq("user_id", user.id).maybeSingle().then(async ({ data, error }) => {
       if (!active) return;
       if (error) {
-        setStatus("error");
+        fail(() => setLoadTick((n) => n + 1));
         return;
       }
 
@@ -68,16 +84,16 @@ export function SyncManager() {
           settings: { goal, preferredModality, workoutHistory, weeklyGoals, habits, habitLog, monthGoals, health, modules, exerciseLog, customFoods, finance, trackers, notifPrefs } as unknown as Json,
         });
         if (insertError) {
-          setStatus("error");
+          fail(() => setLoadTick((n) => n + 1));
           return;
         }
       }
       initializedUser.current = user.id;
-      setStatus("saved");
+      ok();
     });
 
     return () => { active = false; };
-  }, [authLoading, ready, user?.id]);
+  }, [authLoading, ready, user?.id, loadTick]);
 
   useEffect(() => {
     if (!user || initializedUser.current !== user.id) return;
@@ -96,14 +112,16 @@ export function SyncManager() {
         settings: { goal, preferredModality, workoutHistory, weeklyGoals, habits, habitLog, monthGoals, health, modules, exerciseLog, customFoods, finance, trackers, notifPrefs } as unknown as Json,
         updated_at: new Date().toISOString(),
       });
-      setStatus(error ? "error" : "saved");
+      if (error) fail(() => setPushTick((n) => n + 1)); else ok();
     }, 900);
     return () => window.clearTimeout(timer);
-  }, [goal, meals, plan, preferredModality, shoppingItems, user, weeklyGoals, workoutHistory, workouts, habits, habitLog, monthGoals, health, modules, exerciseLog, customFoods, finance, trackers, notifPrefs]);
+  }, [goal, meals, plan, preferredModality, shoppingItems, user, weeklyGoals, workoutHistory, workouts, habits, habitLog, monthGoals, health, modules, exerciseLog, customFoods, finance, trackers, notifPrefs, pushTick]);
 
-  if (!user || status === "idle") return null;
-  return <div className="pointer-events-none fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] right-4 z-30 flex max-w-[calc(100%-2rem)] items-center gap-1.5 rounded-full bg-card/90 px-3 py-1.5 text-[11px] font-medium text-steel shadow-sm ring-1 ring-line backdrop-blur xl:bottom-4" role="status">
-    {status === "error" ? <CloudOff className="size-3.5 text-destructive" /> : <Cloud className="size-3.5 text-good" />}
-    {status === "loading" ? "Sincronizando" : status === "error" ? "Sem sincronização" : "Salvo na nuvem"}
+  if (!user || failSince === null) return null;
+  const retryNow = () => { if (initializedUser.current === user.id) setPushTick((n) => n + 1); else setLoadTick((n) => n + 1); };
+  return <div className="fixed bottom-[calc(4.75rem+env(safe-area-inset-bottom))] left-1/2 z-50 flex max-w-[calc(100%-2rem)] -translate-x-1/2 items-center gap-2 rounded-full bg-card/95 px-3 py-1.5 text-xs font-medium text-ink shadow-md ring-1 ring-line backdrop-blur xl:bottom-4" role="alert">
+    <CloudOff className="size-3.5 shrink-0 text-destructive" />
+    <span>Falha ao salvar — tentando novamente...</span>
+    {now - failSince > 30000 && <button type="button" onClick={retryNow} className="min-h-8 rounded-full bg-brand/15 px-3 text-brand-deep">Tentar novamente</button>}
   </div>;
 }
