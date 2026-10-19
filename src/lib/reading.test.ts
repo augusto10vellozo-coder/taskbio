@@ -11,7 +11,6 @@ describe("leitura", () => {
   it("streak conta dias seguidos com sessão", () => {
     const s = [{ date: "2026-10-19" }, { date: "2026-10-18" }, { date: "2026-10-16" }];
     expect(readingStreak(s, new Date(2026, 9, 19))).toBe(2);
-    expect(readingStreak(s, new Date(2026, 9, 20))).toBe(0 + 0 || readingStreak(s, new Date(2026, 9, 20)));
     expect(readingStreak([{ date: "2026-10-19" }], new Date(2026, 9, 20))).toBe(1);
   });
   it("vincula registros antigos ao livro de mesmo título", () => {
