@@ -1,3 +1,4 @@
+import { ModuleHeader } from "@/components/ModuleHeader";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { TrainingExplore, useScheduleWorkout } from "@/components/TrainingExplore";
 import { useEffect, useMemo, useState } from "react";
@@ -39,7 +40,7 @@ function Treino() {
   const tab = aba === "explorar" ? "explorar" : "semana";
   return (
     <main className="mx-auto max-w-6xl px-5 pb-20 sm:px-8">
-      <section className="pt-8 pb-4"><p className="text-xs font-medium uppercase tracking-[0.18em] text-steel">Treino</p>
+      <ModuleHeader title="Treino" /><section className="pb-4">
         <div role="tablist" aria-label="Seções do treino" className="mt-3 inline-flex rounded-lg bg-mist p-1 text-sm">
           {([["semana", "Minha semana"], ["explorar", "Explorar e criar"]] as const).map(([id, label]) => <button key={id} role="tab" aria-selected={tab === id} onClick={() => navigate({ search: id === "explorar" ? { aba: "explorar" } : {}, replace: true })} className={`rounded-md px-3 py-1.5 font-medium ${tab === id ? "bg-ink text-white" : "text-steel"}`}>{label}</button>)}
         </div>
@@ -75,7 +76,7 @@ function WeekTab({ onExplore }: { onExplore: () => void }) {
   return (
     <div>
       <section className="flex flex-wrap items-end justify-between gap-3 pb-5">
-        <div><h1 className="font-display text-3xl font-semibold sm:text-4xl">Plano da semana</h1><p className="mt-2 text-sm text-steel">Toque no dia para ver o treino. O círculo marca o treino como concluído.</p></div>
+        <div><h2 className="font-display text-xl font-semibold">Plano da semana</h2><p className="mt-2 text-sm text-steel">Toque no dia para ver o treino. O círculo marca o treino como concluído.</p></div>
         <Button variant="outline" onClick={() => setImporting(true)}><FileUp /> Importar plano</Button>
       </section>
 
@@ -111,7 +112,7 @@ function AssignForm({ workouts, onPick, onCreate }: { workouts: Workout[]; onPic
   const [name, setName] = useState("");
   return <div className="mt-3 space-y-3">
     {workouts.length > 0 && <div className="flex flex-wrap gap-2">{workouts.map((w) => <Button key={w.id} variant="outline" size="sm" onClick={() => onPick(w)}>{w.name}</Button>)}</div>}
-    <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); if (name.trim()) { onCreate(name.trim()); setName(""); } }}><input value={name} onChange={(e) => setName(e.target.value)} placeholder="Novo treino (ex.: Peito e tríceps, Corrida, Full body)" className="h-10 flex-1 rounded-md bg-background px-3 text-sm ring-1 ring-line" /><Button><Plus /> Criar</Button></form>
+    <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); if (name.trim()) { onCreate(name.trim()); setName(""); } }}><input value={name} onChange={(e) => setName(e.target.value)} placeholder="Novo treino (ex.: Peito e tríceps, Corrida, Full body)" className="h-10 min-w-0 flex-1 rounded-md bg-background px-3 text-sm ring-1 ring-line" /><Button><Plus /> Criar</Button></form>
   </div>;
 }
 
@@ -122,8 +123,8 @@ function WorkoutDetail({ workout, dateKey }: { workout: Workout; dateKey: string
   return <div className="mt-3">
     {workout.exercises.length === 0 && <p className="py-4 text-sm text-steel">Adicione os exercícios deste treino.</p>}
     <ul className="divide-y divide-line">{workout.exercises.map((ex) => <ExerciseRow key={ex.id} ex={ex} workout={workout} dateKey={dateKey} open={open === ex.id} onToggle={() => setOpen(open === ex.id ? null : ex.id)} />)}</ul>
-    <form className="mt-4 grid grid-cols-[1fr_64px_64px_80px_auto] gap-2" onSubmit={(e) => { e.preventDefault(); if (!form.name.trim()) return; const ex: Exercise = { id: `e-${Date.now()}`, name: form.name.trim(), sets: Math.max(1, Number(form.sets) || 3), reps: Math.max(1, Number(form.reps) || 10), restSec: 60, muscles: "", howTo: "", doneSets: 0, ...(Number(form.load.replace(",", ".")) ? { loadKg: Number(form.load.replace(",", ".")) } : {}) }; updateWorkout({ ...workout, exercises: [...workout.exercises, ex] }); setForm({ ...form, name: "", load: "" }); }}>
-      <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Exercício" className="h-10 min-w-0 rounded-md bg-background px-3 text-sm ring-1 ring-line" />
+    <form className="mt-4 grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto] sm:grid-cols-[minmax(0,1fr)_64px_64px_80px_auto] gap-2" onSubmit={(e) => { e.preventDefault(); if (!form.name.trim()) return; const ex: Exercise = { id: `e-${Date.now()}`, name: form.name.trim(), sets: Math.max(1, Number(form.sets) || 3), reps: Math.max(1, Number(form.reps) || 10), restSec: 60, muscles: "", howTo: "", doneSets: 0, ...(Number(form.load.replace(",", ".")) ? { loadKg: Number(form.load.replace(",", ".")) } : {}) }; updateWorkout({ ...workout, exercises: [...workout.exercises, ex] }); setForm({ ...form, name: "", load: "" }); }}>
+      <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Exercício" className="col-span-4 h-10 min-w-0 sm:col-span-1 rounded-md bg-background px-3 text-sm ring-1 ring-line" />
       <input value={form.sets} onChange={(e) => setForm({ ...form, sets: e.target.value })} aria-label="Séries" inputMode="numeric" className="h-10 rounded-md bg-background px-2 text-sm ring-1 ring-line" />
       <input value={form.reps} onChange={(e) => setForm({ ...form, reps: e.target.value })} aria-label="Repetições" inputMode="numeric" className="h-10 rounded-md bg-background px-2 text-sm ring-1 ring-line" />
       <input value={form.load} onChange={(e) => setForm({ ...form, load: e.target.value })} placeholder="kg" aria-label="Carga em kg" inputMode="decimal" className="h-10 rounded-md bg-background px-2 text-sm ring-1 ring-line" />

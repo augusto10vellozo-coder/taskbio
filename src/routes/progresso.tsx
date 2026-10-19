@@ -1,3 +1,4 @@
+import { ModuleHeader } from "@/components/ModuleHeader";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { format, isAfter, parseISO, subDays } from "date-fns";
@@ -99,11 +100,12 @@ function Progresso() {
     setEntries((current) => current.filter((entry) => entry.id !== id));
   }
 
-  if (!authLoading && !user) return <main className="mx-auto max-w-4xl px-5 py-16 text-center"><Activity className="mx-auto size-9 text-brand-deep" /><h1 className="mt-4 font-display text-3xl font-semibold">Seu progresso começa com sua conta</h1><p className="mx-auto mt-2 max-w-lg text-sm text-steel">Entre para salvar seus registros com segurança e acompanhar a evolução.</p><Button asChild className="mt-6"><Link to="/auth">Entrar ou criar conta</Link></Button></main>;
+  if (!authLoading && !user) return <main className="mx-auto max-w-4xl px-5 pb-16"><ModuleHeader title="Progresso" /><div className="pt-8 text-center"><Activity className="mx-auto size-9 text-brand-deep" /><h2 className="mt-4 font-display text-2xl font-semibold">Seu progresso começa com sua conta</h2><p className="mx-auto mt-2 max-w-lg text-sm text-steel">Entre para salvar seus registros com segurança e acompanhar a evolução.</p><Button asChild className="mt-6"><Link to="/auth">Entrar ou criar conta</Link></Button></div></main>;
 
   return (
     <main className="mx-auto max-w-6xl px-5 pb-20 sm:px-8">
-      <section className="pt-8 pb-5"><p className="text-xs font-medium uppercase tracking-[0.18em] text-steel">Meu progresso</p><h1 className="mt-2 font-display text-3xl font-semibold sm:text-4xl">Evolução baseada nos seus registros</h1><p className="mt-2 text-sm text-steel">Acompanhe tendências sem transformar números isolados em diagnóstico.</p></section>
+      <ModuleHeader title="Progresso" />
+      <section className="pb-5"><h2 className="font-display text-lg font-semibold">Evolução baseada nos seus registros</h2><p className="mt-2 text-sm text-steel">Acompanhe tendências sem transformar números isolados em diagnóstico.</p></section>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{[["Rotina semanal", `${pct}%`, `${done.length} de ${all.length} blocos`], ["Treinos concluídos", `${workoutHistory.length}`, "histórico total"], ["Volume registrado", `${totalVolume.toLocaleString("pt-BR")} kg`, "nos treinos"], ["Calorias planejadas", mealSummary(all, getMeal).kcal.toLocaleString("pt-BR"), "semana atual"]].map(([title, stat, detail]) => <article key={title} className="rounded-lg bg-card p-4 ring-1 ring-line"><p className="text-[11px] uppercase text-steel">{title}</p><p className="mt-2 font-display text-2xl font-semibold">{stat}</p><p className="mt-1 text-xs text-steel">{detail}</p></article>)}</div>
       <section className="mt-7 border-t border-line pt-6" aria-labelledby="weekly-goals-title">
         <div className="mb-4"><h2 id="weekly-goals-title" className="font-display text-xl font-semibold">Metas da semana</h2><p className="text-sm text-steel">Comparação com a semana anterior; ajuste suas metas quando quiser.</p></div>

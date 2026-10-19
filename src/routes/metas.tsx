@@ -1,3 +1,4 @@
+import { ModuleHeader } from "@/components/ModuleHeader";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Minus, Plus, Trash2 } from "lucide-react";
@@ -35,7 +36,7 @@ function Metas() {
 
   return (
     <main className="mx-auto max-w-4xl px-5 pb-20 sm:px-8">
-      <section className="pt-8 pb-5"><p className="text-xs font-medium uppercase tracking-[0.18em] text-steel">Metas</p><h1 className="mt-2 font-display text-3xl font-semibold capitalize sm:text-4xl">{format(new Date(`${month}-01T12:00:00`), "MMMM 'de' yyyy", { locale: ptBR })}</h1><p className="mt-2 text-sm text-steel">Ex.: treinar 12 vezes, ler 2 livros, economizar R$ 200.</p></section>
+      <ModuleHeader title="Metas" /><section className="pb-5"><h2 className="font-display text-lg font-semibold capitalize">{format(new Date(`${month}-01T12:00:00`), "MMMM 'de' yyyy", { locale: ptBR })}</h2><p className="mt-2 text-sm text-steel">Ex.: treinar 12 vezes, ler 2 livros, economizar R$ 200.</p></section>
       <form className="grid gap-2 rounded-lg bg-card p-4 ring-1 ring-line sm:grid-cols-[1fr_80px_100px_1fr_auto]" onSubmit={(e) => { e.preventDefault(); if (!title.trim()) return; saveMonthGoal({ id: `g-${Date.now()}`, month, title: title.trim(), target: Math.max(1, Number(target) || 1), unit: unit.trim() || "vezes", source, manual: 0 }); setTitle(""); toast.success("Meta criada"); }}>
         <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Nova meta" className="h-10 rounded-md bg-background px-3 text-sm ring-1 ring-line" />
         <input type="number" min="1" value={target} onChange={(e) => setTarget(e.target.value)} aria-label="Alvo" className="h-10 rounded-md bg-background px-3 text-sm ring-1 ring-line" />

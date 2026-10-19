@@ -1,3 +1,4 @@
+import { ModuleHeader } from "@/components/ModuleHeader";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { addDays, format, isSameDay } from "date-fns";
@@ -115,13 +116,12 @@ function Agenda() {
 
   return (
     <main className="mx-auto max-w-6xl px-5 pb-20 sm:px-8">
-      <section className="pt-8 pb-4">
+      <ModuleHeader title="Minha Agenda" /><section className="pb-4">
         <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
           <div>
-            <p className="text-xs font-medium uppercase tracking-[0.18em] text-steel">Minha agenda</p>
-            <h1 className="mt-2 max-w-[40ch] text-balance font-display text-3xl font-semibold tracking-tight sm:text-4xl">
+            <h2 className="max-w-[40ch] text-balance font-display text-xl font-semibold">
               {formatFullDate(selectedDate)}
-            </h1>
+            </h2>
             <p className="mt-2 max-w-[48ch] text-pretty text-sm text-steel">
               {blocks.length} blocos planejados · {resumo.done} concluídos · custo do dia estimado em{" "}
               {brl(resumo.cost)}
@@ -158,7 +158,7 @@ function Agenda() {
             </Button>;
           })}
         </div>
-        {emptyWeek && !exampleDismissed && <div className="mt-5 border-y border-line py-5"><p className="font-display font-semibold">Comece com uma semana de exemplo</p><p className="mt-1 text-sm text-steel">Refeições, atividades e descanso editáveis. Você pode limpar a semana a qualquer momento.</p><div className="mt-3 flex gap-2"><Button size="sm" onClick={fillExample}>Preencher com semana de exemplo</Button><Button size="sm" variant="ghost" onClick={() => { localStorage.setItem("trilha:example-dismissed", "yes"); setExampleDismissed(true); }}>Agora não</Button></div></div>}
+        {emptyWeek && !exampleDismissed && <div className="mt-5 border-y border-line py-5"><p className="font-display font-semibold">Comece com uma semana de exemplo</p><p className="mt-1 text-sm text-steel">Refeições, atividades e descanso editáveis. Você pode limpar a semana a qualquer momento.</p><div className="mt-3 flex flex-wrap gap-2"><Button size="sm" onClick={fillExample}>Preencher com semana de exemplo</Button><Button size="sm" variant="ghost" onClick={() => { localStorage.setItem("trilha:example-dismissed", "yes"); setExampleDismissed(true); }}>Agora não</Button></div></div>}
       </section>
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">

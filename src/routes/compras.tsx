@@ -1,3 +1,4 @@
+import { ModuleHeader } from "@/components/ModuleHeader";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { Plus, RotateCcw, Trash2 } from "lucide-react";
@@ -49,7 +50,8 @@ function Compras() {
 
   return (
     <main className="mx-auto max-w-4xl px-5 pb-20 sm:px-8">
-      <section className="pt-8 pb-5"><p className="text-xs font-medium uppercase tracking-[0.18em] text-steel">Compras</p><h1 className="mt-2 font-display text-3xl font-semibold sm:text-4xl">Lista consolidada da semana</h1><p className="mt-2 text-sm text-steel">Ingredientes iguais são somados automaticamente. Seus itens pessoais também ficam salvos.</p></section>
+      <ModuleHeader title="Compras" />
+      <section className="pb-5"><h2 className="font-display text-lg font-semibold">Lista consolidada da semana</h2><p className="mt-2 text-sm text-steel">Ingredientes iguais são somados automaticamente. Seus itens pessoais também ficam salvos.</p></section>
        <div className="mb-4 flex justify-end" title={shoppingItems.length ? undefined : "Planeje refeições primeiro"}>
          <DropdownMenu><DropdownMenuTrigger asChild><Button variant="outline" disabled={shoppingItems.length === 0}>Exportar lista</Button></DropdownMenuTrigger><DropdownMenuContent align="end"><DropdownMenuItem onSelect={copyList}>Copiar como texto</DropdownMenuItem><DropdownMenuItem onSelect={() => { downloadShoppingPdf(shoppingItems, cost).catch(() => toast.error("Não foi possível baixar o PDF.")); }}>Baixar PDF</DropdownMenuItem></DropdownMenuContent></DropdownMenu>
        </div>

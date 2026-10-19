@@ -1,3 +1,4 @@
+import { ModuleHeader } from "@/components/ModuleHeader";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Crown, Flame, Search, Trophy, UserPlus } from "lucide-react";
@@ -101,7 +102,7 @@ function Amigos() {
 
   return (
     <main className="mx-auto max-w-4xl px-5 pb-20 sm:px-8">
-      <section className="pt-8 pb-5"><p className="text-xs font-medium uppercase tracking-[0.18em] text-steel">Amigos</p><h1 className="mt-2 font-display text-3xl font-semibold sm:text-4xl">Liga semanal</h1><p className="mt-2 text-sm text-steel">A liga premia a constância: marque seus dias e mantenha a sequência</p></section>
+      <ModuleHeader title="Amigos" /><section className="pb-5"><h2 className="font-display text-lg font-semibold">Liga semanal</h2><p className="mt-2 text-sm text-steel">A liga premia a constância: marque seus dias e mantenha a sequência</p></section>
 
       {isMonday && <div className="mb-4"><WeeklyCard champion={!!user && champ === user.id} me={last.me} position={last.position} friends={last.rows?.length ?? 0} days={lastDays} label={label} /></div>}
 
