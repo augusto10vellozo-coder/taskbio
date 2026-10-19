@@ -52,7 +52,7 @@ describe("dueStreakRisk", () => {
   });
   it("menciona o congelamento quando há um disponível", () => {
     const r = dueStreakRisk({ ...streakInput, freezesAvailable: 1 }, TZ, at20)[0]!;
-    expect(r.title).toBe("🔥 Streak em risco — use seu congelamento ou marque seus hábitos agora");
+    expect(r.title).toBe("🧊 Streak em risco! Você tem 1 congelamento — use ou marque seus hábitos");
   });
   it("não avisa com dia 100% marcado, streak curto ou fora do horário", () => {
     expect(dueStreakRisk({ ...streakInput, habitLog: { "2026-10-13": ["h1"], "2026-10-14": ["h1", "h2"] } }, TZ, at20)).toEqual([]);
@@ -66,11 +66,11 @@ describe("dueDayClose", () => {
   const dayPlan = { "2026-10-14": [{ done: true }, { done: false }, { done: false }] };
   it("avisa às 21h30 com itens pendentes e XP restante até o teto de 100", () => {
     const r = dueDayClose(dayPlan, 60, TZ, at2130)[0]!;
-    expect(r.title).toBe("Faltam 2 itens pra fechar o dia — vale 40 XP");
+    expect(r.title).toBe("🌙 Faltam 2 itens pra fechar o dia — valem 40 XP");
   });
   it("não avisa sem pendências e zera o XP no teto", () => {
     expect(dueDayClose({ "2026-10-14": [{ done: true }] }, 60, TZ, at2130)).toEqual([]);
-    expect(dueDayClose(dayPlan, 120, TZ, at2130)[0]!.title).toContain("vale 0 XP");
+    expect(dueDayClose(dayPlan, 120, TZ, at2130)[0]!.title).toContain("valem 0 XP");
   });
 });
 
@@ -84,7 +84,7 @@ describe("dueMealReminders", () => {
     const at1246 = new Date("2026-10-14T15:46:00Z"); // 12:46 em SP
     const due = dueMealReminders(mealPlan, TZ, at1246);
     expect(due.map((r) => r.key)).toEqual(["mealrem|m1|2026-10-14"]);
-    expect(due[0]!.title).toBe("Já registrou: Almoço?");
+    expect(due[0]!.title).toBe("🍽️ Já almoçou? Registre e mantenha as calorias do dia em dia");
   });
   it("não avisa antes dos 45 min nem muito depois", () => {
     expect(dueMealReminders(mealPlan, TZ, new Date("2026-10-14T15:40:00Z"))).toEqual([]);
@@ -96,18 +96,18 @@ describe("dueLeagueOpen", () => {
   it("avisa segunda às 9h com a posição da semana anterior", () => {
     const mon = new Date("2026-10-19T12:01:00Z"); // segunda 09:01 em SP
     const r = dueLeagueOpen(3, TZ, mon)[0]!;
-    expect(r.title).toBe("🏆 Nova semana da liga começou!");
-    expect(r.body).toContain("3º lugar");
+    expect(r.title).toBe("🏆 Nova liga começou! Você fechou a semana passada em 3º lugar");
+    expect(r.url).toBe("/amigos");
   });
   it("não avisa em outro dia nem sem posição conhecida", () => {
     expect(dueLeagueOpen(3, TZ, new Date("2026-10-20T12:01:00Z"))).toEqual([]); // terça
-    expect(dueLeagueOpen(null, TZ, new Date("2026-10-19T12:01:00Z"))[0]!.body).not.toContain("lugar");
+    expect(dueLeagueOpen(null, TZ, new Date("2026-10-19T12:01:00Z"))[0]!.title).not.toContain("lugar");
   });
 });
 
 describe("preferências e horário de silêncio", () => {
   it("lê toggles salvos e liga tudo por padrão", () => {
-    expect(readNotifPrefs(null)).toEqual({ streak: true, dayClose: true, meals: true, league: true, tasks: true, workouts: true });
+    expect(readNotifPrefs(null)).toEqual({ streak: true, dayClose: true, meals: true, league: true, tasks: true, workouts: true, weekly: true });
     expect(readNotifPrefs({ notifPrefs: { streak: false } }).streak).toBe(false);
     expect(readNotifPrefs({ notifPrefs: { streak: false } }).meals).toBe(true);
   });
@@ -121,5 +121,34 @@ describe("preferências e horário de silêncio", () => {
     expect(all.map((r) => r.title)).toEqual(["Consulta", "Academia"]);
     expect(dueReminders(plan, TZ, now, { ...readNotifPrefs(null), workouts: false }).map((r) => r.title)).toEqual(["Consulta"]);
     expect(dueReminders(plan, TZ, now, { ...readNotifPrefs(null), tasks: false }).map((r) => r.title)).toEqual(["Academia"]);
+  });
+});
+
+import { dueStreakMilestone, dueDayComplete, dueLeagueMove, dueWeeklySummary } from "./push-reminders";
+describe("celebrações e resumo", () => {
+  const habits = [{ id: "h1" }];
+  const log = (n: number) => Object.fromEntries(Array.from({ length: n }, (_, i) => [new Date(Date.UTC(2026, 9, 14 - i)).toISOString().slice(0, 10), ["h1"]]));
+  const noon = new Date("2026-10-14T15:00:00Z");
+  it("marco de 10 dias dá 10 XP de bônus respeitando o teto de 100", () => {
+    expect(dueStreakMilestone({ plan: {}, habitLog: log(10), habits, frozenDays: [], todayXp: 20 }, TZ, noon)[0]!.title).toBe("🎉 10 dias seguidos! +10 XP de bônus");
+    expect(dueStreakMilestone({ plan: {}, habitLog: log(10), habits, frozenDays: [], todayXp: 95 }, TZ, noon)[0]!.bonus).toBe(5);
+    expect(dueStreakMilestone({ plan: {}, habitLog: log(5), habits, frozenDays: [], todayXp: 0 }, TZ, noon)[0]!.bonus).toBe(0);
+    expect(dueStreakMilestone({ plan: {}, habitLog: log(7), habits, frozenDays: [], todayXp: 0 }, TZ, noon)).toEqual([]);
+  });
+  it("dia 100% concluído só com todos os blocos feitos", () => {
+    expect(dueDayComplete({ "2026-10-14": [{ done: true }] }, TZ, noon)[0]!.url).toBe("/agenda");
+    expect(dueDayComplete({ "2026-10-14": [{ done: true }, { done: false }] }, TZ, noon)).toEqual([]);
+  });
+  it("avisa liderança assumida e ultrapassagem", () => {
+    expect(dueLeagueMove(2, 1, null, TZ, noon)[0]!.title).toBe("📈 Você assumiu a liderança!");
+    expect(dueLeagueMove(1, 2, { name: "Ana Souza", xpGap: 15 }, TZ, noon)[0]!.title).toBe("📉 Ana te ultrapassou — 2 hábitos hoje te devolvem o 1º");
+    expect(dueLeagueMove(null, 1, null, TZ, noon)).toEqual([]);
+  });
+  it("resumo semanal só domingo às 20h", () => {
+    const sun = new Date("2026-10-18T23:01:00Z"); // domingo 20:01 em SP
+    const plan = { "2026-10-17": [{ kind: "treino", done: true }, { kind: "refeicao" }] };
+    const r = dueWeeklySummary({ plan, habitLog: { "2026-10-18": ["h1"] }, kcalFor: (b) => b.filter((x) => x.kind === "refeicao").length * 500 }, TZ, sun)[0]!;
+    expect(r.title).toBe("📊 Sua semana: 2 dias marcados · 1 treino · 500 kcal planejadas. Confira o card e compartilhe!");
+    expect(dueWeeklySummary({ plan, habitLog: {}, kcalFor: () => 0 }, TZ, new Date("2026-10-17T23:01:00Z"))).toEqual([]);
   });
 });
