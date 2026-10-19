@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { DayTimeline } from "@/components/DayTimeline";
 import { WeekActions } from "@/components/WeekActions";
 import { useAwards } from "@/lib/use-awards";
+import { ReadingGoalBar } from "@/components/ReadingGoalBar";
 import { mealSummary } from "@/lib/meal-summary";
 import { agendaSummary } from "@/lib/agenda-overview";
 
@@ -128,6 +129,7 @@ function Agenda() {
               {goal ? ` · objetivo: ${goal}` : ""}
             </p>
             {awards && <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-card px-3 py-1 text-xs font-medium ring-1 ring-line" title="Cada vitória na liga semanal vale 1 congelamento. Ele protege sua sequência se você perder 1 dia.">❄️ {awards.freezes} {awards.freezes === 1 ? "congelamento disponível" : "congelamentos disponíveis"}</p>}
+            <ReadingGoalBar />
           </div>
           <div className="flex flex-wrap items-center gap-2 lg:justify-end">
             <Button asChild variant="outline" size="sm"><Link to="/calendario"><CalendarDays /> Mês</Link></Button>

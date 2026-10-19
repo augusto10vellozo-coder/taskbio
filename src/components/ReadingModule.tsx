@@ -139,7 +139,7 @@ export function ReadingModule() {
 
         <div role="tablist" aria-label="Filtrar por status" className="mt-4 flex gap-2">
           {(["lendo", "concluido", "quero"] as BookStatus[]).map((s) => (
-            <button key={s} role="tab" aria-selected={filter === s} onClick={() => setFilter(s)} className={`h-9 rounded-full px-4 text-sm font-medium ring-1 ring-line ${filter === s ? "bg-brand text-brand-foreground" : "bg-card"}`}>{READING_STATUS_LABEL[s]} ({books.filter((b) => b.status === s).length})</button>
+            <button key={s} role="tab" aria-selected={filter === s} onClick={() => setFilter(s)} className={`h-9 rounded-full px-4 text-sm font-medium ring-1 ring-line ${filter === s ? "bg-primary text-primary-foreground" : "bg-card"}`}>{READING_STATUS_LABEL[s]} ({books.filter((b) => b.status === s).length})</button>
           ))}
         </div>
         <ul className="mt-3 grid gap-3 sm:grid-cols-2">
