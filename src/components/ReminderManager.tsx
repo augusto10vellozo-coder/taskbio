@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { parseISO, setHours, setMinutes, subMinutes } from "date-fns";
 import { useTaskBio } from "@/lib/trilha-store";
+import { useAuth } from "@/lib/auth-context";
 import { addDays, format } from "date-fns";
 import { isActiveDay } from "@/lib/engagement";
 import { toDateKey } from "@/lib/calendar-utils";
@@ -10,13 +11,23 @@ const MAX_DELAY = 24 * 60 * 60 * 1000;
 
 export function ReminderManager() {
   const { plan, habitLog, habits } = useTaskBio();
+  const { user } = useAuth();
   const latest = useRef({ plan, habitLog, habits });
   latest.current = { plan, habitLog, habits };
   const timers = useRef<number[]>([]);
   const [serverPush, setServerPush] = useState(false);
   useEffect(() => {
-    navigator.serviceWorker?.getRegistration("/push-sw.js").then((r) => r?.pushManager.getSubscription()).then((sub) => setServerPush(!!sub)).catch(() => {});
-  }, []);
+    navigator.serviceWorker?.getRegistration("/push-sw.js").then(async (r) => {
+      // Re-sync (or renew) the device subscription on every app open while permission is granted.
+      if (r && "Notification" in window && Notification.permission === "granted") {
+        const { enableServerPush } = await import("@/lib/push-client");
+        const result = await enableServerPush();
+        setServerPush(result === "ok");
+        return;
+      }
+      setServerPush(!!(await r?.pushManager.getSubscription()));
+    }).catch(() => {});
+  }, [user?.id]);
   const [preferences, setPreferences] = useState<ReminderPreferences>(defaultReminderPreferences);
 
   useEffect(() => {

@@ -36,6 +36,13 @@
       "when": 1792191019645,
       "tag": "0004_shared_league_ranking",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1792412920063,
+      "tag": "0005_notification_celebrations",
+      "breakpoints": true
     }
   ]
 }

@@ -9,6 +9,9 @@ self.addEventListener("push", (event) => {
     body: data.body,
     icon: "/icons/taskbio-192-v2.png",
     badge: "/icons/taskbio-192-v2.png",
+    tag: data.tag || undefined,
+    renotify: !!data.tag,
+    vibrate: [120, 60, 120],
     data: { url: data.url },
   }));
 });
@@ -20,4 +23,11 @@ self.addEventListener("notificationclick", (event) => {
     for (const client of list) if ("focus" in client) { client.navigate(url); return client.focus(); }
     return self.clients.openWindow(url);
   }));
+});
+
+// Browser rotated the subscription: re-subscribe; the app re-saves it on next open.
+self.addEventListener("pushsubscriptionchange", (event) => {
+  const key = event.oldSubscription && event.oldSubscription.options && event.oldSubscription.options.applicationServerKey;
+  if (!key) return;
+  event.waitUntil(self.registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: key }));
 });
