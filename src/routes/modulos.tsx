@@ -1,3 +1,4 @@
+import { ModuleHeader } from "@/components/ModuleHeader";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { MODULES, isModuleOn } from "@/lib/modules";
 import { useTaskBio } from "@/lib/trilha-store";
@@ -18,7 +19,8 @@ function Modulos() {
   const { modules, setModule } = useTaskBio();
   return (
     <main className="mx-auto max-w-4xl px-5 pb-20 sm:px-8">
-      <section className="pt-8 pb-5"><p className="text-xs font-medium uppercase tracking-[0.18em] text-steel">Módulos</p><h1 className="mt-2 font-display text-3xl font-semibold sm:text-4xl">Monte o seu TaskBio</h1><p className="mt-2 text-sm text-steel">Desativar um módulo apenas o tira do menu. Seus registros continuam guardados e voltam ao reativar.</p></section>
+      <ModuleHeader title="Módulos" />
+      <section className="pb-5"><h2 className="font-display text-lg font-semibold">Monte o seu TaskBio</h2><p className="mt-2 text-sm text-steel">Desativar um módulo apenas o tira do menu. Seus registros continuam guardados e voltam ao reativar.</p></section>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {MODULES.filter((m) => m.optional).map((m) => { const on = isModuleOn(modules, m.id); const Icon = m.icon; return (
           <section key={m.id} className={`rounded-lg bg-card p-4 ring-1 ${on ? "ring-brand" : "ring-line"}`}>

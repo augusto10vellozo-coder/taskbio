@@ -102,7 +102,7 @@ export function SyncManager() {
   }, [goal, meals, plan, preferredModality, shoppingItems, user, weeklyGoals, workoutHistory, workouts, habits, habitLog, monthGoals, health, modules, exerciseLog, customFoods, finance, trackers, notifPrefs]);
 
   if (!user || status === "idle") return null;
-  return <div className="fixed bottom-4 right-4 z-40 flex items-center gap-1.5 rounded-full bg-card/90 px-3 py-1.5 text-[11px] font-medium text-steel shadow-sm ring-1 ring-line backdrop-blur" role="status">
+  return <div className="pointer-events-none fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] right-4 z-30 flex max-w-[calc(100%-2rem)] items-center gap-1.5 rounded-full bg-card/90 px-3 py-1.5 text-[11px] font-medium text-steel shadow-sm ring-1 ring-line backdrop-blur xl:bottom-4" role="status">
     {status === "error" ? <CloudOff className="size-3.5 text-destructive" /> : <Cloud className="size-3.5 text-good" />}
     {status === "loading" ? "Sincronizando" : status === "error" ? "Sem sincronização" : "Salvo na nuvem"}
   </div>;

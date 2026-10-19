@@ -1,3 +1,4 @@
+import { ModuleHeader } from "@/components/ModuleHeader";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
@@ -42,7 +43,8 @@ function Financas() {
 
   return (
     <main className="mx-auto max-w-4xl px-5 pb-20 sm:px-8">
-      <section className="pt-8 pb-5"><p className="text-xs font-medium uppercase tracking-[0.18em] text-steel">Finanças</p><h1 className="mt-2 font-display text-3xl font-semibold sm:text-4xl">Seu mês em reais</h1><p className="mt-2 text-sm text-steel">Controle simples e pessoal; não é orientação financeira.</p></section>
+      <ModuleHeader title="Finanças" />
+      <section className="pb-5"><h2 className="font-display text-lg font-semibold">Seu mês em reais</h2><p className="mt-2 text-sm text-steel">Controle simples e pessoal; não é orientação financeira.</p></section>
 
       <form className="rounded-lg bg-card p-4 ring-1 ring-line" onSubmit={(e) => { e.preventDefault(); const v = num(amount); if (!(v > 0)) { toast.error("Informe um valor"); return; } setFinance((s) => ({ ...s, entries: [{ id: `f-${Date.now()}`, date: toDateKey(new Date()), amount: v, description: desc.trim() || cat, category: type === "receita" ? "Receita" : cat, type }, ...s.entries] })); setAmount(""); setDesc(""); toast.success(type === "gasto" ? "Gasto registrado" : "Receita registrada"); }}>
         <div className="mb-3 grid grid-cols-2 rounded-lg bg-mist p-1 sm:w-64">{(["gasto", "receita"] as const).map((t) => <button key={t} type="button" onClick={() => setType(t)} className={`rounded-md px-3 py-1.5 text-sm font-medium ${type === t ? "bg-card text-ink shadow-sm" : "text-steel"}`}>{t === "gasto" ? "Gasto" : "Receita"}</button>)}</div>
@@ -52,7 +54,7 @@ function Financas() {
           {type === "gasto" ? <select aria-label="Categoria" value={cat} onChange={(e) => setCat(e.target.value)} className={field}>{cats.map((c) => <option key={c}>{c}</option>)}</select> : <span />}
           <Button><Plus /> Registrar</Button>
         </div>
-        <div className="mt-3 flex gap-2 text-xs"><input value={newCat} onChange={(e) => setNewCat(e.target.value)} placeholder="Nova categoria" className="h-8 rounded-md bg-background px-2 ring-1 ring-line" /><Button type="button" size="sm" variant="outline" onClick={() => { const c = newCat.trim(); if (!c || cats.includes(c)) return; setFinance((s) => ({ ...s, customCategories: [...s.customCategories, c] })); setCat(c); setNewCat(""); }}>Adicionar categoria</Button></div>
+        <div className="mt-3 grid grid-cols-[minmax(0,1fr)_auto] gap-2 text-xs"><input value={newCat} onChange={(e) => setNewCat(e.target.value)} placeholder="Nova categoria" className="h-8 min-w-0 rounded-md bg-background px-2 ring-1 ring-line" /><Button type="button" size="sm" variant="outline" onClick={() => { const c = newCat.trim(); if (!c || cats.includes(c)) return; setFinance((s) => ({ ...s, customCategories: [...s.customCategories, c] })); setCat(c); setNewCat(""); }}>Adicionar categoria</Button></div>
       </form>
 
       <div className="mt-4 grid gap-3 sm:grid-cols-3">

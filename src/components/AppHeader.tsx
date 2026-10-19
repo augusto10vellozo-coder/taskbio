@@ -10,7 +10,6 @@ import { defaultReminderPreferences, readReminderPreferences, saveReminderPrefer
 
 import { MODULES, isModuleOn } from "@/lib/modules";
 import { useTaskBio } from "@/lib/trilha-store";
-import { BackButton } from "@/components/BottomNav";
 
 export function AppHeader() {
   const { user, loading } = useAuth();
@@ -39,20 +38,19 @@ export function AppHeader() {
   const initials = displayName?.split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase();
 
   return (
-    <header className="sticky top-0 z-30 glass-strong border-b border-white/40">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-5 sm:px-8">
-        <div className="flex items-center gap-1">
-          <BackButton />
-          <Link to="/" className="flex items-center gap-3">
-          <img src="/icons/taskbio-192-v2.png" alt="" width={36} height={36} className="size-9 rounded-xl ring-1 ring-black/5" />
-          <div className="leading-none">
+    <header className="sticky top-0 z-30 glass-strong border-b border-line">
+      <div className="mx-auto grid min-h-16 max-w-6xl grid-cols-[minmax(0,1fr)_auto] items-center gap-2 px-4 sm:px-8 xl:flex xl:justify-between">
+        <div className="min-w-0">
+          <Link to="/" className="flex min-w-0 items-center gap-2 sm:gap-3">
+          <img src="/icons/taskbio-192-v2.png" alt="" width={36} height={36} className="size-9 shrink-0 rounded-xl ring-1 ring-line" />
+          <div className="min-w-0 leading-none">
             <p className="font-display text-[15px] font-semibold tracking-tight">TaskBio</p>
-            <p className="mt-0.5 text-[11px] text-steel">organização de vida saudável</p>
+            <p className="mt-0.5 truncate text-[10px] text-steel sm:text-[11px]">organização de vida saudável</p>
           </div>
         </Link>
         </div>
 
-        <nav className="hidden items-center gap-1 text-sm md:flex">
+        <nav className="hidden min-w-0 flex-wrap items-center justify-center gap-1 py-2 text-sm xl:flex">
           {links.map((l) => (
             <Link
               key={l.to}
@@ -68,7 +66,7 @@ export function AppHeader() {
           {user && <Link to="/amigos" className="rounded-lg px-3 py-2 font-medium text-steel hover:text-ink" activeProps={{ className: "rounded-lg px-3 py-2 font-medium bg-ink text-white" }}>Amigos</Link>}
         </nav>
 
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-1 sm:gap-2">
           <DropdownMenu><DropdownMenuTrigger asChild><Button variant="ghost" size="icon" aria-label="Configurações" title="Configurações"><Settings2 /></Button></DropdownMenuTrigger><DropdownMenuContent align="end" className="w-64"><DropdownMenuLabel>Módulos</DropdownMenuLabel>{MODULES.filter((m) => m.optional).map((m) => <DropdownMenuItem key={m.id} onSelect={(event) => { event.preventDefault(); setModule(m.id, !isModuleOn(modules, m.id)); }}>{isModuleOn(modules, m.id) ? "✓ " : "\u2003"}{m.label}</DropdownMenuItem>)}<DropdownMenuLabel className="mt-2">Aparência</DropdownMenuLabel><DropdownMenuRadioGroup value={theme} onValueChange={(value) => setTheme(value as ThemePreference)}><DropdownMenuRadioItem value="light">Claro</DropdownMenuRadioItem><DropdownMenuRadioItem value="dark">Escuro</DropdownMenuRadioItem><DropdownMenuRadioItem value="system">Seguir sistema</DropdownMenuRadioItem></DropdownMenuRadioGroup><DropdownMenuLabel className="mt-2">Lembretes neste aparelho</DropdownMenuLabel><DropdownMenuItem onSelect={(event) => { event.preventDefault(); updateReminders({ ...reminders, enabled: !reminders.enabled }); }}>{reminders.enabled ? "Desativar todos" : "Ativar lembretes"}</DropdownMenuItem>{reminders.enabled && <><DropdownMenuItem onSelect={(event) => { event.preventDefault(); updateReminders({ ...reminders, dailyEnabled: !reminders.dailyEnabled }); }}>{reminders.dailyEnabled ? "✓ " : ""}Planejar dia seguinte</DropdownMenuItem><DropdownMenuItem onSelect={(event) => { event.preventDefault(); updateReminders({ ...reminders, workoutEnabled: !reminders.workoutEnabled }); }}>{reminders.workoutEnabled ? "✓ " : ""}Lembretes de treino</DropdownMenuItem><DropdownMenuItem onSelect={(event) => { event.preventDefault(); updateReminders({ ...reminders, streakEnabled: !reminders.streakEnabled }); }}>{reminders.streakEnabled ? "✓ " : ""}Aviso à noite se nada foi marcado</DropdownMenuItem>{reminders.streakEnabled && <div className="px-2 py-1.5 text-xs text-steel"><label>Horário do aviso<input type="time" value={reminders.streakTime} onChange={(event) => updateReminders({ ...reminders, streakTime: event.target.value })} className="mt-1 h-8 w-full rounded-md bg-background px-2 ring-1 ring-line" /></label></div>}<div className="px-2 py-1.5 text-xs text-steel"><label>Horário diário<input type="time" value={reminders.dailyTime} onChange={(event) => updateReminders({ ...reminders, dailyTime: event.target.value })} className="mt-1 h-8 w-full rounded-md bg-background px-2 ring-1 ring-line" /></label></div></>}</DropdownMenuContent></DropdownMenu>
           {isAdmin && <Button asChild variant="ghost" size="sm"><Link to="/equipe">Equipe</Link></Button>}
           {!loading && user ? <>

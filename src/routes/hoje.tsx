@@ -1,3 +1,4 @@
+import { ModuleHeader } from "@/components/ModuleHeader";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { CalendarDays } from "lucide-react";
@@ -36,9 +37,7 @@ function Hoje() {
 
   return (
     <main className="mx-auto max-w-3xl px-5 pb-20 sm:px-8">
-      <section className="pt-8 pb-5">
-        <p className="text-xs font-medium uppercase tracking-[0.18em] text-steel">Linha do dia</p>
-        <h1 className="mt-2 font-display text-3xl font-semibold tracking-tight sm:text-4xl">Hoje</h1>
+      <ModuleHeader title="Hoje" /><section className="pb-5">
         <p className="mt-2 text-sm text-steel">
           {formatFullDate(new Date())} · {summary.total} {summary.total === 1 ? "item" : "itens"} · {summary.completed}{" "}
           {summary.completed === 1 ? "concluído" : "concluídos"}

@@ -1,3 +1,4 @@
+import { ModuleHeader } from "@/components/ModuleHeader";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Droplets, Minus, Moon, Pill, Plus, Scale, Trash2 } from "lucide-react";
@@ -36,7 +37,8 @@ function Saude() {
 
   return (
     <main className="mx-auto max-w-4xl px-5 pb-20 sm:px-8">
-      <section className="pt-8 pb-5"><p className="text-xs font-medium uppercase tracking-[0.18em] text-steel">Saúde</p><h1 className="mt-2 font-display text-3xl font-semibold sm:text-4xl">Registro rápido</h1><p className="mt-2 text-sm text-steel">Registros pessoais de acompanhamento; não substituem orientação médica.</p></section>
+      <ModuleHeader title="Saúde" />
+      <section className="pb-5"><h2 className="font-display text-lg font-semibold">Registro rápido</h2><p className="mt-2 text-sm text-steel">Registros pessoais de acompanhamento; não substituem orientação médica.</p></section>
       <div className="grid gap-3 md:grid-cols-3">
         <Card icon={<Droplets className="size-4 text-brand" />} title="Água">
           <p className="font-display text-3xl font-semibold">{water}<span className="text-base text-steel"> / {health.waterGoal} copos</span></p>
@@ -45,7 +47,7 @@ function Saude() {
         </Card>
         <Card icon={<Moon className="size-4 text-brand" />} title="Sono">
           <p className="font-display text-3xl font-semibold">{health.sleep[today] ?? "—"}<span className="text-base text-steel"> h</span></p>
-          <form className="mt-3 flex gap-2" onSubmit={(e) => { e.preventDefault(); const v = Number(sleep); if (!(v > 0 && v <= 24)) return; setHealth((h) => ({ ...h, sleep: { ...h.sleep, [today]: v } })); setSleep(""); toast.success("Sono registrado"); }}><input type="number" step="0.5" min="0" max="24" value={sleep} onChange={(e) => setSleep(e.target.value)} placeholder="Horas" className="h-9 w-full rounded-md bg-background px-3 text-sm ring-1 ring-line" /><Button>Salvar</Button></form>
+          <form className="mt-3 flex gap-2" onSubmit={(e) => { e.preventDefault(); const v = Number(sleep); if (!(v > 0 && v <= 24)) return; setHealth((h) => ({ ...h, sleep: { ...h.sleep, [today]: v } })); setSleep(""); toast.success("Sono registrado"); }}><input type="number" step="0.5" min="0" max="24" value={sleep} onChange={(e) => setSleep(e.target.value)} placeholder="Horas" className="h-9 min-w-0 flex-1 rounded-md bg-background px-3 text-sm ring-1 ring-line" /><Button>Salvar</Button></form>
         </Card>
         <Card icon={<Scale className="size-4 text-brand" />} title="Peso">
           <p className="font-display text-3xl font-semibold">{health.weight[today] ?? "—"}<span className="text-base text-steel"> kg</span></p>
