@@ -22,9 +22,12 @@ export type HealthLog = {
   meds?: { id: string; name: string; time: string }[];
   medsTaken?: Record<string, string[]>;
 };
-export type SessionEntry = { id: string; date: string; minutes: number; title: string };
-export type Trackers = { leitura: SessionEntry[]; estudos: SessionEntry[] };
-export const emptyTrackers: Trackers = { leitura: [], estudos: [] };
+export type SessionEntry = { id: string; date: string; minutes: number; title: string; bookId?: string; pages?: number };
+export type BookStatus = "lendo" | "concluido" | "quero";
+export type Quote = { id: string; text: string; page?: number };
+export type Book = { id: string; title: string; author: string; totalPages?: number | undefined; pagesRead: number; cover?: string | undefined; status: BookStatus; rating?: number; quotes: Quote[]; createdAt: string };
+export type Trackers = { leitura: SessionEntry[]; estudos: SessionEntry[]; books?: Book[]; readingGoal?: number };
+export const emptyTrackers: Trackers = { leitura: [], estudos: [], books: [], readingGoal: 180 };
 
 export const emptyHealth: HealthLog = { waterGoal: 8, water: {}, sleep: {}, weight: {} };
 

@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { SessionTracker } from "@/components/SessionTracker";
+import { ReadingModule } from "@/components/ReadingModule";
 
 export const Route = createFileRoute("/leitura")({
   head: () => ({ meta: [
@@ -10,5 +10,5 @@ export const Route = createFileRoute("/leitura")({
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary" },
   ] }),
-  component: () => <SessionTracker kind="leitura" title="Leitura" subtitle="Seu tempo de leitura" placeholder="Livro (opcional)" />,
+  component: ReadingModule,
 });

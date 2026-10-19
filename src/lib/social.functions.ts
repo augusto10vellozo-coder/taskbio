@@ -4,7 +4,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { brasiliaDay, xpFor } from "@/lib/xp";
 
 const xpInput = z.object({
-  kind: z.enum(["habit", "block", "meal", "workout", "photo"]),
+  kind: z.enum(["habit", "block", "meal", "workout", "photo", "reading"]),
   ref: z.string().min(1).max(200),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   on: z.boolean(),
