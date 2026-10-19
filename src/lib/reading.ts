@@ -30,6 +30,7 @@ export function linkLegacySessions(sessions: SessionEntry[], book: Pick<Book, "i
   return sessions.map((s) => (!s.bookId && s.title && norm(s.title) === t ? { ...s, bookId: book.id } : s));
 }
 
+const clean = (s: string) => s.replace(/[\u0000-\u001f\u007f-\u009f\u200b-\u200f\uFFFD-\uFFFF]/g, "").replace(/\s+/g, " ").trim();
 const https = (u?: string) => u?.replace(/^http:/, "https:");
 
 export async function searchBooks(q: string, signal?: AbortSignal): Promise<BookResult[]> {
@@ -37,11 +38,11 @@ export async function searchBooks(q: string, signal?: AbortSignal): Promise<Book
     const r = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(q)}&maxResults=10&printType=books`, { signal: signal ?? null });
     if (!r.ok) throw new Error(String(r.status));
     const j = await r.json() as { items?: { volumeInfo: { title?: string; authors?: string[]; pageCount?: number; imageLinks?: { thumbnail?: string; smallThumbnail?: string } } }[] };
-    const items = (j.items ?? []).filter((i) => i.volumeInfo.title).map((i): BookResult => ({ title: i.volumeInfo.title!, author: (i.volumeInfo.authors ?? []).join(", "), totalPages: i.volumeInfo.pageCount || undefined, cover: https(i.volumeInfo.imageLinks?.thumbnail ?? i.volumeInfo.imageLinks?.smallThumbnail) }));
+    const items = (j.items ?? []).filter((i) => i.volumeInfo.title).map((i): BookResult => ({ title: clean(i.volumeInfo.title!), author: (i.volumeInfo.authors ?? []).join(", "), totalPages: i.volumeInfo.pageCount || undefined, cover: https(i.volumeInfo.imageLinks?.thumbnail ?? i.volumeInfo.imageLinks?.smallThumbnail) }));
     if (items.length) return items;
   } catch (e) { if ((e as Error).name === "AbortError") throw e; }
   const r = await fetch(`https://openlibrary.org/search.json?q=${encodeURIComponent(q)}&limit=10&fields=title,author_name,number_of_pages_median,cover_i`, { signal: signal ?? null });
   if (!r.ok) return [];
   const j = await r.json() as { docs?: { title: string; author_name?: string[]; number_of_pages_median?: number; cover_i?: number }[] };
-  return (j.docs ?? []).map((d): BookResult => ({ title: d.title, author: (d.author_name ?? []).join(", "), totalPages: d.number_of_pages_median || undefined, cover: d.cover_i ? `https://covers.openlibrary.org/b/id/${d.cover_i}-M.jpg` : undefined }));
+  return (j.docs ?? []).map((d): BookResult => ({ title: clean(d.title), author: (d.author_name ?? []).join(", "), totalPages: d.number_of_pages_median || undefined, cover: d.cover_i ? `https://covers.openlibrary.org/b/id/${d.cover_i}-M.jpg` : undefined }));
 }
