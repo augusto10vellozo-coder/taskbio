@@ -1,6 +1,6 @@
 # Roadmap
 
-- [ ] Ajustar hábitos em 360/390px, desobstruir navegação e padronizar Voltar em todos os módulos; validar navegação e marcação sem alterar dados da conta
+- [x] Ajustar hábitos, desobstruir navegação e padronizar Voltar; 18 telas validadas em 360/390px e desktop, marcação local persistida e retorno direto conferidos sem alterar dados da conta
 
 - [x] Corrigir participantes compartilhados da liga, incluindo ranking, prêmios e avisos; grupo de três validado para cada participante e tela conferida com a conta do anfitrião
 

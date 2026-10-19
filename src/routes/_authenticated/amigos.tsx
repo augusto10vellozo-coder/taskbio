@@ -122,14 +122,14 @@ function Amigos() {
       </section>
 
       <div className="mt-4 grid gap-3 md:grid-cols-2">
-        <section className="rounded-lg bg-card p-4 ring-1 ring-line">
+        <section className="min-w-0 rounded-lg bg-card p-4 ring-1 ring-line">
           <h2 className="font-display text-lg font-semibold">Convidar</h2>
           <Button className="mt-3 w-full" onClick={invite} disabled={!profile?.invite_code}><UserPlus /> Convidar amigo</Button>
           <label className="mt-4 block text-xs text-steel">Seu nome de usuário
             <span className="mt-1 flex gap-2"><input value={uname} onChange={(e) => setUname(e.target.value)} placeholder="ex.: maria.silva" className="h-9 min-w-0 flex-1 rounded-md bg-background px-3 text-sm text-ink ring-1 ring-line" /><Button size="sm" variant="outline" onClick={saveUsername}>Salvar</Button></span>
           </label>
         </section>
-        <section className="rounded-lg bg-card p-4 ring-1 ring-line">
+        <section className="min-w-0 rounded-lg bg-card p-4 ring-1 ring-line">
           <h2 className="font-display text-lg font-semibold">Buscar por nome de usuário</h2>
           <form onSubmit={search} className="mt-3 flex gap-2"><input value={q} onChange={(e) => setQ(e.target.value)} placeholder="nome de usuário" aria-label="Buscar nome de usuário" className="h-9 min-w-0 flex-1 rounded-md bg-background px-3 text-sm ring-1 ring-line" /><Button size="sm"><Search /> Buscar</Button></form>
           <ul className="mt-2 divide-y divide-line">{found.map((f) => <li key={f.id} className="flex items-center gap-2 py-2 text-sm"><span className="flex-1">{f.display_name || f.username} <span className="text-xs text-steel">@{f.username}</span></span><Button size="sm" variant="outline" onClick={async () => { const r = await sendFriendRequest({ data: { to: f.id } }); toast[r.ok ? "success" : "error"](r.ok ? (r.already ? "Vocês já estão conectados ou o convite está pendente" : "Convite enviado") : "Não foi possível enviar"); }}>Convidar</Button></li>)}</ul>
