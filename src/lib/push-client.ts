@@ -23,14 +23,24 @@ export async function enableServerPush(): Promise<PushResult> {
     const subscription = (await registration.pushManager.getSubscription())
       ?? await registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyToBytes(VAPID_PUBLIC_KEY) });
     const json = subscription.toJSON();
+    let deviceId = localStorage.getItem("taskbio:push-device");
+    if (!deviceId) { deviceId = crypto.randomUUID(); localStorage.setItem("taskbio:push-device", deviceId); }
+    const deviceLabel = `${isIOS ? "iPhone/iPad" : /Android/.test(navigator.userAgent) ? "Android" : "Computador"} · ${standalone ? "Tela de início" : "Navegador"}`;
     const { error } = await supabase.from("push_subscriptions").upsert({
       user_id: user.id,
+      device_id: deviceId,
+      device_label: deviceLabel,
+      updated_at: new Date().toISOString(),
+      active: true,
+      inactive_reason: null,
       endpoint: subscription.endpoint,
       p256dh: json.keys?.["p256dh"] ?? "",
       auth: json.keys?.["auth"] ?? "",
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "America/Sao_Paulo",
     }, { onConflict: "endpoint" });
-    return error ? "error" : "ok";
+    if (error) return "error";
+    const { error: duplicateError } = await supabase.from("push_subscriptions").update({ active: false, inactive_reason: "duplicate_device" }).eq("user_id", user.id).eq("device_id", deviceId).neq("endpoint", subscription.endpoint);
+    return duplicateError ? "error" : "ok";
   } catch (error) {
     console.error(error);
     return "error";
