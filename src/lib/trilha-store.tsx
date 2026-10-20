@@ -22,6 +22,7 @@ import { normalizePlan, toDateKey } from "./calendar-utils";
 import { emptyHealth, emptyTrackers, type Trackers, type Habit, type HabitLog, type HealthLog, type MonthGoal } from "./engagement";
 import type { ModuleSettings } from "./modules";
 import { foodName } from "./meal-summary";
+import { saveMealRecord, unifyMealBlocks } from "./meal-link";
 import type { ExerciseLogEntry } from "./training";
 import type { Food } from "./food-db";
 import { emitBlockXp, emitXp, foodItemCount } from "./xp-client";
@@ -56,6 +57,7 @@ type Store = TaskBioState & {
   removeBlock: (date: string, blockId: string) => void;
   addBlock: (date: string, block: Omit<Block, "id" | "done">) => void;
   updateBlock: (date: string, blockId: string, block: Omit<Block, "id" | "done">) => void;
+  registerMeal: (date: string, block: Omit<Block, "id" | "done">, editingId?: string) => void;
   setDoneSets: (workoutId: string, exerciseId: string, doneSets: number) => void;
   setExerciseLoad: (workoutId: string, exerciseId: string, loadKg: number) => void;
   completeWorkout: (entry: WorkoutHistoryEntry) => void;
@@ -120,8 +122,7 @@ const globalContexts = globalThis as typeof globalThis & {
 const StoreContext = globalContexts[contextKey] ?? createContext<Store | null>(null);
 globalContexts[contextKey] = StoreContext;
 
-const sortBlocks = (blocks: Block[]) =>
-  [...blocks].sort((a, b) => a.time.localeCompare(b.time));
+const sortBlocks = unifyMealBlocks;
 
 export function TaskBioProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<TaskBioState>(initialState);
@@ -216,6 +217,14 @@ export function TaskBioProvider({ children }: { children: ReactNode }) {
         ...s,
         plan: { ...s.plan, [day]: sortBlocks((s.plan[day] ?? []).map((item) => item.id === blockId ? { ...item, ...block } : item)) },
       })),
+      registerMeal: (day, block, editingId) => {
+        const record: Block = { ...block, id: `b-${Date.now()}-${day}`, done: true };
+        const next = saveMealRecord(state.plan[day] ?? [], record, editingId);
+        const saved = next.find((b) => b.manualMeal === record.manualMeal);
+        // Keep the existing food-item XP path and reference; completion adds no extra award.
+        if (!editingId && saved && foodItemCount(saved) > 0) emitXp({ kind: "meal", ref: saved.id, date: day, on: true, foodItems: foodItemCount(saved) });
+        setState((s) => ({ ...s, plan: { ...s.plan, [day]: saveMealRecord(s.plan[day] ?? [], record, editingId) } }));
+      },
       setDoneSets: (workoutId, exerciseId, doneSets) =>
         setState((s) => ({
           ...s,
@@ -273,7 +282,7 @@ export function TaskBioProvider({ children }: { children: ReactNode }) {
         shoppingItems: s.shoppingItems.filter((item) => item.id !== id),
       })),
       setWeeklyGoals: (weeklyGoals) => setState((s) => ({ ...s, weeklyGoals })),
-      replaceDays: (days) => setState((s) => ({ ...s, plan: { ...s.plan, ...days } })),
+      replaceDays: (days) => setState((s) => ({ ...s, plan: { ...s.plan, ...normalizePlan(days) } })),
       clearWeek: (keys) => setState((s) => ({ ...s, plan: Object.fromEntries(Object.entries(s.plan).filter(([key]) => !keys.includes(key))) })),
       addCustomFood: (food) => setState((s) => ({ ...s, customFoods: [food, ...(s.customFoods ?? []).filter((f) => f.id !== food.id)].slice(0, 500) })),
       addExerciseLog: (entry) => setState((s) => ({ ...s, exerciseLog: [{ ...entry, id: `x-${Date.now()}` }, ...(s.exerciseLog ?? [])].slice(0, 2000) })),

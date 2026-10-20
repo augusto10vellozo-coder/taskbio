@@ -3,7 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { addDays, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarPlus, ChevronLeft, ChevronRight, Plus, ShoppingBasket } from "lucide-react";
+import { CalendarPlus, ChevronLeft, ChevronRight, Plus, ArrowRight, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -73,7 +73,7 @@ const toNonNegativeNumber = (value: string) => {
 };
 
 function Alimentacao() {
-  const { meals, plan, addBlock, updateBlock, removeBlock, getMeal, customFoods, addCustomFood } = useTaskBio();
+  const { meals, plan, addBlock, registerMeal, removeBlock, getMeal, customFoods, addCustomFood } = useTaskBio();
   const [referenceDate, setReferenceDate] = useState(() => new Date());
   const [selectedDate, setSelectedDate] = useState(() => new Date());
   const [manualOpen, setManualOpen] = useState(false);
@@ -138,8 +138,7 @@ function Alimentacao() {
         cost: toNonNegativeNumber(manualMeal.cost),
       },
     };
-    if (editingMeal) updateBlock(selectedKey, editingMeal.id, payload);
-    else addBlock(selectedKey, payload);
+    registerMeal(selectedKey, payload, editingMeal?.id);
     setEditingMeal(null);
     setManualMeal(emptyManualMeal);
     setManualOpen(false);
@@ -151,7 +150,6 @@ function Alimentacao() {
       <ModuleHeader title="Alimentação" /><section className="pb-5">
         <div className="mt-2 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
           <div><h2 className="font-display text-lg font-semibold">Planeje suas refeições</h2><p className="mt-2 max-w-[62ch] text-sm leading-6 text-steel">Escolha o que vai preparar em cada dia. Valores estimados.</p></div>
-          <Button asChild variant="outline"><Link to="/compras"><ShoppingBasket /> Gerar lista da semana</Link></Button>
         </div>
       </section>
 
@@ -171,41 +169,55 @@ function Alimentacao() {
         </div>
       </section>
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_300px]">
-        <section>
-          <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-end"><div><h2 className="font-display text-xl font-semibold">Escolher para {format(selectedDate, "EEEE", { locale: ptBR })}</h2><p className="mt-1 text-xs text-steel">Adicione sugestões ou registre o que você realmente comeu.</p></div><Button type="button" onClick={() => { setEditingMeal(null); setManualMeal(emptyManualMeal); setManualOpen(true); }}><Plus /> Registrar o que comi</Button></div>
-          <div className="mt-4 grid gap-4 md:grid-cols-2">
-            {meals.map((meal) => (
-              <article key={meal.id} className="rounded-lg bg-card p-4 ring-1 ring-line">
-                <div className="flex items-start justify-between gap-3"><div><p className="text-[11px] uppercase text-steel">{meal.name}</p><h3 className="mt-1 text-base font-semibold">{meal.items}</h3></div><span className="shrink-0 text-sm font-semibold">{brl(meal.cost)}</span></div>
-                <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-steel"><span>{meal.macros.kcal} kcal</span><span>P {meal.macros.prot}g</span><span>C {meal.macros.carb}g</span><span>G {meal.macros.gord}g</span></div>
-                <Button className="mt-4 w-full" size="sm" onClick={() => scheduleMeal(meal.id)}><CalendarPlus /> Adicionar neste dia</Button>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <aside className="space-y-4">
-          <section className="rounded-lg bg-ink p-5 text-primary-foreground">
-            <p className="text-[11px] uppercase text-primary-foreground/70">Resumo da semana</p><p className="mt-2 font-display text-3xl font-semibold">{brl(totals.cost)}</p><p className="mt-1 text-xs text-primary-foreground/70">{scheduled.length} refeições · {totals.known ? `${fmt(totals.kcal)} kcal` : "calorias não informadas"}</p>
-            <dl className="mt-4 grid grid-cols-3 gap-2 border-t border-primary-foreground/20 pt-4 text-center"><div><dt className="text-[10px] text-primary-foreground/70">Proteína</dt><dd className="mt-1 font-semibold">{totals.known ? `${fmt(totals.prot)}g` : "—"}</dd></div><div><dt className="text-[10px] text-primary-foreground/70">Carboidrato</dt><dd className="mt-1 font-semibold">{totals.known ? `${fmt(totals.carb)}g` : "—"}</dd></div><div><dt className="text-[10px] text-primary-foreground/70">Gordura</dt><dd className="mt-1 font-semibold">{totals.known ? `${fmt(totals.gord)}g` : "—"}</dd></div></dl>
-            <p className="mt-3 text-[10px] text-primary-foreground/60">Registros pessoais. Não substituem orientação de profissional.</p>{totals.missing > 0 && <p className="mt-3 text-xs leading-5 text-primary-foreground/70">{totals.missing} refeição(ões) sem valores nutricionais informados; não incluídas nos nutrientes.</p>}
-          </section>
-          <section className="rounded-lg bg-card p-4 ring-1 ring-line"><h2 className="font-display text-base font-semibold">Neste dia</h2>
-            {selectedMeals.length === 0 ? <p className="mt-3 text-sm text-steel">Nenhuma refeição registrada.</p> : <>
-              <p className="mt-3 text-sm font-semibold">{dayTotals.known ? `${fmt(dayTotals.kcal)} kcal` : "Calorias não informadas"}</p>
-              <p className="mt-1 text-xs text-steel">{dayTotals.known ? `P ${fmt(dayTotals.prot)}g · C ${fmt(dayTotals.carb)}g · G ${fmt(dayTotals.gord)}g` : "Nutrientes não informados"}</p>
-              <ul className="mt-3 divide-y divide-line">{selectedMeals.map((block) => { const meal = getMeal(block.mealId); const nutrition = mealNutrition(block, getMeal); return <li key={block.id} className="flex flex-wrap items-center justify-between gap-3 py-3"><div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-2"><p className="text-sm font-medium">{foodName(meal?.items ?? block.title)}</p>{block.manualMeal ? <span className="rounded-full bg-mist px-2 py-0.5 text-[10px] font-medium text-steel">registrado</span> : null}</div><p className="mt-0.5 text-xs leading-5 text-steel">{block.time}{block.manualMeal ? ` · ${block.manualMeal.portion}` : ""} · {nutrition.known ? `${fmt(nutrition.kcal)} kcal` : "Nutrientes não informados"}</p></div><div className="flex gap-1">{block.manualMeal && <Button variant="ghost" size="sm" onClick={() => editMeal(block)}>Editar</Button>}<Button variant="ghost" size="sm" onClick={() => removeBlock(selectedKey, block.id)}>Remover</Button></div></li>; })}</ul>
-            </>}
-          </section>
-          <p className="text-xs leading-5 text-steel">Registros pessoais. Não substituem orientação de profissional.</p>
-        </aside>
+      <section className="py-6" aria-label="Refeições do dia">
+        <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+          <h2 className="font-display text-xl font-semibold">Refeições de {format(selectedDate, "EEEE", { locale: ptBR })}</h2>
+          <Button type="button" onClick={() => { setEditingMeal(null); setManualMeal(emptyManualMeal); setManualOpen(true); }}><Plus /> Registrar o que comi</Button>
+        </div>
+        <div className="mt-4 border-y border-line py-4">
+          <h3 className="text-xs font-medium text-steel">Resumo do dia</h3>
+          <p className="mt-1 font-display text-2xl font-semibold">{dayTotals.known ? `${fmt(dayTotals.kcal)} kcal` : "Calorias não informadas"}</p>
+          <p className="mt-1 text-xs text-steel">{dayTotals.known ? `P ${fmt(dayTotals.prot)}g · C ${fmt(dayTotals.carb)}g · G ${fmt(dayTotals.gord)}g` : "Nutrientes não informados"}{dayTotals.cost > 0 ? ` · ${brl(dayTotals.cost)}` : ""}</p>
+        </div>
+        {selectedMeals.length === 0 ? <p className="py-5 text-sm text-steel">Registre sua primeira refeição neste dia.</p> :
+          <ul className="divide-y divide-line">{selectedMeals.map((block) => {
+            const meal = getMeal(block.mealId);
+            const nutrition = mealNutrition(block, getMeal);
+            return <li key={block.id} className="flex flex-wrap items-center justify-between gap-3 py-4">
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2"><h3 className="break-words text-sm font-medium">{foodName(block.manualMeal ? block.title : meal?.items ?? block.title)}</h3>{block.manualMeal && <span className="rounded-full bg-mist px-2 py-0.5 text-[10px] font-medium text-steel">registrado</span>}</div>
+                <p className="mt-1 text-xs leading-5 text-steel">{block.time}{block.manualMeal ? ` · ${block.manualMeal.portion}` : ""}{nutrition.known ? ` · ${fmt(nutrition.kcal)} kcal` : ""}</p>
+                {!block.manualMeal && <p className="mt-1 text-xs text-steel">Refeição a registrar</p>}
+              </div>
+              <div className="flex flex-wrap gap-1"><Button variant={block.manualMeal ? "ghost" : "outline"} size="sm" onClick={() => editMeal(block)}>{block.manualMeal ? "Editar" : "Registrar alimentos"}</Button><Button variant="ghost" size="sm" onClick={() => removeBlock(selectedKey, block.id)}>Remover</Button></div>
+            </li>;
+          })}</ul>}
+      </section>
+      <section className="border-y border-line py-4" aria-label="Resumo da semana">
+        <h2 className="font-display text-base font-semibold">Resumo da semana</h2>
+        <p className="mt-2 text-sm">{scheduled.length} refeições · {totals.known ? `${fmt(totals.kcal)} kcal` : "Calorias não informadas"}{totals.cost > 0 ? ` · ${brl(totals.cost)}` : ""}</p>
+        {totals.known > 0 && <p className="mt-1 text-xs text-steel">P {fmt(totals.prot)}g · C {fmt(totals.carb)}g · G {fmt(totals.gord)}g</p>}
+        {totals.missing > 0 && <p className="mt-2 text-xs text-steel">{totals.missing} refeição(ões) sem valores nutricionais informados.</p>}
+      </section>
+      <details className="group border-b border-line py-4">
+        <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between font-display text-base font-semibold">Sugestões<ChevronDown className="size-4 transition-transform group-open:rotate-180" /></summary>
+        <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {meals.map((meal) => <article key={meal.id} className="rounded-lg bg-card p-4 ring-1 ring-line">
+            <div className="flex items-start justify-between gap-3"><div className="min-w-0"><p className="text-[11px] uppercase text-steel">{meal.name}</p><h3 className="mt-1 break-words text-base font-semibold">{meal.items}</h3></div><span className="shrink-0 text-sm font-semibold">{brl(meal.cost)}</span></div>
+            <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-steel"><span>{meal.macros.kcal} kcal</span><span>P {meal.macros.prot}g</span><span>C {meal.macros.carb}g</span><span>G {meal.macros.gord}g</span></div>
+            <Button className="mt-4 w-full" size="sm" onClick={() => scheduleMeal(meal.id)}><CalendarPlus /> Adicionar neste dia</Button>
+          </article>)}
+        </div>
+      </details>
+      <div className="flex flex-wrap items-center justify-between gap-3 py-5">
+        <p className="text-xs leading-5 text-steel">Registros pessoais. Não substituem orientação de profissional.</p>
+        <Button asChild variant="link" size="sm"><Link to="/compras">Lista da semana <ArrowRight className="size-4" /></Link></Button>
       </div>
       <Dialog open={manualOpen} onOpenChange={setManualOpen}>
         <DialogContent className="max-h-[90vh] w-[calc(100%-2rem)] overflow-y-auto sm:max-w-xl">
           <form onSubmit={registerManualMeal}>
             <DialogHeader>
-              <DialogTitle>{editingMeal ? "Editar refeição registrada" : "Registrar o que comi"}</DialogTitle>
+              <DialogTitle>{editingMeal ? "Registrar alimentos" : "Registrar o que comi"}</DialogTitle>
               <DialogDescription>Adicione um alimento ou refeição em {format(selectedDate, "dd/MM")}. Os valores nutricionais são opcionais.</DialogDescription>
             </DialogHeader>
             <div className="mt-5 grid gap-4 sm:grid-cols-2">

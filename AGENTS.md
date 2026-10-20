@@ -17,7 +17,7 @@ Public analytics uses opt-in browser consent and stores only event type, known p
 
 Content reviews run only from an authenticated, server-verified admin function; the AI key and model call stay server-only to prevent unauthorized spending.
 
-Manual food entries are stored as dated meal blocks inside the existing plan payload; this preserves offline use and account synchronization without a parallel food-log store.
+Agenda and Alimentação share dated blocks in the synced plan; meal-link recognizes meal appointments, merges same-name/time duplicates keeping food-bearing IDs, and completes that block on consumption. Why: preserves offline use without duplicate logs.
 
 Food totals use the shared meal-summary resolver for catalog and manual blocks; missing nutrition stays unknown instead of being inferred, and display-only accent corrections preserve stored user data.
 
