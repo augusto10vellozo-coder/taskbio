@@ -64,6 +64,13 @@
       "when": 1792457883043,
       "tag": "0008_push_delivery_tracking",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1792458012426,
+      "tag": "0009_push_daily_attempt_budget",
+      "breakpoints": true
     }
   ]
 }
