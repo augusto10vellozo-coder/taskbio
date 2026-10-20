@@ -1,0 +1,13 @@
+ALTER TABLE public.push_subscriptions ADD COLUMN active boolean NOT NULL DEFAULT true, ADD COLUMN inactive_reason text, ADD COLUMN updated_at timestamptz NOT NULL DEFAULT now(), ADD COLUMN device_id text, ADD COLUMN device_label text;
+CREATE INDEX push_device_idx ON public.push_subscriptions(user_id, device_id);
+CREATE TABLE public.push_delivery_jobs (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), user_id uuid NOT NULL, subscription_id uuid NOT NULL REFERENCES public.push_subscriptions(id) ON DELETE CASCADE, reminder_key text NOT NULL, layer text NOT NULL, day date NOT NULL, due_at timestamptz NOT NULL, attempts integer NOT NULL DEFAULT 0, status text NOT NULL DEFAULT 'pending', lease_until timestamptz, UNIQUE(subscription_id, reminder_key));
+GRANT ALL ON public.push_delivery_jobs TO service_role;
+ALTER TABLE public.push_delivery_jobs ENABLE ROW LEVEL SECURITY;
+CREATE TABLE public.push_delivery_attempts (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), user_id uuid NOT NULL, subscription_id uuid NOT NULL, reminder_key text NOT NULL, layer text NOT NULL, attempted_at timestamptz NOT NULL DEFAULT now(), result text NOT NULL, http_status integer, reason text);
+GRANT ALL ON public.push_delivery_attempts TO service_role;
+ALTER TABLE public.push_delivery_attempts ENABLE ROW LEVEL SECURITY;
+CREATE INDEX push_attempts_day_idx ON public.push_delivery_attempts(user_id, subscription_id, layer, attempted_at);
+CREATE OR REPLACE FUNCTION public.claim_push_delivery(_id uuid) RETURNS boolean LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$ BEGIN UPDATE public.push_delivery_jobs SET attempts = attempts + 1, lease_until = now() + interval '1 minute' WHERE id = _id AND status = 'pending' AND attempts < 3 AND (lease_until IS NULL OR lease_until < now()); RETURN FOUND; END $$;
+REVOKE ALL ON FUNCTION public.claim_push_delivery(uuid) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.claim_push_delivery(uuid) TO service_role;
+COMMENT ON TABLE public.push_sent IS 'Legacy aggregate acceptance marker; per-device delivery and retries use push_delivery_jobs and push_delivery_attempts.';

@@ -266,6 +266,89 @@ export type Database = {
         }
         Relationships: []
       }
+      push_delivery_attempts: {
+        Row: {
+          attempted_at: string
+          http_status: number | null
+          id: string
+          layer: string
+          reason: string | null
+          reminder_key: string
+          result: string
+          subscription_id: string
+          user_id: string
+        }
+        Insert: {
+          attempted_at?: string
+          http_status?: number | null
+          id?: string
+          layer: string
+          reason?: string | null
+          reminder_key: string
+          result: string
+          subscription_id: string
+          user_id: string
+        }
+        Update: {
+          attempted_at?: string
+          http_status?: number | null
+          id?: string
+          layer?: string
+          reason?: string | null
+          reminder_key?: string
+          result?: string
+          subscription_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      push_delivery_jobs: {
+        Row: {
+          attempts: number
+          day: string
+          due_at: string
+          id: string
+          layer: string
+          lease_until: string | null
+          reminder_key: string
+          status: string
+          subscription_id: string
+          user_id: string
+        }
+        Insert: {
+          attempts?: number
+          day: string
+          due_at: string
+          id?: string
+          layer: string
+          lease_until?: string | null
+          reminder_key: string
+          status?: string
+          subscription_id: string
+          user_id: string
+        }
+        Update: {
+          attempts?: number
+          day?: string
+          due_at?: string
+          id?: string
+          layer?: string
+          lease_until?: string | null
+          reminder_key?: string
+          status?: string
+          subscription_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "push_delivery_jobs_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "push_subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       push_sent: {
         Row: {
           reminder_key: string
@@ -286,30 +369,45 @@ export type Database = {
       }
       push_subscriptions: {
         Row: {
+          active: boolean
           auth: string
           created_at: string
+          device_id: string | null
+          device_label: string | null
           endpoint: string
           id: string
+          inactive_reason: string | null
           p256dh: string
           timezone: string
+          updated_at: string
           user_id: string
         }
         Insert: {
+          active?: boolean
           auth: string
           created_at?: string
+          device_id?: string | null
+          device_label?: string | null
           endpoint: string
           id?: string
+          inactive_reason?: string | null
           p256dh: string
           timezone?: string
+          updated_at?: string
           user_id: string
         }
         Update: {
+          active?: boolean
           auth?: string
           created_at?: string
+          device_id?: string | null
+          device_label?: string | null
           endpoint?: string
           id?: string
+          inactive_reason?: string | null
           p256dh?: string
           timezone?: string
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
@@ -428,6 +526,7 @@ export type Database = {
     }
     Functions: {
       claim_league_awards: { Args: never; Returns: Json }
+      claim_push_delivery: { Args: { _id: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
