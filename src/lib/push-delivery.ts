@@ -8,6 +8,16 @@ export function deliveryResult(status?: number) {
 export function transientFailure(status?: number) {
   return status === undefined || status === 408 || status === 429 || status >= 500;
 }
+export function retryAllowed(attempts: number, status?: number) {
+  return attempts < 3 && transientFailure(status);
+}
+export async function performDelivery(send: () => Promise<{ status: number }>, record: (result: ReturnType<typeof deliveryResult>, status?: number) => Promise<void>) {
+  let status: number | undefined;
+  try { status = (await send()).status; } catch { /* Network/timeout. */ }
+  const result = deliveryResult(status);
+  await record(result, status);
+  return { result, status };
+}
 export function canDeliver(layer: string, prefs: NotifPrefs, timeZone: string, now: Date) {
   if (inQuietHours(wallClockMs(now, timeZone))) return false;
   return !(layer in prefs) || prefs[layer as keyof NotifPrefs];

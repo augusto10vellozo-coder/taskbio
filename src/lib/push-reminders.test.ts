@@ -115,7 +115,7 @@ describe("dueLeagueOpen", () => {
 
 describe("preferências e horário de silêncio", () => {
   it("lê toggles salvos e liga tudo por padrão", () => {
-    expect(readNotifPrefs(null)).toEqual({ streak: true, dayClose: true, meals: true, league: true, tasks: true, workouts: true, weekly: true });
+    expect(readNotifPrefs(null)).toEqual({ streak: true, dayClose: true, meals: true, league: true, tasks: true, workouts: true, weekly: true, exams: true });
     expect(readNotifPrefs({ notifPrefs: { streak: false } }).streak).toBe(false);
     expect(readNotifPrefs({ notifPrefs: { streak: false } }).meals).toBe(true);
   });
