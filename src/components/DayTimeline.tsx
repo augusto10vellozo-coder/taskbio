@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { KIND_LABEL, brl, type Block, type BlockKind } from "@/lib/trilha-data";
 import { useTaskBio } from "@/lib/trilha-store";
 import { PhotoBonus } from "@/components/PhotoBonus";
+import { mealNutrition } from "@/lib/meal-summary";
 
 const dotColor: Record<BlockKind, string> = {
   refeicao: "ring-good",
@@ -68,6 +69,7 @@ export function DayTimeline({
             {blocks.length > 0 && <span className="absolute left-[7px] top-2 bottom-2 w-px bg-line" />}
             {blocks.map((b) => {
               const meal = getMeal(b.mealId);
+              const nutrition = mealNutrition(b, getMeal);
               const workout = getWorkout(b.workoutId);
               const open = workout && openWorkout === workout.id;
               return (
@@ -109,17 +111,17 @@ export function DayTimeline({
 
                     {b.note && <p className="mt-1 text-[11px] text-steel">{b.note}</p>}
 
-                    {meal && (
+                    {b.kind === "refeicao" && nutrition.known && (
                       <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-steel">
-                        <span>{meal.macros.kcal} kcal</span>
+                        <span>{nutrition.kcal} kcal</span>
                         <span className="text-line">·</span>
-                        <span>P {meal.macros.prot}g</span>
+                        <span>P {nutrition.prot}g</span>
                         <span className="text-line">·</span>
-                        <span>C {meal.macros.carb}g</span>
+                        <span>C {nutrition.carb}g</span>
                         <span className="text-line">·</span>
-                        <span>G {meal.macros.gord}g</span>
+                        <span>G {nutrition.gord}g</span>
                         <span className="text-line">·</span>
-                        <span className="font-medium text-ink">{brl(meal.cost)}</span>
+                        {nutrition.cost > 0 && <span className="font-medium text-ink">{brl(nutrition.cost)}</span>}
                       </div>
                     )}
 
