@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Priorizar refeições do dia, recolher sugestões e integrar registros únicos com a Agenda; validar cadastro, conclusão, duplicatas e link de Compras
 - [x] Corrigir entrega por assinatura, renovação, telemetria, silêncio noturno e preferências; 42 testes passaram, controle de provas conferido na conta e renovação validada com envio simulado; recebimento em celular aguarda publicação e teste real
 - [x] Evoluir Estudos: matérias com cor, cronômetro, provas com lembrete, metas por matéria, streak e +5 XP
 - [x] Evoluir Leitura: busca de livros, estante, sessões por livro, meta semanal, streak, citações e +5 XP
