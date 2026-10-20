@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { buildPushPayload } from "@block65/webcrypto-web-push";
 import { dueDayComplete, dueLeagueMove, dueStreakMilestone, dueWeeklySummary, dueDayClose, dueLeagueOpen, dueMealReminders, dueReminders, dueSettingsReminders, dueStreakRisk, inQuietHours, readNotifPrefs, wallClockMs } from "@/lib/push-reminders";
 import { VAPID_PUBLIC_KEY } from "@/lib/push-config";
-import { canDeliver, deliveryResult, reminderLayer, transientFailure } from "@/lib/push-delivery";
+import { canDeliver, performDelivery, reminderLayer, retryAllowed } from "@/lib/push-delivery";
 import { mealSummary } from "@/lib/meal-summary";
 import { MEALS } from "@/lib/trilha-data";
 import type { Block, Meal } from "@/lib/trilha-data";
@@ -94,7 +94,8 @@ export const Route = createFileRoute("/api/public/push-reminders")({
                   const idx = ranked.findIndex((r) => r.user_id === row.user_id);
                   if (idx >= 0) {
                     const pos = idx + 1;
-                    const prev = posBy.get(row.user_id) ?? null;
+                    const retryMove = (pendingJobs ?? []).find(j => j.user_id === row.user_id && j.layer === "league" && j.reminder_key.startsWith("leaguemove|") && j.due_at === now.toISOString());
+                    const prev = retryMove ? (retryMove.reminder_key.includes("|lead|") ? 2 : 1) : posBy.get(row.user_id) ?? null;
                     const leader = pos > 1 ? { name: (ranked[0]?.display_name ?? ""), xpGap: (ranked[0]?.week_xp ?? 0) - (ranked[idx]?.week_xp ?? 0) } : null;
                     scheduled.push(...dueLeagueMove(prev, pos, leader, tz, now));
                     if (prev !== pos) await supabaseAdmin.from("league_positions").upsert({ user_id: row.user_id, week_start: thisWeekStart, position: pos, updated_at: now.toISOString() });
@@ -112,7 +113,7 @@ export const Route = createFileRoute("/api/public/push-reminders")({
             const blocks = Object.values(row.plan as Record<string, Block[]>).flat();
             const layer = reminderLayer(reminder.key, blocks.some(b => b.id === blockId && b.kind === "treino"));
             // Preserve the existing bonus independently of device retries (XP ref is unique).
-            if (reminder.bonus && canDeliver(layer, prefs, tz, executionNow)) await supabaseAdmin.from("xp_events").upsert({ user_id: row.user_id, kind: "bonus", ref: `bonus:${reminder.key}`, day: todaySp, points: reminder.bonus }, { onConflict: "user_id,kind,ref", ignoreDuplicates: true });
+            if (reminder.bonus && canDeliver(layer, prefs, tz, executionNow)) await supabaseAdmin.from("xp_events").upsert({ user_id: row.user_id, kind: "bonus", ref: `bonus:${reminder.key}`, day: todaySp, points: reminder.bonus }, { onConflict: "user_id,ref", ignoreDuplicates: true });
             const body = reminder.body ? `${reminder.url === "/financas" ? "💰" : reminder.url === "/saude" ? "💊" : "📅"} ${reminder.title} · ${reminder.body}` : reminder.title;
             const tag = reminder.tag ?? `agenda-${reminder.key}`;
             for (const sub of userSubs) {
@@ -125,20 +126,18 @@ export const Route = createFileRoute("/api/public/push-reminders")({
               if (!job) continue;
               const { data: claimed } = await supabaseAdmin.rpc("claim_push_delivery", { _id: job.id });
               if (!claimed) continue;
-              let status: number | undefined;
-              try {
+              const { result, status } = await performDelivery(async () => {
                 const payload = await buildPushPayload(
                   { data: JSON.stringify({ title: "TaskBio", body, url: reminder.url, tag }), options: { ttl: 900, urgency: "high" } },
                   { endpoint: sub.endpoint, expirationTime: null, keys: { p256dh: sub.p256dh, auth: sub.auth } }, vapid,
                 );
-                const res = await fetch(sub.endpoint, { ...payload, signal: AbortSignal.timeout(5000) });
-                status = res.status;
-              } catch { /* Technical failure only; never log subscription credentials or payload. */ }
-              const result = deliveryResult(status);
-              const reason = result === "invalid" ? "expired_subscription" : result === "failed" ? (status === undefined ? "network_timeout" : `http_${status}`) : null;
-              const { error: logError } = await supabaseAdmin.from("push_delivery_attempts").insert({ user_id: row.user_id, subscription_id: sub.id, reminder_key: reminder.key, layer, attempted_at: executionNow.toISOString(), result, http_status: status ?? null, reason });
-              if (logError) console.error("Push telemetry write failed");
-              await supabaseAdmin.from("push_delivery_jobs").update({ status: result === "failed" && transientFailure(status) && job.attempts + 1 < 3 ? "pending" : result, lease_until: null }).eq("id", job.id);
+                return fetch(sub.endpoint, { ...payload, signal: AbortSignal.timeout(5000) });
+              }, async (result, status) => {
+                const { error: logError } = await supabaseAdmin.from("push_delivery_attempts").insert({ user_id: row.user_id, subscription_id: sub.id, reminder_key: reminder.key, layer, attempted_at: new Date().toISOString(), result, http_status: status ?? null, reason: status === undefined ? "network_timeout" : result === "delivered" ? null : `http_${status}` });
+                if (logError) console.error("Push telemetry write failed");
+              });
+              const reason = result === "invalid" ? `http_${status}` : null;
+              await supabaseAdmin.from("push_delivery_jobs").update({ status: result === "failed" && retryAllowed(job.attempts + 1, status) ? "pending" : result, lease_until: null }).eq("id", job.id);
               if (result === "invalid") await supabaseAdmin.from("push_subscriptions").update({ active: false, inactive_reason: reason }).eq("id", sub.id);
               if (result === "delivered") {
                 sent++;
