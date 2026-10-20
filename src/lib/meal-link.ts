@@ -21,7 +21,7 @@ export function unifyMealBlocks(blocks: Block[]): Block[] {
     if (!previous) continue;
     const winner = foodRank(block) > foodRank(previous) ? block : previous;
     const other = winner === block ? previous : block;
-    result[index] = { ...other, ...winner, note: winner.note ?? other.note, reminderMinutes: winner.reminderMinutes ?? other.reminderMinutes, endTime: winner.endTime ?? other.endTime, photoPath: winner.photoPath ?? other.photoPath, done: winner.done || other.done };
+    result[index] = { ...other, ...winner, done: winner.done || other.done };
   }
   return result.sort((a, b) => a.time.localeCompare(b.time));
 }
