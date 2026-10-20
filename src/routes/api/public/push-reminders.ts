@@ -33,6 +33,7 @@ export const Route = createFileRoute("/api/public/push-reminders")({
         const userIds = [...new Set(subs.map((s) => s.user_id))];
         const { data: rows } = await supabaseAdmin.from("user_data").select("user_id, plan, meals, settings").in("user_id", userIds);
         const executionNow = new Date();
+        const { data: legacySent } = await supabaseAdmin.from("push_sent").select("user_id, reminder_key");
         const { data: pendingJobs, error: jobsError } = await supabaseAdmin.from("push_delivery_jobs").select("*").eq("status", "pending").lt("attempts", 3).in("subscription_id", subs.map(s => s.id));
         if (jobsError) return new Response("Delivery storage unavailable", { status: 503 });
         const now = executionNow;
@@ -124,6 +125,8 @@ export const Route = createFileRoute("/api/public/push-reminders")({
               if (enqueueError) continue;
               const { data: job } = await supabaseAdmin.from("push_delivery_jobs").select("*").eq("subscription_id", sub.id).eq("reminder_key", reminder.key).single();
               if (!job) continue;
+              // Existing markers predate per-device acceptance; do not replay old notifications.
+              if (job.attempts === 0 && !(pendingJobs ?? []).some(j => j.reminder_key === reminder.key && j.user_id === row.user_id) && (legacySent ?? []).some(j => j.user_id === row.user_id && j.reminder_key === reminder.key)) continue;
               const { data: claimed } = await supabaseAdmin.rpc("claim_push_delivery", { _id: job.id });
               if (!claimed) continue;
               const { result, status } = await performDelivery(async () => {
