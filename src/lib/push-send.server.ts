@@ -6,7 +6,7 @@ export async function pushToUser(userId: string, message: { title: string; body:
   const privateKey = process.env["VAPID_PRIVATE_KEY"];
   if (!privateKey) return;
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data: subs } = await supabaseAdmin.from("push_subscriptions").select("id, endpoint, p256dh, auth").eq("user_id", userId);
+  const { data: subs } = await supabaseAdmin.from("push_subscriptions").select("id, endpoint, p256dh, auth").eq("user_id", userId).eq("active", true);
   const vapid = { subject: "mailto:contatotaskbio@gmail.com", publicKey: VAPID_PUBLIC_KEY, privateKey };
   for (const sub of subs ?? []) {
     try {
@@ -16,7 +16,7 @@ export async function pushToUser(userId: string, message: { title: string; body:
         vapid,
       );
       const res = await fetch(sub.endpoint, payload);
-      if (res.status === 404 || res.status === 410) await supabaseAdmin.from("push_subscriptions").delete().eq("id", sub.id);
+      if (res.status === 404 || res.status === 410) await supabaseAdmin.from("push_subscriptions").update({ active: false, inactive_reason: `http_${res.status}` }).eq("id", sub.id);
     } catch (error) { console.error("Push error", error); }
   }
 }

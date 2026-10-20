@@ -132,7 +132,7 @@ export function TaskBioProvider({ children }: { children: ReactNode }) {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
         const stored = JSON.parse(raw) as Partial<TaskBioState>;
-        setState({ ...initialState, ...stored, plan: normalizePlan(stored.plan) });
+        setState({ ...initialState, ...stored, notifPrefs: { ...defaultNotifPrefs, ...stored.notifPrefs }, plan: normalizePlan(stored.plan) });
       }
     } catch {
       /* ignora estado inválido */
@@ -163,6 +163,7 @@ export function TaskBioProvider({ children }: { children: ReactNode }) {
       hydrate: (nextState) => setState((current) => ({
         ...current,
         ...nextState,
+        ...(nextState.notifPrefs ? { notifPrefs: { ...defaultNotifPrefs, ...nextState.notifPrefs } } : {}),
         ...(nextState.plan ? { plan: normalizePlan(nextState.plan) } : {}),
       })),
       toggleBlock: (day, blockId) => {

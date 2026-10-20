@@ -3,14 +3,14 @@ type ReminderBlock = { id: string; time: string; kind: string; title: string; do
 export type DueReminder = { key: string; title: string; body: string; url: string; tag?: string };
 
 /** Per-layer notification toggles stored in user_data.settings.notifPrefs; all on by default. */
-export type NotifPrefs = { streak: boolean; dayClose: boolean; meals: boolean; league: boolean; tasks: boolean; workouts: boolean; weekly: boolean };
-export const defaultNotifPrefs: NotifPrefs = { streak: true, dayClose: true, meals: true, league: true, tasks: true, workouts: true, weekly: true };
+export type NotifPrefs = { streak: boolean; dayClose: boolean; meals: boolean; league: boolean; tasks: boolean; workouts: boolean; weekly: boolean; exams: boolean };
+export const defaultNotifPrefs: NotifPrefs = { streak: true, dayClose: true, meals: true, league: true, tasks: true, workouts: true, weekly: true, exams: true };
 export function readNotifPrefs(settings: unknown): NotifPrefs {
   const raw = settings && typeof settings === "object" && !Array.isArray(settings)
     ? (settings as Record<string, unknown>)["notifPrefs"] : undefined;
   const p = raw && typeof raw === "object" && !Array.isArray(raw) ? raw as Record<string, unknown> : {};
   const on = (k: keyof NotifPrefs) => typeof p[k] === "boolean" ? (p[k] as boolean) : true;
-  return { streak: on("streak"), dayClose: on("dayClose"), meals: on("meals"), league: on("league"), tasks: on("tasks"), workouts: on("workouts"), weekly: on("weekly") };
+  return { streak: on("streak"), dayClose: on("dayClose"), meals: on("meals"), league: on("league"), tasks: on("tasks"), workouts: on("workouts"), weekly: on("weekly"), exams: on("exams") };
 }
 
 /** No notifications between 22:30 and 07:00 (user-local wall clock ms from localWallClock). */
@@ -41,6 +41,7 @@ export function dueReminders(plan: unknown, timeZone: string, now: Date, prefs: 
   if (!plan || typeof plan !== "object") return [];
   let nowMs: number;
   try { nowMs = localWallClock(now, timeZone); } catch { nowMs = localWallClock(now, "America/Sao_Paulo"); }
+  if (inQuietHours(nowMs)) return [];
   const days = [dayKey(nowMs), dayKey(nowMs + 86400000)];
   const result: DueReminder[] = [];
   for (const date of days) {
@@ -64,11 +65,12 @@ export function dueReminders(plan: unknown, timeZone: string, now: Date, prefs: 
 }
 
 /** Bills: notify at 09:00 the day before the due date. Medications: notify daily at their time. */
-export function dueSettingsReminders(settings: unknown, timeZone: string, now: Date): DueReminder[] {
+export function dueSettingsReminders(settings: unknown, timeZone: string, now: Date, prefs: NotifPrefs = defaultNotifPrefs): DueReminder[] {
   if (!settings || typeof settings !== "object") return [];
   let nowMs: number;
   try { nowMs = localWallClock(now, timeZone); } catch { nowMs = localWallClock(now, "America/Sao_Paulo"); }
   const today = dayKey(nowMs);
+  if (inQuietHours(nowMs)) return [];
   const tomorrow = dayKey(nowMs + 86400000);
   const [y, mo, d] = today.split("-").map(Number);
   const at = (time: string) => { const [h, m] = time.split(":").map(Number); return Number.isNaN(h) || Number.isNaN(m) ? NaN : (Date.UTC(y!, mo! - 1, d!, h!, m!) - nowMs) / 60000; };
@@ -85,7 +87,7 @@ export function dueSettingsReminders(settings: unknown, timeZone: string, now: D
     result.push({ key: `med|${med.id}|${today}`, title: `Lembrete: ${String(med.name).slice(0, 80)}`, body: `Horário marcado: ${med.time}.`, url: "/saude" });
   }
   for (const ex of (s as { trackers?: { exams?: { id: string; subjectName?: string; title: string; date: string; done?: boolean }[] } }).trackers?.exams ?? []) {
-    if (!ex || ex.done || typeof ex.date !== "string") continue;
+    if (!prefs.exams || !ex || ex.done || typeof ex.date !== "string") continue;
     const label = `${String(ex.title).slice(0, 80)}${ex.subjectName ? ` (${String(ex.subjectName).slice(0, 40)})` : ""}`;
     if (ex.date === tomorrow && inWindow(at("09:00"))) result.push({ key: `exam1|${ex.id}|${ex.date}`, title: `📚 Amanhã: ${label}`, body: "Bora revisar hoje?", url: "/estudos", tag: `exam-${ex.id}` });
     if (ex.date === today && inWindow(at("08:00"))) result.push({ key: `exam0|${ex.id}|${ex.date}`, title: `📚 É hoje: ${label}`, body: "Boa sorte!", url: "/estudos", tag: `exam-${ex.id}` });
