@@ -55,6 +55,7 @@ function Amigos() {
   }, [myTitles?.join("|")]);
   const [profile, setProfile] = useState<{ username: string | null; invite_code: string | null } | null>(null);
   const [uname, setUname] = useState("");
+  const [editingName, setEditingName] = useState(false);
   const [q, setQ] = useState("");
   const [found, setFound] = useState<Found[]>([]);
   const [requests, setRequests] = useState<Req[]>([]);
@@ -102,7 +103,7 @@ function Amigos() {
     if (!/^[a-z0-9_.]{3,20}$/.test(v)) { toast.error("Use de 3 a 20 letras minúsculas, números, ponto ou _"); return; }
     const { error } = await supabase.from("profiles").update({ username: v }).eq("id", user!.id);
     if (error) { toast.error("Esse nome de usuário já está em uso."); return; }
-    setProfile((p) => ({ invite_code: p?.invite_code ?? null, username: v })); toast.success("Nome de usuário salvo");
+    setProfile((p) => ({ invite_code: p?.invite_code ?? null, username: v })); setEditingName(false); toast.success(`Nome salvo: ${v}`);
   }
 
   async function invite() {
@@ -147,7 +148,7 @@ function Amigos() {
           <li key={r.user_id} className={`flex items-center gap-3 py-3 ${r.user_id === user?.id ? "font-medium" : ""}`}>
             <span className="w-6 text-center font-display text-lg font-semibold">{i === 0 && r.week_xp > 0 ? <Crown className="mx-auto size-5 text-brand" aria-label="1º lugar" /> : `${i + 1}º`}</span>
             <Avatar name={r.display_name || r.username || ""} url={r.avatar_url} champion={r.user_id === champ} />
-            <div className="min-w-0 flex-1"><p className="truncate">{r.display_name || r.username || "Sem nome"}{r.user_id === user?.id ? " (você)" : ""}</p>{(titles.get(r.user_id) as string[] | undefined)?.length ? <span className="mt-0.5 flex flex-wrap gap-1">{(titles.get(r.user_id) as string[]).map((t) => <span key={t} className={`rounded-full px-1.5 py-px text-[10px] font-semibold ring-1 ${t === "Campeão" ? "text-gold ring-gold/60" : t === "Recomeço" ? "text-accent ring-accent/50" : "text-good ring-good/50"}`}>{t}</span>)}</span> : null}<p className="text-xs text-steel">{r.habits} hábitos · {r.meals} refeições · {r.workouts} treinos na semana · hoje {r.today_xp} XP</p></div>
+            <div className="min-w-0 flex-1"><p className="line-clamp-2 break-words leading-snug">{r.display_name || r.username || "Sem nome"}{r.user_id === user?.id ? " (você)" : ""}</p>{(titles.get(r.user_id) as string[] | undefined)?.length ? <span className="mt-0.5 flex flex-wrap gap-1">{(titles.get(r.user_id) as string[]).map((t) => <span key={t} className={`rounded-full px-1.5 py-px text-[10px] font-semibold ring-1 ${t === "Campeão" ? "text-gold ring-gold/60" : t === "Recomeço" ? "text-accent ring-accent/50" : "text-good ring-good/50"}`}>{t}</span>)}</span> : null}<p className="text-xs text-steel">{r.habits} hábitos · {r.meals} refeições · {r.workouts} treinos na semana · hoje {r.today_xp} XP</p></div>
             {r.user_id !== user?.id && inactive.has(r.user_id) && (state?.nudgedToday.includes(r.user_id)
               ? <Button size="sm" variant="outline" disabled>Cutucado 👋</Button>
               : <Button size="sm" variant="outline" onClick={() => nudge(r.user_id)}>Cutucar 👋</Button>)}
@@ -157,17 +158,21 @@ function Amigos() {
         {rows && rows.length < 2 && <p className="mt-2 text-sm text-steel">Convide amigos para começar a competir.</p>}
         {rows && position > 0 && rows.length > 1 && <p className="mt-2 border-t border-line pt-3 text-sm">Você está em <strong>{position}º</strong> entre seus amigos.</p>}
         <p className="mt-3 text-xs text-steel">❄️ {awards?.freezes ?? 0} congelamento(s) de sequência · o campeão da semana ganha troféu dourado e 1 congelamento.</p>
-        <p className="mt-1 text-[11px] text-steel">Até 100 XP por dia contam para a liga. Peso, medidas e dados de saúde nunca aparecem aqui.</p>
+        <p className="mt-1 pb-1 text-[11px] leading-relaxed text-steel">Até 100 XP por dia contam para a liga. Peso, medidas e dados de saúde nunca aparecem aqui.</p>
       </section>
 
       <div className="mt-4 grid gap-3 md:grid-cols-2">
         <section className="min-w-0 rounded-lg bg-card p-4 ring-1 ring-line">
           <h2 className="font-display text-lg font-semibold">Convidar</h2>
           <Button className="mt-3 w-full" onClick={invite}><UserPlus /> Convidar amigo</Button>
-          <Button className="mt-2 w-full" variant="outline" onClick={copyLink}>Copiar link de convite</Button>
-          <label className="mt-4 block text-xs text-steel">Seu nome de usuário
-            <span className="mt-1 flex gap-2"><input value={uname} onChange={(e) => setUname(e.target.value)} placeholder="ex.: maria.silva" className="h-9 min-w-0 flex-1 rounded-md bg-background px-3 text-sm text-ink ring-1 ring-line" /><Button size="sm" variant="outline" onClick={saveUsername}>Salvar</Button></span>
-          </label>
+          <Button className="mt-2 w-full" variant="outline" onClick={copyLink} disabled={!profile?.username}>Copiar link de convite</Button>
+          {profile?.username && !editingName ? (
+            <p className="mt-4 flex items-center gap-2 text-sm text-ink"><span aria-hidden>✅</span><span className="min-w-0 flex-1 break-words">Nome salvo: @{profile.username}</span><Button size="sm" variant="ghost" onClick={() => setEditingName(true)}>Alterar</Button></p>
+          ) : (
+            <label className="mt-4 block text-xs text-steel">Seu nome de usuário
+              <span className="mt-1 flex gap-2"><input value={uname} onChange={(e) => setUname(e.target.value)} placeholder="ex.: maria.silva" className="h-9 min-w-0 flex-1 rounded-md bg-background px-3 text-sm text-ink ring-1 ring-line" /><Button size="sm" variant="outline" onClick={saveUsername}>Salvar</Button></span>
+            </label>
+          )}
         </section>
         <section className="min-w-0 rounded-lg bg-card p-4 ring-1 ring-line">
           <h2 className="font-display text-lg font-semibold">Buscar por nome de usuário</h2>
