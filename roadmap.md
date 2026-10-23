@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Corrigir Progresso: eixos por valor e tempo, nomes padronizados sem alterar números, detalhe opcional/unidades e metas excedidas; testar dados reais e novos registros; backup pelo Histórico indisponível
 - [x] Planejamento etapa 2: atalhos de refeição/dia/semana e Compras com período, prévia, origem e atualização explícita; 42 testes passaram e fluxo autenticado confirmou cópias, carrinho persistido e lista intacta até atualizar em 360/390px; conta restaurada; backup pelo Histórico indisponível
 - [x] Alimentação: Planejar/Registrar, consumo no mesmo ID, previsão original, pular e repetir; 22 testes e fluxo na conta com reabertura de consumida/pulada passaram; itens de teste removidos, compras preservadas; backup pelo Histórico indisponível
 - [x] Compras: texto corrigido, estado vazio com dois caminhos, unidade fixa e consolidação normalizada; 4 testes passaram
