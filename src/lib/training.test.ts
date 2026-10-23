@@ -16,6 +16,11 @@ describe("training", () => {
   it("does not invent history from planned or imported exercises", () => {
     expect(exerciseHistory("Novo", [], [], [workout], { "2026-10-12": [{ id: "b", kind: "treino", time: "07:00", title: "Costas", workoutId: workout.id, done: false }] })).toEqual([]);
   });
+  it("dated series never create legacy history for another planned day", () => {
+    const dated = { ...workout, exercises: workout.exercises.map((e, i) => ({ ...e, doneSets: i === 0 ? 1 : 0, seriesByDate: { "2026-10-12": [{ done: i === 0 }] } })) };
+    const plan = { "2026-10-12": [{ id: "a", kind: "treino" as const, time: "07:00", title: "Costas", workoutId: dated.id, done: false }], "2026-10-19": [{ id: "b", kind: "treino" as const, time: "07:00", title: "Costas", workoutId: dated.id, done: false }] };
+    expect(exerciseHistory("Remada no TRX", [], [], [dated], plan).map(e => e.date)).toEqual(["2026-10-12"]);
+  });
   it("keeps bodyweight session repetitions in history", () => {
     expect(exerciseHistory("Remada no TRX", [], [{ completedAt: "2026-10-12T10:00:00Z", exercises: [{ name: "Remada no TRX", loadKg: 0, reps: 12 }] }] as never)[0]).toEqual({ date: "2026-10-12", loadKg: 0, reps: 12 });
   });

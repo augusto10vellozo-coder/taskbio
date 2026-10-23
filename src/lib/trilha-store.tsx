@@ -24,6 +24,7 @@ import type { ModuleSettings } from "./modules";
 import { foodName } from "./meal-summary";
 import { saveMealRecord, unifyMealBlocks } from "./meal-link";
 import { recordExerciseSets, type ExerciseLogEntry } from "./training";
+import { changeSeries } from "./training-session";
 import type { Food } from "./food-db";
 import { emitBlockXp, emitXp, foodItemCount } from "./xp-client";
 import { emptyFinance, type FinanceState } from "./finance";
@@ -59,6 +60,7 @@ type Store = TaskBioState & {
   updateBlock: (date: string, blockId: string, block: Omit<Block, "id" | "done">) => void;
   registerMeal: (date: string, block: Omit<Block, "id" | "done">, editingId?: string) => void;
   setDoneSets: (workoutId: string, exerciseId: string, doneSets: number, date?: string) => void;
+  setSeries: (workoutId: string, exerciseId: string, date: string, index: number, patch: { done?: boolean; loadKg?: number | undefined }) => void;
   setExerciseLoad: (workoutId: string, exerciseId: string, loadKg: number) => void;
   completeWorkout: (entry: WorkoutHistoryEntry) => void;
   addWorkout: (workout: Workout) => void;
@@ -225,6 +227,14 @@ export function TaskBioProvider({ children }: { children: ReactNode }) {
         if (!editingId && saved && foodItemCount(saved) > 0) emitXp({ kind: "meal", ref: saved.id, date: day, on: true, foodItems: foodItemCount(saved) });
         setState((s) => ({ ...s, plan: { ...s.plan, [day]: saveMealRecord(s.plan[day] ?? [], record, editingId) } }));
       },
+      setSeries: (workoutId, exerciseId, date, index, patch) => setState(s => {
+        const workout = s.workouts.find(w => w.id === workoutId);
+        const ex = workout?.exercises.find(e => e.id === exerciseId);
+        if (!workout || !ex) return s;
+        const updated = changeSeries(ex, date, index, patch);
+        const next = { ...workout, exercises: workout.exercises.map(e => e.id === exerciseId ? updated : e) };
+        return { ...s, workouts: s.workouts.map(w => w.id === workoutId ? next : w), exerciseLog: patch.done === true ? recordExerciseSets(s.exerciseLog, next, exerciseId, updated.doneSets, date) : s.exerciseLog };
+      }),
       setDoneSets: (workoutId, exerciseId, doneSets, date) =>
         setState((s) => ({
           ...s,

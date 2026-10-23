@@ -25,7 +25,7 @@ export function exerciseHistory(name: string, log: ExerciseLogEntry[], history: 
   const fromPartial = Object.entries(plan).flatMap(([date, blocks]) => blocks.flatMap((b) => {
     if (b.kind !== "treino" || !b.workoutId) return [];
     const workout = workouts.find((w) => w.id === b.workoutId);
-    return (workout?.exercises ?? []).filter((e) => exerciseKey(e.name) === k && e.doneSets > 0 && e.reps > 0).map((e) => ({ date, loadKg: e.loadKg || 0, reps: e.reps }));
+    return (workout?.exercises ?? []).filter((e) => exerciseKey(e.name) === k && (e.seriesByDate ? e.seriesByDate[date]?.some(s => s.done) : e.doneSets > 0) && e.reps > 0).map((e) => ({ date, loadKg: e.loadKg || 0, reps: e.reps }));
   }));
   const seen = new Set<string>();
   return [...fromLog, ...fromSessions, ...fromPartial]
