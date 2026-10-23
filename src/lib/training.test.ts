@@ -1,8 +1,41 @@
 import { describe, expect, it } from "vitest";
-import { exerciseHistory, exerciseKey, progression, toWorkout, weeklyMax } from "./training";
+import { exerciseHistory, exerciseKey, progression, recordExerciseSets, toWorkout, weeklyMax } from "./training";
 import { goalProgress } from "./engagement";
 
 describe("training", () => {
+  const workout = toWorkout({ day: null, name: "Costas", exercises: [{ name: "Remada no TRX", sets: 3, reps: 12, loadKg: null }, { name: "Supino", sets: 3, reps: 8, loadKg: 40 }, { name: "Novo", sets: 3, reps: 10, loadKg: 20 }] }, [], "partial");
+  it("retains every independently recorded exercise across weeks without workout completion", () => {
+    const first = workout.exercises[0];
+    const second = workout.exercises[1];
+    if (!first || !second) throw new Error("Missing fixture");
+    let log = recordExerciseSets([], workout, first.id, 1, "2026-10-12");
+    log = recordExerciseSets(log, workout, second.id, 1, "2026-10-12");
+    expect(exerciseHistory("Remada no TRX", log, [], [], {}, "2026-10-19")[0]).toEqual({ date: "2026-10-12", loadKg: 0, reps: 12 });
+    expect(exerciseHistory("Supino", log, [], [], {}, "2026-10-19")[0]).toEqual({ date: "2026-10-12", loadKg: 40, reps: 8 });
+  });
+  it("does not invent history from planned or imported exercises", () => {
+    expect(exerciseHistory("Novo", [], [], [workout], { "2026-10-12": [{ id: "b", kind: "treino", time: "07:00", title: "Costas", workoutId: workout.id, done: false }] })).toEqual([]);
+  });
+  it("keeps bodyweight session repetitions in history", () => {
+    expect(exerciseHistory("Remada no TRX", [], [{ completedAt: "2026-10-12T10:00:00Z", exercises: [{ name: "Remada no TRX", loadKg: 0, reps: 12 }] }] as never)[0]).toEqual({ date: "2026-10-12", loadKg: 0, reps: 12 });
+  });
+  it("matches case accents and extra spaces in actual records", () => {
+    expect(exerciseHistory(" ELEVAÇÃO   LATERAL ", [{ id: "r", date: "2026-10-12", exercise: "elevacao lateral", loadKg: 8, reps: 12, sets: 3 }], [])[0]?.loadKg).toBe(8);
+  });
+  it("recovers marked legacy sets without requiring a finished workout", () => {
+    const partial = { ...workout, exercises: workout.exercises.map((e, i) => ({ ...e, doneSets: i === 0 ? 1 : 0 })) };
+    const plan = { "2026-10-12": [{ id: "b", kind: "treino" as const, time: "07:00", title: "Costas", workoutId: partial.id, done: false }] };
+    expect(exerciseHistory("remada no trx", [], [], [partial], plan)[0]?.reps).toBe(12);
+    expect(exerciseHistory("Supino", [], [], [partial], plan)).toEqual([]);
+  });
+  it("updates a set record without multiplying it and ignores future entries", () => {
+    const ex = workout.exercises[0];
+    if (!ex) throw new Error("Missing fixture");
+    const log = recordExerciseSets(recordExerciseSets([], workout, ex.id, 1, "2026-10-26"), workout, ex.id, 2, "2026-10-26");
+    expect(log).toHaveLength(1);
+    expect(log[0]?.sets).toBe(2);
+    expect(exerciseHistory(ex.name, log, [], [], {}, "2026-10-19")).toEqual([]);
+  });
   it("links exercise names regardless of accents and case", () => {
     expect(exerciseKey("Supino Inclinado")).toBe(exerciseKey("supino  inclinado"));
     expect(exerciseKey("Elevação lateral")).toBe("elevacao lateral");

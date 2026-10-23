@@ -23,7 +23,7 @@ import { emptyHealth, emptyTrackers, type Trackers, type Habit, type HabitLog, t
 import type { ModuleSettings } from "./modules";
 import { foodName } from "./meal-summary";
 import { saveMealRecord, unifyMealBlocks } from "./meal-link";
-import type { ExerciseLogEntry } from "./training";
+import { recordExerciseSets, type ExerciseLogEntry } from "./training";
 import type { Food } from "./food-db";
 import { emitBlockXp, emitXp, foodItemCount } from "./xp-client";
 import { emptyFinance, type FinanceState } from "./finance";
@@ -58,7 +58,7 @@ type Store = TaskBioState & {
   addBlock: (date: string, block: Omit<Block, "id" | "done">) => void;
   updateBlock: (date: string, blockId: string, block: Omit<Block, "id" | "done">) => void;
   registerMeal: (date: string, block: Omit<Block, "id" | "done">, editingId?: string) => void;
-  setDoneSets: (workoutId: string, exerciseId: string, doneSets: number) => void;
+  setDoneSets: (workoutId: string, exerciseId: string, doneSets: number, date?: string) => void;
   setExerciseLoad: (workoutId: string, exerciseId: string, loadKg: number) => void;
   completeWorkout: (entry: WorkoutHistoryEntry) => void;
   addWorkout: (workout: Workout) => void;
@@ -225,9 +225,13 @@ export function TaskBioProvider({ children }: { children: ReactNode }) {
         if (!editingId && saved && foodItemCount(saved) > 0) emitXp({ kind: "meal", ref: saved.id, date: day, on: true, foodItems: foodItemCount(saved) });
         setState((s) => ({ ...s, plan: { ...s.plan, [day]: saveMealRecord(s.plan[day] ?? [], record, editingId) } }));
       },
-      setDoneSets: (workoutId, exerciseId, doneSets) =>
+      setDoneSets: (workoutId, exerciseId, doneSets, date) =>
         setState((s) => ({
           ...s,
+          exerciseLog: (() => {
+            const workout = s.workouts.find((w) => w.id === workoutId);
+            return workout ? recordExerciseSets(s.exerciseLog ?? [], workout, exerciseId, doneSets, date ?? toDateKey(new Date())) : s.exerciseLog;
+          })(),
           workouts: s.workouts.map((w) =>
             w.id !== workoutId
               ? w
@@ -255,6 +259,7 @@ export function TaskBioProvider({ children }: { children: ReactNode }) {
         setState((s) => ({
           ...s,
           workoutHistory: [entry, ...s.workoutHistory].slice(0, 50),
+          exerciseLog: [...entry.exercises.filter((e) => e.reps > 0).map((e) => ({ id: `session:${entry.id}:${e.exerciseId}`, date: entry.completedAt.slice(0, 10), exercise: e.name, loadKg: e.loadKg || 0, reps: e.reps, sets: e.sets, workoutId: entry.workoutId })), ...(s.exerciseLog ?? [])].slice(0, 2000),
           workouts: s.workouts.map((workout) =>
             workout.id === entry.workoutId
               ? { ...workout, exercises: workout.exercises.map((exercise) => ({ ...exercise, doneSets: 0 })) }

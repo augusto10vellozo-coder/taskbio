@@ -148,7 +148,7 @@ export function DayTimeline({
                                   {Array.from({ length: e.sets }, (_, i) => i + 1).map((n) => (
                                     <button
                                       key={n}
-                                      onClick={() => setDoneSets(workout.id, e.id, e.doneSets >= n ? n - 1 : n)}
+                                      onClick={() => setDoneSets(workout.id, e.id, e.doneSets >= n ? n - 1 : n, dateKey)}
                                       className={`grid size-5 place-items-center rounded-md text-[10px] font-semibold ${
                                         e.doneSets >= n ? "bg-good text-white" : "bg-white text-steel ring-1 ring-line"
                                       }`}

@@ -14,7 +14,7 @@ import { Tick } from "@/components/TodayPanel";
 import { useTaskBio } from "@/lib/trilha-store";
 import { useAuth } from "@/lib/auth-context";
 import { getWeekDates, toDateKey } from "@/lib/calendar-utils";
-import { exerciseHistory, kg, progression, toWorkout, weeklyMax, type ImportedWorkout } from "@/lib/training";
+import { exerciseHistory, exercisePerformance, kg, progression, toWorkout, weeklyMax, type ImportedWorkout } from "@/lib/training";
 import { interpretWorkoutPlan } from "@/lib/plan-import.functions";
 import type { Block, Exercise, Workout } from "@/lib/trilha-data";
 import { getWorkoutExamples } from "@/lib/trilha-data";
@@ -134,8 +134,8 @@ function WorkoutDetail({ workout, dateKey }: { workout: Workout; dateKey: string
 }
 
 function ExerciseRow({ ex, workout, dateKey, open, onToggle }: { ex: Exercise; workout: Workout; dateKey: string; open: boolean; onToggle: () => void }) {
-  const { exerciseLog, workoutHistory, addExerciseLog, updateWorkout } = useTaskBio();
-  const history = useMemo(() => exerciseHistory(ex.name, exerciseLog ?? [], workoutHistory), [ex.name, exerciseLog, workoutHistory]);
+  const { exerciseLog, workoutHistory, workouts, plan, addExerciseLog, updateWorkout } = useTaskBio();
+  const history = useMemo(() => exerciseHistory(ex.name, exerciseLog ?? [], workoutHistory, workouts, plan, dateKey), [ex.name, exerciseLog, workoutHistory, workouts, plan, dateKey]);
   const last = history[0];
   const delta = progression(history);
   const [load, setLoad] = useState("");
@@ -147,7 +147,7 @@ function ExerciseRow({ ex, workout, dateKey, open, onToggle }: { ex: Exercise; w
   return <li className="py-3">
     <button className="flex w-full items-center gap-3 text-left" onClick={onToggle} aria-expanded={open}>
       <Tick on={loggedToday} />
-      <span className="min-w-0 flex-1"><span className="block text-sm font-medium">{ex.name}</span><span className="block text-xs text-steel">{ex.sets}x{ex.reps}{ex.loadKg ? ` · ${kg(ex.loadKg)}` : ""}{last ? ` · última vez: ${kg(last.loadKg)} x ${last.reps}` : ""}</span></span>
+      <span className="min-w-0 flex-1"><span className="block text-sm font-medium">{ex.name}</span><span className="block text-xs text-steel">{ex.sets}x{ex.reps}{ex.loadKg ? ` · ${kg(ex.loadKg)}` : ""}{last ? ` · última vez: ${exercisePerformance(last)}` : ""}</span></span>
       {delta > 0 && <span className="inline-flex items-center gap-1 rounded-full bg-good/15 px-2 py-0.5 text-[11px] font-medium"><TrendingUp className="size-3" />progressão +{kg(delta)}</span>}
     </button>
     {open && <div className="mt-3 rounded-md bg-background p-3 ring-1 ring-line">
@@ -159,7 +159,7 @@ function ExerciseRow({ ex, workout, dateKey, open, onToggle }: { ex: Exercise; w
       </form>
       <p className="mt-3 text-xs font-medium text-steel">Carga máxima por semana · últimas 8 semanas</p>
       <div className="h-32"><ResponsiveContainer width="100%" height="100%"><LineChart data={chart}><XAxis dataKey="week" tick={{ fontSize: 10 }} /><YAxis tick={{ fontSize: 10 }} width={30} domain={["auto", "auto"]} /><Tooltip formatter={(v) => [`${v} kg`, "Carga"]} /><Line type="monotone" dataKey="kg" stroke="var(--color-brand, currentColor)" strokeWidth={2} connectNulls /></LineChart></ResponsiveContainer></div>
-      {history.length > 0 && <ul className="mt-2 max-h-28 overflow-y-auto text-xs text-steel">{history.slice(0, 10).map((h, i) => <li key={i}>{h.date.split("-").reverse().join("/")} — {kg(h.loadKg)} x {h.reps}</li>)}</ul>}
+      {history.length > 0 && <ul className="mt-2 max-h-28 overflow-y-auto text-xs text-steel">{history.slice(0, 10).map((h, i) => <li key={i}>{h.date.split("-").reverse().join("/")} — {exercisePerformance(h)}</li>)}</ul>}
     </div>}
   </li>;
 }
