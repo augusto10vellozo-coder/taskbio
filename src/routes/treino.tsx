@@ -217,7 +217,7 @@ function ImportDialog({ open, onOpenChange, week, onAssign }: { open: boolean; o
   };
 
   return <Dialog open={open} onOpenChange={(v) => { onOpenChange(v); if (!v) reset(); }}>
-    <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
+    <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl [&>*]:min-w-0 [&_input]:min-w-0">
       <DialogHeader><DialogTitle>Importar plano de treino</DialogTitle><DialogDescription>Etapas: 1. enviar arquivo · 2. leitura automática · 3. revisar antes de salvar. PDF, Word (.docx), Excel (.xlsx) ou CSV, até 10 MB.</DialogDescription></DialogHeader>
       {!user ? <div className="py-4 text-sm">Entre na sua conta para importar planos. <Button asChild size="sm" className="ml-2"><Link to="/auth">Entrar</Link></Button></div>
         : step === "source" ? <div className="grid gap-3 sm:grid-cols-3">

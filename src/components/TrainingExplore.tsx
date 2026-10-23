@@ -26,7 +26,7 @@ export function useScheduleWorkout() {
   const { plan, addWorkout, replaceDays } = useTaskBio();
   return (dateKey: string, model: Workout) => {
     const id = `w-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
-    const copy: Workout = { ...model, id, templateId: model.templateId ?? model.id, exercises: model.exercises.map((e, i) => ({ ...e, id: `${id}-e${i}`, doneSets: 0 })) };
+    const copy: Workout = { ...model, id, templateId: model.templateId ?? model.id, exercises: model.exercises.map((e, i) => ({ ...e, id: `${id}-e${i}`, doneSets: 0, seriesByDate: {} })) };
     addWorkout(copy);
     const block: Block = { id: `b-${Date.now()}-${dateKey}`, time: "07:00", kind: "treino", title: copy.name, done: false, workoutId: copy.id };
     replaceDays({ [dateKey]: [...(plan[dateKey] ?? []).filter((b) => b.kind !== "treino"), block].sort((a, b) => a.time.localeCompare(b.time)) });
