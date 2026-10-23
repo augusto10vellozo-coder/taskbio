@@ -14,7 +14,25 @@ export const photoPlanSchema = z.object({
     }).strict()),
   }).strict()),
 }).strict();
-export type PhotoWorkout = z.infer<typeof photoPlanSchema>["workouts"][number];
+export type PhotoWorkout = z.infer<typeof photoPlanSchema>["workouts"][number] & { notes?: string[] };
+
+/** Keep unquantified preparation/instructions out of the exercise validator. */
+export function separatePhotoNotes(workouts: PhotoWorkout[]): PhotoWorkout[] {
+  return workouts.map(workout => {
+    const notes = [...(workout.notes ?? [])];
+    const exercises = workout.exercises.filter(exercise => {
+      const name = exercise.name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+      const instruction = /\b(aquecimento|aquecer|mobilidade|instrucao|instrucoes|orientacao|orientacoes)\b/.test(name);
+      const hasPrescription = /\d+\s*[x×]\s*\d+|\d+\s*(series|repeticoes)/.test(name);
+      if (instruction && exercise.sets === null && exercise.reps === null && !hasPrescription) {
+        notes.push(exercise.name);
+        return false;
+      }
+      return true;
+    });
+    return { ...workout, notes, exercises };
+  });
+}
 
 export function validatePhoto(file: { name: string; size: number }) {
   if (file.size > MAX_PHOTO_BYTES) return "A imagem passa de 10 MB. Envie uma imagem menor.";

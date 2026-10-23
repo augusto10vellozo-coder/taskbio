@@ -3,7 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { Camera, ImagePlus, LoaderCircle, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { interpretWorkoutPhoto } from "@/lib/plan-photo.functions";
-import { mergePhotoWorkouts, photoToValidation, PHOTO_UNREADABLE, validatePhoto, type PhotoWorkout } from "@/lib/plan-photo";
+import { mergePhotoWorkouts, separatePhotoNotes, photoToValidation, PHOTO_UNREADABLE, validatePhoto, type PhotoWorkout } from "@/lib/plan-photo";
 import type { ImportedWorkout } from "@/lib/training";
 
 type Photo = { id: number; name: string; blob: Blob; url: string };
@@ -37,7 +37,7 @@ export function WorkoutPhotoImport({ onContinue, onCancel }: { onContinue: (item
     const result = await interpret({ data: { text } });
     if (!active.current) return;
     if (result.error || !result.data?.readable) throw new Error(result.error ?? PHOTO_UNREADABLE);
-    const parsed = mergePhotoWorkouts([result.data.workouts]);
+    const parsed = separatePhotoNotes(mergePhotoWorkouts([result.data.workouts]));
     // An uncertain OCR batch always requires explicit human confirmation.
     if (pages.some(p => p.uncertain)) parsed.forEach(w => w.exercises.forEach(e => { e.review = true; }));
     setItems(parsed); setStale(false);
@@ -90,11 +90,12 @@ export function WorkoutPhotoImport({ onContinue, onCancel }: { onContinue: (item
       <p className="font-medium">Encontrei {items.reduce((sum, w) => sum + w.exercises.length, 0)} exercícios em {items.length} treinos</p>
       {items.map((workout, wi) => <section key={wi} className="space-y-3 border-t border-line pt-3">
         <h3 className="text-sm font-semibold">{workout.name}{workout.day ? ` · ${workout.day}` : ""}</h3>
+        {workout.notes?.map((note, index) => <p key={index} className="text-sm text-steel">{note}</p>)}
         {workout.exercises.map((exercise, ei) => <div key={ei} className="space-y-2">
           <div className="flex flex-wrap items-center gap-2"><span className="text-sm">{exercise.name}</span>{exercise.review && <span className="text-xs font-semibold text-gold">revisar</span>}</div>
           <div className="grid grid-cols-3 gap-2">{([['sets', 'Séries'], ['reps', 'Repetições'], ['loadKg', 'Carga (kg)']] as const).map(([field, label]) => <label key={field} className="min-w-0 text-xs text-steel">{label}
-            <input aria-label={`${label} de ${exercise.name}`} inputMode={field === 'loadKg' ? 'decimal' : 'numeric'} value={exercise[field] ?? ""} disabled={busy} onChange={e => update(wi, ei, field, e.target.value)} className={`mt-1 h-9 w-full min-w-0 rounded-md bg-background px-2 text-sm text-ink ring-1 ${exercise[field] === null ? 'ring-gold' : 'ring-line'}`} />
-            {exercise[field] === null && <span className="mt-1 block text-gold">revisar</span>}
+            <input aria-label={`${label} de ${exercise.name}`} inputMode={field === 'loadKg' ? 'decimal' : 'numeric'} placeholder={field === 'loadKg' ? 'opcional' : undefined} value={exercise[field] ?? ""} disabled={busy} onChange={e => update(wi, ei, field, e.target.value)} className={`mt-1 h-9 w-full min-w-0 rounded-md bg-background px-2 text-sm text-ink ring-1 ${field !== 'loadKg' && exercise[field] === null ? 'ring-gold' : 'ring-line'}`} />
+            {field !== 'loadKg' && exercise[field] === null && <span className="mt-1 block text-gold">revisar</span>}
           </label>)}</div>
           {exercise.review && <Button size="sm" variant="outline" disabled={busy} onClick={() => setItems(all => all.map((w, i) => i !== wi ? w : { ...w, exercises: w.exercises.map((e, j) => j !== ei ? e : { ...e, review: false }) }))}>Conferi este exercício</Button>}
         </div>)}
