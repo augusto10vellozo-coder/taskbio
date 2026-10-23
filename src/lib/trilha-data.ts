@@ -78,6 +78,9 @@ export type ShoppingItem = {
   unit: string;
   checked: boolean;
   manual?: boolean;
+  source?: "plan";
+  planPeriod?: { start: string; end: string };
+  estimatedCost?: number;
 };
 
 export type Block = {
@@ -98,7 +101,7 @@ export type Block = {
     portion: string;
     macros: Macros;
     cost: number;
-    items?: { foodId?: string; name: string; grams: number; portion: string; macros: Macros }[] | undefined;
+    items?: { foodId?: string; name: string; grams: number; portion: string; macros: Macros; shoppingAmount?: number; shoppingUnit?: string }[] | undefined;
     kcalOverride?: number | undefined;
   };
   workoutId?: string;

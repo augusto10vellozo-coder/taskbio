@@ -1,4 +1,5 @@
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { MealPlanningShortcuts } from "@/components/MealPlanningShortcuts";
 import { makePlannedMeal, mealsForMode, mealsForTotals, predictedMeal, nextMealDate, mealTypes, type MealMode } from "@/lib/meal-planning";
 import { ModuleHeader } from "@/components/ModuleHeader";
 import { createFileRoute, Link } from "@tanstack/react-router";
@@ -174,6 +175,7 @@ function Alimentacao() {
       <Tabs value={mode} onValueChange={value => setMode(value as MealMode)} className="mb-4">
         <TabsList aria-label="Modo de alimentação"><TabsTrigger value="planejar">Planejar</TabsTrigger><TabsTrigger value="registrar">Registrar</TabsTrigger></TabsList>
       </Tabs>
+      {mode === "planejar" && <div className="mb-4"><MealPlanningShortcuts kind="week" date={selectedKey} weekKeys={weekKeys} /></div>}
       <section className="border-y border-line py-4">
         <div className="flex items-center justify-between gap-3">
           <Button variant="ghost" size="icon" onClick={() => { const next = addDays(referenceDate, -7); setReferenceDate(next); setSelectedDate(next); }} aria-label="Semana anterior"><ChevronLeft /></Button>
@@ -195,6 +197,7 @@ function Alimentacao() {
           <h2 className="font-display text-xl font-semibold">Refeições de {format(selectedDate, "EEEE", { locale: ptBR })}</h2>
           <Button type="button" onClick={() => { setEditingMeal(null); setFormMode(mode); setMealType("Almoço"); setManualMeal(emptyManualMeal); setManualOpen(true); }}><Plus /> {mode === "planejar" ? "Planejar refeição" : "Registrar o que comi"}</Button>
         </div>
+        {mode === "planejar" && <div className="mt-3"><MealPlanningShortcuts kind="day" date={selectedKey} weekKeys={weekKeys} /></div>}
         <div className="mt-4 border-y border-line py-4">
           <h3 className="text-xs font-medium text-steel">Resumo do dia{mode === "planejar" ? " · previsto" : " · registrado"}</h3>
           <p className="mt-1 font-display text-2xl font-semibold">{dayTotals.known ? `${fmt(dayTotals.kcal)} kcal${mode === "planejar" ? " previstas" : ""}` : "Calorias não informadas"}</p>
@@ -219,6 +222,7 @@ function Alimentacao() {
                 {!block.manualMeal && !block.plannedMeal && <p className="mt-1 text-xs text-steel">Refeição a registrar</p>}
               </div>
               <div className="flex flex-wrap gap-1">
+                {mode === "planejar" && block.plannedMeal && <MealPlanningShortcuts kind="meal" blockId={block.id} date={selectedKey} weekKeys={weekKeys} />}
                 {mode === "planejar" && block.plannedMeal?.state === "planejada" && <><Button size="sm" onClick={() => consumeMeal(selectedKey, block.id)}>Comi isso</Button><Button size="sm" variant="ghost" onClick={() => skipMeal(selectedKey, block.id)}>Pulei esta refeição</Button></>}
                 {block.plannedMeal?.state !== "pulada" && <Button variant={block.manualMeal ? "ghost" : "outline"} size="sm" onClick={() => editMeal(block)}>{block.plannedMeal?.state === "consumida" ? "Editar o que comi de verdade" : block.plannedMeal ? "Editar plano" : block.manualMeal ? "Editar" : "Registrar alimentos"}</Button>}<Button variant="ghost" size="sm" onClick={() => removeBlock(selectedKey, block.id)}>Remover</Button></div>
             </li>;

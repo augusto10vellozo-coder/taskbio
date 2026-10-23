@@ -29,7 +29,7 @@ import type { Food } from "./food-db";
 import { emitBlockXp, emitXp, foodItemCount } from "./xp-client";
 import { emptyFinance, type FinanceState } from "./finance";
 import { defaultNotifPrefs, type NotifPrefs } from "./push-reminders";
-import { consumePlannedMeal, skipPlannedMeal } from "./meal-planning";
+import { consumePlannedMeal, skipPlannedMeal, repeatPlannedDays, copyPreviousMealWeek } from "./meal-planning";
 
 export type TaskBioState = {
   plan: Plan;
@@ -61,6 +61,8 @@ type Store = TaskBioState & {
   updateBlock: (date: string, blockId: string, block: Omit<Block, "id" | "done">) => void;
   registerMeal: (date: string, block: Omit<Block, "id" | "done">, editingId?: string) => void;
   savePlannedMeal: (date: string, block: Block) => void;
+  repeatMeals: (sourceDate: string, dates: string[], blockId?: string) => void;
+  repeatPreviousMealWeek: (weekKeys: string[], replace: boolean) => void;
   consumeMeal: (date: string, blockId: string) => void;
   skipMeal: (date: string, blockId: string) => void;
   setDoneSets: (workoutId: string, exerciseId: string, doneSets: number, date?: string) => void;
@@ -233,6 +235,8 @@ export function TaskBioProvider({ children }: { children: ReactNode }) {
         setState((s) => ({ ...s, plan: { ...s.plan, [day]: saveMealRecord(s.plan[day] ?? [], record, editingId) } }));
       },
       savePlannedMeal: (day, block) => setState(s => ({ ...s, plan: { ...s.plan, [day]: sortBlocks([...(s.plan[day] ?? []).filter(b => b.id !== block.id), block]) } })),
+      repeatMeals: (sourceDate, dates, blockId) => setState(s => ({ ...s, plan: repeatPlannedDays(s.plan, (s.plan[sourceDate] ?? []).filter(b => !blockId || b.id === blockId), dates, () => `p-${crypto.randomUUID()}`) })),
+      repeatPreviousMealWeek: (weekKeys, replace) => setState(s => ({ ...s, plan: copyPreviousMealWeek(s.plan, weekKeys, replace, () => `p-${crypto.randomUUID()}`) })),
       consumeMeal: (day, blockId) => {
         const block = state.plan[day]?.find(b => b.id === blockId);
         if (!block?.plannedMeal || block.plannedMeal.state !== "planejada") return;
