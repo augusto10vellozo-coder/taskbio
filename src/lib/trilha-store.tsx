@@ -175,6 +175,7 @@ export function TaskBioProvider({ children }: { children: ReactNode }) {
       })),
       toggleBlock: (day, blockId) => {
         const target = (state.plan[day] ?? []).find((b) => b.id === blockId);
+        if (target?.plannedMeal) return;
         if (target && (target.kind !== "refeicao" || foodItemCount(target) === 0)) emitBlockXp(day, target, !target.done);
         setState((s) => ({
           ...s,

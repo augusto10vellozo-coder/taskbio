@@ -11,7 +11,9 @@ export function mealsForMode(blocks: Block[], mode: MealMode) {
 
 export function predictedMeal(block: Block): Block {
   const original = block.plannedMeal?.original;
-  return original ? { ...block, title: original.title, time: original.time, manualMeal: original.food, mealId: undefined } : block;
+  if (!original) return block;
+  const { mealId: _mealId, ...rest } = block;
+  return { ...rest, title: original.title, time: original.time, manualMeal: original.food };
 }
 
 export function mealsForTotals(blocks: Block[], mode: MealMode) {
