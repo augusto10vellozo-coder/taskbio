@@ -18,6 +18,7 @@ import { exerciseHistory, exercisePerformance, kg, progression, toWorkout, weekl
 import { interpretWorkoutPlan } from "@/lib/plan-import.functions";
 import type { Block, Exercise, Workout } from "@/lib/trilha-data";
 import { getWorkoutExamples } from "@/lib/trilha-data";
+import { WorkoutPhotoImport } from "@/components/WorkoutPhotoImport";
 
 export const Route = createFileRoute("/treino")({
   head: () => ({ meta: [
@@ -168,10 +169,10 @@ function ImportDialog({ open, onOpenChange, week, onAssign }: { open: boolean; o
   const { user } = useAuth();
   const { addWorkout, exerciseLog, workoutHistory, workouts } = useTaskBio();
   const interpret = useServerFn(interpretWorkoutPlan);
-  const [step, setStep] = useState<"upload" | "reading" | "review">("upload");
+  const [step, setStep] = useState<"source" | "photo" | "upload" | "reading" | "review">("source");
   const [error, setError] = useState<string | null>(null);
   const [items, setItems] = useState<ImportedWorkout[]>([]);
-  const reset = () => { setStep("upload"); setError(null); setItems([]); };
+  const reset = () => { setStep("source"); setError(null); setItems([]); };
 
   async function handleFile(file: File) {
     setError(null);
@@ -206,6 +207,12 @@ function ImportDialog({ open, onOpenChange, week, onAssign }: { open: boolean; o
     <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
       <DialogHeader><DialogTitle>Importar plano de treino</DialogTitle><DialogDescription>Etapas: 1. enviar arquivo · 2. leitura automática · 3. revisar antes de salvar. PDF, Word (.docx), Excel (.xlsx) ou CSV, até 10 MB.</DialogDescription></DialogHeader>
       {!user ? <div className="py-4 text-sm">Entre na sua conta para importar planos. <Button asChild size="sm" className="ml-2"><Link to="/auth">Entrar</Link></Button></div>
+        : step === "source" ? <div className="grid gap-3 sm:grid-cols-3">
+          <Button variant="outline" onClick={() => setStep("upload")}><FileUp />PDF</Button>
+          <Button variant="outline" onClick={() => setStep("photo")}><FileUp />Foto ou print</Button>
+          <Button variant="outline" disabled><FileUp />Excel/CSV · em breve</Button>
+        </div>
+        : step === "photo" ? <WorkoutPhotoImport onCancel={reset} onContinue={result => { setItems(result); setStep("review"); }} />
         : step === "upload" ? <div className="space-y-3">
           <label className="flex cursor-pointer flex-col items-center gap-2 rounded-lg border border-dashed border-line p-8 text-center text-sm"><FileUp className="size-6 text-brand" />Escolher arquivo<input type="file" className="sr-only" accept=".pdf,.docx,.xlsx,.xls,.csv,.txt" onChange={(e) => { const f = e.target.files?.[0]; if (f) void handleFile(f); e.target.value = ""; }} /></label>
           {error && <p role="alert" className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}
