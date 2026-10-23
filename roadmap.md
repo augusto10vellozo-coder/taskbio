@@ -1,8 +1,8 @@
 # Roadmap
-- [ ] Treino 1: marcação independente por série/data, carga opcional e progresso da sessão; testar antes do timer
-- [ ] Treino 2: descanso por timestamp, pausa, +15s e reinício; testar antes do progresso semanal
-- [ ] Treino 3: progresso por dias planejados/concluídos e semana completa; testar antes da importação
-- [ ] Treino 4: Excel/CSV local com revisão existente e campos ausentes; testar integração e regressões PDF/foto
+- [x] Treino 1: marcação independente por série/data, carga opcional e progresso da sessão; testes 2/4, 4/4 e reabertura passaram
+- [x] Treino 2: descanso por timestamp, pausa, +15s e reinício; pausa, navegação, reinício e zero conferidos
+- [x] Treino 3: progresso por dias planejados/concluídos e semana completa; atualização imediata e badge conferidos
+- [x] Treino 4: Excel/CSV local com revisão existente e campos ausentes; XLSX/XLS/CSV e execução autenticada passaram, dados originais restaurados; 42 testes aprovados e entradas PDF/foto preservadas
 - [x] Ajustar validação por foto: carga opcional neutra e aquecimento/instruções como notas; 20 testes passaram e foto real autenticada confirmou bloqueio por repetições, rodapé e continuidade na validação existente, sem salvar dados ou alterar PDF
 - [x] Importar fotos/prints com OCR local e confirmação; 17 testes e leitura real autenticada de duas imagens passaram, com campos ausentes, remoção/releitura, imagem inválida e PDF preservado; câmera/HEIC em aparelho físico ainda não verificados
 - [x] Corrigir histórico independente por exercício e registros parciais sem carga; 21 testes passaram e registros individuais de uma semana apareceram na seguinte após recarregar, sem concluir o treino
