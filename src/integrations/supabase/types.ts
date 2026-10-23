@@ -119,6 +119,33 @@ export type Database = {
         }
         Relationships: []
       }
+      nudges: {
+        Row: {
+          created_at: string
+          day: string
+          id: string
+          recipient: string
+          seen_at: string | null
+          sender: string
+        }
+        Insert: {
+          created_at?: string
+          day: string
+          id?: string
+          recipient: string
+          seen_at?: string | null
+          sender: string
+        }
+        Update: {
+          created_at?: string
+          day?: string
+          id?: string
+          recipient?: string
+          seen_at?: string | null
+          sender?: string
+        }
+        Relationships: []
+      }
       professional_clients: {
         Row: {
           client_id: string | null
@@ -533,6 +560,12 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      league_inactive: {
+        Args: { _start: string }
+        Returns: {
+          user_id: string
+        }[]
       }
       league_week: {
         Args: { _start: string }
