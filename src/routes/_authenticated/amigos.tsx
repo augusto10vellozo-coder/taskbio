@@ -152,7 +152,7 @@ function Amigos() {
             {r.user_id !== user?.id && inactive.has(r.user_id) && (state?.nudgedToday.includes(r.user_id)
               ? <Button size="sm" variant="outline" disabled>Cutucado 👋</Button>
               : <Button size="sm" variant="outline" onClick={() => nudge(r.user_id)}>Cutucar 👋</Button>)}
-            <div className="text-right"><p className="font-display text-lg font-semibold">{r.week_xp} XP</p><p className="flex items-center justify-end gap-1 text-xs text-steel"><Flame className="size-3.5 text-brand" />{r.streak}</p></div>
+            <div className="min-w-16 shrink-0 text-right"><p className="font-display text-lg font-semibold">{r.week_xp} XP</p><p className="flex items-center justify-end gap-1 text-xs text-steel"><Flame className="size-3.5 text-brand" />{r.streak}</p></div>
           </li>
         ))}</ol>}
         {rows && rows.length < 2 && <p className="mt-2 text-sm text-steel">Convide amigos para começar a competir.</p>}
