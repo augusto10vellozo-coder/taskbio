@@ -122,3 +122,23 @@ export const inviterByUsername = createServerFn({ method: "POST" })
     if (!p || p.id === context.userId) return null;
     return p;
   });
+
+/** My friendships (status only), sent pending requests with names, nudges sent today and unseen nudges received. */
+export const myFriendState = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const me = context.userId;
+    const today = brasiliaDay(new Date());
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: fs } = await supabaseAdmin.from("friendships").select("id, requester, addressee, status").or(`requester.eq.${me},addressee.eq.${me}`);
+    const sentIds = (fs ?? []).filter((f) => f.requester === me && f.status === "pending").map((f) => f.addressee);
+    const { data: ps } = sentIds.length ? await supabaseAdmin.from("profiles").select("id, username, display_name, avatar_url").in("id", sentIds) : { data: [] };
+    const { data: nudged } = await supabaseAdmin.from("nudges").select("recipient").eq("sender", me).eq("day", today);
+    const { count } = await supabaseAdmin.from("nudges").select("id", { count: "exact", head: true }).eq("recipient", me).is("seen_at", null);
+    return {
+      relations: (fs ?? []).map((f) => ({ id: f.id, other: f.requester === me ? f.addressee : f.requester, status: f.status, mine: f.requester === me })),
+      sent: (fs ?? []).filter((f) => f.requester === me && f.status === "pending").map((f) => ({ id: f.id, profile: (ps ?? []).find((p) => p.id === f.addressee) ?? null })),
+      nudgedToday: (nudged ?? []).map((n) => n.recipient),
+      nudgesReceived: count ?? 0,
+    };
+  });

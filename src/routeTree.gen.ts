@@ -39,6 +39,7 @@ import { Route as AuthenticatedEquipeRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
 import { Route as AuthenticatedProfissionalRouteImport } from './routes/_authenticated/profissional'
 import { Route as ConviteIndexRouteImport } from './routes/convite.index'
+import { Route as ConviteUsernameRouteImport } from './routes/convite.$username'
 import { Route as ApiPublicPushRemindersRouteImport } from './routes/api/public/push-reminders'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
@@ -193,6 +194,11 @@ const ConviteIndexRoute = ConviteIndexRouteImport.update({
   path: '/convite/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ConviteUsernameRoute = ConviteUsernameRouteImport.update({
+  id: '/convite/$username',
+  path: '/convite/$username',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicPushRemindersRoute = ApiPublicPushRemindersRouteImport.update({
   id: '/api/public/push-reminders',
   path: '/api/public/push-reminders',
@@ -238,6 +244,7 @@ export interface FileRoutesByFullPath {
   '/equipe': typeof AuthenticatedEquipeRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/profissional': typeof AuthenticatedProfissionalRoute
+  '/convite/$username': typeof ConviteUsernameRoute
   '/convite/': typeof ConviteIndexRoute
   '/api/public/push-reminders': typeof ApiPublicPushRemindersRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -272,6 +279,7 @@ export interface FileRoutesByTo {
   '/equipe': typeof AuthenticatedEquipeRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/profissional': typeof AuthenticatedProfissionalRoute
+  '/convite/$username': typeof ConviteUsernameRoute
   '/convite': typeof ConviteIndexRoute
   '/api/public/push-reminders': typeof ApiPublicPushRemindersRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -308,6 +316,7 @@ export interface FileRoutesById {
   '/_authenticated/equipe': typeof AuthenticatedEquipeRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
   '/_authenticated/profissional': typeof AuthenticatedProfissionalRoute
+  '/convite/$username': typeof ConviteUsernameRoute
   '/convite/': typeof ConviteIndexRoute
   '/api/public/push-reminders': typeof ApiPublicPushRemindersRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -344,6 +353,7 @@ export interface FileRouteTypes {
     | '/equipe'
     | '/perfil'
     | '/profissional'
+    | '/convite/$username'
     | '/convite/'
     | '/api/public/push-reminders'
     | '/lovable/email/auth/preview'
@@ -378,6 +388,7 @@ export interface FileRouteTypes {
     | '/equipe'
     | '/perfil'
     | '/profissional'
+    | '/convite/$username'
     | '/convite'
     | '/api/public/push-reminders'
     | '/lovable/email/auth/preview'
@@ -413,6 +424,7 @@ export interface FileRouteTypes {
     | '/_authenticated/equipe'
     | '/_authenticated/perfil'
     | '/_authenticated/profissional'
+    | '/convite/$username'
     | '/convite/'
     | '/api/public/push-reminders'
     | '/lovable/email/auth/preview'
@@ -445,6 +457,7 @@ export interface RootRouteChildren {
   SobreRoute: typeof SobreRoute
   TermosRoute: typeof TermosRoute
   TreinoRoute: typeof TreinoRoute
+  ConviteUsernameRoute: typeof ConviteUsernameRoute
   ConviteIndexRoute: typeof ConviteIndexRoute
   ApiPublicPushRemindersRoute: typeof ApiPublicPushRemindersRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
@@ -663,6 +676,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConviteIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/convite/$username': {
+      id: '/convite/$username'
+      path: '/convite/$username'
+      fullPath: '/convite/$username'
+      preLoaderRoute: typeof ConviteUsernameRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/push-reminders': {
       id: '/api/public/push-reminders'
       path: '/api/public/push-reminders'
@@ -730,6 +750,7 @@ const rootRouteChildren: RootRouteChildren = {
   SobreRoute: SobreRoute,
   TermosRoute: TermosRoute,
   TreinoRoute: TreinoRoute,
+  ConviteUsernameRoute: ConviteUsernameRoute,
   ConviteIndexRoute: ConviteIndexRoute,
   ApiPublicPushRemindersRoute: ApiPublicPushRemindersRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
