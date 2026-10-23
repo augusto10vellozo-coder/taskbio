@@ -23,7 +23,7 @@ Food totals use the shared meal-summary resolver for catalog and manual blocks; 
 
 The legacy `/rotina` address redirects to the main agenda at `/`; this keeps old links and saved browser addresses working.
 
-Home-screen installation uses a web app manifest without app-shell caching; this preserves installability without stale preview or deployment caches.
+Home-screen installation uses a manifest without caching to avoid stale deployments.
 
 Navigation uses the registry-driven fixed BottomNav below the desktop-header breakpoint; sync and consent overlays sit above it so every enabled module stays reachable without obstructed controls.
 
@@ -42,3 +42,4 @@ All copy a visitor can see stays in Brazilian Portuguese, and authentication fai
 - League membership is the connected group of accepted friendships, resolved by league_week_for; league_week scopes it to auth.uid() and the push cron uses the service-only resolver. Why: every participant, award and notification must use the same ranking without granting access to private health records.
 - Notification rules stay in push-reminders.ts; service-only delivery jobs/attempts track acceptance per subscription with atomic daily layer budgets and same-day retries rebuilt from original due instants, never persisted message content. All layers obey local quiet hours and synced notifPrefs (including exams); legacy timers are disabled. Bonus XP remains unique by user/ref. Why: delivery failures cannot masquerade as success or duplicate XP.
 - Reading (books, quotes, goal) and study (subjects, exams, pomodoro) data live in the synced trackers payload; book search runs in the browser, legacy study titles migrate to subjects client-side, exam reminders come from dueSettingsReminders, and session XP uses recordXp kinds "reading"/"study". Why: one synced store and server-decided points.
+- Progress uses a shared calculation/label helper, UTC date-key timestamps and existing notes for optional details; this preserves numeric history without schema changes.
