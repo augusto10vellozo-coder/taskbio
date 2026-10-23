@@ -89,6 +89,11 @@ export type Block = {
   note?: string;
   done: boolean;
   mealId?: string;
+  plannedMeal?: {
+    state: "planejada" | "consumida" | "pulada";
+    type: "Café da manhã" | "Almoço" | "Jantar" | "Lanche";
+    original: { title: string; time: string; food: NonNullable<Block["manualMeal"]> };
+  };
   manualMeal?: {
     portion: string;
     macros: Macros;

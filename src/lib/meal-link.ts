@@ -15,7 +15,7 @@ export function unifyMealBlocks(blocks: Block[]): Block[] {
   const result: Block[] = [];
   for (const original of blocks) {
     const block = isMealAppointment(original) ? { ...original, kind: "refeicao" as const } : original;
-    const index = block.kind === "refeicao" ? result.findIndex((other) => other.kind === "refeicao" && other.time === block.time && mealNameKey(other.title) === mealNameKey(block.title)) : -1;
+    const index = block.kind === "refeicao" && !block.plannedMeal ? result.findIndex((other) => other.kind === "refeicao" && !other.plannedMeal && other.time === block.time && mealNameKey(other.title) === mealNameKey(block.title)) : -1;
     if (index < 0) { result.push(block); continue; }
     const previous = result[index];
     if (!previous) continue;
@@ -28,7 +28,7 @@ export function unifyMealBlocks(blocks: Block[]): Block[] {
 
 export function saveMealRecord(blocks: Block[], record: Block, editingId?: string) {
   const current = unifyMealBlocks(blocks);
-  const linked = editingId ? current.find((block) => block.id === editingId) : current.find((block) => block.kind === "refeicao" && block.time === record.time && mealNameKey(block.title) === mealNameKey(record.title));
+  const linked = editingId ? current.find((block) => block.id === editingId) : current.find((block) => block.kind === "refeicao" && !block.plannedMeal && block.time === record.time && mealNameKey(block.title) === mealNameKey(record.title));
   const saved: Block = { ...linked, ...record, id: linked?.id ?? record.id, done: true };
   return unifyMealBlocks([...current.filter((block) => block.id !== saved.id), saved]);
 }
