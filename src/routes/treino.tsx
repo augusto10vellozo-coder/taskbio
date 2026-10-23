@@ -210,7 +210,7 @@ function ImportDialog({ open, onOpenChange, week, onAssign }: { open: boolean; o
         : step === "source" ? <div className="grid gap-3 sm:grid-cols-3">
           <Button variant="outline" onClick={() => setStep("upload")}><FileUp />PDF</Button>
           <Button variant="outline" onClick={() => setStep("photo")}><FileUp />Foto ou print</Button>
-          <Button variant="outline" onClick={() => setStep("upload")}><FileUp />Excel/CSV</Button>
+          <Button variant="outline" disabled><FileUp />Excel/CSV · em breve</Button>
         </div>
         : step === "photo" ? <WorkoutPhotoImport onCancel={reset} onContinue={result => { setItems(result); setStep("review"); }} />
         : step === "upload" ? <div className="space-y-3">
