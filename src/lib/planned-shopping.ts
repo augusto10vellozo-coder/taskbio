@@ -10,8 +10,9 @@ export function pendingPlannedMeals(plan: Plan, period: ShoppingPeriod): Block[]
 }
 
 function quantity(item: FoodItem): { amount: number; unit: string } | null {
-  if (item.shoppingAmount != null && item.shoppingUnit && SHOPPING_UNITS.some(u => u === normalizeUnit(item.shoppingUnit))) {
-    return Number.isFinite(item.shoppingAmount) && item.shoppingAmount > 0 ? { amount: item.shoppingAmount, unit: normalizeUnit(item.shoppingUnit) } : null;
+  const explicitUnit = item.shoppingUnit ? normalizeUnit(item.shoppingUnit) : undefined;
+  if (item.shoppingAmount != null && explicitUnit && SHOPPING_UNITS.some(u => u === explicitUnit)) {
+    return Number.isFinite(item.shoppingAmount) && item.shoppingAmount > 0 ? { amount: item.shoppingAmount, unit: explicitUnit } : null;
   }
   // Older picker records retain the explicit user-selected quantity in their portion.
   const portion = item.portion.trim().match(/^(\d+(?:[.,]\d+)?)\s*(?:×\s*)?(un|unidade|unidades|kg|g|L|ml)(?:\s*\([\d.,]+ g\))?$/i);
