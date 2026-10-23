@@ -19,7 +19,7 @@ export const Route = createFileRoute("/convite/$username")({
 
 function ConviteUsuario() {
   const { username } = Route.useParams();
-  const { user, loading } = useAuth() as ReturnType<typeof useAuth> & { loading?: boolean };
+  const { user, loading } = useAuth();
   const navigate = useNavigate();
   const valid = /^[a-z0-9_.]{3,20}$/.test(username.toLowerCase());
   useEffect(() => {
