@@ -1,5 +1,5 @@
 import { addDays, parseISO } from "date-fns";
-import type { Block } from "./trilha-data";
+import type { Block, Plan } from "./trilha-data";
 import { toDateKey } from "./calendar-utils";
 
 export type MealMode = "planejar" | "registrar";
@@ -37,5 +37,31 @@ export function skipPlannedMeal(block: Block): Block {
 export function nextMealDate(date: string, today: string) {
   let next = toDateKey(addDays(parseISO(date), 7));
   while (next <= today) next = toDateKey(addDays(parseISO(next), 7));
+  return next;
+}
+
+export function copyPlannedMeals(blocks: Block[], id: () => string): Block[] {
+  return blocks.flatMap(block => {
+    const planned = block.plannedMeal;
+    if (!planned) return [];
+    return [makePlannedMeal(id(), planned.type, planned.original.title, planned.original.time, planned.original.food)];
+  });
+}
+
+export function repeatPlannedDays(plan: Plan, blocks: Block[], dates: string[], id: () => string): Plan {
+  const next = { ...plan };
+  for (const date of new Set(dates)) {
+    next[date] = [...(next[date] ?? []), ...copyPlannedMeals(blocks, id)].sort((a, b) => a.time.localeCompare(b.time));
+  }
+  return next;
+}
+
+export function copyPreviousMealWeek(plan: Plan, weekKeys: string[], replace: boolean, id: () => string): Plan {
+  const next = { ...plan };
+  for (const date of weekKeys) {
+    const previous = toDateKey(addDays(parseISO(date), -7));
+    const keep = (plan[date] ?? []).filter(block => !replace || !block.plannedMeal);
+    next[date] = [...keep, ...copyPlannedMeals(plan[previous] ?? [], id)].sort((a, b) => a.time.localeCompare(b.time));
+  }
   return next;
 }
