@@ -1,5 +1,5 @@
 import { format, parseISO, startOfWeek, subWeeks } from "date-fns";
-import type { Exercise, Workout, WorkoutHistoryEntry } from "./trilha-data";
+import type { Exercise, Plan, Workout, WorkoutHistoryEntry } from "./trilha-data";
 
 export type ExerciseLogEntry = {
   id: string;
@@ -16,17 +16,39 @@ export const exerciseKey = (name: string) =>
   name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, " ").trim();
 
 /** Every record of one exercise (manual logs + finished workout sessions), newest first. */
-export function exerciseHistory(name: string, log: ExerciseLogEntry[], history: WorkoutHistoryEntry[]) {
+export function exerciseHistory(name: string, log: ExerciseLogEntry[], history: WorkoutHistoryEntry[], workouts: Workout[] = [], plan: Plan = {}, throughDate?: string) {
   const k = exerciseKey(name);
-  const fromLog = log.filter((e) => exerciseKey(e.exercise) === k).map((e) => ({ date: e.date, loadKg: e.loadKg, reps: e.reps }));
-  const fromSessions = history.flatMap((h) => h.exercises.filter((e) => exerciseKey(e.name) === k && e.loadKg > 0).map((e) => ({ date: h.completedAt.slice(0, 10), loadKg: e.loadKg, reps: e.reps })));
-  return [...fromLog, ...fromSessions].sort((a, b) => b.date.localeCompare(a.date));
+  const fromLog = log.filter((e) => exerciseKey(e.exercise) === k && e.reps > 0).map((e) => ({ date: e.date, loadKg: e.loadKg || 0, reps: e.reps }));
+  const fromSessions = history.flatMap((h) => h.exercises.filter((e) => exerciseKey(e.name) === k && e.reps > 0).map((e) => ({ date: h.completedAt.slice(0, 10), loadKg: e.loadKg || 0, reps: e.reps })));
+  // Recover legacy partial sessions only where a set was actually marked.
+  // A configured/imported exercise alone is not evidence of execution.
+  const fromPartial = Object.entries(plan).flatMap(([date, blocks]) => blocks.flatMap((b) => {
+    if (b.kind !== "treino" || !b.workoutId) return [];
+    const workout = workouts.find((w) => w.id === b.workoutId);
+    return (workout?.exercises ?? []).filter((e) => exerciseKey(e.name) === k && e.doneSets > 0 && e.reps > 0).map((e) => ({ date, loadKg: e.loadKg || 0, reps: e.reps }));
+  }));
+  const seen = new Set<string>();
+  return [...fromLog, ...fromSessions, ...fromPartial]
+    .filter((e) => !throughDate || e.date <= throughDate)
+    .sort((a, b) => b.date.localeCompare(a.date))
+    .filter((e) => { const key = `${e.date}:${e.loadKg}:${e.reps}`; if (seen.has(key)) return false; seen.add(key); return true; });
 }
+
+/** Persist a partial exercise independently of completion of its workout. */
+export function recordExerciseSets(log: ExerciseLogEntry[], workout: Workout, exerciseId: string, doneSets: number, date: string) {
+  const ex = workout.exercises.find((e) => e.id === exerciseId);
+  if (!ex || doneSets <= 0 || ex.reps <= 0) return log;
+  const id = `sets:${workout.id}:${exerciseId}:${date}`;
+  return [{ id, date, exercise: ex.name, loadKg: ex.loadKg || 0, reps: ex.reps, sets: doneSets, workoutId: workout.id }, ...log.filter((e) => e.id !== id)].slice(0, 2000);
+}
+
+export const exercisePerformance = (entry: { loadKg: number; reps: number }) => entry.loadKg > 0 ? `${kg(entry.loadKg)} x ${entry.reps}` : `${entry.reps} reps`;
 
 /** Difference between the latest load and the one before it; positive means progression. */
 export function progression(entries: { loadKg: number }[]) {
-  if (entries.length < 2) return 0;
-  return Math.round((entries[0]!.loadKg - entries[1]!.loadKg) * 100) / 100;
+  const [latest, previous] = entries;
+  if (!latest || !previous || latest.loadKg <= 0 || previous.loadKg <= 0) return 0;
+  return Math.round((latest.loadKg - previous.loadKg) * 100) / 100;
 }
 
 /** Heaviest load per week for the last `weeks` weeks (oldest first); null where nothing was logged. */
@@ -34,7 +56,7 @@ export function weeklyMax(entries: { date: string; loadKg: number }[], today: Da
   return Array.from({ length: weeks }, (_, i) => {
     const start = startOfWeek(subWeeks(today, weeks - 1 - i), { weekStartsOn: 1 });
     const key = format(start, "yyyy-MM-dd");
-    const loads = entries.filter((e) => format(startOfWeek(parseISO(e.date), { weekStartsOn: 1 }), "yyyy-MM-dd") === key).map((e) => e.loadKg);
+    const loads = entries.filter((e) => e.loadKg > 0 && format(startOfWeek(parseISO(e.date), { weekStartsOn: 1 }), "yyyy-MM-dd") === key).map((e) => e.loadKg);
     return { week: format(start, "dd/MM"), kg: loads.length ? Math.max(...loads) : null };
   });
 }
