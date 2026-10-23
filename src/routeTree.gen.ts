@@ -18,7 +18,6 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CalendarioRouteImport } from './routes/calendario'
 import { Route as ComprasRouteImport } from './routes/compras'
 import { Route as ContatoRouteImport } from './routes/contato'
-import { Route as ConviteRouteImport } from './routes/convite'
 import { Route as EsqueciSenhaRouteImport } from './routes/esqueci-senha'
 import { Route as EstudosRouteImport } from './routes/estudos'
 import { Route as FinancasRouteImport } from './routes/financas'
@@ -39,6 +38,7 @@ import { Route as AuthenticatedAmigosRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedEquipeRouteImport } from './routes/_authenticated/equipe'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
 import { Route as AuthenticatedProfissionalRouteImport } from './routes/_authenticated/profissional'
+import { Route as ConviteIndexRouteImport } from './routes/convite.index'
 import { Route as ApiPublicPushRemindersRouteImport } from './routes/api/public/push-reminders'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
@@ -85,11 +85,6 @@ const ComprasRoute = ComprasRouteImport.update({
 const ContatoRoute = ContatoRouteImport.update({
   id: '/contato',
   path: '/contato',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ConviteRoute = ConviteRouteImport.update({
-  id: '/convite',
-  path: '/convite',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EsqueciSenhaRoute = EsqueciSenhaRouteImport.update({
@@ -193,6 +188,11 @@ const AuthenticatedProfissionalRoute =
     path: '/profissional',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ConviteIndexRoute = ConviteIndexRouteImport.update({
+  id: '/convite/',
+  path: '/convite/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicPushRemindersRoute = ApiPublicPushRemindersRouteImport.update({
   id: '/api/public/push-reminders',
   path: '/api/public/push-reminders',
@@ -218,7 +218,6 @@ export interface FileRoutesByFullPath {
   '/calendario': typeof CalendarioRoute
   '/compras': typeof ComprasRoute
   '/contato': typeof ContatoRoute
-  '/convite': typeof ConviteRoute
   '/esqueci-senha': typeof EsqueciSenhaRoute
   '/estudos': typeof EstudosRoute
   '/financas': typeof FinancasRoute
@@ -239,6 +238,7 @@ export interface FileRoutesByFullPath {
   '/equipe': typeof AuthenticatedEquipeRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/profissional': typeof AuthenticatedProfissionalRoute
+  '/convite/': typeof ConviteIndexRoute
   '/api/public/push-reminders': typeof ApiPublicPushRemindersRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -252,7 +252,6 @@ export interface FileRoutesByTo {
   '/calendario': typeof CalendarioRoute
   '/compras': typeof ComprasRoute
   '/contato': typeof ContatoRoute
-  '/convite': typeof ConviteRoute
   '/esqueci-senha': typeof EsqueciSenhaRoute
   '/estudos': typeof EstudosRoute
   '/financas': typeof FinancasRoute
@@ -273,6 +272,7 @@ export interface FileRoutesByTo {
   '/equipe': typeof AuthenticatedEquipeRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/profissional': typeof AuthenticatedProfissionalRoute
+  '/convite': typeof ConviteIndexRoute
   '/api/public/push-reminders': typeof ApiPublicPushRemindersRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -288,7 +288,6 @@ export interface FileRoutesById {
   '/calendario': typeof CalendarioRoute
   '/compras': typeof ComprasRoute
   '/contato': typeof ContatoRoute
-  '/convite': typeof ConviteRoute
   '/esqueci-senha': typeof EsqueciSenhaRoute
   '/estudos': typeof EstudosRoute
   '/financas': typeof FinancasRoute
@@ -309,6 +308,7 @@ export interface FileRoutesById {
   '/_authenticated/equipe': typeof AuthenticatedEquipeRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
   '/_authenticated/profissional': typeof AuthenticatedProfissionalRoute
+  '/convite/': typeof ConviteIndexRoute
   '/api/public/push-reminders': typeof ApiPublicPushRemindersRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -324,7 +324,6 @@ export interface FileRouteTypes {
     | '/calendario'
     | '/compras'
     | '/contato'
-    | '/convite'
     | '/esqueci-senha'
     | '/estudos'
     | '/financas'
@@ -345,6 +344,7 @@ export interface FileRouteTypes {
     | '/equipe'
     | '/perfil'
     | '/profissional'
+    | '/convite/'
     | '/api/public/push-reminders'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -358,7 +358,6 @@ export interface FileRouteTypes {
     | '/calendario'
     | '/compras'
     | '/contato'
-    | '/convite'
     | '/esqueci-senha'
     | '/estudos'
     | '/financas'
@@ -379,6 +378,7 @@ export interface FileRouteTypes {
     | '/equipe'
     | '/perfil'
     | '/profissional'
+    | '/convite'
     | '/api/public/push-reminders'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -393,7 +393,6 @@ export interface FileRouteTypes {
     | '/calendario'
     | '/compras'
     | '/contato'
-    | '/convite'
     | '/esqueci-senha'
     | '/estudos'
     | '/financas'
@@ -414,6 +413,7 @@ export interface FileRouteTypes {
     | '/_authenticated/equipe'
     | '/_authenticated/perfil'
     | '/_authenticated/profissional'
+    | '/convite/'
     | '/api/public/push-reminders'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -429,7 +429,6 @@ export interface RootRouteChildren {
   CalendarioRoute: typeof CalendarioRoute
   ComprasRoute: typeof ComprasRoute
   ContatoRoute: typeof ContatoRoute
-  ConviteRoute: typeof ConviteRoute
   EsqueciSenhaRoute: typeof EsqueciSenhaRoute
   EstudosRoute: typeof EstudosRoute
   FinancasRoute: typeof FinancasRoute
@@ -446,6 +445,7 @@ export interface RootRouteChildren {
   SobreRoute: typeof SobreRoute
   TermosRoute: typeof TermosRoute
   TreinoRoute: typeof TreinoRoute
+  ConviteIndexRoute: typeof ConviteIndexRoute
   ApiPublicPushRemindersRoute: typeof ApiPublicPushRemindersRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
@@ -514,13 +514,6 @@ declare module '@tanstack/react-router' {
       path: '/contato'
       fullPath: '/contato'
       preLoaderRoute: typeof ContatoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/convite': {
-      id: '/convite'
-      path: '/convite'
-      fullPath: '/convite'
-      preLoaderRoute: typeof ConviteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/esqueci-senha': {
@@ -663,6 +656,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProfissionalRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/convite/': {
+      id: '/convite/'
+      path: '/convite'
+      fullPath: '/convite/'
+      preLoaderRoute: typeof ConviteIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/push-reminders': {
       id: '/api/public/push-reminders'
       path: '/api/public/push-reminders'
@@ -714,7 +714,6 @@ const rootRouteChildren: RootRouteChildren = {
   CalendarioRoute: CalendarioRoute,
   ComprasRoute: ComprasRoute,
   ContatoRoute: ContatoRoute,
-  ConviteRoute: ConviteRoute,
   EsqueciSenhaRoute: EsqueciSenhaRoute,
   EstudosRoute: EstudosRoute,
   FinancasRoute: FinancasRoute,
@@ -731,6 +730,7 @@ const rootRouteChildren: RootRouteChildren = {
   SobreRoute: SobreRoute,
   TermosRoute: TermosRoute,
   TreinoRoute: TreinoRoute,
+  ConviteIndexRoute: ConviteIndexRoute,
   ApiPublicPushRemindersRoute: ApiPublicPushRemindersRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
