@@ -71,6 +71,13 @@
       "when": 1792458012426,
       "tag": "0009_push_daily_attempt_budget",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1792770895106,
+      "tag": "0010_friend_nudges",
+      "breakpoints": true
     }
   ]
 }

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth-context";
 import { INVITE_KEY } from "@/components/InviteManager";
 
-export const Route = createFileRoute("/convite")({
+export const Route = createFileRoute("/convite/")({
   validateSearch: (s: Record<string, unknown>) => ({ ref: typeof s["ref"] === "string" ? s["ref"] : "" }),
   head: () => ({ meta: [
     { title: "Convite para a liga — TaskBio" },
