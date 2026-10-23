@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Importar fotos/prints de treino com OCR local, confirmação e reutilização da validação; preservar PDF e testar múltiplas imagens e campos ausentes
 - [x] Corrigir histórico independente por exercício e registros parciais sem carga; 21 testes passaram e registros individuais de uma semana apareceram na seguinte após recarregar, sem concluir o treino
 - [x] Priorizar refeições do dia, recolher sugestões e integrar registros únicos com a Agenda; 15 testes e fluxo local completo em celular/computador validados, incluindo conclusão com kcal e link de Compras
 - [x] Corrigir entrega por assinatura, renovação, telemetria, silêncio noturno e preferências; 42 testes passaram, controle de provas conferido na conta e renovação validada com envio simulado; recebimento em celular aguarda publicação e teste real
