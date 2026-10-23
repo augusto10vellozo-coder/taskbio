@@ -3,7 +3,7 @@ import { ModuleHeader } from "@/components/ModuleHeader";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { TrainingExplore, useScheduleWorkout } from "@/components/TrainingExplore";
 import { useEffect, useMemo, useState } from "react";
-import { addDays, format } from "date-fns";
+import { addDays, format, getISOWeek } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { CalendarPlus, ChevronLeft, ChevronRight, FileUp, Plus, Trash2, TrendingUp, X } from "lucide-react";
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
@@ -20,7 +20,8 @@ import { interpretWorkoutPlan } from "@/lib/plan-import.functions";
 import type { Block, Exercise, Workout } from "@/lib/trilha-data";
 import { getWorkoutExamples } from "@/lib/trilha-data";
 import { WorkoutSeries, SessionProgress } from "@/components/WorkoutSeries";
-import { exerciseSeries } from "@/lib/training-session";
+import { Progress } from "@/components/ui/progress";
+import { exerciseSeries, weeklyTrainingProgress } from "@/lib/training-session";
 import { WorkoutPhotoImport } from "@/components/WorkoutPhotoImport";
 
 export const Route = createFileRoute("/treino")({
@@ -67,6 +68,7 @@ function WeekTab({ onExplore }: { onExplore: () => void }) {
   if (!ref || !selected) return <div className="h-60 animate-pulse rounded-lg bg-mist" />;
 
   const week = getWeekDates(ref);
+  const weeklyProgress = weeklyTrainingProgress(plan, week.map(toDateKey));
   const blockOf = (k: string) => (plan[k] ?? []).find((b) => b.kind === "treino");
   const selBlock = blockOf(selected);
   const selWorkout = selBlock?.workoutId ? workouts.find((w) => w.id === selBlock.workoutId) : undefined;
@@ -80,7 +82,7 @@ function WeekTab({ onExplore }: { onExplore: () => void }) {
   return (
     <div>
       <section className="flex flex-wrap items-end justify-between gap-3 pb-5">
-        <div><h2 className="font-display text-xl font-semibold">Plano da semana</h2><p className="mt-2 text-sm text-steel">Toque no dia pra ver o treino e marque quando concluir 💪</p></div>
+        <div><h2 className="font-display text-xl font-semibold">Plano da semana</h2><div className="mt-3 space-y-2" aria-label="Progresso semanal do treino"><p className="text-xs font-medium">{weeklyProgress.done} de {weeklyProgress.total} treinos · Semana {getISOWeek(ref)}</p><Progress value={weeklyProgress.total ? 100 * weeklyProgress.done / weeklyProgress.total : 0} className="[&>div]:bg-good" />{weeklyProgress.complete && <span className="inline-block text-xs font-medium text-good">Semana completa 🏆</span>}</div><p className="mt-2 text-sm text-steel">Toque no dia pra ver o treino e marque quando concluir 💪</p></div>
         <Button variant="outline" onClick={() => setImporting(true)}><FileUp /> Importar plano</Button>
       </section>
 

@@ -16,3 +16,8 @@ export function sessionProgress(workout: Workout, date: string) {
   const exercises = workout.exercises.filter(e => e.sets > 0 && exerciseSeries(e, date).every(s => s.done)).length;
   return { total, done, exercises, complete: total > 0 && done === total };
 }
+export function weeklyTrainingProgress(plan: Plan, dates: string[]) {
+  const planned = dates.filter(date => (plan[date] ?? []).some(b => b.kind === 'treino'));
+  const done = planned.filter(date => (plan[date] ?? []).filter(b => b.kind === 'treino').every(b => b.done)).length;
+  return { total: planned.length, done, complete: planned.length > 0 && done === planned.length };
+}
