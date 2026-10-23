@@ -22,9 +22,9 @@ export type Exercise = {
   restSec: number;
   muscles: string;
   howTo: string;
-  loadKg?: number;
+  loadKg?: number | undefined;
   doneSets: number;
-  seriesByDate?: Record<string, { done: boolean; loadKg?: number }[]>;
+  seriesByDate?: Record<string, { done: boolean; loadKg?: number | undefined }[]>;
 };
 
 export type Workout = {

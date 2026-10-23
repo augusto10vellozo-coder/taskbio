@@ -1,5 +1,5 @@
 import type { Exercise, Workout, Plan } from './trilha-data';
-export type SeriesState = { done: boolean; loadKg?: number };
+export type SeriesState = { done: boolean; loadKg?: number | undefined };
 export function exerciseSeries(ex: Exercise, date: string): SeriesState[] {
   const saved = ex.seriesByDate?.[date];
   return Array.from({ length: ex.sets }, (_, i) => saved?.[i] ?? { done: !ex.seriesByDate && i < ex.doneSets });

@@ -1,3 +1,4 @@
+import { RestTimer } from "@/components/RestTimer";
 import { ModuleHeader } from "@/components/ModuleHeader";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { TrainingExplore, useScheduleWorkout } from "@/components/TrainingExplore";
@@ -123,7 +124,8 @@ function WorkoutDetail({ workout, dateKey }: { workout: Workout; dateKey: string
   const { updateWorkout } = useTaskBio();
   const [open, setOpen] = useState<string | null>(null);
   const [form, setForm] = useState({ name: "", sets: "3", reps: "10", load: "" });
-  return <div className="mt-3">
+  return <div className="mt-3 pb-32">
+    <RestTimer />
     <SessionProgress workout={workout} date={dateKey} />
     {workout.exercises.length === 0 && <p className="py-4 text-sm text-steel">Adicione os exercícios deste treino.</p>}
     <ul className="divide-y divide-line">{workout.exercises.map((ex) => <ExerciseRow key={ex.id} ex={ex} workout={workout} dateKey={dateKey} open={open === ex.id} onToggle={() => setOpen(open === ex.id ? null : ex.id)} />)}</ul>
