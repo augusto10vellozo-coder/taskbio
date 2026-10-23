@@ -20,7 +20,9 @@ export async function readPlanPhotos(images: Blob[], onProgress: (image: number,
     const pages: { text: string; uncertain: boolean }[] = [];
     for (let i = 0; i < images.length; i++) {
       current = i; onProgress(i, 0);
-      const result = await worker.recognize(images[i]);
+      const image = images[i];
+      if (!image) continue;
+      const result = await worker.recognize(image);
       pages.push({ text: result.data.text, uncertain: result.data.confidence < 70 });
       onProgress(i, 1);
     }

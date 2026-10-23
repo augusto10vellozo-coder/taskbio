@@ -9,23 +9,23 @@ describe("importação de fotos", () => {
     expect(validatePhoto({ name: "foto.jpg", size: 10485761 })).not.toBeNull();
   });
   it("preserva séries/repetições ausentes sem inventar valores", () => {
-    const w = workout(); w.exercises[0].sets = null; w.exercises[0].reps = null;
+    const w = workout(); const exercise = w.exercises[0]; if (!exercise) throw new Error("exercício ausente"); exercise.sets = null; exercise.reps = null;
     expect(photoToValidation([w])).toBeNull();
     expect(w.exercises[0]).toMatchObject({ sets: null, reps: null });
   });
   it("carga ausente permanece nula e não impede a validação", () => {
-    const w = workout(); w.exercises[0].loadKg = null;
-    expect(photoToValidation([w])?.[0].exercises[0]).toEqual({ name: "Supino", sets: 5, reps: 15, loadKg: null });
+    const w = workout(); const exercise = w.exercises[0]; if (!exercise) throw new Error("exercício ausente"); exercise.loadKg = null;
+    expect(photoToValidation([w])?.[0]?.exercises[0]).toEqual({ name: "Supino", sets: 5, reps: 15, loadKg: null });
   });
   it("campos duvidosos exigem confirmação humana", () => {
-    const w = workout(); w.exercises[0].review = true;
+    const w = workout(); const exercise = w.exercises[0]; if (!exercise) throw new Error("exercício ausente"); exercise.review = true;
     expect(photoToValidation([w])).toBeNull();
   });
   it("reúne duas imagens na ordem sem perder continuação de treino", () => {
-    const first = workout(), second = workout(); second.exercises[0].name = "Remada";
+    const first = workout(), second = workout(); const exercise = second.exercises[0]; if (!exercise) throw new Error("exercício ausente"); exercise.name = "Remada";
     const result = mergePhotoWorkouts([[first], [second]]);
     expect(result).toHaveLength(1);
-    expect(result[0].exercises.map(e => e.name)).toEqual(["Supino", "Remada"]);
+    expect(result[0]?.exercises.map(e => e.name)).toEqual(["Supino", "Remada"]);
     expect(first.exercises).toHaveLength(1);
   });
 });
