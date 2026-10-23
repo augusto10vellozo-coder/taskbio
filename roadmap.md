@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Compras: texto corrigido, estado vazio com dois caminhos, unidade fixa e consolidação normalizada; 4 testes passaram
 - [x] Treino 1: marcação independente por série/data, carga opcional e progresso da sessão; testes 2/4, 4/4 e reabertura passaram
 - [x] Treino 2: descanso por timestamp, pausa, +15s e reinício; pausa, navegação, reinício e zero conferidos
 - [x] Treino 3: progresso por dias planejados/concluídos e semana completa; atualização imediata e badge conferidos
