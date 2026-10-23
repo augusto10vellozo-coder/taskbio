@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { foodMacros, searchFoods, type Food } from "@/lib/food-db";
 import type { Macros } from "@/lib/trilha-data";
 
-export type MealItem = { foodId?: string; name: string; grams: number; portion: string; macros: Macros };
+export type MealItem = { foodId?: string; name: string; grams: number; portion: string; macros: Macros; shoppingAmount?: number; shoppingUnit?: string };
 
 const num = (v: string) => { const n = Number(v.replace(",", ".")); return Number.isFinite(n) && n >= 0 ? n : 0; };
 const fmt = (n: number) => n.toLocaleString("pt-BR", { maximumFractionDigits: 1 });
@@ -29,7 +29,7 @@ export function MealItemPicker({ customFoods, onAdd, onCreateFood }: { customFoo
   function add() {
     if (!food || grams <= 0 || !preview) return;
     const portion = m ? `${fmt(num(qty))} × ${m.label.replace(/^1 /, "")} (${fmt(grams)} g)` : `${fmt(grams)} g`;
-    onAdd({ foodId: food.id, name: food.name, grams, portion, macros: preview });
+    onAdd({ foodId: food.id, name: food.name, grams, portion, macros: preview, shoppingAmount: m?.label === "1 unidade" ? num(qty) : grams, shoppingUnit: m?.label === "1 unidade" ? "un" : "g" });
     reset();
   }
   function createFood() {
