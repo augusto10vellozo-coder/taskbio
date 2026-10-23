@@ -389,16 +389,26 @@ const parseIngredientQuantity = (qty: string) => {
     : { amount: 1, unit: qty.trim() || "un" };
 };
 
+export const SHOPPING_UNITS = ["un", "kg", "g", "L", "ml"] as const;
+const UNIT_ALIASES: Record<string, string> = { un: "un", unid: "un", unidade: "un", unidades: "un", kg: "kg", quilo: "kg", kilo: "kg", g: "g", grama: "g", gramas: "g", l: "L", litro: "L", litros: "L", ml: "ml", mililitro: "ml", mililitros: "ml" };
+/** Maps known unit spellings to un/kg/g/L/ml; unknown units are kept as typed. */
+export const normalizeUnit = (unit: string) => {
+  const key = unit.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLowerCase().replace(/\.$/, "");
+  return UNIT_ALIASES[key] ?? (unit.trim() || "un");
+};
+export const normalizeItemName = (name: string) => name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\s+/g, " ").trim();
+
 export function consolidateIngredients(meals: Meal[]) {
   const consolidated = new Map<string, { name: string; amount: number; unit: string }>();
   meals.forEach((meal) => meal.ingredients.forEach((ingredient) => {
     const parsed = ingredient.amount != null && ingredient.unit
       ? { amount: ingredient.amount, unit: ingredient.unit }
       : parseIngredientQuantity(ingredient.qty);
-    const key = `${ingredient.name.toLocaleLowerCase("pt-BR")}::${parsed.unit.toLocaleLowerCase("pt-BR")}`;
+    parsed.unit = normalizeUnit(parsed.unit);
+    const key = `${normalizeItemName(ingredient.name)}::${parsed.unit}`;
     const current = consolidated.get(key);
     consolidated.set(key, {
-      name: ingredient.name,
+      name: current?.name ?? ingredient.name.replace(/\s+/g, " ").trim(),
       amount: (current?.amount ?? 0) + parsed.amount,
       unit: parsed.unit,
     });
