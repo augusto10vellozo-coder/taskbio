@@ -29,6 +29,7 @@ import type { Food } from "./food-db";
 import { emitBlockXp, emitXp, foodItemCount } from "./xp-client";
 import { emptyFinance, type FinanceState } from "./finance";
 import { defaultNotifPrefs, type NotifPrefs } from "./push-reminders";
+import { consumePlannedMeal, skipPlannedMeal } from "./meal-planning";
 
 export type TaskBioState = {
   plan: Plan;
@@ -230,6 +231,15 @@ export function TaskBioProvider({ children }: { children: ReactNode }) {
         if (!editingId && saved && foodItemCount(saved) > 0) emitXp({ kind: "meal", ref: saved.id, date: day, on: true, foodItems: foodItemCount(saved) });
         setState((s) => ({ ...s, plan: { ...s.plan, [day]: saveMealRecord(s.plan[day] ?? [], record, editingId) } }));
       },
+      savePlannedMeal: (day, block) => setState(s => ({ ...s, plan: { ...s.plan, [day]: sortBlocks([...(s.plan[day] ?? []).filter(b => b.id !== block.id), block]) } })),
+      consumeMeal: (day, blockId) => {
+        const block = state.plan[day]?.find(b => b.id === blockId);
+        if (!block?.plannedMeal || block.plannedMeal.state !== "planejada") return;
+        const consumed = consumePlannedMeal(block);
+        if (foodItemCount(consumed) > 0) emitXp({ kind: "meal", ref: blockId, date: day, on: true, foodItems: foodItemCount(consumed) });
+        setState(s => ({ ...s, plan: { ...s.plan, [day]: (s.plan[day] ?? []).map(b => b.id === blockId ? consumePlannedMeal(b) : b) } }));
+      },
+      skipMeal: (day, blockId) => setState(s => ({ ...s, plan: { ...s.plan, [day]: (s.plan[day] ?? []).map(b => b.id === blockId ? skipPlannedMeal(b) : b) } })),
       setSeries: (workoutId, exerciseId, date, index, patch) => setState(s => {
         const workout = s.workouts.find(w => w.id === workoutId);
         const ex = workout?.exercises.find(e => e.id === exerciseId);
