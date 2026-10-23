@@ -17,7 +17,7 @@ Public analytics uses opt-in browser consent and stores only event type, known p
 
 Content reviews run only from an authenticated, server-verified admin function; the AI key and model call stay server-only to prevent unauthorized spending.
 
-Agenda and Alimentação share synced dated blocks; legacy meal duplicates merge keeping food-bearing IDs. Explicit plannedMeal blocks bypass merging and keep an original snapshot; consumption populates manualMeal on the same ID. Why: preserves predictions, multiple same-type meals, offline records and existing shopping behavior.
+Agenda and Alimentação share dated blocks; legacy duplicates keep food-bearing IDs, while plannedMeal bypasses merging and retains its snapshot through same-ID consumption. Copy helpers reset execution atomically; shopping reads pending snapshots by period only on explicit generation and tracks origin separately. Why: preserves predictions, XP integrity and manual carts.
 
 Food totals use the shared meal-summary resolver for catalog and manual blocks; missing nutrition stays unknown instead of being inferred, and display-only accent corrections preserve stored user data.
 
