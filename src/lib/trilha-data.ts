@@ -24,6 +24,7 @@ export type Exercise = {
   howTo: string;
   loadKg?: number;
   doneSets: number;
+  seriesByDate?: Record<string, { done: boolean; loadKg?: number }[]>;
 };
 
 export type Workout = {

@@ -18,6 +18,8 @@ import { exerciseHistory, exercisePerformance, kg, progression, toWorkout, weekl
 import { interpretWorkoutPlan } from "@/lib/plan-import.functions";
 import type { Block, Exercise, Workout } from "@/lib/trilha-data";
 import { getWorkoutExamples } from "@/lib/trilha-data";
+import { WorkoutSeries, SessionProgress } from "@/components/WorkoutSeries";
+import { exerciseSeries } from "@/lib/training-session";
 import { WorkoutPhotoImport } from "@/components/WorkoutPhotoImport";
 
 export const Route = createFileRoute("/treino")({
@@ -122,6 +124,7 @@ function WorkoutDetail({ workout, dateKey }: { workout: Workout; dateKey: string
   const [open, setOpen] = useState<string | null>(null);
   const [form, setForm] = useState({ name: "", sets: "3", reps: "10", load: "" });
   return <div className="mt-3">
+    <SessionProgress workout={workout} date={dateKey} />
     {workout.exercises.length === 0 && <p className="py-4 text-sm text-steel">Adicione os exercícios deste treino.</p>}
     <ul className="divide-y divide-line">{workout.exercises.map((ex) => <ExerciseRow key={ex.id} ex={ex} workout={workout} dateKey={dateKey} open={open === ex.id} onToggle={() => setOpen(open === ex.id ? null : ex.id)} />)}</ul>
     <form className="mt-4 grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto] sm:grid-cols-[minmax(0,1fr)_64px_64px_80px_auto] gap-2" onSubmit={(e) => { e.preventDefault(); if (!form.name.trim()) return; const ex: Exercise = { id: `e-${Date.now()}`, name: form.name.trim(), sets: Math.max(1, Number(form.sets) || 3), reps: Math.max(1, Number(form.reps) || 10), restSec: 60, muscles: "", howTo: "", doneSets: 0, ...(Number(form.load.replace(",", ".")) ? { loadKg: Number(form.load.replace(",", ".")) } : {}) }; updateWorkout({ ...workout, exercises: [...workout.exercises, ex] }); setForm({ ...form, name: "", load: "" }); }}>
@@ -143,15 +146,16 @@ function ExerciseRow({ ex, workout, dateKey, open, onToggle }: { ex: Exercise; w
   const [reps, setReps] = useState("");
   useEffect(() => { if (open) { setLoad(String(last?.loadKg ?? ex.loadKg ?? "")); setReps(String(last?.reps ?? ex.reps)); } }, [open]);
   const chart = useMemo(() => weeklyMax(history, new Date()), [history]);
-  const loggedToday = history.some((h) => h.date === dateKey);
+  const seriesDone = exerciseSeries(ex, dateKey).filter(s => s.done).length;
 
   return <li className="py-3">
     <button className="flex w-full items-center gap-3 text-left" onClick={onToggle} aria-expanded={open}>
-      <Tick on={loggedToday} />
-      <span className="min-w-0 flex-1"><span className="block text-sm font-medium">{ex.name}</span><span className="block text-xs text-steel">{ex.sets}x{ex.reps}{ex.loadKg ? ` · ${kg(ex.loadKg)}` : ""}{last ? ` · última vez: ${exercisePerformance(last)}` : ""}</span></span>
+      <Tick on={ex.sets > 0 && seriesDone === ex.sets} />
+      <span className="min-w-0 flex-1"><span className="block text-sm font-medium">{ex.name}</span><span className="block text-xs text-steel">{seriesDone} de {ex.sets} séries · {ex.sets}x{ex.reps}{ex.loadKg ? ` · ${kg(ex.loadKg)}` : ""}{last ? ` · última vez: ${exercisePerformance(last)}` : ""}</span></span>
       {delta > 0 && <span className="inline-flex items-center gap-1 rounded-full bg-good/15 px-2 py-0.5 text-[11px] font-medium"><TrendingUp className="size-3" />progressão +{kg(delta)}</span>}
     </button>
     {open && <div className="mt-3 rounded-md bg-background p-3 ring-1 ring-line">
+      <WorkoutSeries workout={workout} ex={ex} date={dateKey} />
       <form className="flex flex-wrap items-end gap-2" onSubmit={(e) => { e.preventDefault(); const l = Number(load.replace(",", ".")); const r = Number(reps); if (!(l >= 0) || !(r > 0)) return; addExerciseLog({ date: dateKey, exercise: ex.name, loadKg: l, reps: r, sets: ex.sets, workoutId: workout.id }); updateWorkout({ ...workout, exercises: workout.exercises.map((x) => x.id === ex.id ? { ...x, loadKg: l } : x) }); toast.success(last && l > last.loadKg ? `Progressão +${kg(l - last.loadKg)}!` : "Registro salvo"); onToggle(); }}>
         <label className="text-xs text-steel">Carga (kg)<input autoFocus inputMode="decimal" value={load} onChange={(e) => setLoad(e.target.value)} className="mt-1 block h-10 w-24 rounded-md bg-card px-2 text-sm text-ink ring-1 ring-line" /></label>
         <label className="text-xs text-steel">Repetições<input inputMode="numeric" value={reps} onChange={(e) => setReps(e.target.value)} className="mt-1 block h-10 w-24 rounded-md bg-card px-2 text-sm text-ink ring-1 ring-line" /></label>
