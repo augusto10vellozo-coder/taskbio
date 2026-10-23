@@ -5,6 +5,9 @@ import { KIND_LABEL, brl, type Block, type BlockKind } from "@/lib/trilha-data";
 import { useTaskBio } from "@/lib/trilha-store";
 import { PhotoBonus } from "@/components/PhotoBonus";
 import { mealNutrition } from "@/lib/meal-summary";
+import { WorkoutSeries, SessionProgress } from "@/components/WorkoutSeries";
+import { exerciseSeries } from "@/lib/training-session";
+import { RestTimer } from "@/components/RestTimer";
 
 const dotColor: Record<BlockKind, string> = {
   refeicao: "ring-good",
@@ -26,7 +29,7 @@ export function DayTimeline({
   id?: string;
   className?: string;
 }) {
-  const { plan, getMeal, getWorkout, toggleBlock, removeBlock, addBlock, updateBlock, setDoneSets } = useTaskBio();
+  const { plan, getMeal, getWorkout, toggleBlock, removeBlock, addBlock, updateBlock } = useTaskBio();
   const [openWorkout, setOpenWorkout] = useState<string | null>("w1");
   const [editing, setEditing] = useState<Block | null>(null);
   const blocks = plan[dateKey] ?? [];
@@ -43,6 +46,7 @@ export function DayTimeline({
 
   return (
     <>
+      {openWorkout && blocks.some(b => b.workoutId === openWorkout) && <RestTimer />}
       <section id={id} aria-label="Linha do dia" className={className}>
         <div className="glass-strong rounded-2xl p-5 ring-1 ring-black/5 sm:p-6">
           <div className="mb-5 flex items-center justify-between">
@@ -131,32 +135,21 @@ export function DayTimeline({
                           {workout.exercises.length} exercícios · {open ? "ocultar" : "ver treino"}
                         </button>
                         {open && (
-                          <div className="mt-3 space-y-2.5">
+                          <div className="mt-3 space-y-2.5 pb-32">
+                            <SessionProgress workout={workout} date={dateKey} />
                             {workout.exercises.map((e) => (
                               <div key={e.id} className="rounded-lg bg-white/50 p-2.5 ring-1 ring-black/5">
                                 <div className="flex items-center justify-between gap-2">
                                   <p className="text-sm font-medium">{e.name}</p>
                                   <span className="text-[11px] text-steel">
-                                    {e.sets} × {e.reps}
+                                    {exerciseSeries(e, dateKey).filter(s => s.done).length} de {e.sets} séries · {e.sets} × {e.reps}
                                     {e.restSec ? ` · descanso ${e.restSec}s` : ""}
                                   </span>
                                 </div>
                                 <p className="mt-1 text-[11px] text-steel">
                                   {e.muscles} — {e.howTo}
                                 </p>
-                                <div className="mt-2 flex items-center gap-1.5">
-                                  {Array.from({ length: e.sets }, (_, i) => i + 1).map((n) => (
-                                    <button
-                                      key={n}
-                                      onClick={() => setDoneSets(workout.id, e.id, e.doneSets >= n ? n - 1 : n, dateKey)}
-                                      className={`grid size-5 place-items-center rounded-md text-[10px] font-semibold ${
-                                        e.doneSets >= n ? "bg-good text-white" : "bg-white text-steel ring-1 ring-line"
-                                      }`}
-                                    >
-                                      {n}
-                                    </button>
-                                  ))}
-                                </div>
+                                <WorkoutSeries workout={workout} ex={e} date={dateKey} />
                               </div>
                             ))}
                           </div>

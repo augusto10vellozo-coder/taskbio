@@ -33,7 +33,7 @@ export function spreadsheetRows(rows: unknown[][], sheetName='Treino importado')
    if(nameIndex<0)continue;
    name=text[nameIndex]??'';const after=text.slice(nameIndex+1);const combined=after[0]?.match(/^(\d+)\s*[x×]\s*(\d+)$/i);
    sets=combined?number(combined[1],true):number(after[0],true);reps=combined?number(combined[2],true):number(after[1],true);loadKg=number(after[combined?1:2]);
-   if(sets===null && reps===null && loadKg===null && !after.some(v=>/\d/.test(v)))continue;
+   if(!combined && after.filter(v=>/\d/.test(v)).length<2)continue;
    const prefix=text.slice(0,nameIndex);const d=prefix.map(day).find(Boolean);if(d)currentDay=d;
    const title=prefix.find(v=>/^treino\b/i.test(v));if(title)currentName=title;
   }
