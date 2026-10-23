@@ -212,7 +212,7 @@ function Alimentacao() {
             const meal = getMeal(block.mealId);
             const shown = mode === "planejar" ? predictedMeal(block) : block;
             const nutrition = mealNutrition(shown, getMeal);
-            return <li key={block.id} className="flex flex-wrap items-center justify-between gap-3 py-4">
+            return <li key={block.id} className="flex flex-col items-stretch justify-between gap-3 py-4 sm:flex-row sm:items-center">
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2"><h3 className="break-words text-sm font-medium">{foodName(block.manualMeal ? block.title : meal?.items ?? block.title)}</h3>{(block.manualMeal || block.plannedMeal) && <span className="rounded-full bg-mist px-2 py-0.5 text-[10px] font-medium text-steel">{block.plannedMeal?.state ?? "registrado"}</span>}</div>
                 <p className="mt-1 text-xs leading-5 text-steel">{shown.time}{shown.manualMeal ? ` · ${shown.manualMeal.portion}` : ""}{nutrition.known ? ` · ${fmt(nutrition.kcal)} kcal` : ""}</p>

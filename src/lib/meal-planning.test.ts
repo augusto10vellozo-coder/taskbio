@@ -29,7 +29,7 @@ describe("meal planning", () => {
     expect(edited).toHaveLength(1);
     expect(sum(edited, "planejar").kcal).toBe(720);
     expect(sum(edited, "registrar").kcal).toBe(650);
-    expect(edited[0]?.plannedMeal?.original.food.items[0]?.grams).toBe(100);
+    expect(edited[0]?.plannedMeal?.original.food.items?.[0]?.grams).toBe(100);
   });
   it("preserves legacy unplanned records even if not marked done", () => {
     const old: Block = { id: "old", kind: "refeicao", time: "12:00", title: "Almoço", done: false, manualMeal: food };
