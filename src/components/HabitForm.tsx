@@ -5,7 +5,7 @@ import { weeklyTarget } from "@/lib/habits";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
-export function HabitForm({ habit, onSave, onClose }: { habit?: Habit; onSave: (patch: Pick<Habit, "name" | "frequency" | "weeklyTarget" | "emoji">) => void; onClose: () => void }) {
+export function HabitForm({ habit, onSave, onClose }: { habit?: Habit | undefined; onSave: (patch: Pick<Habit, "name" | "frequency" | "weeklyTarget" | "emoji">) => void; onClose: () => void }) {
   const [name, setName] = useState(habit?.name ?? "");
   const [frequency, setFrequency] = useState<"daily" | "weekly">(habit?.frequency ?? "daily");
   const [target, setTarget] = useState(habit ? weeklyTarget(habit) : 3);

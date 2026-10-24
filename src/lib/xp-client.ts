@@ -12,6 +12,15 @@ export function emitXp(input: { kind: XpKind; ref: string; date: string; on: boo
   const send = async () => { await supabase.auth.getSession().then(async ({ data }) => {
     if (!data.session) return;
     try {
+      if (input.kind === "habit" && input.on) {
+        const id = input.ref.slice(0, -(input.date.length + 1));
+        for (let attempt = 0; attempt < 12; attempt++) {
+          const { data: stored } = await supabase.from("user_data").select("settings").eq("user_id", data.session.user.id).maybeSingle();
+          const settings = stored?.settings as { habits?: { id: string }[] } | undefined;
+          if (settings?.habits?.some(h => h.id === id)) break;
+          await new Promise(resolve => window.setTimeout(resolve, 250));
+        }
+      }
       const res = await recordXp({ data: input });
       window.dispatchEvent(new CustomEvent(XP_EVENT, { detail: res }));
     } catch { /* offline: points are not awarded later to keep the same-day rule */ }
@@ -20,7 +29,7 @@ export function emitXp(input: { kind: XpKind; ref: string; date: string; on: boo
   const previous = habitQueues.get(input.ref) ?? Promise.resolve();
   const queued = previous.catch(() => {}).then(send);
   habitQueues.set(input.ref, queued);
-  void queued.finally(() => { if (habitQueues.get(input.ref) === queued) habitQueues.delete(input.ref); });
+  void queued.finally(() => { if (habitQueues.get(input.ref) === queued) habitQueues.delete(input.ref); }).catch(() => {});
 }
 
 export const foodItemCount = (b: Pick<Block, "manualMeal">) => (b.manualMeal?.items ?? []).filter((i) => i.foodId).length;
