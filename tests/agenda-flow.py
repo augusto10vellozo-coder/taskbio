@@ -43,10 +43,10 @@ async def main():
    assert await timeline.get_by_text(titles[0],exact=True).count()==1
    for width,height in [(360,800),(390,630),(1280,1800)]:
     await page.set_viewport_size({'width':width,'height':height})
+    await page.wait_for_timeout(200)
     await page.evaluate("window.scrollTo(0,document.documentElement.scrollHeight)")
     await page.wait_for_timeout(100)
     header=page.get_by_label('Navegação de datas',exact=True)
-    print('HEADER BOX',width,await header.bounding_box(),await page.evaluate('scrollY')); await page.screenshot(path=f'/tmp/browser/agenda-update/final-{width}.png')
     box=await header.bounding_box(); assert box and abs(box['y'])<=1 and box['y']+box['height']<height
     assert await header.get_by_role('button',name='Voltar',exact=True).is_visible()
     assert 'segunda-feira, 11 de janeiro' in (await header.inner_text()).lower()
