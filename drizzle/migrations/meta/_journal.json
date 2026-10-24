@@ -92,6 +92,13 @@
       "when": 1792805561436,
       "tag": "0012_reading_daily_xp_guard",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1792806607307,
+      "tag": "0013_study_daily_xp_guard",
+      "breakpoints": true
     }
   ]
 }

@@ -19,6 +19,11 @@ export const recordXp = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const ref = `${data.kind}:${data.ref}`;
+    if (data.kind === "study") {
+      const { data: points, error } = await supabaseAdmin.rpc("record_study_xp", { _user_id: context.userId, _session_id: data.ref, _date: data.date, _on: data.on });
+      if (error) throw new Error("Não foi possível atualizar os pontos de estudo.");
+      return { points: points ?? 0 };
+    }
     if (data.kind === "reading") {
       const { data: points, error } = await supabaseAdmin.rpc("record_reading_xp", { _user_id: context.userId, _session_id: data.ref, _date: data.date, _on: data.on });
       if (error) throw new Error("Não foi possível atualizar os pontos da leitura.");

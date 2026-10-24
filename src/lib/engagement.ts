@@ -23,7 +23,7 @@ export type HealthLog = {
   medsTaken?: Record<string, string[]>;
 };
 export type SessionEntry = { id: string; date: string; minutes: number; title: string; bookId?: string; pages?: number; progressMode?: "pages" | "percent"; progressPercent?: number; agendaBlockId?: string; subjectId?: string; learned?: string };
-export type Subject = { id: string; name: string; color: string; weeklyGoalMin?: number };
+export type Subject = { id: string; name: string; color: string; weeklyGoalMin?: number; dailyGoalMin?: number; normalizedName?: string };
 export type Exam = { id: string; subjectId: string; subjectName?: string; title: string; date: string; done?: boolean };
 export type BookStatus = "lendo" | "concluido" | "quero";
 export type Quote = { id: string; text: string; page?: number };
