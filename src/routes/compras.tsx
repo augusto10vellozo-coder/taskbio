@@ -56,6 +56,7 @@ function Compras() {
         {checked > 0 && <div className="mt-4 flex justify-end"><Button variant="ghost" size="sm" onClick={() => setShoppingItems(shoppingItems.map((item) => ({ ...item, checked: false })))}><RotateCcw /> Desmarcar tudo</Button></div>}
         <ShoppingFinanceBridge cost={cost} />
       </section>
+      </section>
       <p className="mt-4 text-xs leading-5 text-steel">Valores estimados. Registros pessoais não substituem orientação de profissional.</p>
     </main>
   );
