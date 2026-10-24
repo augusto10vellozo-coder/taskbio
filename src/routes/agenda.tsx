@@ -108,8 +108,8 @@ function Agenda() {
   };
 
   const resumo = useMemo(() => {
-    const { cost, kcal } = mealSummary(blocks, getMeal);
-    return { cost, kcal, done: blocks.filter((b) => b.done).length };
+    const { cost } = mealSummary(blocks, getMeal);
+    return { cost, done: blocks.filter((b) => b.done).length };
   }, [blocks, getMeal]);
 
   const semanaCusto = useMemo(() => mealSummary(weekKeys.flatMap((key) => plan[key] ?? []), getMeal).cost, [getMeal, plan, weekKeys]);
@@ -124,7 +124,7 @@ function Agenda() {
 
   return (
     <main ref={mainRef} className="mx-auto max-w-6xl px-5 pb-44 sm:px-8">
-      <div ref={dateHeaderRef} className="sticky top-[var(--agenda-top,4rem)] z-30 -mx-5 border-b border-line bg-background px-5 pb-3 sm:-mx-8 sm:px-8" aria-label="Navegação de datas">
+      <div ref={dateHeaderRef} className="sticky top-[var(--agenda-top,4rem)] z-20 -mx-5 border-b border-line bg-background px-5 pb-3 sm:-mx-8 sm:px-8" aria-label="Navegação de datas">
       <ModuleHeader title="Minha Agenda" /><section>
         <div className="flex flex-col justify-between gap-3 lg:flex-row lg:items-end">
           <div>
@@ -155,7 +155,7 @@ function Agenda() {
             const today = isSameDay(date, new Date());
             const count = (plan[toDateKey(date)] ?? []).length;
             return <Button key={toDateKey(date)} variant={active ? "default" : "outline"} onClick={() => setSelectedDate(date)} className="h-auto min-w-0 flex-col gap-0.5 px-1.5 py-2 sm:px-3" aria-pressed={active}>
-              <span className="text-[10px] font-medium uppercase sm:text-xs">{format(date, "EEE", { locale: ptBR }).replace(".", "")}</span>
+              <span className="text-[10px] font-medium uppercase sm:text-xs">{["dom", "seg", "ter", "qua", "qui", "sex", "sáb"][date.getDay()]}</span>
               <span className="font-display text-lg font-semibold sm:text-xl">{format(date, "dd")}</span>
               <span className="hidden text-[10px] font-normal sm:block">{format(date, "MMM", { locale: ptBR }).replace(".", "")}{today ? " · hoje" : count ? ` · ${count}` : ""}</span>
             </Button>;
