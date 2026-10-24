@@ -2,7 +2,7 @@ import { addDays, format, parseISO } from "date-fns";
 import type { Plan, WorkoutHistoryEntry } from "./trilha-data";
 
 /** countsForStreak defaults to true when missing. */
-export type Habit = { id: string; name: string; createdAt: string; countsForStreak?: boolean };
+export type Habit = { id: string; name: string; createdAt: string; countsForStreak?: boolean; frequency?: "daily" | "weekly"; weeklyTarget?: number; emoji?: string; frequencySince?: string };
 /** dateKey -> ids of habits marked on that day */
 export type HabitLog = Record<string, string[]>;
 export type MonthGoal = {

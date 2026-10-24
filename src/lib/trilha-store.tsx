@@ -3,6 +3,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type Context,
   type ReactNode,
@@ -30,6 +31,7 @@ import { emitBlockXp, emitXp, foodItemCount } from "./xp-client";
 import { emptyFinance, type FinanceState } from "./finance";
 import { defaultNotifPrefs, type NotifPrefs } from "./push-reminders";
 import { consumePlannedMeal, skipPlannedMeal, repeatPlannedDays, copyPreviousMealWeek } from "./meal-planning";
+import { changeHabitMark, editHabit, normalizeHabits } from "./habits";
 
 export type TaskBioState = {
   plan: Plan;
@@ -82,7 +84,8 @@ type Store = TaskBioState & {
   clearWeek: (keys: string[]) => void;
   addExerciseLog: (entry: Omit<ExerciseLogEntry, "id">) => void;
   updateWorkout: (workout: Workout) => void;
-  addHabit: (name: string) => void;
+  addHabit: (name: string, options?: Pick<Habit, "frequency" | "weeklyTarget" | "emoji">) => void;
+  updateHabit: (id: string, patch: Pick<Habit, "name" | "frequency" | "weeklyTarget" | "emoji">) => void;
   removeHabit: (id: string) => void;
   toggleHabitStreak: (id: string) => void;
   toggleHabit: (date: string, id: string) => void;
@@ -135,13 +138,15 @@ const sortBlocks = unifyMealBlocks;
 export function TaskBioProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<TaskBioState>(initialState);
   const [ready, setReady] = useState(false);
+  const habitLogRef = useRef(state.habitLog);
+  habitLogRef.current = state.habitLog;
 
   useEffect(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
         const stored = JSON.parse(raw) as Partial<TaskBioState>;
-        setState({ ...initialState, ...stored, notifPrefs: { ...defaultNotifPrefs, ...stored.notifPrefs }, plan: normalizePlan(stored.plan) });
+        setState({ ...initialState, ...stored, habits: normalizeHabits(stored.habits ?? []), notifPrefs: { ...defaultNotifPrefs, ...stored.notifPrefs }, plan: normalizePlan(stored.plan) });
       }
     } catch {
       /* ignora estado inválido */
@@ -174,6 +179,7 @@ export function TaskBioProvider({ children }: { children: ReactNode }) {
         ...nextState,
         ...(nextState.notifPrefs ? { notifPrefs: { ...defaultNotifPrefs, ...nextState.notifPrefs } } : {}),
         ...(nextState.plan ? { plan: normalizePlan(nextState.plan) } : {}),
+        ...(nextState.habits ? { habits: normalizeHabits(nextState.habits) } : {}),
       })),
       toggleBlock: (day, blockId) => {
         const target = (state.plan[day] ?? []).find((b) => b.id === blockId);
@@ -320,16 +326,19 @@ export function TaskBioProvider({ children }: { children: ReactNode }) {
       addCustomFood: (food) => setState((s) => ({ ...s, customFoods: [food, ...(s.customFoods ?? []).filter((f) => f.id !== food.id)].slice(0, 500) })),
       addExerciseLog: (entry) => setState((s) => ({ ...s, exerciseLog: [{ ...entry, id: `x-${Date.now()}` }, ...(s.exerciseLog ?? [])].slice(0, 2000) })),
       updateWorkout: (workout) => setState((s) => ({ ...s, workouts: s.workouts.map((w) => w.id === workout.id ? workout : w) })),
-      addHabit: (name) => setState((s) => ({ ...s, habits: [...s.habits, { id: `h-${Date.now()}`, name, createdAt: new Date().toISOString() }] })),
+      addHabit: (name, options) => setState((s) => ({ ...s, habits: [...s.habits, { id: `h-${crypto.randomUUID()}`, name, createdAt: new Date().toISOString(), frequency: "daily", ...options }] })),
+      updateHabit: (id, patch) => setState(s => ({ ...s, habits: s.habits.map(h => h.id === id ? editHabit(h, patch, toDateKey(new Date())) : h) })),
       toggleHabitStreak: (id) => setState((s) => ({ ...s, habits: s.habits.map((h) => h.id === id ? { ...h, countsForStreak: h.countsForStreak === false } : h) })),
       removeHabit: (id) => setState((s) => ({ ...s, habits: s.habits.filter((h) => h.id !== id) })),
       toggleHabit: (date, id) => {
-        emitXp({ kind: "habit", ref: `${id}:${date}`, date, on: !(state.habitLog[date] ?? []).includes(id) });
-        setState((s) => {
-        const cur = s.habitLog[date] ?? [];
-        const next = cur.includes(id) ? cur.filter((x) => x !== id) : [...cur, id];
-        return { ...s, habitLog: { ...s.habitLog, [date]: next } };
-      });
+        const habit = state.habits.find(h => h.id === id);
+        if (!habit) return;
+        const before = habitLogRef.current;
+        const next = changeHabitMark(habit, before, date);
+        if (next === before) return;
+        habitLogRef.current = next;
+        emitXp({ kind: "habit", ref: `${id}:${date}`, date, on: !before[date]?.includes(id) });
+        setState(s => ({ ...s, habitLog: next }));
       },
       saveMonthGoal: (goal) => setState((s) => ({ ...s, monthGoals: s.monthGoals.some((g) => g.id === goal.id) ? s.monthGoals.map((g) => g.id === goal.id ? goal : g) : [...s.monthGoals, goal] })),
       removeMonthGoal: (id) => setState((s) => ({ ...s, monthGoals: s.monthGoals.filter((g) => g.id !== id) })),
