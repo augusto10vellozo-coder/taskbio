@@ -1,6 +1,6 @@
 // Pure XP rules shared by the server function and tests.
 export type XpKind = "habit" | "block" | "meal" | "workout" | "photo" | "reading" | "study";
-export const XP_POINTS: Record<XpKind, number> = { habit: 10, block: 5, meal: 5, workout: 10, photo: 5, reading: 10, study: 5 };
+export const XP_POINTS: Record<XpKind, number> = { habit: 10, block: 5, meal: 5, workout: 10, photo: 5, reading: 10, study: 10 };
 export const LEAGUE_DAILY_CAP = 100;
 
 /** Calendar day (yyyy-MM-dd) in Brasília time. */

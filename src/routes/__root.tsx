@@ -23,6 +23,7 @@ import { InviteManager } from "../components/InviteManager";
 import { PendingProfessionalInvites } from "../components/PendingProfessionalInvites";
 import { PrivacyConsent } from "../components/PrivacyConsent";
 import { ThemeProvider } from "../lib/theme-context";
+import { StudyTimerProvider } from "../components/StudyTimerProvider";
 
 function NotFoundComponent() {
   return (
@@ -140,6 +141,7 @@ function RootComponent() {
       <ThemeProvider>
       <AuthProvider>
         <TaskBioProvider>
+          <StudyTimerProvider>
           <div className="app-glow" />
           <AppHeader />
           <Outlet />
@@ -151,6 +153,7 @@ function RootComponent() {
           <InviteManager />
           <PendingProfessionalInvites />
           <Toaster position="top-center" richColors />
+          </StudyTimerProvider>
         </TaskBioProvider>
       </AuthProvider>
       </ThemeProvider>
