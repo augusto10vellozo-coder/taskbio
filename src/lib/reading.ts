@@ -7,7 +7,8 @@ export const READING_STATUS_LABEL = { lendo: "Lendo", concluido: "Concluído", q
 export type BookResult = { title: string; author: string; totalPages?: number | undefined; cover?: string | undefined };
 
 /** Percent of a book read; null when the total is unknown. */
-export function bookPercent(b: Pick<Book, "pagesRead" | "totalPages">) {
+export function bookPercent(b: Pick<Book, "pagesRead" | "totalPages" | "progressMode" | "progressPercent">) {
+  if (b.progressMode === "percent" && b.progressPercent !== undefined) return b.progressPercent;
   if (!b.totalPages || b.totalPages <= 0) return null;
   return Math.min(100, Math.round((b.pagesRead / b.totalPages) * 100));
 }
@@ -23,6 +24,38 @@ export function readingStreak(sessions: Pick<SessionEntry, "date">[], today: Dat
 }
 
 const norm = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+
+export const validReadingGoal = (value: number) => Number.isInteger(value) && value >= 30 && value <= 1680;
+export const validReadingPercent = (value: number) => Number.isFinite(value) && value >= 0 && value <= 100;
+export const READING_MILESTONES = [7, 30, 100];
+
+export function bestReadingStreak(sessions: Pick<SessionEntry, "date">[]) {
+  const days = [...new Set(sessions.map(s => s.date))].sort();
+  let best = 0, run = 0, previous = "";
+  for (const day of days) {
+    run = previous && format(addDays(new Date(`${previous}T12:00:00`), 1), "yyyy-MM-dd") === day ? run + 1 : 1;
+    best = Math.max(best, run); previous = day;
+  }
+  return best;
+}
+
+export function readingSummary(sessions: SessionEntry[]) {
+  return { sessions: sessions.length, minutes: sessions.reduce((n, s) => n + s.minutes, 0), pages: sessions.reduce((n, s) => n + (s.pages ?? 0), 0), books: new Set(sessions.map(s => s.bookId || norm(s.title)).filter(Boolean)).size };
+}
+
+export function remainingReadingMinutes(book: Book, sessions: SessionEntry[]) {
+  const measured = sessions.filter(s => s.bookId === book.id && (s.pages ?? 0) > 0 && s.minutes > 0);
+  const pages = measured.reduce((n, s) => n + (s.pages ?? 0), 0);
+  if (!book.totalPages || !pages) return null;
+  const pct = bookPercent(book);
+  const remainingPages = book.progressMode === "percent" && pct !== null ? book.totalPages * (1 - pct / 100) : book.totalPages - book.pagesRead;
+  return Math.max(0, Math.round(remainingPages * measured.reduce((n, s) => n + s.minutes, 0) / pages));
+}
+
+export function applyReadingProgress(book: Book, session: Pick<SessionEntry, "pages" | "progressMode" | "progressPercent">): Book {
+  if (session.progressMode === "percent") return { ...book, progressMode: "percent", progressPercent: session.progressPercent ?? bookPercent(book) ?? 0 };
+  return { ...book, progressMode: "pages", pagesRead: book.totalPages ? Math.min(book.totalPages, book.pagesRead + (session.pages ?? 0)) : book.pagesRead + (session.pages ?? 0) };
+}
 
 /** Old free-text sessions whose title matches the book are linked to it. */
 export function linkLegacySessions(sessions: SessionEntry[], book: Pick<Book, "id" | "title">) {
