@@ -85,6 +85,13 @@
       "when": 1792801405167,
       "tag": "0011_habit_weekly_xp_guard",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1792805561436,
+      "tag": "0012_reading_daily_xp_guard",
+      "breakpoints": true
     }
   ]
 }
