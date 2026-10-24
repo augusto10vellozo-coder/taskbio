@@ -13,7 +13,7 @@ import { useAuth } from "@/lib/auth-context";
 import { useTaskBio } from "@/lib/trilha-store";
 import { mealSummary } from "@/lib/meal-summary";
 import { getWeekDates, toDateKey } from "@/lib/calendar-utils";
-import { progressKinds as kinds, normalizeProgressName, progressChartData, progressXAxis, progressYAxis, progressPayload, progressValueError, weeklyGoalProgress, type ProgressEntry } from "@/lib/progress";
+import { progressKinds as kinds, progressChartData, progressXAxis, progressYAxis, progressPayload, progressValueError, weeklyGoalProgress, type ProgressEntry } from "@/lib/progress";
 import { useProgressEntries } from "@/lib/use-progress-entries";
 
 export const Route = createFileRoute("/progresso")({
