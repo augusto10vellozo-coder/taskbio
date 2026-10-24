@@ -157,7 +157,7 @@ function Financas() {
         </form>
         <ul className="mt-3 divide-y divide-line">{sortBills(f.bills).map((b) => { const st = billStatus(b, todayKey); return (
           <li key={b.id} className={`flex flex-wrap items-center gap-x-3 gap-y-1 py-2 text-sm ${st.kind === "paga" ? "opacity-60" : ""}`}>
-            <div className="min-w-0 flex-1"><p className={`break-words font-medium ${st.kind === "paga" ? "line-through" : ""}`}>{st.kind === "paga" && <Check className="mr-1 inline size-4 text-good" />}{b.title}</p>
+            <div className="min-w-0 basis-full sm:basis-auto sm:flex-1"><p className={`break-words font-medium ${st.kind === "paga" ? "line-through" : ""}`}>{st.kind === "paga" && <Check className="mr-1 inline size-4 text-good" />}{b.title}</p>
               <p className={`text-xs ${st.kind === "atrasada" ? "font-semibold text-destructive" : st.kind === "hoje" ? "font-semibold text-brand-deep" : "text-steel"}`}>{st.label} · {b.dueDate.split("-").reverse().join("/")} · {b.category || "Contas fixas"}</p></div>
             <span className="font-medium">{brl(b.amount)}</span>
             <Button size="sm" variant={b.paid ? "outline" : "default"} onClick={() => { if (b.paid) { setFinance((s) => unpayBill(s, b.id)); toast.success("Conta desmarcada · gasto removido"); } else { setFinance((s) => payBill(s, b.id, todayKey)); toast.success(`Conta paga · gasto de ${brl(b.amount)} lançado`); } }}>{b.paid ? "Desmarcar" : "Marcar como paga"}</Button>
