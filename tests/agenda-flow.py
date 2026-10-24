@@ -43,7 +43,7 @@ async def main():
     await page.evaluate("window.scrollTo(0,document.documentElement.scrollHeight)")
     await page.wait_for_timeout(100)
     header=page.get_by_label('Navegação de datas',exact=True)
-     box=await header.bounding_box(); assert box and abs(box['y'])<=1 and box['y']+box['height']<height
+    box=await header.bounding_box(); assert box and abs(box['y'])<=1 and box['y']+box['height']<height
     assert await header.get_by_role('button',name='Voltar',exact=True).is_visible()
     assert 'segunda-feira, 11 de janeiro' in await header.inner_text()
     fab=await page.get_by_role('button',name='Adicionar bloco',exact=True).bounding_box()
@@ -51,9 +51,9 @@ async def main():
     assert fab and last and last['y']+last['height']<=fab['y'],(last,fab)
     assert await page.evaluate('document.documentElement.scrollWidth <= innerWidth')
     await page.screenshot(path=f'/tmp/browser/agenda-update/scroll-{width}.png')
-     await header.get_by_role('button',name='Próximo dia',exact=True).click()
+    await header.get_by_role('button',name='Próximo dia',exact=True).click()
     assert 'terça-feira, 12 de janeiro' in await header.inner_text()
-     await header.get_by_role('button',name='Dia anterior',exact=True).click()
+    await header.get_by_role('button',name='Dia anterior',exact=True).click()
     await page.get_by_role('button',name='Adicionar bloco',exact=True).click()
     assert await page.get_by_label('Título',exact=True).is_visible()
     form=page.locator('#linha-do-dia form'); formbox=await form.bounding_box(); box=await header.bounding_box()
