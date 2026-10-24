@@ -1,0 +1,20 @@
+import { describe, expect, it } from "vitest";
+import { canMarkHabit, changeHabitMark, editHabit, habitConsistency, habitMilestone, habitStreak, normalizeHabits, weekMarks } from "./habits";
+import type { Habit, HabitLog } from "./engagement";
+import { cappedWeekXp, xpFor } from "./xp";
+const daily: Habit = { id: "h", name: "Ler", createdAt: "2026-09-01", frequency: "daily" };
+const weekly: Habit = { ...daily, frequency: "weekly", weeklyTarget: 3 };
+const logFor = (dates: string[]): HabitLog => Object.fromEntries(dates.map(d => [d, ["h"]]));
+describe("habit frequency rules", () => {
+  it("migrates legacy habits to daily without losing fields", () => { expect(normalizeHabits([{ id: "h", name: "Ler", createdAt: "2026-09-01" }])[0]?.frequency).toBe("daily"); });
+  it("blocks a fourth mark at a weekly target of three", () => { const log = logFor(["2026-10-19", "2026-10-20", "2026-10-21"]); expect(weekMarks(weekly, log, "2026-10-25")).toBe(3); expect(canMarkHabit(weekly, log, "2026-10-22")).toBe(false); expect(changeHabitMark(weekly, log, "2026-10-22")).toBe(log); });
+  it("allows unmark at the cap and unlocks remaining cells", () => { const log = logFor(["2026-10-19", "2026-10-20", "2026-10-21"]); const next = changeHabitMark(weekly, log, "2026-10-20"); expect(weekMarks(weekly, next, "2026-10-22")).toBe(2); expect(canMarkHabit(weekly, next, "2026-10-22")).toBe(true); });
+  it("daily streak of five remains valid before today's mark", () => { const log = logFor(["2026-10-19", "2026-10-20", "2026-10-21", "2026-10-22", "2026-10-23"]); expect(habitStreak(daily, log, "2026-10-23")).toBe(5); expect(habitStreak(daily, log, "2026-10-24")).toBe(5); expect(habitStreak(daily, log, "2026-10-25")).toBe(0); });
+  it("weekly streak counts three completed weeks and tolerates ongoing week", () => { const log = logFor(["2026-10-05", "2026-10-06", "2026-10-07", "2026-10-12", "2026-10-13", "2026-10-14", "2026-10-19", "2026-10-20", "2026-10-21"]); expect(habitStreak(weekly, log, "2026-10-23")).toBe(3); expect(habitStreak(weekly, log, "2026-10-28")).toBe(3); expect(habitStreak(weekly, log, "2026-11-02")).toBe(0); });
+  it("changing format resets calculation from the current week and preserves checks", () => { const log = logFor(["2026-10-12", "2026-10-13", "2026-10-14", "2026-10-19", "2026-10-20", "2026-10-21"]); const copy = structuredClone(log); const edited = editHabit(daily, { name: "Ler", frequency: "weekly", weeklyTarget: 3 }, "2026-10-23"); expect(edited.frequencySince).toBe("2026-10-19"); expect(habitStreak(edited, log, "2026-10-23")).toBe(1); expect(log).toEqual(copy); });
+  it("daily expected days equal 35", () => { const dates = Array.from({ length: 28 }, (_, i) => `2026-10-${String(i + 1).padStart(2, "0")}`); expect(habitConsistency([daily], logFor(dates), "2026-10-28")).toEqual({ percent: 80, recent: false }); });
+  it("weekly expected marks equal target times five", () => { const dates = Array.from({ length: 12 }, (_, i) => `2026-10-${String(i + 1).padStart(2, "0")}`); expect(habitConsistency([weekly], logFor(dates), "2026-10-23").percent).toBe(80); });
+  it("recent habit uses days since creation", () => { const h = { ...daily, createdAt: "2026-10-21" }; expect(habitConsistency([h], logFor(["2026-10-21", "2026-10-22"]), "2026-10-23")).toEqual({ percent: 67, recent: true }); });
+  it("uses the requested daily and weekly milestones", () => { for (const n of [7,30,100]) expect(habitMilestone(daily, n)).toBe(true); for (const n of [4,12,52]) expect(habitMilestone(weekly, n)).toBe(true); expect(habitMilestone(weekly, 7)).toBe(false); });
+  it("keeps habit XP at ten per current-day mark, independent of frequency", () => { expect(xpFor({ kind: "habit", date: "2026-10-23" }, "2026-10-23")).toBe(10); expect(xpFor({ kind: "habit", date: "2026-10-22" }, "2026-10-23")).toBe(0); const events = [1,2,3].map(() => ({ day: "2026-10-23", points: 10 })); expect(cappedWeekXp(events)).toBe(30); expect(cappedWeekXp(events.slice(1))).toBe(20); });
+});
