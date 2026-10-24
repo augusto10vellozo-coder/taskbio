@@ -18,7 +18,7 @@ async def main():
   # Create temporary future rest blocks so no daily XP is eligible.
   await page.evaluate("sessionStorage.setItem('trilha:selected-date','2027-01-11')")
   await page.goto('http://localhost:8080/agenda',wait_until='networkidle')
-  titles=[f'Verificação Agenda {i}' for i in range(10)]
+  titles=[f'Verificação Agenda {i}' for i in range(20)]
   for title in titles:
    rows=timeline.locator('li').filter(has=page.get_by_text(title,exact=True))
    while await rows.count(): await rows.first.get_by_role('button',name='Remover bloco',exact=True).click()
