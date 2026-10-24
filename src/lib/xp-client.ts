@@ -35,6 +35,7 @@ export function emitXp(input: { kind: XpKind; ref: string; date: string; on: boo
 export const foodItemCount = (b: Pick<Block, "manualMeal">) => (b.manualMeal?.items ?? []).filter((i) => i.foodId).length;
 
 export function emitBlockXp(date: string, block: Block, on: boolean) {
+  if (block.kind === "leitura") return;
   if (block.kind === "treino") emitXp({ kind: "workout", ref: block.id, date, on });
   else if (block.kind === "refeicao") emitXp({ kind: "meal", ref: block.id, date, on, foodItems: foodItemCount(block) });
   else emitXp({ kind: "block", ref: block.id, date, on });

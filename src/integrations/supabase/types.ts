@@ -625,6 +625,15 @@ export type Database = {
         }
         Returns: number
       }
+      record_reading_xp: {
+        Args: {
+          _date: string
+          _on: boolean
+          _session_id: string
+          _user_id: string
+        }
+        Returns: number
+      }
       search_profiles: {
         Args: { _q: string }
         Returns: {

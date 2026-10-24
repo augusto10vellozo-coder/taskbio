@@ -10,7 +10,7 @@ export const DAYS = [
 
 export type DayKey = (typeof DAYS)[number]["key"];
 
-export type BlockKind = "refeicao" | "treino" | "compromisso" | "descanso";
+export type BlockKind = "refeicao" | "treino" | "compromisso" | "descanso" | "leitura";
 
 export type Macros = { kcal: number; prot: number; carb: number; gord: number };
 
@@ -105,6 +105,8 @@ export type Block = {
     kcalOverride?: number | undefined;
   };
   workoutId?: string;
+  readingBookId?: string;
+  durationMinutes?: number;
   reminderMinutes?: number;
   photoPath?: string;
   recurrence?: "none" | "weekdays" | "daily";
@@ -428,6 +430,7 @@ export const formatIngredientAmount = (amount: number, unit: string) =>
   `${amount.toLocaleString("pt-BR", { maximumFractionDigits: 2 })} ${unit}`;
 
 export const KIND_LABEL: Record<BlockKind, string> = {
+  leitura: "Leitura",
   refeicao: "Refeição",
   treino: "Atividade física",
   compromisso: "Compromisso",

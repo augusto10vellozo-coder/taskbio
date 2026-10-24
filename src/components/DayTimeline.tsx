@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { Bell, Check, Pencil, Plus, Trash2, X } from "lucide-react";
+import { Bell, BookOpen, Check, Pencil, Plus, Trash2, X } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { KIND_LABEL, brl, type Block, type BlockKind } from "@/lib/trilha-data";
 import { useTaskBio } from "@/lib/trilha-store";
@@ -10,6 +11,7 @@ import { exerciseSeries } from "@/lib/training-session";
 import { RestTimer } from "@/components/RestTimer";
 
 const dotColor: Record<BlockKind, string> = {
+  leitura: "ring-accent",
   refeicao: "ring-good",
   treino: "ring-brand",
   compromisso: "ring-steel",
@@ -83,6 +85,7 @@ export function DayTimeline({
                     <span className="font-display font-medium text-ink">{b.time}</span>
                     <span className="size-1 rounded-full bg-line" />
                     {KIND_LABEL[b.kind]}
+                    {b.kind === "leitura" && <BookOpen className="size-3.5 text-accent" />}
                   </div>
 
                   <div className={`mt-2 rounded-xl p-3 ring-1 ring-black/5 ${workout ? "rail glass pl-4" : "glass"}`}>
@@ -91,7 +94,7 @@ export function DayTimeline({
                       <div className="flex min-w-0 flex-wrap items-center gap-1.5 sm:justify-end">
                         {b.endTime && <span className="text-[11px] text-steel">{b.time} — {b.endTime}</span>}
                         {b.reminderMinutes ? <span title={`Lembrete ${b.reminderMinutes} minutos antes`} className="text-brand-deep"><Bell className="size-3.5" /></span> : null}
-                        <Button
+                        {b.kind === "leitura" && !b.done ? <Button asChild variant="ghost" size="sm" className="text-accent"><Link to="/leitura" search={{ blockId: b.id, date: dateKey }}><BookOpen className="size-3.5" /> Registrar</Link></Button> : <Button
                           variant="ghost"
                           size="sm"
                           aria-label={`${b.done ? "Desmarcar" : "Concluir"} ${b.title}`}
@@ -102,8 +105,8 @@ export function DayTimeline({
                           }`}
                         >
                           {b.done && <Check className="size-3.5" />}{b.done ? "Feito" : "Concluir"}
-                        </Button>
-                        <PhotoBonus date={dateKey} block={b} />
+                        </Button>}
+                        {b.kind !== "leitura" && <PhotoBonus date={dateKey} block={b} />}
                         <Button variant="ghost" size="icon" onClick={() => setEditing(b)} className="size-7 text-steel" aria-label="Editar bloco" title="Editar">
                           <Pencil className="size-3.5" />
                         </Button>
@@ -202,6 +205,9 @@ function AddBlockForm({
   submitLabel?: string;
   suggestions?: string[];
 }) {
+  const { trackers } = useTaskBio();
+  const [readingBookId, setReadingBookId] = useState(initial?.readingBookId ?? "");
+  const [durationMinutes, setDurationMinutes] = useState(initial?.durationMinutes?.toString() ?? "30");
   const [time, setTime] = useState(initial?.time ?? "07:00");
   const [endTime, setEndTime] = useState(initial?.endTime ?? "");
   const [kind, setKind] = useState<BlockKind>(initial?.kind ?? "compromisso");
@@ -220,6 +226,7 @@ function AddBlockForm({
           time,
           kind,
           title: title.trim(),
+          ...(kind === "leitura" ? { readingBookId, durationMinutes: Number(durationMinutes) } : {}),
           recurrence: recurrence ?? "none",
           ...(endTime ? { endTime } : {}),
           ...(note.trim() ? { note: note.trim() } : {}),
@@ -249,7 +256,9 @@ function AddBlockForm({
         <option value="refeicao">Refeição</option>
         <option value="treino">Atividade física</option>
         <option value="descanso">Descanso</option>
+        <option value="leitura">Leitura</option>
       </select></label>
+      {kind === "leitura" && <><label className="text-xs font-medium text-steel">Duração (min)<input required type="number" min="1" value={durationMinutes} onChange={e => setDurationMinutes(e.target.value)} className="mt-1.5 w-full rounded-lg bg-background px-2 py-1.5 text-sm ring-1 ring-line" /></label><label className="text-xs font-medium text-steel">Livro (opcional)<select value={readingBookId} onChange={e => setReadingBookId(e.target.value)} className="mt-1.5 w-full rounded-lg bg-background px-2 py-1.5 text-sm ring-1 ring-line"><option value="">Sem livro vinculado</option>{(trackers.books ?? []).map(b => <option key={b.id} value={b.id}>{b.title}</option>)}</select></label></>}
       <label className="text-xs font-medium text-steel">Título<input
         value={title}
         onChange={(e) => setTitle(e.target.value)}
