@@ -99,6 +99,13 @@
       "when": 1792806607307,
       "tag": "0013_study_daily_xp_guard",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1792852417161,
+      "tag": "0014_shared_health_weight_history",
+      "breakpoints": true
     }
   ]
 }

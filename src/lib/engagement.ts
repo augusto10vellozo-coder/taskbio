@@ -16,12 +16,14 @@ export type MonthGoal = {
 };
 export type HealthLog = {
   waterGoal: number;
+  sleepGoal?: number;
   water: Record<string, number>;
   sleep: Record<string, number>;
   weight: Record<string, number>;
-  meds?: { id: string; name: string; time: string }[];
+  meds?: Medication[];
   medsTaken?: Record<string, string[]>;
 };
+export type Medication = { id: string; name: string; time: string; intervalHours?: 4 | 6 | 8 | 12 | 24; startDate?: string; endDate?: string };
 export type SessionEntry = { id: string; date: string; minutes: number; title: string; bookId?: string; pages?: number; progressMode?: "pages" | "percent"; progressPercent?: number; agendaBlockId?: string; subjectId?: string; learned?: string };
 export type Subject = { id: string; name: string; color: string; weeklyGoalMin?: number; dailyGoalMin?: number; normalizedName?: string };
 export type Exam = { id: string; subjectId: string; subjectName?: string; title: string; date: string; done?: boolean };

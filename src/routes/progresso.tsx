@@ -1,6 +1,6 @@
 import { ModuleHeader } from "@/components/ModuleHeader";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useMemo, useState, type FormEvent } from "react";
 import { format, isAfter, parseISO, subDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Activity, Plus, Trash2 } from "lucide-react";
@@ -13,7 +13,8 @@ import { useAuth } from "@/lib/auth-context";
 import { useTaskBio } from "@/lib/trilha-store";
 import { mealSummary } from "@/lib/meal-summary";
 import { getWeekDates, toDateKey } from "@/lib/calendar-utils";
-import { progressKinds as kinds, normalizeProgressName, progressChartData, progressXAxis, progressYAxis, progressPayload, progressValueError, weeklyGoalProgress, type ProgressEntry } from "@/lib/progress";
+import { progressKinds as kinds, progressChartData, progressXAxis, progressYAxis, progressPayload, progressValueError, weeklyGoalProgress, type ProgressEntry } from "@/lib/progress";
+import { useProgressEntries } from "@/lib/use-progress-entries";
 
 export const Route = createFileRoute("/progresso")({
   head: () => ({ meta: [
@@ -32,8 +33,7 @@ const chartConfig = { value: { label: "Valor", color: "var(--brand)" } } satisfi
 function Progresso() {
   const { user, loading: authLoading } = useAuth();
   const { plan, workoutHistory, getMeal, weeklyGoals, setWeeklyGoals } = useTaskBio();
-  const [entries, setEntries] = useState<ProgressEntry[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { entries, loading, saved, removed, saveWeight } = useProgressEntries();
   const [period, setPeriod] = useState<7 | 30 | 90>(30);
   const [kind, setKind] = useState<keyof typeof kinds>("weight");
   const [value, setValue] = useState("");
@@ -41,19 +41,6 @@ function Progresso() {
   const [valueError, setValueError] = useState<string | null>(null);
   const [notes, setNotes] = useState("");
   const [date, setDate] = useState(() => toDateKey(new Date()));
-
-  useEffect(() => {
-    if (authLoading) return;
-    if (!user) { setLoading(false); return; }
-    let active = true;
-    supabase.from("progress_entries").select("id, entry_date, kind, value, unit, label, notes").eq("user_id", user.id).order("entry_date", { ascending: true }).then(({ data, error }) => {
-      if (!active) return;
-      if (error) toast.error("Não foi possível carregar seus registros.");
-      setEntries(((data as ProgressEntry[] | null) ?? []).map((entry) => ({ ...entry, label: normalizeProgressName(entry.label) })));
-      setLoading(false);
-    });
-    return () => { active = false; };
-  }, [authLoading, user?.id]);
 
   const filtered = useMemo(() => {
     const cutoff = subDays(new Date(), period);
@@ -88,16 +75,21 @@ function Progresso() {
     setValueError(errorMessage);
     if (errorMessage) return;
     const payload = { user_id: user.id, entry_date: date, ...progressPayload(kind, value, detail, notes) };
+    if (kind === "weight") {
+      try { await saveWeight(date, payload.value, payload.notes); }
+      catch { toast.error("Não foi possível salvar o registro."); return; }
+      setValue(""); setDetail(""); setNotes(""); setValueError(null); toast.success("Progresso registrado."); return;
+    }
     const { data, error } = await supabase.from("progress_entries").insert(payload).select("id, entry_date, kind, value, unit, label, notes").single();
     if (error || !data) { toast.error("Não foi possível salvar o registro."); return; }
-    setEntries((current) => [...current, data as ProgressEntry].sort((a, b) => a.entry_date.localeCompare(b.entry_date)));
+    saved(data as ProgressEntry);
     setValue(""); setDetail(""); setNotes(""); setValueError(null); toast.success("Progresso registrado.");
   }
 
   async function removeEntry(id: string) {
     const { error } = await supabase.from("progress_entries").delete().eq("id", id);
     if (error) { toast.error("Não foi possível remover o registro."); return; }
-    setEntries((current) => current.filter((entry) => entry.id !== id));
+    removed(id);
   }
 
   if (!authLoading && !user) return <main className="mx-auto max-w-4xl px-5 pb-16"><ModuleHeader title="Progresso" /><div className="pt-8 text-center"><Activity className="mx-auto size-9 text-brand-deep" /><h2 className="mt-4 font-display text-2xl font-semibold">Seu progresso começa com sua conta</h2><p className="mx-auto mt-2 max-w-lg text-sm text-steel">Entre pra guardar seus registros e ver sua evolução.</p><Button asChild className="mt-6"><Link to="/auth">Entrar ou criar conta</Link></Button></div></main>;
