@@ -19,6 +19,14 @@ export const recordXp = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const ref = `${data.kind}:${data.ref}`;
+    if (data.kind === "habit") {
+      const suffix = `:${data.date}`;
+      if (!data.ref.endsWith(suffix)) return { points: 0 };
+      const habitId = data.ref.slice(0, -suffix.length);
+      const { data: points, error } = await supabaseAdmin.rpc("record_habit_xp", { _user_id: context.userId, _habit_id: habitId, _date: data.date, _on: data.on });
+      if (error) throw new Error("Não foi possível atualizar os pontos do hábito.");
+      return { points: points ?? 0 };
+    }
     if (!data.on) {
       await supabaseAdmin.from("xp_events").delete().eq("user_id", context.userId).eq("ref", ref);
       return { points: 0 };
