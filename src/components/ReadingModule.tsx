@@ -5,13 +5,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { recordXp } from "@/lib/social.functions";
 import { XP_EVENT } from "@/lib/xp-client";
 import { brasiliaDay } from "@/lib/xp";
-import { BookOpen, Check, Flame, Loader2, Plus, Quote as QuoteIcon, Search, Star, Trash2 } from "lucide-react";
+import { BookOpen, Check, Loader2, Plus, Quote as QuoteIcon, Search, Star, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { ModuleHeader } from "@/components/ModuleHeader";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useTaskBio } from "@/lib/trilha-store";
-import { toDateKey } from "@/lib/calendar-utils";
 import { lastDays, type Book, type BookStatus } from "@/lib/engagement";
 import { bookPercent, DEFAULT_READING_GOAL, linkLegacySessions, READING_STATUS_LABEL, readingStreak, searchBooks, type BookResult } from "@/lib/reading";
 import { bestReadingStreak, readingSummary, remainingReadingMinutes, validReadingGoal, validReadingPercent, READING_MILESTONES } from "@/lib/reading";
@@ -70,13 +69,12 @@ export function ReadingModule() {
     return () => { clearTimeout(t); ctrl.abort(); };
   }, [q]);
 
-  const reading = books.filter((b) => b.status === "lendo");
-  const streak = useMemo(() => readingStreak(sessions, new Date()), [sessions]);
+  const streak = useMemo(() => today ? readingStreak(sessions, new Date(`${today}T12:00:00`)) : 0, [sessions, today]);
   const best = bestReadingStreak(sessions);
   const summary = readingSummary(sessions);
   if (!today) return <main className="mx-auto max-w-4xl px-5 pt-8"><div className="h-60 animate-pulse rounded-lg bg-mist" /></main>;
 
-  const week = lastDays(new Date(), 7);
+  const week = lastDays(new Date(`${today}T12:00:00`), 7);
   const weekMin = sessions.filter((e) => week.includes(e.date)).reduce((n, e) => n + e.minutes, 0);
   const todayMin = sessions.filter((e) => e.date === today).reduce((n, e) => n + e.minutes, 0);
 
@@ -124,7 +122,7 @@ export function ReadingModule() {
               } else toast.success("Sessão registrada");
             } catch { toast.warning("Sessão salva. Não foi possível registrar o XP."); }
             finally { setBusy(false); }
-            const nextStreak = readingStreak([{ date }, ...sessions], new Date());
+            const nextStreak = readingStreak([{ date }, ...sessions], new Date(`${today}T12:00:00`));
             if (READING_MILESTONES.includes(nextStreak) && nextStreak > streak) toast.success(`🔥 ${nextStreak} dias seguidos de leitura!`);
           }}>
             <select aria-label="Livro" value={sel.bookId} onChange={(e) => setSel((s) => ({ ...s, bookId: e.target.value, mode: books.find(b => b.id === e.target.value)?.progressMode ?? "pages", pages: "" }))} className={`${input} col-span-2`}>
