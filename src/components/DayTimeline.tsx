@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { Bell, BookOpen, Check, Pencil, Plus, Trash2, X } from "lucide-react";
+import { Bell, BookOpen, Check, Pencil, Plus, Trash2, Wallet, X } from "lucide-react";
+import { billRemindersOn, brl as brlFinance } from "@/lib/finance";
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { KIND_LABEL, brl, type Block, type BlockKind } from "@/lib/trilha-data";
@@ -31,7 +32,7 @@ export function DayTimeline({
   id?: string;
   className?: string;
 }) {
-  const { plan, getMeal, getWorkout, toggleBlock, removeBlock, addBlock, updateBlock } = useTaskBio();
+  const { plan, getMeal, getWorkout, toggleBlock, removeBlock, addBlock, updateBlock, finance } = useTaskBio();
   const [openWorkout, setOpenWorkout] = useState<string | null>("w1");
   const [editing, setEditing] = useState<Block | null>(null);
   const blocks = plan[dateKey] ?? [];
@@ -68,6 +69,14 @@ export function DayTimeline({
               onCancel={() => onAddingChange(false)}
             />
           )}
+
+          {billRemindersOn(finance?.bills ?? [], dateKey).map((bill) => (
+            <Link key={bill.id} to="/financas" className="mb-3 flex items-center gap-3 rounded-lg bg-mist/60 px-3 py-2 text-sm ring-1 ring-line" aria-label={`Conta a pagar: ${bill.title}`}>
+              <Wallet className="size-4 shrink-0 text-accent" />
+              <span className="min-w-0 flex-1 break-words"><span className="text-[10px] font-medium uppercase tracking-wide text-steel">Conta a pagar · vence amanhã</span><br />{bill.title}</span>
+              <span className="shrink-0 font-medium">{brlFinance(bill.amount)}</span>
+            </Link>
+          ))}
 
           {blocks.length === 0 && <p className="text-sm text-steel">Nenhum bloco para este dia. Adicione o primeiro.</p>}
 

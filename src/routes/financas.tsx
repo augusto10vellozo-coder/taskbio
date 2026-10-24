@@ -26,7 +26,7 @@ export const Route = createFileRoute("/financas")({
 let sessionMonth: string | null = null;
 
 const field = "h-10 rounded-md bg-background px-3 text-sm ring-1 ring-line";
-const num = (v: string) => Number(v.replace(/\./g, "").replace(",", ".")) || Number(v.replace(",", "."));
+const num = (v: string) => { const t = v.replace(/[R$\s]/g, ""); return Number(t.includes(",") ? t.replace(/\./g, "").replace(",", ".") : t); };
 const monthLabel = (m: string) => { const s = format(parseISO(`${m}-01`), "MMMM 'de' yyyy", { locale: ptBR }); return s[0]!.toUpperCase() + s.slice(1); };
 const emptyBill = { title: "", amount: "", dueDate: "", category: "Contas fixas" };
 
