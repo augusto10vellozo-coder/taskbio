@@ -1,5 +1,5 @@
 # Roadmap
-- [ ] Hábitos: formulário diário/semanal, edição preservando histórico, limite semanal, sequências e mapa; validar XP e fluxo autenticado; backup pelo Histórico indisponível
+- [x] Hábitos: formulário diário/semanal, edição e histórico, limites, sequências e mapa; 25 testes e fluxo autenticado em 360/390/1280px confirmaram bloqueio da quarta marcação e XP, reversão exata de 10 XP, cliques rápidos e reabertura; dados originais restaurados; backup pelo Histórico indisponível
 - [x] Corrigir Progresso: 26 testes e fluxo autenticado validaram eixos 84,5–88,5, distância real de seis dias, nomes, unidades, salvamento/reabertura sem detalhe, ponto único, vazio e meta 120%; valores/datas/observações originais conferidos por hash idêntico, teste removido; backup pelo Histórico indisponível
 - [x] Planejamento etapa 2: atalhos de refeição/dia/semana e Compras com período, prévia, origem e atualização explícita; 42 testes passaram e fluxo autenticado confirmou cópias, carrinho persistido e lista intacta até atualizar em 360/390px; conta restaurada; backup pelo Histórico indisponível
 - [x] Alimentação: Planejar/Registrar, consumo no mesmo ID, previsão original, pular e repetir; 22 testes e fluxo na conta com reabertura de consumida/pulada passaram; itens de teste removidos, compras preservadas; backup pelo Histórico indisponível
