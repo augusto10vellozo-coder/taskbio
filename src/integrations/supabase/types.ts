@@ -223,6 +223,7 @@ export type Database = {
           kind: string
           label: string
           notes: string | null
+          superseded: boolean
           unit: string
           updated_at: string
           user_id: string
@@ -235,6 +236,7 @@ export type Database = {
           kind: string
           label: string
           notes?: string | null
+          superseded?: boolean
           unit: string
           updated_at?: string
           user_id: string
@@ -247,6 +249,7 @@ export type Database = {
           kind?: string
           label?: string
           notes?: string | null
+          superseded?: boolean
           unit?: string
           updated_at?: string
           user_id?: string
@@ -460,6 +463,7 @@ export type Database = {
       user_data: {
         Row: {
           created_at: string
+          health_weight_imported_at: string | null
           meals: Json
           plan: Json
           settings: Json
@@ -470,6 +474,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          health_weight_imported_at?: string | null
           meals?: Json
           plan?: Json
           settings?: Json
@@ -480,6 +485,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          health_weight_imported_at?: string | null
           meals?: Json
           plan?: Json
           settings?: Json
@@ -642,6 +648,28 @@ export type Database = {
           _user_id: string
         }
         Returns: number
+      }
+      save_progress_weight: {
+        Args: { _date: string; _notes?: string; _value: number }
+        Returns: {
+          created_at: string
+          entry_date: string
+          id: string
+          kind: string
+          label: string
+          notes: string | null
+          superseded: boolean
+          unit: string
+          updated_at: string
+          user_id: string
+          value: number
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "progress_entries"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       search_profiles: {
         Args: { _q: string }
