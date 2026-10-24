@@ -1,7 +1,7 @@
 import { addDays, differenceInCalendarDays, format, getDaysInMonth, parseISO } from "date-fns";
 
-export type FinanceEntry = { id: string; date: string; amount: number; description: string; category: string; type: "gasto" | "receita"; billId?: string; source?: "compras" };
-export type Bill = { id: string; title: string; amount: number; dueDate: string; category?: string; paid?: boolean; paidDate?: string };
+export type FinanceEntry = { id: string; date: string; amount: number; description: string; category: string; type: "gasto" | "receita"; billId?: string | undefined; source?: "compras" };
+export type Bill = { id: string; title: string; amount: number; dueDate: string; category?: string; paid?: boolean; paidDate?: string | undefined };
 export type ShoppingRecord = { signature: string; amount: number; date: string };
 export type FinanceState = { entries: FinanceEntry[]; bills: Bill[]; monthlyBudget: number; budgets?: Record<string, number>; customCategories: string[]; shoppingRecord?: ShoppingRecord };
 
