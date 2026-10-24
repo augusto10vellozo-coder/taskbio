@@ -1,4 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
+import { useSearch } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
+import { supabase } from "@/integrations/supabase/client";
+import { recordXp } from "@/lib/social.functions";
+import { XP_EVENT } from "@/lib/xp-client";
+import { brasiliaDay } from "@/lib/xp";
 import { BookOpen, Check, Flame, Loader2, Plus, Quote as QuoteIcon, Search, Star, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { ModuleHeader } from "@/components/ModuleHeader";
@@ -8,7 +14,7 @@ import { useTaskBio } from "@/lib/trilha-store";
 import { toDateKey } from "@/lib/calendar-utils";
 import { lastDays, type Book, type BookStatus } from "@/lib/engagement";
 import { bookPercent, DEFAULT_READING_GOAL, linkLegacySessions, READING_STATUS_LABEL, readingStreak, searchBooks, type BookResult } from "@/lib/reading";
-import { emitXp } from "@/lib/xp-client";
+import { bestReadingStreak, readingSummary, remainingReadingMinutes, validReadingGoal, validReadingPercent, READING_MILESTONES } from "@/lib/reading";
 
 const input = "h-10 min-w-0 rounded-md bg-background px-3 text-sm ring-1 ring-line";
 
@@ -19,7 +25,14 @@ export function Cover({ book, className = "h-24 w-16" }: { book: Pick<Book, "tit
 }
 
 export function ReadingModule() {
-  const { trackers, setTrackers } = useTaskBio();
+  const { trackers, setTrackers, plan, ready, registerReading } = useTaskBio();
+  const search = useSearch({ from: "/leitura" });
+  const updateXp = useServerFn(recordXp);
+  const agendaBlock = search.date ? plan[search.date]?.find(b => b.id === search.blockId && b.kind === "leitura") : undefined;
+  const [prefilled, setPrefilled] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [xpNote, setXpNote] = useState("");
+  const [goalDraft, setGoalDraft] = useState("");
   const books = trackers.books ?? [];
   const sessions = trackers.leitura ?? [];
   const goal = trackers.readingGoal ?? DEFAULT_READING_GOAL;
@@ -30,10 +43,21 @@ export function ReadingModule() {
   const [loading, setLoading] = useState(false);
   const [manual, setManual] = useState(false);
   const [m, setM] = useState({ title: "", author: "", pages: "" });
-  const [sel, setSel] = useState({ bookId: "", minutes: "", pages: "" });
+  const [sel, setSel] = useState({ bookId: "", minutes: "", pages: "", mode: "pages" as "pages" | "percent" });
   const [openId, setOpenId] = useState<string | null>(null);
   const [rateId, setRateId] = useState<string | null>(null);
-  useEffect(() => setToday(toDateKey(new Date())), []);
+  useEffect(() => {
+    const refresh = () => setToday(brasiliaDay(new Date()));
+    refresh(); const timer = window.setInterval(refresh, 60000);
+    return () => window.clearInterval(timer);
+  }, []);
+  useEffect(() => setGoalDraft(String(goal)), [goal]);
+  useEffect(() => {
+    if (!ready || !agendaBlock || prefilled === agendaBlock.id) return;
+    const book = books.find(b => b.id === agendaBlock.readingBookId);
+    setSel({ bookId: book?.id ?? "", minutes: String(agendaBlock.durationMinutes ?? 30), pages: "", mode: book?.progressMode ?? "pages" });
+    setPrefilled(agendaBlock.id);
+  }, [ready, agendaBlock, books, prefilled]);
 
   useEffect(() => {
     const term = q.trim();
@@ -47,8 +71,9 @@ export function ReadingModule() {
   }, [q]);
 
   const reading = books.filter((b) => b.status === "lendo");
-  useEffect(() => { if (!sel.bookId && reading[0]) setSel((s) => ({ ...s, bookId: reading[0]!.id })); }, [reading, sel.bookId]);
   const streak = useMemo(() => readingStreak(sessions, new Date()), [sessions]);
+  const best = bestReadingStreak(sessions);
+  const summary = readingSummary(sessions);
   if (!today) return <main className="mx-auto max-w-4xl px-5 pt-8"><div className="h-60 animate-pulse rounded-lg bg-mist" /></main>;
 
   const week = lastDays(new Date(), 7);
@@ -69,34 +94,51 @@ export function ReadingModule() {
     <main className="mx-auto max-w-4xl px-5 pb-24 sm:px-8">
       <ModuleHeader title="Leitura" />
       <div className="-mt-1 flex flex-wrap items-center gap-2 pb-5 text-sm text-steel">
-        <span className="inline-flex items-center gap-1 rounded-full bg-card px-3 py-1 font-medium text-foreground ring-1 ring-line"><Flame className="size-4 text-accent" /> {streak} {streak === 1 ? "dia seguido" : "dias seguidos"}</span>
-        <span>Seu tempo de leitura</span>
+        <div><span className={`inline-flex items-center gap-1 rounded-full bg-card px-3 py-1 font-medium ring-1 ring-line ${streak ? "text-foreground" : "text-steel"}`}>🔥 {streak} {streak === 1 ? "dia seguido" : "dias seguidos"}</span><p className="mt-1 text-xs">Melhor sequência: {best} {best === 1 ? "dia" : "dias"}</p></div>
       </div>
 
       <section aria-labelledby="sessao" className="rounded-lg bg-card p-4 ring-1 ring-line">
         <h2 id="sessao" className="font-display text-lg font-semibold">Registrar sessão</h2>
-        {reading.length === 0 ? <p className="mt-2 text-sm text-steel">Adicione seu primeiro livro pra registrar a leitura.</p> : (
-          <form className="mt-3 grid grid-cols-2 gap-2" onSubmit={(e) => {
+        {books.length === 0 ? <p className="mt-2 text-sm text-steel">Adicione seu primeiro livro pra registrar a leitura.</p> : (
+          <form className="mt-3 grid grid-cols-2 gap-2" onSubmit={async (e) => {
             e.preventDefault();
+            if (busy || (agendaBlock?.done && sessions.some(s => s.agendaBlockId === agendaBlock.id && s.date === search.date))) return;
             const mins = Math.round(Number(sel.minutes));
             const book = books.find((b) => b.id === sel.bookId);
             if (!book) { toast.error("Escolha o livro"); return; }
-            if (!(mins > 0)) { toast.error("Informe os minutos"); return; }
+            if (!(mins > 0) || !Number.isFinite(mins)) { toast.error("Informe os minutos"); return; }
+            if (sel.mode === "percent" && sel.pages !== "" && !validReadingPercent(Number(sel.pages))) { toast.error("Informe um progresso entre 0 e 100%"); return; }
             const pg = Math.max(0, Math.round(Number(sel.pages) || 0));
-            const id = `s-${Date.now()}`;
-            setTrackers((t) => ({ ...t, leitura: [{ id, date: today, minutes: mins, title: book.title, bookId: book.id, ...(pg ? { pages: pg } : {}) }, ...t.leitura], books: (t.books ?? []).map((b) => b.id === book.id ? { ...b, pagesRead: b.totalPages ? Math.min(b.totalPages, b.pagesRead + pg) : b.pagesRead + pg } : b) }));
-            emitXp({ kind: "reading", ref: id, date: today, on: true });
+            const id = `s-${crypto.randomUUID()}`;
+            const date = agendaBlock && search.date ? search.date : today;
+            registerReading({ id, date, minutes: mins, title: book.title, bookId: book.id, progressMode: sel.mode, ...(sel.mode === "percent" ? (sel.pages !== "" ? { progressPercent: Number(sel.pages) } : {}) : pg ? { pages: pg } : {}), ...(agendaBlock ? { agendaBlockId: agendaBlock.id } : {}) });
             setSel((s) => ({ ...s, minutes: "", pages: "" }));
-            toast.success("Sessão registrada · +5 XP");
+            setBusy(true); setXpNote("");
+            try {
+              const { data } = await supabase.auth.getSession();
+              if (data.session) {
+                const result = await updateXp({ data: { kind: "reading", ref: id, date, on: true } });
+                window.dispatchEvent(new CustomEvent(XP_EVENT, { detail: result }));
+                if (result.points > 0) toast.success(`Sessão registrada · +${result.points} XP`);
+                else { toast.success("Sessão registrada"); if (date === today) setXpNote("XP do dia de leitura já registrado"); }
+              } else toast.success("Sessão registrada");
+            } catch { toast.warning("Sessão salva. Não foi possível registrar o XP."); }
+            finally { setBusy(false); }
+            const nextStreak = readingStreak([{ date }, ...sessions], new Date());
+            if (READING_MILESTONES.includes(nextStreak) && nextStreak > streak) toast.success(`🔥 ${nextStreak} dias seguidos de leitura!`);
           }}>
-            <select aria-label="Livro" value={sel.bookId} onChange={(e) => setSel((s) => ({ ...s, bookId: e.target.value }))} className={`${input} col-span-2`}>
-              {reading.map((b) => <option key={b.id} value={b.id}>{b.title}</option>)}
+            <select aria-label="Livro" value={sel.bookId} onChange={(e) => setSel((s) => ({ ...s, bookId: e.target.value, mode: books.find(b => b.id === e.target.value)?.progressMode ?? "pages", pages: "" }))} className={`${input} col-span-2`}>
+              <option value="">Escolha o livro</option>
+              {books.map((b) => <option key={b.id} value={b.id}>{b.title}</option>)}
             </select>
+            <div className="col-span-2 flex gap-2" role="group" aria-label="Modo de progresso">{(["pages", "percent"] as const).map(mode => <Button type="button" key={mode} variant={sel.mode === mode ? "default" : "outline"} size="sm" aria-pressed={sel.mode === mode} onClick={() => setSel(s => ({ ...s, mode, pages: "" }))}>{mode === "pages" ? "Por páginas" : "Por percentual"}</Button>)}</div>
             <input type="number" min="1" aria-label="Minutos" placeholder="Minutos" value={sel.minutes} onChange={(e) => setSel((s) => ({ ...s, minutes: e.target.value }))} className={input} />
-            <input type="number" min="0" aria-label="Páginas lidas" placeholder="Páginas (opcional)" value={sel.pages} onChange={(e) => setSel((s) => ({ ...s, pages: e.target.value }))} className={input} />
-            <Button className="col-span-2 h-10"><Plus /> Registrar</Button>
+            <input type="number" min="0" max={sel.mode === "percent" ? 100 : undefined} step={sel.mode === "percent" ? "any" : "1"} aria-label={sel.mode === "percent" ? "Progresso (%)" : "Páginas lidas"} placeholder={sel.mode === "percent" ? "Progresso (%)" : "Páginas (opcional)"} value={sel.pages} onChange={(e) => setSel((s) => ({ ...s, pages: e.target.value }))} className={input} />
+            <Button disabled={busy || !!(agendaBlock?.done && sessions.some(s => s.agendaBlockId === agendaBlock.id && s.date === search.date))} className="col-span-2 h-10"><Plus /> Registrar</Button>
           </form>
         )}
+        {xpNote && <p role="status" className="mt-2 text-xs text-steel">{xpNote}</p>}
+        {agendaBlock?.done && <p className="mt-2 text-xs text-good">Leitura da Agenda concluída ✅</p>}
       </section>
 
       <div className="mt-4 grid grid-cols-2 gap-3">
@@ -105,7 +147,7 @@ export function ReadingModule() {
           <p className="text-xs font-medium text-steel">Meta semanal</p>
           <p className="mt-1 font-display text-2xl font-semibold">{weekMin}<span className="text-sm font-normal text-steel"> / {goal} min</span></p>
           <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-mist"><div className="h-full bg-brand" style={{ width: `${Math.min(100, (weekMin / Math.max(1, goal)) * 100)}%` }} /></div>
-          <label className="mt-2 flex items-center gap-2 text-xs text-steel">Meta <input type="number" min="10" step="10" aria-label="Meta semanal em minutos" value={goal} onChange={(e) => { const v = Math.round(Number(e.target.value)); if (v > 0) setTrackers((t) => ({ ...t, readingGoal: v })); }} className="h-8 w-20 rounded bg-background px-2 ring-1 ring-line" /> min</label>
+          <form className="mt-2 flex flex-wrap items-center gap-2" onSubmit={e => { e.preventDefault(); const v = Number(goalDraft); if (!validReadingGoal(v)) { toast.error("A meta deve ficar entre 30 e 1.680 min por semana"); return; } setTrackers(t => ({ ...t, readingGoal: v })); toast.success(`Meta atualizada para ${v} min por semana`); }}><label className="flex items-center gap-2 text-xs text-steel">Meta <input type="number" aria-label="Meta semanal em minutos" value={goalDraft} onChange={e => setGoalDraft(e.target.value)} className="h-8 w-20 rounded bg-background px-2 ring-1 ring-line" /> min</label><Button size="sm" variant="outline" aria-label="Salvar meta"><Check className="size-4" /></Button></form>
         </section>
       </div>
 
@@ -144,7 +186,7 @@ export function ReadingModule() {
         </div>
         <ul className="mt-3 grid gap-3 sm:grid-cols-2">
           {books.filter((b) => b.status === filter).length === 0 && <li className="rounded-lg bg-card p-6 text-center text-sm text-steel ring-1 ring-line sm:col-span-2">Nenhum livro aqui ainda.</li>}
-          {books.filter((b) => b.status === filter).map((b) => { const pct = bookPercent(b); return (
+          {books.filter((b) => b.status === filter).map((b) => { const pct = bookPercent(b); const remaining = b.status === "lendo" ? remainingReadingMinutes(b, sessions) : null; return (
             <li key={b.id}><button type="button" onClick={() => setOpenId(b.id)} className="flex w-full gap-3 rounded-lg bg-card p-3 text-left ring-1 ring-line hover:ring-brand">
               <Cover book={b} />
               <span className="min-w-0 flex-1">
@@ -152,7 +194,8 @@ export function ReadingModule() {
                 <span className="block text-xs text-steel">{b.author || "Autor desconhecido"}</span>
                 {b.rating ? <span className="mt-1 flex" aria-label={`Nota ${b.rating} de 5`}>{Array.from({ length: b.rating }, (_, i) => <Star key={i} className="size-3.5 fill-accent text-accent" />)}</span> : null}
                 <span className="mt-2 block h-1.5 overflow-hidden rounded-full bg-mist"><span className="block h-full bg-brand" style={{ width: `${pct ?? 0}%` }} /></span>
-                <span className="mt-1 block text-xs text-steel">{pct === null ? `${b.pagesRead} páginas lidas` : `${pct}% · ${b.pagesRead}/${b.totalPages} págs.`}</span>
+                <span className="mt-1 block text-xs text-steel">{b.progressMode === "percent" ? `${pct ?? 0}%` : pct === null ? `${b.pagesRead} páginas lidas` : `${pct}% · ${b.pagesRead}/${b.totalPages} págs.`}</span>
+                {remaining !== null && remaining > 0 && <span className="mt-1 block text-xs text-steel">~{remaining >= 60 ? `${Math.round(remaining / 60)}h` : `${remaining} min`} para terminar</span>}
               </span>
             </button></li>
           ); })}
@@ -161,6 +204,7 @@ export function ReadingModule() {
 
       <section aria-labelledby="hist" className="mt-6">
         <h2 id="hist" className="font-display text-lg font-semibold">Histórico</h2>
+        <p className="mt-2 text-xs text-steel">Total: {summary.sessions} sessões · {summary.minutes} min · {summary.pages} páginas · {summary.books} livros</p>
         <ul className="mt-3 divide-y divide-line rounded-lg bg-card px-4 ring-1 ring-line">{sessions.length === 0 ? <li className="py-6 text-center text-sm text-steel">Nenhuma sessão ainda.</li> : sessions.slice(0, 30).map((e) => <li key={e.id} className="flex items-center gap-3 py-2 text-sm"><span className="min-w-0 flex-1 [overflow-wrap:anywhere]">{titleOf(e.bookId) ?? (e.title || "Leitura")} <span className="text-xs text-steel">· {e.date.split("-").reverse().join("/")}{e.pages ? ` · ${e.pages} págs.` : ""}</span></span><span className="shrink-0 font-medium">{e.minutes} min</span><Button variant="ghost" size="icon" className="size-7 shrink-0" aria-label="Remover sessão" onClick={() => { emitXp({ kind: "reading", ref: e.id, date: e.date, on: false }); setTrackers((t) => ({ ...t, leitura: t.leitura.filter((x) => x.id !== e.id) })); }}><Trash2 /></Button></li>)}</ul>
       </section>
 
