@@ -11,6 +11,7 @@ import { useTaskBio } from "@/lib/trilha-store";
 import { plannedShopping } from "@/lib/planned-shopping";
 import { getWeekKeys } from "@/lib/calendar-utils";
 import { downloadShoppingPdf, shoppingLines } from "@/lib/shopping-export";
+import { ShoppingFinanceBridge } from "@/components/ShoppingFinanceBridge";
 
 export const Route = createFileRoute("/compras")({
   head: () => ({ meta: [
@@ -54,7 +55,6 @@ function Compras() {
         {shoppingItems.length === 0 ? <div className="mt-6 border-y border-dashed border-line py-10 text-center"><p className="text-sm font-medium">Sua lista está vazia.</p><p className="mx-auto mt-1 max-w-xs text-xs leading-5 text-steel">Gere a partir do seu plano alimentar ou adicione um item.</p><Button variant="outline" className="mt-4 h-11 whitespace-normal" onClick={() => nameRef.current?.focus()}>Adicionar item manual</Button></div> : <ul className="mt-3 divide-y divide-line">{shoppingItems.map((item) => <li key={item.id} className="flex items-center gap-3 py-3"><Button variant={item.checked ? "default" : "outline"} size="icon" className="size-7 shrink-0" onClick={() => toggleShoppingItem(item.id)} aria-label={`${item.name}: ${item.checked ? "retirar" : "colocar"} no carrinho`}>{item.checked ? "✓" : ""}</Button><span className={`min-w-0 flex-1 break-words text-sm ${item.checked ? "text-steel line-through" : ""}`}>{item.name}{item.manual ? <span className="ml-2 text-[10px] text-steel">pessoal</span> : item.source === "plan" ? <span className="ml-2 text-[10px] text-steel">do plano</span> : null}</span><span className="shrink-0 text-xs text-steel">{formatIngredientAmount(item.amount, normalizeUnit(item.unit))}</span>{item.manual || item.source === "plan" ? <Button variant="ghost" size="icon" className="size-7 shrink-0" onClick={() => removeShoppingItem(item.id)} aria-label={`Remover ${item.name}`}><Trash2 /></Button> : null}</li>)}</ul>}
         {checked > 0 && <div className="mt-4 flex justify-end"><Button variant="ghost" size="sm" onClick={() => setShoppingItems(shoppingItems.map((item) => ({ ...item, checked: false })))}><RotateCcw /> Desmarcar tudo</Button></div>}
         <ShoppingFinanceBridge cost={cost} />
-      </section>
       </section>
       <p className="mt-4 text-xs leading-5 text-steel">Valores estimados. Registros pessoais não substituem orientação de profissional.</p>
     </main>
