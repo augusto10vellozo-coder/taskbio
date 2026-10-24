@@ -616,6 +616,15 @@ export type Database = {
           username: string
         }[]
       }
+      record_habit_xp: {
+        Args: {
+          _date: string
+          _habit_id: string
+          _on: boolean
+          _user_id: string
+        }
+        Returns: number
+      }
       search_profiles: {
         Args: { _q: string }
         Returns: {

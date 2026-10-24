@@ -78,6 +78,13 @@
       "when": 1792770895106,
       "tag": "0010_friend_nudges",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1792801405167,
+      "tag": "0011_habit_weekly_xp_guard",
+      "breakpoints": true
     }
   ]
 }
