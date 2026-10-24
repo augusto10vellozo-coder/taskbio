@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Bell, Pencil, Plus, Trash2, X } from "lucide-react";
+import { Bell, Check, Pencil, Plus, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { KIND_LABEL, brl, type Block, type BlockKind } from "@/lib/trilha-data";
 import { useTaskBio } from "@/lib/trilha-store";
@@ -101,7 +101,7 @@ export function DayTimeline({
                             b.done ? "bg-good/10 text-good ring-good/20" : "text-steel ring-line hover:text-ink"
                           }`}
                         >
-                          {b.done ? "Feito" : "Marcar"}
+                          {b.done && <Check className="size-3.5" />}{b.done ? "Feito" : "Concluir"}
                         </Button>
                         <PhotoBonus date={dateKey} block={b} />
                         <Button variant="ghost" size="icon" onClick={() => setEditing(b)} className="size-7 text-steel" aria-label="Editar bloco" title="Editar">
