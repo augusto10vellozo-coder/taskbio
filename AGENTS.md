@@ -19,7 +19,7 @@ Content reviews run only from an authenticated, server-verified admin function; 
 
 Agenda and Alimentação share dated blocks; legacy duplicates keep food-bearing IDs, while plannedMeal bypasses merging and retains its snapshot through same-ID consumption. Copy helpers reset execution atomically; shopping reads pending snapshots by period only on explicit generation and tracks origin separately. Why: preserves predictions, XP integrity and manual carts.
 
-Food totals use the shared meal-summary resolver for catalog and manual blocks; missing nutrition stays unknown instead of being inferred, and display-only accent corrections preserve stored user data.
+Food totals use meal-summary; absent nutrition stays unknown and accent fixes never change stored data.
 
 The legacy `/rotina` address redirects to the main agenda at `/`; this keeps old links and saved browser addresses working.
 
@@ -43,4 +43,4 @@ All copy a visitor can see stays in Brazilian Portuguese, and authentication fai
 - Notification rules stay in push-reminders.ts; service-only delivery jobs/attempts track acceptance per subscription with atomic daily layer budgets and same-day retries rebuilt from original due instants, never persisted message content. All layers obey local quiet hours and synced notifPrefs (including exams); legacy timers are disabled. Bonus XP remains unique by user/ref. Why: delivery failures cannot masquerade as success or duplicate XP.
 - Reading/study use synced trackers and daily-locked service XP RPCs by session. Reading completes Agenda blocks atomically. StudyTimerProvider above Outlet persists account deadlines; normalization remaps history. dueSettingsReminders handles exams.
 - Habit helpers own weekly caps and streaks in additive synced metadata; service-only record_habit_xp locks account transitions and browser queues serialize reversals. Why: preserve checks, existing XP values and league caps.
-- Progress shares calculations/labels, UTC date keys and notes to preserve numeric history.
+- Progress/Saúde share cached progress_entries; owner RPC updates daily weight, duplicates stay archived. Dose helpers serve UI/cron by date/time without XP.
