@@ -18,7 +18,10 @@ async def main():
   # Create temporary future rest blocks so no daily XP is eligible.
   await page.evaluate("sessionStorage.setItem('trilha:selected-date','2027-01-11')")
   await page.goto('http://localhost:8080/agenda',wait_until='networkidle')
-  titles=[f'Verificação Agenda {i}' for i in range(10)]
+  titles=[f'Verificação Agenda {i}' for i in range(20)]
+  for title in titles:
+   rows=timeline.locator('li').filter(has=page.get_by_text(title,exact=True))
+   while await rows.count(): await rows.first.get_by_role('button',name='Remover bloco',exact=True).click()
   try:
    for title in titles:
     await page.get_by_role('button',name='Adicionar bloco',exact=True).click()
@@ -38,22 +41,26 @@ async def main():
    await page.evaluate("sessionStorage.setItem('trilha:selected-date','2027-01-11')")
    await page.goto('http://localhost:8080/agenda',wait_until='networkidle')
    assert await timeline.get_by_text(titles[0],exact=True).count()==1
-   for width,height in [(360,800),(390,844),(1280,1800)]:
+   for width,height in [(360,800),(390,630),(1280,1800)]:
     await page.set_viewport_size({'width':width,'height':height})
+    await page.wait_for_timeout(200)
     await page.evaluate("window.scrollTo(0,document.documentElement.scrollHeight)")
     await page.wait_for_timeout(100)
     header=page.get_by_label('Navegação de datas',exact=True)
-    box=await header.bounding_box(); assert box and box['y']>=0 and box['y']+box['height']<height
+    box=await header.bounding_box(); assert box and abs(box['y'])<=1 and box['y']+box['height']<height
     assert await header.get_by_role('button',name='Voltar',exact=True).is_visible()
-    assert 'segunda-feira, 11 de janeiro' in await header.inner_text()
+    assert 'segunda-feira, 11 de janeiro' in (await header.inner_text()).lower()
     fab=await page.get_by_role('button',name='Adicionar bloco',exact=True).bounding_box()
     last=await timeline.locator('li').last.bounding_box()
     assert fab and last and last['y']+last['height']<=fab['y'],(last,fab)
     assert await page.evaluate('document.documentElement.scrollWidth <= innerWidth')
     await page.screenshot(path=f'/tmp/browser/agenda-update/scroll-{width}.png')
-    await header.get_by_role('button',name=re.compile('ter.*12',re.I)).click()
-    assert 'terça-feira, 12 de janeiro' in await header.inner_text()
-    await header.get_by_role('button',name=re.compile('seg.*11',re.I)).click()
+    await header.get_by_role('button',name='Próximo dia',exact=True).click()
+    assert 'terça-feira, 12 de janeiro' in (await header.inner_text()).lower()
+    if await header.get_by_role('button',name='Dia anterior',exact=True).is_visible():
+     await header.get_by_role('button',name='Dia anterior',exact=True).click()
+    else:
+     await header.get_by_role('button',name=re.compile('seg.*11',re.I)).click()
     await page.get_by_role('button',name='Adicionar bloco',exact=True).click()
     assert await page.get_by_label('Título',exact=True).is_visible()
     form=page.locator('#linha-do-dia form'); formbox=await form.bounding_box(); box=await header.bounding_box()
@@ -62,9 +69,11 @@ async def main():
    assert not errors,errors
    print('PASS: authenticated blocks, nutrition/workout preserved; future block create/reload/complete/unmark; sticky dates/back/week controls; FAB and last item at 360/390/1280; no overflow/runtime errors')
   finally:
+   await page.evaluate("sessionStorage.setItem('trilha:selected-date','2027-01-11')")
+   await page.goto('http://localhost:8080/agenda',wait_until='networkidle')
    for title in titles:
     row=timeline.locator('li').filter(has=page.get_by_text(title,exact=True))
-    if await row.count(): await row.get_by_role('button',name='Remover bloco',exact=True).click()
+    while await row.count(): await row.first.get_by_role('button',name='Remover bloco',exact=True).click()
    await page.wait_for_timeout(2000)
    await page.evaluate("sessionStorage.setItem('trilha:selected-date','2027-01-11')")
    await page.goto('http://localhost:8080/agenda',wait_until='networkidle')

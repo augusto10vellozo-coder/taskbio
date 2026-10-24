@@ -48,6 +48,8 @@ function Agenda() {
   const [adding, setAdding] = useState(false);
   const mainRef = useRef<HTMLElement>(null);
   const dateHeaderRef = useRef<HTMLDivElement>(null);
+  const dateStartRef = useRef<HTMLDivElement>(null);
+  const [compactDates, setCompactDates] = useState(false);
   const [exampleDismissed, setExampleDismissed] = useState(false);
   const scrollToTimeline = () => requestAnimationFrame(() => document.getElementById("linha-do-dia")?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth", block: "start" }));
   const planDay = () => { setAdding(true); scrollToTimeline(); };
@@ -59,18 +61,19 @@ function Agenda() {
     if (!ready) return;
     const main = mainRef.current;
     const dateHeader = dateHeaderRef.current;
-    const appHeader = document.querySelector("header.sticky");
-    if (!main || !dateHeader || !appHeader) return;
+    const dateStart = dateStartRef.current;
+    if (!main || !dateHeader || !dateStart) return;
     const measure = () => {
-      const top = appHeader.getBoundingClientRect().height;
-      main.style.setProperty("--agenda-top", `${top}px`);
-      main.style.setProperty("--agenda-scroll-offset", `${top + dateHeader.getBoundingClientRect().height + 16}px`);
+      main.style.setProperty("--agenda-scroll-offset", `${dateHeader.getBoundingClientRect().height + 16}px`);
     };
     const observer = new ResizeObserver(measure);
-    observer.observe(appHeader);
     observer.observe(dateHeader);
+    const scrollObserver = new IntersectionObserver(([entry]) => {
+      if (entry) setCompactDates(!entry.isIntersecting && entry.boundingClientRect.top < 0);
+    });
+    scrollObserver.observe(dateStart);
     measure();
-    return () => observer.disconnect();
+    return () => { observer.disconnect(); scrollObserver.disconnect(); };
   }, [ready]);
 
   const dateKey = toDateKey(selectedDate);
@@ -124,8 +127,15 @@ function Agenda() {
 
   return (
     <main ref={mainRef} className="mx-auto max-w-6xl px-5 pb-44 sm:px-8">
-      <div ref={dateHeaderRef} className="sticky top-[var(--agenda-top,4rem)] z-20 -mx-5 border-b border-line bg-background px-5 pb-3 sm:-mx-8 sm:px-8" aria-label="Navegação de datas">
-      <ModuleHeader title="Minha Agenda" /><section>
+      <div ref={dateStartRef} className="h-px" aria-hidden="true" />
+      <div ref={dateHeaderRef} className="sticky top-0 z-35 -mx-5 border-b border-line bg-background px-5 pb-3 sm:-mx-8 sm:px-8" aria-label="Navegação de datas">
+      <ModuleHeader title="Minha Agenda" />
+      {compactDates && <div className="grid grid-cols-[2.75rem_minmax(0,1fr)_2.75rem] items-center gap-2">
+        <Button variant="ghost" size="icon" className="size-11" onClick={() => setSelectedDate((date) => addDays(date, -1))} aria-label="Dia anterior" title="Dia anterior"><ChevronLeft /></Button>
+        <h2 className="min-w-0 text-center font-display text-sm font-semibold first-letter:uppercase">{format(selectedDate, "EEEE, d 'de' MMMM", { locale: ptBR })}</h2>
+        <Button variant="ghost" size="icon" className="size-11" onClick={() => setSelectedDate((date) => addDays(date, 1))} aria-label="Próximo dia" title="Próximo dia"><ChevronRight /></Button>
+      </div>}
+      <section className={compactDates ? "hidden" : undefined}>
         <div className="flex flex-col justify-between gap-3 lg:flex-row lg:items-end">
           <div>
             <h2 className="max-w-[40ch] text-balance font-display text-xl font-semibold">
