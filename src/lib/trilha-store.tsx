@@ -32,6 +32,8 @@ import { emptyFinance, type FinanceState } from "./finance";
 import { defaultNotifPrefs, type NotifPrefs } from "./push-reminders";
 import { consumePlannedMeal, skipPlannedMeal, repeatPlannedDays, copyPreviousMealWeek } from "./meal-planning";
 import { changeHabitMark, editHabit, normalizeHabits } from "./habits";
+import { applyReadingProgress } from "./reading";
+import type { SessionEntry } from "./engagement";
 
 export type TaskBioState = {
   plan: Plan;
@@ -98,6 +100,7 @@ type Store = TaskBioState & {
   addCustomFood: (food: Food) => void;
   setFinance: (fn: (f: FinanceState) => FinanceState) => void;
   setTrackers: (fn: (t: Trackers) => Trackers) => void;
+  registerReading: (session: SessionEntry) => void;
   setNotifPref: (key: keyof NotifPrefs, on: boolean) => void;
 };
 
@@ -345,6 +348,10 @@ export function TaskBioProvider({ children }: { children: ReactNode }) {
       setHealth: (fn) => setState((s) => ({ ...s, health: fn({ ...emptyHealth, ...s.health }) })),
       setFinance: (fn) => setState((s) => ({ ...s, finance: fn({ ...emptyFinance, ...s.finance }) })),
       setTrackers: (fn) => setState((s) => ({ ...s, trackers: fn({ ...emptyTrackers, ...s.trackers }) })),
+      registerReading: (session) => setState(s => ({ ...s,
+        trackers: { ...s.trackers, leitura: [session, ...s.trackers.leitura], books: (s.trackers.books ?? []).map(b => b.id === session.bookId ? applyReadingProgress(b, session) : b) },
+        plan: session.agendaBlockId ? { ...s.plan, [session.date]: (s.plan[session.date] ?? []).map(b => b.id === session.agendaBlockId && b.kind === "leitura" ? { ...b, done: true } : b) } : s.plan,
+      })),
       setNotifPref: (key, on) => setState((s) => ({ ...s, notifPrefs: { ...defaultNotifPrefs, ...s.notifPrefs, [key]: on } })),
       setModule: (id, on) => setState((s) => ({ ...s, modules: { ...s.modules, [id]: on } })),
       getWorkout: (id) => state.workouts.find((w) => w.id === id),
