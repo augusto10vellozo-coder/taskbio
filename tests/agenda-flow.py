@@ -45,6 +45,7 @@ async def main():
     header=page.get_by_label('Navegação de datas',exact=True)
     box=await header.bounding_box(); assert box and abs(box['y'])<=1 and box['y']+box['height']<height
     assert await header.get_by_role('button',name='Voltar',exact=True).is_visible()
+    print("DATE HEADER",width,await header.inner_text()); await page.screenshot(path=f"/tmp/browser/agenda-update/observed-{width}.png")
     assert 'segunda-feira, 11 de janeiro' in await header.inner_text()
     fab=await page.get_by_role('button',name='Adicionar bloco',exact=True).bounding_box()
     last=await timeline.locator('li').last.bounding_box()
