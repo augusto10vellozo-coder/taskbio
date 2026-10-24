@@ -1,4 +1,6 @@
 // Pure scheduling logic for server-sent agenda reminders (shared with tests).
+import { medicationDoses, doseTaken } from "./health";
+import type { Medication } from "./engagement";
 type ReminderBlock = { id: string; time: string; kind: string; title: string; done?: boolean; reminderMinutes?: number };
 export type DueReminder = { key: string; title: string; body: string; url: string; tag?: string };
 
@@ -75,16 +77,16 @@ export function dueSettingsReminders(settings: unknown, timeZone: string, now: D
   const [y, mo, d] = today.split("-").map(Number);
   const at = (time: string) => { const [h, m] = time.split(":").map(Number); return Number.isNaN(h) || Number.isNaN(m) ? NaN : (Date.UTC(y!, mo! - 1, d!, h!, m!) - nowMs) / 60000; };
   const inWindow = (diff: number) => diff <= 0 && diff > -5;
-  const s = settings as { finance?: { bills?: { id: string; title: string; amount: number; dueDate: string; paid?: boolean }[] }; health?: { meds?: { id: string; name: string; time: string }[]; medsTaken?: Record<string, string[]> } };
+  const s = settings as { finance?: { bills?: { id: string; title: string; amount: number; dueDate: string; paid?: boolean }[] }; health?: { meds?: Medication[]; medsTaken?: Record<string, string[]> } };
   const result: DueReminder[] = [];
   for (const bill of s.finance?.bills ?? []) {
     if (!bill || bill.paid || bill.dueDate !== tomorrow || !inWindow(at("09:00"))) continue;
     result.push({ key: `bill|${bill.id}|${bill.dueDate}`, title: `Conta vence amanhã: ${String(bill.title).slice(0, 80)}`, body: `Valor: R$ ${Number(bill.amount).toFixed(2).replace(".", ",")}.`, url: "/financas" });
   }
-  const taken = new Set(s.health?.medsTaken?.[today] ?? []);
-  for (const med of s.health?.meds ?? []) {
-    if (!med || taken.has(med.id) || typeof med.time !== "string" || !inWindow(at(med.time))) continue;
-    result.push({ key: `med|${med.id}|${today}`, title: `Lembrete: ${String(med.name).slice(0, 80)}`, body: `Horário marcado: ${med.time}.`, url: "/saude" });
+  const taken = s.health?.medsTaken?.[today] ?? [];
+  for (const med of medicationDoses(s.health?.meds ?? [], today)) {
+    if (doseTaken(med, taken) || !inWindow(at(med.time))) continue;
+    result.push({ key: med.legacy ? `med|${med.medicationId}|${today}` : `med|${med.id}`, title: `Lembrete: ${String(med.name).slice(0, 80)}`, body: `Horário marcado: ${med.time}.`, url: "/saude" });
   }
   for (const ex of (s as { trackers?: { exams?: { id: string; subjectName?: string; title: string; date: string; done?: boolean }[] } }).trackers?.exams ?? []) {
     if (!prefs.exams || !ex || ex.done || typeof ex.date !== "string") continue;
