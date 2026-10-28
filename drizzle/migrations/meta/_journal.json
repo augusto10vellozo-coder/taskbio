@@ -148,6 +148,13 @@
       "when": 1793215619654,
       "tag": "0020_routine_progress_summary",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1793215896206,
+      "tag": "0021_consistency_score",
+      "breakpoints": true
     }
   ]
 }
