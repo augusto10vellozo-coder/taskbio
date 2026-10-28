@@ -22,7 +22,7 @@ export function SyncManager() {
     setFailSince((v) => v ?? Date.now());
     window.setTimeout(retry, 5000);
   };
-  const ok = () => { setStatus("saved"); setFailSince(null); };
+  const ok = () => { setStatus("saved"); setFailSince(null); window.dispatchEvent(new Event("taskbio:synced")); };
   useEffect(() => {
     if (failSince === null) return;
     setNow(Date.now());
