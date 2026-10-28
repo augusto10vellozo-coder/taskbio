@@ -21,7 +21,10 @@ export function editHabit(previous: Habit, patch: Pick<Habit, "name" | "frequenc
   const changed = (previous.frequency ?? "daily") !== (patch.frequency ?? "daily") || (patch.frequency === "weekly" && weeklyTarget(previous) !== weeklyTarget({ ...previous, ...patch }));
   return { ...previous, ...patch, ...(changed ? { frequencySince: habitWeek(today) } : {}) };
 }
-export function habitStreak(habit: Habit, log: HabitLog, today: string): number {
+export function habitStreak(habit: Habit, log: HabitLog, today: string, frozen: readonly string[] = []): number {
+  const protectedLog: HabitLog = { ...log };
+  for (const day of frozen) protectedLog[day] = [...new Set([...(log[day] ?? []), habit.id])];
+  log = protectedLog;
   const since = habit.frequencySince ?? "0000-00-00";
   if (habit.frequency === "weekly") {
     let cursor = parseISO(habitWeek(today));
@@ -38,6 +41,10 @@ export function habitStreak(habit: Habit, log: HabitLog, today: string): number 
 }
 export function habitMilestone(habit: Habit, count: number) {
   return (habit.frequency === "weekly" ? [4, 12, 52] : [7, 30, 100]).includes(count);
+}
+/** Protection changes only the individual streak, never completion/consistency. */
+export function habitBestStreak(habit: Habit, log: HabitLog, frozen: readonly string[] = []) {
+  return Math.max(0, ...[...new Set([...Object.keys(log), ...frozen])].map(day => habitStreak(habit, log, day, frozen)));
 }
 export function habitConsistency(habits: Habit[], log: HabitLog, today: string) {
   let marked = 0, expected = 0;

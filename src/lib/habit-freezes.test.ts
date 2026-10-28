@@ -1,0 +1,20 @@
+import { describe, expect, it } from "vitest";
+import { habitBestStreak, habitConsistency, habitStreak, weekMarks } from "./habits";
+import { dayScore, streak } from "./engagement";
+import { freezeStateSchema } from "./habit-freezes";
+import type { Habit, HabitLog } from "./engagement";
+const habit: Habit = { id: "h", name: "Caminhar", createdAt: "2026-10-19", frequency: "daily" };
+const log: HabitLog = { "2026-10-19": ["h"], "2026-10-20": ["h"] };
+describe("individual habit protection", () => {
+  it("keeps a missed day in the individual streak", () => expect(habitStreak(habit, log, "2026-10-22", ["2026-10-21"])).toBe(3));
+  it("breaks without protection", () => expect(habitStreak(habit, log, "2026-10-22")).toBe(0));
+  it("preserves the best protected streak", () => expect(habitBestStreak(habit, log, ["2026-10-21"])).toBe(3));
+  it("does not complete the Agenda day", () => expect(dayScore({}, [habit], log, "2026-10-21")).toBe(0));
+  it("does not change the global routine streak", () => expect(streak({}, log, new Date(2026, 9, 22), [habit])).toBe(0));
+  it("never mutates the canonical log", () => { const original = structuredClone(log); habitStreak(habit, log, "2026-10-22", ["2026-10-21"]); expect(log).toEqual(original); });
+  it("retroactive completion replaces protection without double counting", () => expect(habitStreak(habit, { ...log, "2026-10-21": ["h"] }, "2026-10-22", ["2026-10-21"])).toBe(3));
+  it("keeps consistency completion-only", () => expect(habitConsistency([habit], log, "2026-10-21").percent).toBe(67));
+  it("weekly protection does not consume a completion slot", () => { const weekly = { ...habit, frequency: "weekly" as const, weeklyTarget: 3 }; expect(habitStreak(weekly, log, "2026-10-26", ["2026-10-21"])).toBe(1); expect(weekMarks(weekly, log, "2026-10-21")).toBe(2); });
+  it("rejects negative balances", () => expect(freezeStateSchema.safeParse({ balance: -1, progress: 0, frozen: [], notices: [] }).success).toBe(false));
+  it("rejects balances above the cap of three", () => expect(freezeStateSchema.safeParse({ balance: 4, progress: 0, frozen: [], notices: [] }).success).toBe(false));
+});

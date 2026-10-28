@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight, Flame, Plus, LockKeyhole } from "lucide-react";
+import { ChevronLeft, ChevronRight, Flame, Plus, LockKeyhole, Snowflake } from "lucide-react";
 import { addDays, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
@@ -11,7 +11,10 @@ import { lastDays } from "@/lib/engagement";
 import { Tick } from "@/components/TodayPanel";
 import { ModuleHeader } from "@/components/ModuleHeader";
 import { HabitForm } from "@/components/HabitForm";
-import { canMarkHabit, changeHabitMark, habitConsistency, habitMilestone, habitStreak, weekMarks, weeklyTarget } from "@/lib/habits";
+import { canMarkHabit, changeHabitMark, habitConsistency, habitMilestone, habitStreak, habitBestStreak, weekMarks, weeklyTarget } from "@/lib/habits";
+import { useHabitFreezes } from "@/lib/use-habit-freezes";
+import { brasiliaDay } from "@/lib/xp";
+import { emptyFreezeState } from "@/lib/habit-freezes";
 import type { Habit } from "@/lib/engagement";
 
 export const Route = createFileRoute("/habitos")({
@@ -30,12 +33,16 @@ function Habitos() {
   const { habits, habitLog, addHabit, updateHabit, removeHabit, toggleHabit, toggleHabitStreak } = useTaskBio();
   const [ref, setRef] = useState<Date | null>(null);
   const [editing, setEditing] = useState<Habit | "new" | null>(null);
+  const [explainFreeze, setExplainFreeze] = useState(false);
+  const freezeQuery = useHabitFreezes();
+  const protection = freezeQuery.data ?? emptyFreezeState;
+  const frozenFor = (id: string) => protection.frozen.filter(f => f.habitId === id).map(f => f.day);
   useEffect(() => setRef(new Date()), []);
   if (!ref) return <main className="mx-auto max-w-4xl px-5 pt-8"><div className="h-60 animate-pulse rounded-lg bg-mist" /></main>;
   const week = getWeekDates(ref);
   const month = lastDays(new Date(), 35);
   const max = Math.max(1, habits.length);
-  const today = toDateKey(new Date());
+  const today = brasiliaDay(new Date());
   const consistency = habitConsistency(habits, habitLog, today);
   const mark = (h: Habit, date: string) => {
     if (!canMarkHabit(h, habitLog, date)) return;
@@ -48,6 +55,13 @@ function Habitos() {
   return (
     <main className="mx-auto max-w-4xl px-5 pb-20 sm:px-8">
       <ModuleHeader title="Hábitos" />
+      <div className="mb-5">
+        {freezeQuery.signedIn ? <>
+          <Button variant="outline" className="min-h-11" aria-expanded={explainFreeze} onClick={() => setExplainFreeze(v => !v)}><Snowflake className="size-4 text-brand" />{freezeQuery.isError ? "Congelamentos indisponíveis" : freezeQuery.data ? `${protection.balance} congelamentos` : "Carregando congelamentos…"}</Button>
+          {explainFreeze && <p className="mt-2 max-w-lg text-sm text-steel">Você ganha 1 congelamento a cada 10 hábitos concluídos. Se um dia passar em branco, a gente usa 1 para salvar sua sequência.</p>}
+          {freezeQuery.data && protection.balance < 3 && <p className="mt-2 text-xs text-steel">{protection.progress}/10 para o próximo congelamento</p>}
+        </> : <p className="text-sm text-steel">Entre na sua conta para proteger suas sequências.</p>}
+      </div>
       <section className="pb-5"><h2 className="font-display text-lg font-semibold">Tabela da semana</h2><p className="mt-2 text-sm text-steel">Toque pra marcar o dia · 🔥 = conta pro seu streak</p></section>
       <Button variant="outline" className="mb-4 min-h-11" onClick={() => setEditing("new")}><Plus /> Novo hábito</Button>
       {editing && <HabitForm habit={editing === "new" ? undefined : editing} onClose={() => setEditing(null)} onSave={patch => { if (editing === "new") addHabit(patch.name, patch); else updateHabit(editing.id, patch); }} />}
@@ -62,10 +76,12 @@ function Habitos() {
                 <Button variant="ghost" className="h-auto min-h-11 w-full justify-start whitespace-normal p-0 text-left text-xs sm:text-sm" aria-label={`Editar hábito ${h.name}`} onClick={() => setEditing(h)}><span className="min-w-0 break-words [overflow-wrap:anywhere]">{h.emoji && `${h.emoji} `}{h.name}</span></Button>
                 <span className="block text-[10px] text-steel sm:text-xs">{h.frequency === "weekly" ? `${weeklyTarget(h)}x/semana` : "todo dia"}</span>
                 {h.frequency === "weekly" && <span className="block text-[10px] text-steel sm:text-xs">{weekMarks(h, habitLog, toDateKey(ref))} de {weeklyTarget(h)}</span>}
-                <Button type="button" variant="ghost" className={`h-8 gap-1 p-0 text-xs ${habitStreak(h, habitLog, today) > 0 && h.countsForStreak !== false ? "text-brand" : "text-steel"}`} onClick={() => toggleHabitStreak(h.id)} aria-pressed={h.countsForStreak !== false} aria-label={`${h.name}: ${h.countsForStreak === false ? "não conta" : "conta"} para a sequência de dias`} title="Incluir ou excluir da sequência geral"><Flame className="size-3.5" />{habitStreak(h, habitLog, today)}</Button>
+                <Button type="button" variant="ghost" className={`h-8 gap-1 p-0 text-xs ${habitStreak(h, habitLog, today, frozenFor(h.id)) > 0 && h.countsForStreak !== false ? "text-brand" : "text-steel"}`} onClick={() => toggleHabitStreak(h.id)} aria-pressed={h.countsForStreak !== false} aria-label={`${h.name}: ${h.countsForStreak === false ? "não conta" : "conta"} para a sequência de dias`} title="Incluir ou excluir da sequência geral"><Flame className="size-3.5" />{habitStreak(h, habitLog, today, frozenFor(h.id))}</Button>
+                <span className="block text-[10px] text-steel">Melhor: {habitBestStreak(h, habitLog, frozenFor(h.id))} {h.frequency === "weekly" ? "semanas" : "dias"}</span>
+                <span className="block text-[10px] text-steel">Hoje: {habitLog[today]?.includes(h.id) ? "Concluído" : frozenFor(h.id).includes(today) ? "Congelado" : "Pendente"}</span>
                 <div><Button variant="ghost" className="h-auto min-h-7 p-0 text-[10px] text-steel" aria-label={`Remover ${h.name}`} onClick={() => { if (window.confirm(`Remover o hábito "${h.name}"?`)) removeHabit(h.id); }}>Excluir</Button></div>
               </th>
-              {week.map((d) => { const k = toDateKey(d); const on = (habitLog[k] ?? []).includes(h.id); const blocked = !canMarkHabit(h, habitLog, k); return <td key={k} className="px-0 text-center align-middle"><Button type="button" variant="ghost" disabled={blocked} title={blocked ? "Meta batida" : undefined} aria-pressed={on} aria-label={`${h.name} em ${format(d, "d/MM")}${blocked ? " — meta batida" : ""}`} className="mx-auto flex h-11 w-full max-w-11 gap-0 rounded-md p-0 disabled:cursor-not-allowed disabled:opacity-30 [&_span]:shrink-0" onClick={() => mark(h, k)}>{blocked ? <LockKeyhole className="size-4 text-steel" /> : <Tick on={on} />}</Button></td>; })}
+              {week.map((d) => { const k = toDateKey(d); const on = (habitLog[k] ?? []).includes(h.id); const frozen = !on && frozenFor(h.id).includes(k); const blocked = !canMarkHabit(h, habitLog, k); return <td key={k} className="px-0 text-center align-middle"><Button type="button" variant="ghost" disabled={blocked} title={frozen ? "Congelado" : blocked ? "Meta batida" : on ? "Concluído" : "Pendente"} aria-pressed={on} aria-label={`${h.name} em ${format(d, "d/MM")}${frozen ? " — Congelado" : blocked ? " — meta batida" : ""}`} className="mx-auto flex h-11 w-full max-w-11 gap-0 rounded-md p-0 disabled:cursor-not-allowed disabled:opacity-30 [&_span]:shrink-0" onClick={() => mark(h, k)}>{frozen ? <Snowflake className="size-4 text-brand" /> : blocked ? <LockKeyhole className="size-4 text-steel" /> : <Tick on={on} />}</Button>{frozen && <span className="block text-[8px] text-steel">Congelado</span>}</td>; })}
             </tr>)}</tbody>
           </table>
         )}

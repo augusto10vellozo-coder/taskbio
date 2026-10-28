@@ -24,6 +24,7 @@ import { PendingProfessionalInvites } from "../components/PendingProfessionalInv
 import { PrivacyConsent } from "../components/PrivacyConsent";
 import { ThemeProvider } from "../lib/theme-context";
 import { StudyTimerProvider } from "../components/StudyTimerProvider";
+import { HabitFreezeNotices } from "../components/HabitFreezeNotices";
 
 function NotFoundComponent() {
   return (
@@ -149,6 +150,7 @@ function RootComponent() {
           <BottomNav />
           <PrivacyConsent />
           <SyncManager />
+          <HabitFreezeNotices />
           <ReminderManager />
           <InviteManager />
           <PendingProfessionalInvites />
