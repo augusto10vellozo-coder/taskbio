@@ -7,6 +7,9 @@ import { KIND_LABEL, brl, type Block, type BlockKind } from "@/lib/trilha-data";
 import { useTaskBio } from "@/lib/trilha-store";
 import { PhotoBonus } from "@/components/PhotoBonus";
 import { mealNutrition } from "@/lib/meal-summary";
+import { dayMealProgress, isMealRecorded, predictedMeal } from "@/lib/meal-planning";
+import { toast } from "sonner";
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog";
 import { WorkoutSeries, SessionProgress } from "@/components/WorkoutSeries";
 import { exerciseSeries } from "@/lib/training-session";
 import { RestTimer } from "@/components/RestTimer";
@@ -32,10 +35,12 @@ export function DayTimeline({
   id?: string;
   className?: string;
 }) {
-  const { plan, getMeal, getWorkout, toggleBlock, removeBlock, addBlock, updateBlock, finance } = useTaskBio();
+  const { plan, getMeal, getWorkout, toggleBlock, removeBlock, addBlock, updateBlock, finance, consumeMeal, undoMeal } = useTaskBio();
+  const [undoingMeal, setUndoingMeal] = useState<Block | null>(null);
   const [openWorkout, setOpenWorkout] = useState<string | null>("w1");
   const [editing, setEditing] = useState<Block | null>(null);
   const blocks = plan[dateKey] ?? [];
+  const mealProgress = dayMealProgress(blocks);
   const suggestions = useMemo(
     () =>
       Object.values(plan)
@@ -53,7 +58,7 @@ export function DayTimeline({
       <section id={id} aria-label="Linha do dia" className={className}>
         <div className="glass-strong rounded-2xl p-5 ring-1 ring-black/5 sm:p-6">
           <div className="mb-5 flex items-center justify-between">
-            <h2 className="font-display text-lg font-semibold tracking-tight">Linha do dia</h2>
+            <div><h2 className="font-display text-lg font-semibold tracking-tight">Linha do dia</h2><p className="mt-1 text-xs text-steel">Refeições: {mealProgress.completed} de {mealProgress.total}</p></div>
             <Button variant="ghost" size="sm" onClick={() => onAddingChange(!adding)} className="text-brand-deep ring-1 ring-brand/20">
               {adding ? <X /> : <Plus />}{adding ? "Cancelar" : "Adicionar"}
             </Button>
@@ -84,7 +89,9 @@ export function DayTimeline({
             {blocks.length > 0 && <span className="absolute left-[7px] top-2 bottom-2 w-px bg-line" />}
             {blocks.map((b) => {
               const meal = getMeal(b.mealId);
-              const nutrition = mealNutrition(b, getMeal);
+              const recorded = isMealRecorded(b);
+              const completed = b.kind === "refeicao" ? recorded : b.done;
+              const nutrition = mealNutrition(recorded ? b : predictedMeal(b), getMeal);
               const workout = getWorkout(b.workoutId);
               const open = workout && openWorkout === workout.id;
               return (
@@ -99,21 +106,27 @@ export function DayTimeline({
 
                   <div className={`mt-2 rounded-xl p-3 ring-1 ring-black/5 ${workout ? "rail glass pl-4" : "glass"}`}>
                     <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
-                      <p className="min-w-0 break-words text-sm font-medium [overflow-wrap:anywhere]">{workout ? `${workout.name} — ${workout.focus}` : (b.manualMeal ? b.title : meal?.items ?? b.title)}</p>
+                      <div className="min-w-0"><p className="break-words text-sm font-medium [overflow-wrap:anywhere]">{b.kind === "refeicao" ? `${b.title}${nutrition.known ? ` · ${nutrition.kcal} kcal${nutrition.cost > 0 ? ` · ${brl(nutrition.cost)}` : ""}` : ""}` : workout ? `${workout.name} — ${workout.focus}` : (b.manualMeal ? b.title : meal?.items ?? b.title)}</p>{b.kind === "refeicao" && <p className={`mt-1 text-[11px] ${recorded ? "text-good" : "text-steel"}`}>{recorded ? b.plannedMeal || b.mealId ? "Concluído" : "Não planejado" : "Planejado"}{recorded && b.mealConfirmedAt ? ` · ${new Date(b.mealConfirmedAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}` : ""}</p>}</div>
                       <div className="flex min-w-0 flex-wrap items-center gap-1.5 sm:justify-end">
                         {b.endTime && <span className="text-[11px] text-steel">{b.time} — {b.endTime}</span>}
                         {b.reminderMinutes ? <span title={`Lembrete ${b.reminderMinutes} minutos antes`} className="text-brand-deep"><Bell className="size-3.5" /></span> : null}
                         {b.kind === "leitura" && !b.done ? <Button asChild variant="ghost" size="sm" className="text-accent"><Link to="/leitura" search={{ blockId: b.id, date: dateKey }}><BookOpen className="size-3.5" /> Registrar</Link></Button> : <Button
                           variant="ghost"
                           size="sm"
-                          aria-label={`${b.done ? "Desmarcar" : "Concluir"} ${b.title}`}
-                          aria-pressed={b.done}
-                          onClick={() => toggleBlock(dateKey, b.id)}
+                          aria-label={`${completed ? "Desmarcar" : "Concluir"} ${b.title}`}
+                          aria-pressed={completed}
+                          disabled={b.plannedMeal?.state === "pulada"}
+                          onClick={() => {
+                            if (b.kind !== "refeicao") { toggleBlock(dateKey, b.id); return; }
+                            if (recorded) { setUndoingMeal(b); return; }
+                            consumeMeal(dateKey, b.id);
+                            toast.success(`${b.title} registrado${nutrition.known ? ` · ${nutrition.kcal} kcal` : ""}`);
+                          }}
                           className={`h-auto rounded-full px-2.5 py-0.5 text-[11px] font-medium ring-1 ${
-                            b.done ? "bg-good/10 text-good ring-good/20" : "text-steel ring-line hover:text-ink"
+                            completed ? "bg-good/10 text-good ring-good/20" : "text-steel ring-line hover:text-ink"
                           }`}
                         >
-                          {b.done && <Check className="size-3.5" />}{b.done ? "Feito" : "Concluir"}
+                          {completed && <Check className="size-3.5" />}{completed ? "Feito" : "Concluir"}
                         </Button>}
                         {b.kind !== "leitura" && <PhotoBonus date={dateKey} block={b} />}
                         <Button variant="ghost" size="icon" onClick={() => setEditing(b)} className="size-7 text-steel" aria-label="Editar bloco" title="Editar">
@@ -175,6 +188,13 @@ export function DayTimeline({
           </ol>
         </div>
       </section>
+
+      <AlertDialog open={!!undoingMeal} onOpenChange={open => { if (!open) setUndoingMeal(null); }}>
+        <AlertDialogContent className="w-[calc(100%-2rem)]">
+          <AlertDialogHeader><AlertDialogTitle>Desmarcar refeição?</AlertDialogTitle><AlertDialogDescription>Desmarcar este {undoingMeal?.title.toLocaleLowerCase("pt-BR")} vai remover o registro alimentar do dia</AlertDialogDescription></AlertDialogHeader>
+          <AlertDialogFooter><AlertDialogCancel>Cancelar</AlertDialogCancel><AlertDialogAction onClick={() => { if (!undoingMeal) return; undoMeal(dateKey, undoingMeal.id); toast.success("Registro alimentar removido"); setUndoingMeal(null); }}>Desmarcar</AlertDialogAction></AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {editing && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-ink/35 px-4" role="dialog" aria-modal="true" aria-label="Editar bloco">
