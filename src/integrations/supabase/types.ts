@@ -80,6 +80,90 @@ export type Database = {
         }
         Relationships: []
       }
+      habit_freeze_accounts: {
+        Row: {
+          created_at: string
+          processed_day: string | null
+          started_day: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          processed_day?: string | null
+          started_day?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          processed_day?: string | null
+          started_day?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      habit_freeze_completions: {
+        Row: {
+          created_at: string
+          day: string
+          habit_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          day: string
+          habit_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          day?: string
+          habit_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      habit_freeze_events: {
+        Row: {
+          created_at: string
+          day: string
+          delta: number
+          event_key: string
+          habit_id: string | null
+          id: string
+          kind: string
+          reason: string
+          seen_at: string | null
+          streak: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          day: string
+          delta: number
+          event_key: string
+          habit_id?: string | null
+          id?: string
+          kind: string
+          reason: string
+          seen_at?: string | null
+          streak?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          day?: string
+          delta?: number
+          event_key?: string
+          habit_id?: string | null
+          id?: string
+          kind?: string
+          reason?: string
+          seen_at?: string | null
+          streak?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       league_positions: {
         Row: {
           position: number
@@ -588,8 +672,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      ack_habit_freezes: { Args: { _ids: string[] }; Returns: undefined }
       claim_league_awards: { Args: never; Returns: Json }
       claim_push_delivery: { Args: { _id: string }; Returns: boolean }
+      close_habit_freeze_days: { Args: never; Returns: undefined }
       day_plan_counts: {
         Args: { _day: string; _user_id: string }
         Returns: Record<string, unknown>
@@ -602,6 +688,16 @@ export type Database = {
           _ref: string
           _user_id: string
         }
+        Returns: number
+      }
+      habit_freeze_balance: { Args: { _user: string }; Returns: number }
+      habit_freeze_state: { Args: never; Returns: Json }
+      habit_protected_day: {
+        Args: { _day: string; _habit: string; _log: Json; _user: string }
+        Returns: boolean
+      }
+      habit_protected_streak: {
+        Args: { _day: string; _h: Json; _log: Json; _user: string }
         Returns: number
       }
       has_role: {
@@ -670,6 +766,7 @@ export type Database = {
           username: string
         }[]
       }
+      process_habit_freezes: { Args: { _user: string }; Returns: undefined }
       record_habit_xp: {
         Args: {
           _date: string

@@ -134,6 +134,13 @@
       "when": 1793209194096,
       "tag": "0018_routine_streak_day_bonus",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1793212749738,
+      "tag": "0019_habit_streak_protection",
+      "breakpoints": true
     }
   ]
 }
