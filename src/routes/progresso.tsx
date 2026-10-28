@@ -1,4 +1,5 @@
 import { ModuleHeader } from "@/components/ModuleHeader";
+import { ConsistencyCard } from "@/components/ConsistencyCard";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState, type ReactNode } from "react";
 import { format, isAfter, parseISO, subDays } from "date-fns";
@@ -88,16 +89,18 @@ function Progresso() {
       <ModuleHeader title="Progresso" />
       <section className="flex flex-wrap items-end justify-between gap-3 pb-5"><div><h2 className="font-display text-lg font-semibold">Evolução baseada nos seus registros</h2><p className="mt-2 text-sm text-steel">Registros pessoais não substituem orientação de profissional.</p></div><div className="flex gap-1" role="group" aria-label="Período">{([7, 30, 90] as const).map((days) => <Button key={days} size="sm" variant={period === days ? "default" : "outline"} onClick={() => setPeriod(days)}>{days} dias</Button>)}</div></section>
 
-      {/* SLOT DE DESTAQUE: no futuro a Nota de Consistência assume este lugar, substituindo este card. */}
-      <section aria-label={routineLabel} className="rounded-2xl bg-card p-6 ring-1 ring-line sm:p-8">
+      <ConsistencyCard period={period} />
+
+      {/* Rotina: primeiro card secundário (mesmo número da liga em 7 dias). */}
+      <section aria-label={routineLabel} className="mt-4 rounded-lg bg-card p-4 ring-1 ring-line">
         <p className="text-sm font-medium text-steel">{routineLabel}</p>
         {routine.isPending ? <div className="mt-3 h-14 w-32 animate-pulse rounded-lg bg-mist" /> : pct === null ? <>
-          <p className="mt-2 font-display text-6xl font-semibold text-steel">—</p>
+          <p className="mt-2 font-display text-2xl font-semibold text-steel">—</p>
           <p className="mt-2 text-sm text-steel">{period === 7 ? "Sem blocos previstos nesta semana" : "Sem blocos previstos neste período"}</p>
         </> : <>
-          <p className="mt-2 font-display text-6xl font-semibold">{pct}%</p>
+          <p className="mt-2 font-display text-2xl font-semibold">{pct}%</p>
           <p className="mt-2 text-sm text-steel">{routine.data?.done ?? 0} de {routine.data?.planned ?? 0} blocos concluídos</p>
-          <div className="mt-4 h-3 rounded-full bg-mist" role="progressbar" aria-label={routineLabel} aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}><div className="h-full rounded-full bg-brand transition-all" style={{ width: `${Math.min(100, pct)}%` }} /></div>
+          <div className="mt-3 h-2 rounded-full bg-mist" role="progressbar" aria-label={routineLabel} aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}><div className="h-full rounded-full bg-brand transition-all" style={{ width: `${Math.min(100, pct)}%` }} /></div>
         </>}
         <OriginLink origin={{ to: "/agenda", name: "Agenda" }} />
       </section>

@@ -676,6 +676,31 @@ export type Database = {
       claim_league_awards: { Args: never; Returns: Json }
       claim_push_delivery: { Args: { _id: string }; Returns: boolean }
       close_habit_freeze_days: { Args: never; Returns: undefined }
+      consistency_formula: {
+        Args: {
+          _m_done: number
+          _m_on: boolean
+          _m_planned: number
+          _sleep_days: number
+          _t_done: number
+          _t_on: boolean
+          _t_planned: number
+        }
+        Returns: number
+      }
+      consistency_score: {
+        Args: { _end: string; _start: string }
+        Returns: {
+          meals_done: number
+          meals_on: boolean
+          meals_planned: number
+          score: number
+          sleep_days: number
+          training_done: number
+          training_on: boolean
+          training_planned: number
+        }[]
+      }
       day_plan_counts: {
         Args: { _day: string; _user_id: string }
         Returns: Record<string, unknown>
