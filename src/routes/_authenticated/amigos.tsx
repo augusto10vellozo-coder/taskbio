@@ -11,7 +11,7 @@ import { acceptFriendRequest, inviterByUsername, myFriendState, sendFriendReques
 import { WeeklyCard } from "@/components/WeeklyCard";
 import { useTaskBio } from "@/lib/trilha-store";
 import { brasiliaDay, leaguePct, leaguePositions, leagueWeekStart, shiftDay, weekChampions, weekTitles } from "@/lib/xp";
-import { useAwards, notify } from "@/lib/use-awards";
+import { notify } from "@/lib/use-awards";
 
 export const Route = createFileRoute("/_authenticated/amigos")({
   validateSearch: (s: Record<string, unknown>): { add?: string } => (typeof s["add"] === "string" ? { add: s["add"] } : {}),
@@ -40,7 +40,6 @@ function Amigos() {
   const { habitLog } = useTaskBio();
   const { rows, position, reload } = useLeague();
   const last = useLeague(-1);
-  const awards = useAwards();
   const champs = new Set(last.rows ? weekChampions(last.rows) : []);
   const places = rows ? leaguePositions(rows) : [];
   const titles = rows ? weekTitles(rows) : new Map();

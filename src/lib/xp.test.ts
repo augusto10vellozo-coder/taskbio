@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { brasiliaDay, cappedWeekXp, leagueWeekStart, rankLeague, xpFor } from "./xp";
+import { brasiliaDay, cappedWeekXp, leaguePositions, leagueWeekStart, rankLeague, weekChampions, xpFor } from "./xp";
 
 describe("pontos (XP)", () => {
   const today = "2026-10-16";
@@ -26,12 +26,20 @@ describe("pontos (XP)", () => {
     expect(leagueWeekStart("2026-10-16")).toBe("2026-10-11");
     expect(leagueWeekStart("2026-10-11")).toBe("2026-10-11");
   });
-  it("desempata por dias com hábitos e depois por quem marcou primeiro", () => {
+  it("ordena pela média percentual, não por XP", () => {
     const r = rankLeague([
-      { user_id: "a", week_xp: 50, habit_days: 2, first_mark_sec: 100 },
-      { user_id: "b", week_xp: 50, habit_days: 3, first_mark_sec: 900 },
-      { user_id: "c", week_xp: 50, habit_days: 3, first_mark_sec: 300 },
+      { user_id: "a", week_xp: 300, habit_days: 7, first_mark_sec: 100, week_pct: 0.5 },
+      { user_id: "b", week_xp: 20, habit_days: 1, first_mark_sec: 900, week_pct: 0.87 },
+      { user_id: "c", week_xp: 0, habit_days: 0, first_mark_sec: 0, week_pct: null },
     ]);
-    expect(r.map((x) => x.user_id)).toEqual(["c", "b", "a"]);
+    expect(r.map((x) => x.user_id)).toEqual(["b", "a", "c"]);
+  });
+  it("A com 3 módulos a 100% empata com B com 6 módulos a 100%", () => {
+    const r = rankLeague([
+      { user_id: "B", week_xp: 90, habit_days: 6, first_mark_sec: 100, week_pct: 6 / 6 },
+      { user_id: "A", week_xp: 30, habit_days: 1, first_mark_sec: 900, week_pct: 3 / 3 },
+    ]);
+    expect(leaguePositions(r)).toEqual([1, 1]);
+    expect(weekChampions(r).sort()).toEqual(["A", "B"]);
   });
 });
