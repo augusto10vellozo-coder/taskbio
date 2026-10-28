@@ -237,11 +237,12 @@ export function dueDayComplete(plan: unknown, timeZone: string, now: Date): DueR
 }
 
 /** League position change versus the last stored position this week. */
-export function dueLeagueMove(prev: number | null, pos: number, leader: { name: string; xpGap: number } | null, timeZone: string, now: Date): DueReminder[] {
+export function dueLeagueMove(prev: number | null, pos: number, leader: { name: string; xpGap: number; pctGap?: number } | null, timeZone: string, now: Date): DueReminder[] {
   if (!prev || prev === pos) return [];
   const today = dayKey(wallClock(now, timeZone));
   if (pos === 1 && prev > 1) return [{ key: `leaguemove|lead|${today}`, title: "📈 Você assumiu a liderança!", body: "", url: "/amigos", tag: "leaguemove" }];
   if (prev === 1 && pos > 1 && leader) {
+    if (leader.pctGap !== undefined) return [{ key: `leaguemove|lost|${today}`, title: `📉 ${firstName(leader.name) || "Um amigo"} te ultrapassou — conclua o seu dia pra voltar ao 1º`, body: "", url: "/amigos", tag: "leaguemove" }];
     const habits = Math.max(1, Math.ceil((leader.xpGap + 1) / 10));
     return [{ key: `leaguemove|lost|${today}`, title: `📉 ${firstName(leader.name) || "Um amigo"} te ultrapassou — ${habits} hábito${habits > 1 ? "s" : ""} hoje te devolve${habits > 1 ? "m" : ""} o 1º`, body: "", url: "/amigos", tag: "leaguemove" }];
   }

@@ -26,7 +26,7 @@ function draw(d: Data) {
     g.fillStyle = "#9CA3AF"; g.font = "30px Manrope, sans-serif"; g.fillText(label, 80, y);
     g.fillStyle = color; g.font = "700 110px Manrope, sans-serif"; g.fillText(value, 80, y + 115);
   };
-  stat(330, "Pontos da semana", `${d.me?.week_xp ?? 0} XP`, mint);
+  stat(330, "Conclusão da semana", d.me?.week_pct == null ? "—" : `${Math.round(d.me.week_pct * 100)}%`, mint);
   stat(560, "Sequência", `${d.me?.streak ?? 0} dias`, coral);
   stat(790, "Posição na liga", d.friends > 1 && d.position ? `${d.position}º de ${d.friends}` : "—", d.champion ? gold : "#FFFFFF");
   g.fillStyle = "#9CA3AF"; g.font = "30px Manrope, sans-serif"; g.fillText("Dias marcados", 80, 1030);
@@ -59,7 +59,7 @@ export function WeeklyCard(props: Data) {
   return (
     <section className={`rounded-lg bg-card p-4 ring-1 ${props.champion ? "ring-2 ring-brand" : "ring-line"}`}>
       <p className="text-xs font-medium text-steel">{props.champion ? <span className="mr-1 inline-flex items-center gap-1 font-semibold text-brand"><Crown className="size-3.5" /> Campeão da semana ·</span> : null}Card da semana passada · {props.label}</p>
-      <p className="mt-1 text-sm">{props.me?.week_xp ?? 0} XP · sequência {props.me?.streak ?? 0} · {props.days.filter(Boolean).length} dias marcados{props.friends > 1 && props.position ? ` · ${props.position}º na liga` : ""}</p>
+      <p className="mt-1 text-sm">{props.me?.week_pct == null ? "—" : `${Math.round(props.me.week_pct * 100)}%`} de conclusão · sequência {props.me?.streak ?? 0} · {props.days.filter(Boolean).length} dias marcados{props.friends > 1 && props.position ? ` · ${props.position}º na liga` : ""}</p>
       <Button className="mt-3" size="sm" onClick={share} disabled={busy}><Share2 /> Compartilhar</Button>
     </section>
   );

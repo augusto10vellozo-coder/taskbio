@@ -4,7 +4,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { brasiliaDay, xpFor } from "@/lib/xp";
 
 const xpInput = z.object({
-  kind: z.enum(["habit", "block", "meal", "workout", "photo", "reading", "study"]),
+  kind: z.enum(["habit", "block", "meal", "workout", "photo", "reading", "study", "bill"]),
   ref: z.string().min(1).max(200),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   on: z.boolean(),
@@ -106,9 +106,9 @@ export const sendNudge = createServerFn({ method: "POST" })
     const { error } = await supabaseAdmin.from("nudges").insert({ sender: context.userId, recipient: data.to, day: today });
     if (error) return { ok: false, reason: "already" as const };
     const { data: rows } = await supabaseAdmin.rpc("league_week_for", { _start: leagueWeekStart(today), _user_id: data.to });
-    const { rankLeague } = await import("@/lib/xp");
-    const ranked = rankLeague((rows ?? []) as never[]) as { user_id: string }[];
-    const pos = ranked.findIndex((r) => r.user_id === data.to) + 1;
+    const { rankLeague, leaguePositions } = await import("@/lib/xp");
+    const ranked = rankLeague((rows ?? []) as never[]) as { user_id: string; week_xp: number; habit_days: number; first_mark_sec: number }[];
+    const pos = leaguePositions(ranked)[ranked.findIndex((r) => r.user_id === data.to)] ?? 0;
     const { data: me } = await supabaseAdmin.from("profiles").select("username, display_name").eq("id", context.userId).maybeSingle();
     const { pushToUser } = await import("@/lib/push-send.server");
     await pushToUser(data.to, { title: "TaskBio", body: `👋 ${me?.username || me?.display_name?.trim() || "Um amigo"} cutucou você! Você está em ${pos || 1}º na liga desta semana`, url: `${APP}/amigos`, tag: "nudge" });

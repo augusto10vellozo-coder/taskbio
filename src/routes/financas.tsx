@@ -7,6 +7,7 @@ import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useTaskBio } from "@/lib/trilha-store";
+import { emitXp } from "@/lib/xp-client";
 import { toDateKey } from "@/lib/calendar-utils";
 import { FIXED_CATEGORIES, billStatus, brl, budgetFor, dailyAllowance, emptyFinance, monthSummary, payBill, removeBill, setBudget, sortBills, unpayBill, validAmount, type Bill } from "@/lib/finance";
 
@@ -90,6 +91,7 @@ function Financas() {
       const removeExpense = window.confirm(`Excluir "${b.title}". Remover também o gasto lançado de ${brl(b.amount)}?\n\nOK = remover o gasto · Cancelar = manter o gasto`);
       setFinance((s) => removeBill(s, b.id, removeExpense));
     } else setFinance((s) => removeBill(s, b.id, true));
+    if (b.paid) emitXp({ kind: "bill", ref: `${b.id}:${b.dueDate}`, date: todayKey, on: false });
     toast.success("Conta excluída");
   };
 
@@ -160,7 +162,7 @@ function Financas() {
             <div className="min-w-0 basis-full sm:basis-auto sm:flex-1"><p className={`break-words font-medium ${st.kind === "paga" ? "line-through" : ""}`}>{st.kind === "paga" && <Check className="mr-1 inline size-4 text-good" />}{b.title}</p>
               <p className={`text-xs ${st.kind === "atrasada" ? "font-semibold text-destructive" : st.kind === "hoje" ? "font-semibold text-brand-deep" : "text-steel"}`}>{st.label} · {b.dueDate.split("-").reverse().join("/")} · {b.category || "Contas fixas"}</p></div>
             <span className="font-medium">{brl(b.amount)}</span>
-            <Button size="sm" variant={b.paid ? "outline" : "default"} onClick={() => { if (b.paid) { setFinance((s) => unpayBill(s, b.id)); toast.success("Conta desmarcada · gasto removido"); } else { setFinance((s) => payBill(s, b.id, todayKey)); toast.success(`Conta paga · gasto de ${brl(b.amount)} lançado`); } }}>{b.paid ? "Desmarcar" : "Marcar como paga"}</Button>
+            <Button size="sm" variant={b.paid ? "outline" : "default"} onClick={() => { if (b.paid) { setFinance((s) => unpayBill(s, b.id)); emitXp({ kind: "bill", ref: `${b.id}:${b.dueDate}`, date: todayKey, on: false }); toast.success("Conta desmarcada · gasto removido"); } else { setFinance((s) => payBill(s, b.id, todayKey)); emitXp({ kind: "bill", ref: `${b.id}:${b.dueDate}`, date: todayKey, on: true }); toast.success(`Conta paga · gasto de ${brl(b.amount)} lançado`); } }}>{b.paid ? "Desmarcar" : "Marcar como paga"}</Button>
             <Button variant="ghost" size="icon" className="size-7" aria-label={`Editar ${b.title}`} onClick={() => { setEditingBill(b.id); setBill({ title: b.title, amount: String(b.amount).replace(".", ","), dueDate: b.dueDate, category: b.category || "Contas fixas" }); }}><Pencil /></Button>
             <Button variant="ghost" size="icon" className="size-7" aria-label={`Remover ${b.title}`} onClick={() => deleteBill(b)}><Trash2 /></Button>
           </li>); })}</ul>
@@ -168,7 +170,7 @@ function Financas() {
 
       <section className="mt-4 rounded-lg bg-card p-4 ring-1 ring-line"><h2 className="font-display text-lg font-semibold">Últimos registros</h2>
         {monthEntries.length === 0 && <p className="mt-2 text-sm text-steel">Nenhum registro em {monthLabel(month)}.</p>}
-        <ul className="mt-2 divide-y divide-line">{monthEntries.slice(0, 30).map((e) => <li key={e.id} className="flex items-center gap-3 py-2 text-sm"><span className="min-w-0 flex-1 break-words">{e.description} <span className="text-xs text-steel">· {e.category} · {e.date.split("-").reverse().join("/")}{e.billId ? " · conta" : ""}</span></span><span className={e.type === "receita" ? "font-medium text-brand-deep" : "font-medium"}>{e.type === "receita" ? "+" : "−"}{brl(e.amount)}</span><Button variant="ghost" size="icon" className="size-7" aria-label={`Remover ${e.description}`} onClick={() => setFinance((s) => e.billId ? unpayBill(s, e.billId) : { ...s, entries: s.entries.filter((x) => x.id !== e.id) })}><Trash2 /></Button></li>)}</ul>
+        <ul className="mt-2 divide-y divide-line">{monthEntries.slice(0, 30).map((e) => <li key={e.id} className="flex items-center gap-3 py-2 text-sm"><span className="min-w-0 flex-1 break-words">{e.description} <span className="text-xs text-steel">· {e.category} · {e.date.split("-").reverse().join("/")}{e.billId ? " · conta" : ""}</span></span><span className={e.type === "receita" ? "font-medium text-brand-deep" : "font-medium"}>{e.type === "receita" ? "+" : "−"}{brl(e.amount)}</span><Button variant="ghost" size="icon" className="size-7" aria-label={`Remover ${e.description}`} onClick={() => { const pb = e.billId ? f.bills.find((x) => x.id === e.billId) : undefined; if (pb?.paid) emitXp({ kind: "bill", ref: `${pb.id}:${pb.dueDate}`, date: todayKey, on: false }); setFinance((s) => e.billId ? unpayBill(s, e.billId) : { ...s, entries: s.entries.filter((x) => x.id !== e.id) }); }}><Trash2 /></Button></li>)}</ul>
       </section>
     </main>
   );
