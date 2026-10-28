@@ -44,15 +44,17 @@ export function cappedWeekXp(events: { day: string; points: number }[]) {
   return [...byDay.values()].reduce((n, v) => n + Math.min(LEAGUE_DAILY_CAP, v), 0);
 }
 
-export type LeagueRow = { user_id: string; week_xp: number; habit_days: number; first_mark_sec: number; week_pct?: number | null };
+export type LeagueRow = { user_id: string; week_xp: number; habit_days: number; first_mark_sec: number; week_pct?: number | null; streak_rotina?: number };
 const pctOf = (r: LeagueRow) => (r.week_pct == null ? -1 : Math.round(Number(r.week_pct) * 100));
-/** Ranking order: weekly average completion % (server-computed). Equal % ties; nobody is ahead by XP or module count. */
+const rot = (r: LeagueRow) => r.streak_rotina ?? 0;
+const same = (a: LeagueRow, b: LeagueRow) => pctOf(a) === pctOf(b) && rot(a) === rot(b);
+/** Ranking: people with planned blocks only; weekly completion % (server-computed), then routine streak. Never XP or module count. */
 export function rankLeague<T extends LeagueRow>(rows: T[]) {
-  return [...rows].sort((a, b) => pctOf(b) - pctOf(a));
+  return rows.filter((r) => r.week_pct != null).sort((a, b) => pctOf(b) - pctOf(a) || rot(b) - rot(a));
 }
-/** Positions with ties sharing the same place (1º, 1º, 3º). */
+/** Positions with full ties (same % and routine streak) sharing the place (1º, 1º, 3º). */
 export function leaguePositions(ranked: LeagueRow[]) {
-  return ranked.map((r) => ranked.findIndex((x) => pctOf(x) === pctOf(r)) + 1);
+  return ranked.map((r) => ranked.findIndex((x) => same(x, r)) + 1);
 }
 /** Whole percentage shown in the ranking, or null when nothing was planned. */
 export const leaguePct = (r: LeagueRow) => (r.week_pct == null ? null : Math.round(Number(r.week_pct) * 100));
@@ -74,8 +76,8 @@ export function weekTitles<T extends LeagueRow & { streak: number; comeback?: bo
 /** Champions of a finished week: everyone tied at the highest % (above 0) among 2+ members. */
 export const weekChampions = (ranked: LeagueRow[]) => {
   if (ranked.length < 2) return [] as string[];
-  const top = pctOf(ranked[0]!);
-  return top > 0 ? ranked.filter((r) => pctOf(r) === top).map((r) => r.user_id) : [];
+  const top = ranked[0]!;
+  return pctOf(top) > 0 ? ranked.filter((r) => same(r, top)).map((r) => r.user_id) : [];
 };
 
 /** Months (yyyy-MM, by week start) with 3+ weekly wins. */
