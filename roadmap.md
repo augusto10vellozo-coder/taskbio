@@ -1,5 +1,5 @@
 # Roadmap
-- [ ] Congelamentos individuais: ganhos/uso/devolução no servidor, avisos únicos, saldo/histórico em Hábitos e testes sem alterar XP/liga/Agenda.
+- [x] Congelamentos individuais: servidor com saldo por registros, ganhos 10/20/30/40 = 1/2/3/3, uso/devolução/ruptura e isolamento XP/Agenda testados em dados fictícios removidos; 35 testes passaram. Conta real mostrou saldo/explicação em 360/390/1280px sem erros; job diário meia-noite Brasília ativo. Virada real e aviso no aparelho ainda não observados. Backup/commit manual indisponíveis.
 - [x] Amigos: própria linha e XP sem planejamento, fora da classificação; 17 testes passaram e navegador autenticado confirmou linha real e ausência simulada sem alterar dados, com 390px sem overflow.
 - [x] Bônus +20 por trigger, sequência de rotina e desempate, ranking sem quem não tem plano; teste A/B confirmado.
 - [x] Liga por percentual: blocos previstos calculados no servidor por módulos ativos, histórico antigo trocado por saldo inicial único, conta paga 5 XP revogável e vencedor pela média %, sem congelamento; teste A (3/3) e B (6/6) empatados em 100%. Tela Amigos não conferida no navegador.
