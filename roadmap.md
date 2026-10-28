@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Liga por percentual: blocos previstos calculados no servidor por módulos ativos, histórico antigo trocado por saldo inicial único, conta paga 5 XP revogável e vencedor pela média %, sem congelamento; teste A (3/3) e B (6/6) empatados em 100%. Tela Amigos não conferida no navegador.
 - [x] Agenda: confirmação/desfazer compartilhados, estados/horário, calorias/custo e contador; 37 testes e fluxo autenticado verificaram os dois sentidos, itens/620 kcal/R$12,50, cancelamento/desfazer, reabertura, XP intacto e 360/390/1280px sem cortes; planos temporários removidos.
 - [x] Saúde: cards/comparações, peso único com duplicatas arquivadas, água retroativa, doses por intervalo/período e gráficos; 62 testes e fluxo autenticado verificaram integração bidirecional, reabertura, grafia, checks, XP intacto e 360/390/1280px sem cortes; conta restaurada. Backup pelo Histórico indisponível; entrega push real no aparelho não verificada.
 - [x] Finanças: meses navegáveis, saldo/orçamento por mês, contas com vencimento/pagamento/lembrete na Agenda, gráfico por categoria e ponte confirmada com Compras; 8 testes e fluxo no navegador (390px) conferidos.
