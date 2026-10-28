@@ -38,15 +38,17 @@ export const recordXp = createServerFn({ method: "POST" })
       return { points: points ?? 0 };
     }
     if (!data.on) {
-      await supabaseAdmin.from("xp_events").delete().eq("user_id", context.userId).eq("ref", ref);
+      const { error } = await supabaseAdmin.rpc("revoke_xp", { _user_id: context.userId, _ref: ref });
+      if (error) throw new Error("Não foi possível atualizar os pontos.");
       return { points: 0 };
     }
     const today = brasiliaDay(new Date());
     if (data.kind === "photo" && !data.photoPath?.startsWith(`${context.userId}/`)) return { points: 0 };
     const points = xpFor(data, today);
     if (points === 0) return { points: 0 };
-    const { error } = await supabaseAdmin.from("xp_events").insert({ user_id: context.userId, kind: data.kind, ref, day: today, points, photo_path: data.photoPath ?? null });
-    return { points: error ? 0 : points };
+    const { data: granted, error } = await supabaseAdmin.rpc("grant_xp", { _user_id: context.userId, _kind: data.kind, _ref: ref, _day: today, _points: points });
+    if (error) throw new Error("Não foi possível atualizar os pontos.");
+    return { points: granted ?? 0 };
   });
 
 /** Becomes friends with the owner of an invite code (used after signing up through an invite link). */

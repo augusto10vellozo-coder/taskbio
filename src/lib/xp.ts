@@ -1,6 +1,13 @@
 // Pure XP rules shared by the server function and tests.
+// Single source of XP weights. The database grant_xp function enforces the cap and idempotency;
+// habit/reading/study weights are mirrored in their server-only RPCs (migration central_xp_ledger).
 export type XpKind = "habit" | "block" | "meal" | "workout" | "photo" | "reading" | "study";
-export const XP_POINTS: Record<XpKind, number> = { habit: 10, block: 5, meal: 5, workout: 10, photo: 5, reading: 10, study: 10 };
+export const XP_POINTS: Record<XpKind, number> = { habit: 5, block: 5, meal: 5, workout: 15, photo: 5, reading: 10, study: 10 };
+export const XP_BILL_PAID = 5;
+export const XP_DAY_COMPLETE_BONUS = 20;
+export const XP_DAILY_CAP = 150;
+/** Kinds that never count toward the daily cap. */
+export const XP_CAP_EXEMPT = ["bonus", "bonus_dia_completo", "saldo_inicial_migracao"] as const;
 export const LEAGUE_DAILY_CAP = 100;
 
 /** Calendar day (yyyy-MM-dd) in Brasília time. */

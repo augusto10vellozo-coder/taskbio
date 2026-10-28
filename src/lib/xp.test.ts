@@ -4,10 +4,10 @@ import { brasiliaDay, cappedWeekXp, leagueWeekStart, rankLeague, xpFor } from ".
 describe("pontos (XP)", () => {
   const today = "2026-10-16";
   it("vale 10 por hábito, 5 por bloco, 5 por refeição com item e 10 por treino", () => {
-    expect(xpFor({ kind: "habit", date: today }, today)).toBe(10);
+    expect(xpFor({ kind: "habit", date: today }, today)).toBe(5);
     expect(xpFor({ kind: "block", date: today }, today)).toBe(5);
     expect(xpFor({ kind: "meal", date: today, foodItems: 1 }, today)).toBe(5);
-    expect(xpFor({ kind: "workout", date: today }, today)).toBe(10);
+    expect(xpFor({ kind: "workout", date: today }, today)).toBe(15);
     expect(xpFor({ kind: "photo", date: today }, today)).toBe(5);
   });
   it("dia anterior dá 0 pontos", () => {

@@ -20,7 +20,7 @@ describe("leitura", () => {
   });
   it("sessão de leitura vale o mesmo 10 XP do hábito", () => {
     expect(xpFor({ kind: "reading", date: "2026-10-19" }, "2026-10-19")).toBe(10);
-    expect(xpFor({ kind: "habit", date: "2026-10-19" }, "2026-10-19")).toBe(10);
+    expect(xpFor({ kind: "habit", date: "2026-10-19" }, "2026-10-19")).toBe(5);
   });
   it("meta aceita somente 30 a 1680 minutos", () => {
     expect([29, 30, 240, 1680, 1681].map(validReadingGoal)).toEqual([false, true, true, true, false]);
