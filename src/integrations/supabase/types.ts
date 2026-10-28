@@ -553,6 +553,33 @@ export type Database = {
         }
         Relationships: []
       }
+      xp_opening_balances: {
+        Row: {
+          created_at: string
+          legacy_total: number
+          migration_day: string
+          opening_points: number
+          user_id: string
+          validated: boolean
+        }
+        Insert: {
+          created_at?: string
+          legacy_total: number
+          migration_day?: string
+          opening_points: number
+          user_id: string
+          validated?: boolean
+        }
+        Update: {
+          created_at?: string
+          legacy_total?: number
+          migration_day?: string
+          opening_points?: number
+          user_id?: string
+          validated?: boolean
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -560,6 +587,16 @@ export type Database = {
     Functions: {
       claim_league_awards: { Args: never; Returns: Json }
       claim_push_delivery: { Args: { _id: string }; Returns: boolean }
+      grant_xp: {
+        Args: {
+          _day: string
+          _kind: string
+          _points: number
+          _ref: string
+          _user_id: string
+        }
+        Returns: number
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -649,6 +686,7 @@ export type Database = {
         }
         Returns: number
       }
+      revoke_xp: { Args: { _ref: string; _user_id: string }; Returns: number }
       save_progress_weight: {
         Args: { _date: string; _notes?: string; _value: number }
         Returns: {
