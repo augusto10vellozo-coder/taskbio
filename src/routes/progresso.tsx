@@ -40,7 +40,7 @@ const kindOrigin: Record<keyof typeof kinds, Origin> = {
 };
 
 function OriginLink({ origin, empty }: { origin: Origin; empty?: boolean }) {
-  return <Link to={origin.to} hash={origin.hash} className="mt-3 inline-block text-xs font-medium text-brand-deep underline-offset-4 hover:underline">{empty ? "Registrar" : "Ver"} em {origin.name}</Link>;
+  return <Link to={origin.to} {...(origin.hash ? { hash: origin.hash } : {})} className="mt-3 inline-block text-xs font-medium text-brand-deep underline-offset-4 hover:underline">{empty ? "Registrar" : "Ver"} em {origin.name}</Link>;
 }
 
 function MetricCard({ icon, value, label, origin, emptyText }: { icon: ReactNode; value: string | null; label: string; origin: Origin; emptyText: string }) {
