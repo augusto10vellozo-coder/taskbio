@@ -25,8 +25,8 @@ function load(uid: string) {
     const { data } = await supabase.rpc("claim_league_awards");
     const r = data as unknown as Raw | null;
     if (!r) return;
-    const a: Awards = { wins: r.wins, freezeDays: r.freeze_days, freezes: freezesLeft(r.wins.length, r.freeze_days.length), badges: monthlyBadges(r.wins) };
-    if (r.won) notify("Você venceu a liga da semana! 🏆", "Ganhou o troféu de campeão e 1 congelamento de sequência.");
+    const a: Awards = { wins: r.wins, freezeDays: r.freeze_days, freezes: 0, badges: monthlyBadges(r.wins) };
+    if (r.won) notify("Você venceu a liga da semana! 🏆", "Ganhou o troféu de campeão.");
     if (r.frozen_day) {
       const d = r.frozen_day.split("-").reverse().slice(0, 2).join("/");
       notify("Congelamento aplicado", `Você não marcou nada em ${d}, então usamos 1 congelamento e sua sequência continua.`);

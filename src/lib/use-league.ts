@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
-import { brasiliaDay, leagueWeekStart, rankLeague } from "@/lib/xp";
+import { brasiliaDay, leaguePositions, leagueWeekStart, rankLeague } from "@/lib/xp";
 import { XP_EVENT } from "@/lib/xp-client";
 
-export type LeagueMember = { user_id: string; display_name: string; username: string | null; avatar_url: string | null; week_xp: number; total_xp: number; today_xp: number; habit_days: number; first_mark_sec: number; habits: number; meals: number; workouts: number; streak: number; comeback: boolean };
+export type LeagueMember = { user_id: string; display_name: string; username: string | null; avatar_url: string | null; week_xp: number; total_xp: number; today_xp: number; habit_days: number; first_mark_sec: number; habits: number; meals: number; workouts: number; streak: number; comeback: boolean; week_pct: number | null };
 
-/** Weekly league for the connected group of accepted invites. Only XP and counts — no health data. */
+/** Weekly league for the connected group of accepted invites. Ranked by the server-computed weekly completion % — no health data. */
 export function useLeague(weekOffset = 0) {
   const { user } = useAuth();
   const [rows, setRows] = useState<LeagueMember[] | null>(null);
@@ -22,7 +22,8 @@ export function useLeague(weekOffset = 0) {
     window.addEventListener(XP_EVENT, h);
     return () => window.removeEventListener(XP_EVENT, h);
   }, [load]);
-  const position = user && rows ? rows.findIndex((r) => r.user_id === user.id) + 1 : 0;
+  const myIdx = user && rows ? rows.findIndex((r) => r.user_id === user.id) : -1;
+  const position = rows && myIdx >= 0 ? leaguePositions(rows)[myIdx]! : 0;
   const me = rows?.find((r) => r.user_id === user?.id) ?? null;
 
   // Local notice when my position changes (only for the current week, with permission).

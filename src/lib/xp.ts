@@ -1,9 +1,9 @@
 // Pure XP rules shared by the server function and tests.
 // Single source of XP weights. The database grant_xp function enforces the cap and idempotency;
 // habit/reading/study weights are mirrored in their server-only RPCs (migration central_xp_ledger).
-export type XpKind = "habit" | "block" | "meal" | "workout" | "photo" | "reading" | "study";
-export const XP_POINTS: Record<XpKind, number> = { habit: 5, block: 5, meal: 5, workout: 15, photo: 5, reading: 10, study: 10 };
 export const XP_BILL_PAID = 5;
+export type XpKind = "habit" | "block" | "meal" | "workout" | "photo" | "reading" | "study" | "bill";
+export const XP_POINTS: Record<XpKind, number> = { habit: 5, block: 5, meal: 5, workout: 15, photo: 5, reading: 10, study: 10, bill: XP_BILL_PAID };
 export const XP_DAY_COMPLETE_BONUS = 20;
 export const XP_DAILY_CAP = 150;
 /** Kinds that never count toward the daily cap. */
@@ -44,11 +44,18 @@ export function cappedWeekXp(events: { day: string; points: number }[]) {
   return [...byDay.values()].reduce((n, v) => n + Math.min(LEAGUE_DAILY_CAP, v), 0);
 }
 
-export type LeagueRow = { user_id: string; week_xp: number; habit_days: number; first_mark_sec: number };
-/** Ranking order: XP, then more days with habits, then who marked earlier in the day. */
+export type LeagueRow = { user_id: string; week_xp: number; habit_days: number; first_mark_sec: number; week_pct?: number | null };
+const pctOf = (r: LeagueRow) => (r.week_pct == null ? -1 : Math.round(Number(r.week_pct) * 100));
+/** Ranking order: weekly average completion % (server-computed). Equal % ties; nobody is ahead by XP or module count. */
 export function rankLeague<T extends LeagueRow>(rows: T[]) {
-  return [...rows].sort((a, b) => b.week_xp - a.week_xp || b.habit_days - a.habit_days || a.first_mark_sec - b.first_mark_sec);
+  return [...rows].sort((a, b) => pctOf(b) - pctOf(a));
 }
+/** Positions with ties sharing the same place (1º, 1º, 3º). */
+export function leaguePositions(ranked: LeagueRow[]) {
+  return ranked.map((r) => ranked.findIndex((x) => pctOf(x) === pctOf(r)) + 1);
+}
+/** Whole percentage shown in the ranking, or null when nothing was planned. */
+export const leaguePct = (r: LeagueRow) => (r.week_pct == null ? null : Math.round(Number(r.week_pct) * 100));
 
 export type WeekTitle = "Campeão" | "Muralha da constância" | "Recomeço";
 /** Titles for an already-ranked league (needs 2+ members): 1st place, longest streak, came back after a missed day. */
@@ -56,16 +63,20 @@ export function weekTitles<T extends LeagueRow & { streak: number; comeback?: bo
   const out = new Map<string, WeekTitle[]>();
   if (ranked.length < 2) return out;
   const add = (id: string, t: WeekTitle) => out.set(id, [...(out.get(id) ?? []), t]);
-  const first = ranked[0]!;
-  if (first.week_xp > 0) add(first.user_id, "Campeão");
+  const top = pctOf(ranked[0]!);
+  if (top > 0) ranked.filter((r) => pctOf(r) === top).forEach((r) => add(r.user_id, "Campeão"));
   const best = Math.max(...ranked.map((r) => r.streak));
   if (best > 0) ranked.filter((r) => r.streak === best).forEach((r) => add(r.user_id, "Muralha da constância"));
   ranked.filter((r) => r.comeback).forEach((r) => add(r.user_id, "Recomeço"));
   return out;
 }
 
-/** Champion of a finished week: 1st place with XP among 2+ members. */
-export const weekChampion = (ranked: LeagueRow[]) => (ranked.length >= 2 && ranked[0]!.week_xp > 0 ? ranked[0]!.user_id : null);
+/** Champions of a finished week: everyone tied at the highest % (above 0) among 2+ members. */
+export const weekChampions = (ranked: LeagueRow[]) => {
+  if (ranked.length < 2) return [] as string[];
+  const top = pctOf(ranked[0]!);
+  return top > 0 ? ranked.filter((r) => pctOf(r) === top).map((r) => r.user_id) : [];
+};
 
 /** Months (yyyy-MM, by week start) with 3+ weekly wins. */
 export function monthlyBadges(wins: string[]) {
@@ -74,5 +85,5 @@ export function monthlyBadges(wins: string[]) {
   return [...by].filter(([, n]) => n >= 3).map(([m]) => m).sort();
 }
 
-/** Freezes still available: one per weekly win minus those already used. */
+/** Freezes still available (legacy; the league no longer grants freezes). */
 export const freezesLeft = (wins: number, used: number) => Math.max(0, wins - used);

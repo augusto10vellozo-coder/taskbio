@@ -526,6 +526,7 @@ export type Database = {
           day: string
           id: string
           kind: string
+          legacy: boolean
           photo_path: string | null
           points: number
           ref: string
@@ -536,6 +537,7 @@ export type Database = {
           day: string
           id?: string
           kind: string
+          legacy?: boolean
           photo_path?: string | null
           points: number
           ref: string
@@ -546,6 +548,7 @@ export type Database = {
           day?: string
           id?: string
           kind?: string
+          legacy?: boolean
           photo_path?: string | null
           points?: number
           ref?: string
@@ -587,6 +590,10 @@ export type Database = {
     Functions: {
       claim_league_awards: { Args: never; Returns: Json }
       claim_push_delivery: { Args: { _id: string }; Returns: boolean }
+      day_plan_counts: {
+        Args: { _day: string; _user_id: string }
+        Returns: Record<string, unknown>
+      }
       grant_xp: {
         Args: {
           _day: string
@@ -625,6 +632,7 @@ export type Database = {
           total_xp: number
           user_id: string
           username: string
+          week_pct: number
           week_xp: number
           workouts: number
         }[]
@@ -644,6 +652,7 @@ export type Database = {
           total_xp: number
           user_id: string
           username: string
+          week_pct: number
           week_xp: number
           workouts: number
         }[]
@@ -717,6 +726,10 @@ export type Database = {
           id: string
           username: string
         }[]
+      }
+      week_completion: {
+        Args: { _start: string; _user_id: string }
+        Returns: number
       }
     }
     Enums: {

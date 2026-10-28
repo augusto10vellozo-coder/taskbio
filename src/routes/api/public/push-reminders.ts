@@ -4,6 +4,7 @@ import { dueDayComplete, dueLeagueMove, dueStreakMilestone, dueWeeklySummary, du
 import { VAPID_PUBLIC_KEY } from "@/lib/push-config";
 import { canDeliver, performDelivery, reminderLayer, retryAllowed } from "@/lib/push-delivery";
 import { mealSummary } from "@/lib/meal-summary";
+import { leaguePositions, rankLeague } from "@/lib/xp";
 import { MEALS } from "@/lib/trilha-data";
 import type { Block, Meal } from "@/lib/trilha-data";
 
@@ -64,7 +65,7 @@ export const Route = createFileRoute("/api/public/push-reminders")({
           const settings = row.settings && typeof row.settings === "object" && !Array.isArray(row.settings) ? row.settings as Record<string, unknown> : {};
           const prefs = readNotifPrefs(settings);
           const frozenDays = freezesBy.get(row.user_id) ?? [];
-          const freezesAvailable = Math.max(0, (winsBy.get(row.user_id) ?? 0) - frozenDays.length);
+          const freezesAvailable = 0; // the league no longer grants streak freezes
           const scheduled: { key: string; title: string; body: string; url: string; tag?: string; bonus?: number }[] = [];
           const userMeals = [...MEALS, ...(Array.isArray(row.meals) ? row.meals as unknown as Meal[] : [])];
           const getMeal = (id?: string) => userMeals.find((m) => m.id === id);
@@ -85,19 +86,22 @@ export const Route = createFileRoute("/api/public/push-reminders")({
               if (dueLeagueOpen(1, tz, now).length) {
                 const { data: ranked, error } = await supabaseAdmin.rpc("league_week_for", { _start: lastWeekStart, _user_id: row.user_id });
                 if (!error && ranked && ranked.length >= 2) {
-                  const pos = ranked.findIndex((r) => r.user_id === row.user_id) + 1;
+                  const sorted = rankLeague(ranked);
+                  const i = sorted.findIndex((r) => r.user_id === row.user_id);
+                  const pos = i >= 0 ? leaguePositions(sorted)[i]! : 0;
                   if (pos > 0) scheduled.push(...dueLeagueOpen(pos, tz, now));
                 }
               }
               if (checkLeague) {
-                const { data: ranked } = await supabaseAdmin.rpc("league_week_for", { _start: thisWeekStart, _user_id: row.user_id });
-                if (ranked && ranked.length >= 2 && (ranked[0]?.week_xp ?? 0) > 0) {
+                const { data: rawRanked } = await supabaseAdmin.rpc("league_week_for", { _start: thisWeekStart, _user_id: row.user_id });
+                const ranked = rawRanked ? rankLeague(rawRanked) : null;
+                if (ranked && ranked.length >= 2 && (ranked[0]?.week_pct ?? 0) > 0) {
                   const idx = ranked.findIndex((r) => r.user_id === row.user_id);
                   if (idx >= 0) {
-                    const pos = idx + 1;
+                    const pos = leaguePositions(ranked)[idx]!;
                     const retryMove = (pendingJobs ?? []).find(j => j.user_id === row.user_id && j.layer === "league" && j.reminder_key.startsWith("leaguemove|") && j.due_at === now.toISOString());
                     const prev = retryMove ? (retryMove.reminder_key.includes("|lead|") ? 2 : 1) : posBy.get(row.user_id) ?? null;
-                    const leader = pos > 1 ? { name: (ranked[0]?.display_name ?? ""), xpGap: (ranked[0]?.week_xp ?? 0) - (ranked[idx]?.week_xp ?? 0) } : null;
+                    const leader = pos > 1 ? { name: (ranked[0]?.display_name ?? ""), xpGap: 0, pctGap: Number(ranked[0]?.week_pct ?? 0) - Number(ranked[idx]?.week_pct ?? 0) } : null;
                     scheduled.push(...dueLeagueMove(prev, pos, leader, tz, now));
                     if (prev !== pos) await supabaseAdmin.from("league_positions").upsert({ user_id: row.user_id, week_start: thisWeekStart, position: pos, updated_at: now.toISOString() });
                   }
