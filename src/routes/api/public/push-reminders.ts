@@ -4,6 +4,7 @@ import { dueDayComplete, dueLeagueMove, dueStreakMilestone, dueWeeklySummary, du
 import { VAPID_PUBLIC_KEY } from "@/lib/push-config";
 import { canDeliver, performDelivery, reminderLayer, retryAllowed } from "@/lib/push-delivery";
 import { mealSummary } from "@/lib/meal-summary";
+import { leaguePositions, rankLeague } from "@/lib/xp";
 import { MEALS } from "@/lib/trilha-data";
 import type { Block, Meal } from "@/lib/trilha-data";
 
@@ -85,7 +86,9 @@ export const Route = createFileRoute("/api/public/push-reminders")({
               if (dueLeagueOpen(1, tz, now).length) {
                 const { data: ranked, error } = await supabaseAdmin.rpc("league_week_for", { _start: lastWeekStart, _user_id: row.user_id });
                 if (!error && ranked && ranked.length >= 2) {
-                  const pos = ranked.findIndex((r) => r.user_id === row.user_id) + 1;
+                  const sorted = rankLeague(ranked);
+                  const i = sorted.findIndex((r) => r.user_id === row.user_id);
+                  const pos = i >= 0 ? leaguePositions(sorted)[i]! : 0;
                   if (pos > 0) scheduled.push(...dueLeagueOpen(pos, tz, now));
                 }
               }
