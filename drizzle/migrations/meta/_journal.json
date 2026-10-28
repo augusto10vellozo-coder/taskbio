@@ -120,6 +120,13 @@
       "when": 1793208191609,
       "tag": "0016_league_completion_percent",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1793208426952,
+      "tag": "0017_day_plan_counts_tracker_start",
+      "breakpoints": true
     }
   ]
 }
