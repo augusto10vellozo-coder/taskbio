@@ -628,6 +628,7 @@ export type Database = {
           habits: number
           meals: number
           streak: number
+          streak_rotina: number
           today_xp: number
           total_xp: number
           user_id: string
@@ -648,6 +649,7 @@ export type Database = {
           habits: number
           meals: number
           streak: number
+          streak_rotina: number
           today_xp: number
           total_xp: number
           user_id: string
@@ -696,6 +698,7 @@ export type Database = {
         Returns: number
       }
       revoke_xp: { Args: { _ref: string; _user_id: string }; Returns: number }
+      routine_streak: { Args: { _user_id: string }; Returns: number }
       save_progress_weight: {
         Args: { _date: string; _notes?: string; _value: number }
         Returns: {
@@ -727,6 +730,7 @@ export type Database = {
           username: string
         }[]
       }
+      sync_day_bonus: { Args: { _user_id: string }; Returns: number }
       week_completion: {
         Args: { _start: string; _user_id: string }
         Returns: number
