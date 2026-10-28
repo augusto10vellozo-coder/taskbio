@@ -32,7 +32,7 @@ describe("pontos (XP)", () => {
       { user_id: "b", week_xp: 20, habit_days: 1, first_mark_sec: 900, week_pct: 0.87 },
       { user_id: "c", week_xp: 0, habit_days: 0, first_mark_sec: 0, week_pct: null },
     ]);
-    expect(r.map((x) => x.user_id)).toEqual(["b", "a", "c"]);
+    expect(r.map((x) => x.user_id)).toEqual(["b", "a"]);
   });
   it("A com 3 módulos a 100% empata com B com 6 módulos a 100%", () => {
     const r = rankLeague([
@@ -41,5 +41,13 @@ describe("pontos (XP)", () => {
     ]);
     expect(leaguePositions(r)).toEqual([1, 1]);
     expect(weekChampions(r).sort()).toEqual(["A", "B"]);
+  });
+  it("empate no % é decidido pela sequência de rotina", () => {
+    const r = rankLeague([
+      { user_id: "A", week_xp: 0, habit_days: 0, first_mark_sec: 0, week_pct: 1, streak_rotina: 2 },
+      { user_id: "B", week_xp: 0, habit_days: 0, first_mark_sec: 0, week_pct: 1, streak_rotina: 5 },
+    ]);
+    expect(r.map((x) => x.user_id)).toEqual(["B", "A"]);
+    expect(weekChampions(r)).toEqual(["B"]);
   });
 });

@@ -149,7 +149,7 @@ function Amigos() {
             <span className="w-6 text-center font-display text-lg font-semibold">{places[i] === 1 && (leaguePct(r) ?? 0) > 0 ? <Crown className="mx-auto size-5 text-brand" aria-label="1º lugar" /> : `${places[i]}º`}</span>
             <span className="grid h-11 w-11 shrink-0 place-items-center"><Avatar name={r.display_name || r.username || ""} url={r.avatar_url} champion={champs.has(r.user_id)} /></span>
             <div className="min-w-0 flex-1"><p title={`${r.display_name || r.username || "Sem nome"}${r.user_id === user?.id ? " (você)" : ""}`} className="flex max-w-full items-baseline leading-5"><span className="min-w-0 truncate whitespace-nowrap">{r.display_name || r.username || "Sem nome"}{r.user_id === user?.id ? " (você)" : ""}</span><span className="shrink-0 whitespace-nowrap">&nbsp;· {leaguePct(r) == null ? "—" : `${leaguePct(r)}%`}</span></p>{((titles.get(r.user_id) as string[] | undefined) ?? []).length > 0 && <span className="mt-0.5 flex flex-wrap items-center gap-1">{((titles.get(r.user_id) as string[] | undefined) ?? []).map((t) => <span key={t} className={`rounded-full px-1.5 py-px text-[10px] font-semibold ring-1 ${t === "Campeão" ? "text-gold ring-gold/60" : t === "Recomeço" ? "text-accent ring-accent/50" : "text-good ring-good/50"}`}>{t}</span>)}</span>}<p className="mt-0.5 text-xs text-steel">{r.habits} hábitos · {r.meals} refeições · {r.workouts} treinos na semana · hoje {r.today_xp} XP</p></div>
-            <div className="flex shrink-0 flex-col items-end gap-1 text-right"><p className="font-display text-lg font-semibold">{leaguePct(r) == null ? "—" : `${leaguePct(r)}%`}</p><p className="flex items-center justify-end gap-1 text-xs text-steel"><Flame className="size-3.5 text-brand" />{r.streak}</p>
+            <div className="flex shrink-0 flex-col items-end gap-1 text-right"><p className="font-display text-lg font-semibold">{leaguePct(r) == null ? "—" : `${leaguePct(r)}%`}</p><p className="flex items-center justify-end gap-1 text-xs text-steel"><Flame className="size-3.5 text-brand" />{r.streak_rotina}</p>
             {r.user_id !== user?.id && inactive.has(r.user_id) && (state?.nudgedToday.includes(r.user_id)
               ? <Button size="sm" variant="outline" className="h-8 px-2 text-xs" disabled>Cutucado 👋</Button>
               : <Button size="sm" variant="outline" className="h-8 px-2 text-xs" onClick={() => nudge(r.user_id)}>Cutucar 👋</Button>)}</div>
@@ -157,7 +157,7 @@ function Amigos() {
         ))}</ol>}
         {rows && rows.length < 2 && <p className="mt-2 text-sm text-steel">Convide amigos para começar a competir.</p>}
         {rows && position > 0 && rows.length > 1 && <p className="mt-2 border-t border-line pt-3 text-sm">Você está em <strong>{position}º</strong> entre seus amigos.</p>}
-        <p className="mt-3 text-xs text-steel">Vence a maior média de conclusão do dia na semana · empate divide o troféu dourado.</p>
+        <p className="mt-3 text-xs text-steel">Vence a maior média de conclusão na semana · empate decide pela sequência de rotina.</p>
         <p className="mt-1 pb-1 text-[11px] leading-relaxed text-steel">Conta só o que você planejou nos seus módulos ativos. Peso, medidas e dados de saúde nunca aparecem aqui.</p>
       </section>
 

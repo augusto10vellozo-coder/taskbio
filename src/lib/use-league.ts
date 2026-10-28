@@ -4,7 +4,7 @@ import { useAuth } from "@/lib/auth-context";
 import { brasiliaDay, leaguePositions, leagueWeekStart, rankLeague } from "@/lib/xp";
 import { XP_EVENT } from "@/lib/xp-client";
 
-export type LeagueMember = { user_id: string; display_name: string; username: string | null; avatar_url: string | null; week_xp: number; total_xp: number; today_xp: number; habit_days: number; first_mark_sec: number; habits: number; meals: number; workouts: number; streak: number; comeback: boolean; week_pct: number | null };
+export type LeagueMember = { user_id: string; display_name: string; username: string | null; avatar_url: string | null; week_xp: number; total_xp: number; today_xp: number; habit_days: number; first_mark_sec: number; habits: number; meals: number; workouts: number; streak: number; comeback: boolean; week_pct: number | null; streak_rotina: number };
 
 /** Weekly league for the connected group of accepted invites. Ranked by the server-computed weekly completion % — no health data. */
 export function useLeague(weekOffset = 0) {
