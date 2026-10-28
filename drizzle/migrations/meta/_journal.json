@@ -141,6 +141,13 @@
       "when": 1793212749738,
       "tag": "0019_habit_streak_protection",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1793215619654,
+      "tag": "0020_routine_progress_summary",
+      "breakpoints": true
     }
   ]
 }
