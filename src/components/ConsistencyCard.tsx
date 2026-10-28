@@ -58,7 +58,7 @@ export function ConsistencyCard({ period }: { period: 7 | 30 | 90 }) {
         <ul className="mt-4 space-y-2 px-4 text-sm">
           {d?.training_on && <li>Treino: {t === null ? "sem treinos previstos" : `${t}% (${d.training_done} de ${d.training_planned} treinos)`}</li>}
           {d?.meals_on && <li>Alimentação: {m === null ? "sem refeições planejadas" : `${m}% (${d.meals_done} de ${d.meals_planned} refeições)`}</li>}
-          <li>Sono: +{sleep} ({sleep} {sleep === 1 ? "dia" : "dias"} dentro da meta)</li>
+          <li>Sono: +{sleep} ({d?.sleep_days ?? 0} {d?.sleep_days === 1 ? "dia" : "dias"} dentro da meta)</li>
           <li className="text-steel">Período: {fmtDay(start)} a {fmtDay(today)}</li>
         </ul>
       </SheetContent>
