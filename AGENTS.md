@@ -9,9 +9,9 @@
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
 
-Ad monetization remains inactive until an approved AdSense publisher ID and privacy/consent setup are provided; public informational routes stay accessible without login so site reviewers can inspect the service without exposing user data.
+Ads stay inactive until an approved AdSense ID and consent setup exist; public info routes need no login so reviewers can inspect without user data.
 
-Ad components must use the centralized display-mode guard: browser ads are allowed only in regular browser tabs and remain blocked in installed PWA, iOS home-screen, and native app containers. This prevents future web monetization from leaking into the app experience.
+Ad components must use the centralized display-mode guard: browser ads are allowed only in regular browser tabs and remain blocked in installed PWA, iOS home-screen, and native app containers. Why: keeps ads out of the app.
 
 Public analytics uses opt-in browser consent and stores only event type, known public path, optional ad slot, and timestamp; admin-only RLS protects reports and editorial reviews. This avoids collecting visitor identity or health data.
 
@@ -29,7 +29,7 @@ Navigation uses the registry-driven fixed BottomNav below the desktop-header bre
 
 Module screens use the shared ModuleHeader for their primary title and history-back control with a direct-entry fallback to Modules; back navigation belongs to the screen, never the global brand header.
 
-All copy a visitor can see stays in Brazilian Portuguese, and authentication failures are surfaced through the shared pt-BR message helper instead of the backend's raw text, so no English reaches users on any screen.
+Visible copy stays pt-BR; auth failures use the shared pt-BR message helper, never raw backend text.
 - Optional app modules are declared in src/lib/modules.ts; nav, home shortcuts and settings read that registry so new modules need no refactor.
 - Workout plan import extracts document text and photo OCR in lazy-loaded browser modules; only text reaches authenticated interpretation functions. Photo results keep nullable fields until corrected before entering the unchanged document validation, so images stay on-device and absent values are never defaulted.
 - Photo review separates unquantified preparation/instruction rows into transient notes before marking uncertain exercises; the existing document validator receives exercises only. Why: notes must not create mandatory numeric fields or change PDF/storage behavior.
