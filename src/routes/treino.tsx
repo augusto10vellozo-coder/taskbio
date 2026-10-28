@@ -1,6 +1,7 @@
 import { spreadsheetValid, type SpreadsheetWorkout } from "@/lib/plan-spreadsheet";
 import { RestTimer } from "@/components/RestTimer";
 import { ModuleHeader } from "@/components/ModuleHeader";
+import { ProgressRecorder } from "@/components/ProgressRecorder";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { TrainingExplore, useScheduleWorkout } from "@/components/TrainingExplore";
 import { useEffect, useMemo, useState } from "react";
@@ -52,6 +53,7 @@ function Treino() {
         </div>
       </section>
       {tab === "semana" ? <WeekTab onExplore={() => navigate({ search: { aba: "explorar" } })} /> : <TrainingExplore />}
+      <ProgressRecorder id="registros-treino" title="Carga e corrida" kinds={["strength", "run"]} />
     </main>
   );
 }
