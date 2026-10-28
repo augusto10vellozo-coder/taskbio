@@ -795,6 +795,14 @@ export type Database = {
         Returns: number
       }
       revoke_xp: { Args: { _ref: string; _user_id: string }; Returns: number }
+      routine_progress: {
+        Args: { _end: string; _league_week?: boolean; _start: string }
+        Returns: {
+          done: number
+          pct: number
+          planned: number
+        }[]
+      }
       routine_streak: { Args: { _user_id: string }; Returns: number }
       save_progress_weight: {
         Args: { _date: string; _notes?: string; _value: number }

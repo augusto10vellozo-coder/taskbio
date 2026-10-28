@@ -1,4 +1,5 @@
 import { ModuleHeader } from "@/components/ModuleHeader";
+import { ProgressRecorder } from "@/components/ProgressRecorder";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
 import { ChevronLeft, ChevronRight, Droplets, Minus, Moon, Pill, Plus, Scale, Trash2 } from "lucide-react";
@@ -89,6 +90,7 @@ function Saude() {
       {doses.length === 0 ? <p className="mt-4 text-sm text-steel">Nenhuma dose prevista para hoje.</p> : <ul className="mt-3 divide-y divide-line">{doses.map(dose => { const taken = doseTaken(dose, marks); return <li key={dose.id} className="flex items-start gap-3 py-3 text-sm"><input className="mt-1 size-4 shrink-0" type="checkbox" checked={taken} aria-label={`${dose.time} · ${dose.name} tomado hoje`} onChange={() => setHealth(h => { const cur = h.medsTaken?.[today] ?? []; return { ...h, medsTaken: { ...h.medsTaken, [today]: taken ? cur.filter(id => id !== dose.id && !(dose.legacy && id === dose.medicationId)) : [...cur, dose.id] } }; })} /><div className="min-w-0 flex-1"><span className={taken ? "text-steel line-through break-words" : "break-words"}>{dose.time} · {dose.name}</span>{dose.remainingDays !== undefined && <p className="mt-1 text-xs text-steel">{dose.remainingDays === 0 ? "Último dia deste medicamento" : `faltam ${dose.remainingDays} dias`}</p>}</div><Button variant="ghost" size="icon" className="size-8 shrink-0" aria-label={`Remover ${dose.name}`} onClick={() => setHealth(h => ({ ...h, meds: (h.meds ?? []).filter(m => m.id !== dose.medicationId) }))}><Trash2 /></Button></li>; })}</ul>}
     </section>
     <div className="mt-5 grid gap-3 md:grid-cols-3"><HealthChart title="Água (copos)" data={series(health.water)} goal={health.waterGoal} labels /><HealthChart title="Sono (horas)" data={series(health.sleep)} goal={health.sleepGoal} sleep /><HealthChart title="Peso (kg)" data={series(weights)} labels loading={weightLoading} /></div>
+    <ProgressRecorder id="registros-saude" title="Peso e medidas" kinds={["weight", "measurement"]} />
   </main>;
 }
 function Card({ icon, title, tools, children }: { icon: ReactNode; title: string; tools?: ReactNode; children: ReactNode }) {
