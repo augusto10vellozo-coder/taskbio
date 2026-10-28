@@ -92,6 +92,7 @@ export type Block = {
   note?: string;
   done: boolean;
   mealId?: string;
+  mealConfirmedAt?: string;
   plannedMeal?: {
     state: "planejada" | "consumida" | "pulada";
     type: "Café da manhã" | "Almoço" | "Jantar" | "Lanche";

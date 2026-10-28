@@ -6,7 +6,30 @@ export type MealMode = "planejar" | "registrar";
 export const mealTypes = ["Café da manhã", "Almoço", "Jantar", "Lanche"] as const;
 
 export function mealsForMode(blocks: Block[], mode: MealMode) {
-  return blocks.filter(b => b.kind === "refeicao" && (mode === "planejar" ? !!b.plannedMeal : !b.plannedMeal || b.plannedMeal.state === "consumida"));
+  return blocks.filter(b => b.kind === "refeicao" && (mode === "planejar" ? !!b.plannedMeal : isMealRecorded(b)));
+}
+
+export function isMealRecorded(block: Block) {
+  return block.kind === "refeicao" && (block.plannedMeal ? block.plannedMeal.state === "consumida" : !!block.manualMeal || block.done);
+}
+
+export function dayMealProgress(blocks: Block[]) {
+  return { completed: mealsForMode(blocks, "registrar").length, total: blocks.filter(b => b.kind === "refeicao" && b.plannedMeal?.state !== "pulada").length };
+}
+
+/** Same-ID confirmation is pure and idempotent; it never awards XP. */
+export function confirmMeal(block: Block, confirmedAt: string): Block {
+  if (block.kind !== "refeicao" || isMealRecorded(block) || block.plannedMeal?.state === "pulada") return block;
+  return { ...consumePlannedMeal(block), done: true, mealConfirmedAt: confirmedAt };
+}
+
+export function undoMealConfirmation(blocks: Block[], blockId: string): Block[] {
+  return blocks.flatMap(block => {
+    if (block.id !== blockId || !isMealRecorded(block)) return [block];
+    if (!block.plannedMeal && block.manualMeal && !block.mealId) return [];
+    const { manualMeal: _food, mealConfirmedAt: _at, ...rest } = block;
+    return [{ ...rest, done: false, ...(block.plannedMeal ? { plannedMeal: { ...block.plannedMeal, state: "planejada" as const } } : {}) }];
+  });
 }
 
 export function predictedMeal(block: Block): Block {
