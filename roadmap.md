@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Amigos: garantir que o usuário sem planejamento veja a própria linha e XP, fora da classificação, sem mudar a liga dos outros.
 - [x] Bônus +20 por trigger, sequência de rotina e desempate, ranking sem quem não tem plano; teste A/B confirmado.
 - [x] Liga por percentual: blocos previstos calculados no servidor por módulos ativos, histórico antigo trocado por saldo inicial único, conta paga 5 XP revogável e vencedor pela média %, sem congelamento; teste A (3/3) e B (6/6) empatados em 100%. Tela Amigos não conferida no navegador.
 - [x] Agenda: confirmação/desfazer compartilhados, estados/horário, calorias/custo e contador; 37 testes e fluxo autenticado verificaram os dois sentidos, itens/620 kcal/R$12,50, cancelamento/desfazer, reabertura, XP intacto e 360/390/1280px sem cortes; planos temporários removidos.
