@@ -1,14 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { freezesLeft, monthlyBadges, weekChampion, weekTitles } from "./xp";
+import { freezesLeft, monthlyBadges, weekChampions, weekTitles } from "./xp";
 import { streak } from "./engagement";
 
-const row = (user_id: string, week_xp: number, streak = 0, comeback = false) => ({ user_id, week_xp, habit_days: 0, first_mark_sec: 0, streak, comeback });
+const row = (user_id: string, pct: number, streak = 0, comeback = false) => ({ user_id, week_xp: 0, week_pct: pct / 100, habit_days: 0, first_mark_sec: 0, streak, comeback });
 
 describe("league awards", () => {
   it("1st place is champion only with 2+ members and XP", () => {
-    expect(weekChampion([row("a", 50), row("b", 10)])).toBe("a");
-    expect(weekChampion([row("a", 50)])).toBeNull();
-    expect(weekChampion([row("a", 0), row("b", 0)])).toBeNull();
+    expect(weekChampions([row("a", 50), row("b", 10)])).toEqual(["a"]);
+    expect(weekChampions([row("a", 50)])).toEqual([]);
+    expect(weekChampions([row("a", 0), row("b", 0)])).toEqual([]);
   });
   it("titles: Campeão, Muralha da constância, Recomeço", () => {
     const t = weekTitles([row("a", 50, 2), row("b", 10, 9, true)]);
