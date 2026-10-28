@@ -114,7 +114,7 @@ export const Route = createFileRoute("/api/public/push-reminders")({
             const blocks = Object.values(row.plan as Record<string, Block[]>).flat();
             const layer = reminderLayer(reminder.key, blocks.some(b => b.id === blockId && b.kind === "treino"));
             // Preserve the existing bonus independently of device retries (XP ref is unique).
-            if (reminder.bonus && canDeliver(layer, prefs, tz, executionNow)) await supabaseAdmin.from("xp_events").upsert({ user_id: row.user_id, kind: "bonus", ref: `bonus:${reminder.key}`, day: todaySp, points: reminder.bonus }, { onConflict: "user_id,ref", ignoreDuplicates: true });
+            if (reminder.bonus && canDeliver(layer, prefs, tz, executionNow)) await supabaseAdmin.rpc("grant_xp", { _user_id: row.user_id, _kind: "bonus", _ref: `bonus:${reminder.key}`, _day: todaySp, _points: reminder.bonus });
             const body = reminder.body ? `${reminder.url === "/financas" ? "💰" : reminder.url === "/saude" ? "💊" : "📅"} ${reminder.title} · ${reminder.body}` : reminder.title;
             const tag = reminder.tag ?? `agenda-${reminder.key}`;
             for (const sub of userSubs) {
