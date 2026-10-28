@@ -10,7 +10,7 @@ import { useLeague } from "@/lib/use-league";
 import { acceptFriendRequest, inviterByUsername, myFriendState, sendFriendRequest, sendNudge } from "@/lib/social.functions";
 import { WeeklyCard } from "@/components/WeeklyCard";
 import { useTaskBio } from "@/lib/trilha-store";
-import { brasiliaDay, leagueWeekStart, shiftDay, weekChampion, weekTitles } from "@/lib/xp";
+import { brasiliaDay, leaguePct, leaguePositions, leagueWeekStart, shiftDay, weekChampions, weekTitles } from "@/lib/xp";
 import { useAwards, notify } from "@/lib/use-awards";
 
 export const Route = createFileRoute("/_authenticated/amigos")({
@@ -41,7 +41,8 @@ function Amigos() {
   const { rows, position, reload } = useLeague();
   const last = useLeague(-1);
   const awards = useAwards();
-  const champ = last.rows ? weekChampion(last.rows) : null;
+  const champs = new Set(last.rows ? weekChampions(last.rows) : []);
+  const places = rows ? leaguePositions(rows) : [];
   const titles = rows ? weekTitles(rows) : new Map();
   const myTitles = (user && titles.get(user.id)) as string[] | undefined;
   useEffect(() => {
@@ -139,17 +140,17 @@ function Amigos() {
     <main className="mx-auto max-w-4xl px-5 pb-20 sm:px-8">
       <ModuleHeader title="Amigos" /><section className="pb-5"><h2 className="font-display text-lg font-semibold">Liga semanal</h2><p className="mt-2 text-sm text-steel">A liga premia a constância: marque seus dias e mantenha a sequência</p></section>
 
-      {isMonday && <div className="mb-4"><WeeklyCard champion={!!user && champ === user.id} me={last.me} position={last.position} friends={last.rows?.length ?? 0} days={lastDays} label={label} /></div>}
+      {isMonday && <div className="mb-4"><WeeklyCard champion={!!user && champs.has(user.id)} me={last.me} position={last.position} friends={last.rows?.length ?? 0} days={lastDays} label={label} /></div>}
 
       {!!state?.nudgesReceived && <p className="mb-4 rounded-lg bg-card p-3 text-sm ring-1 ring-brand/40">Você recebeu {state.nudgesReceived} cutucada(s) 👋</p>}
       {inviter && <section className="mb-4 flex flex-wrap items-center gap-3 rounded-lg bg-card p-4 ring-1 ring-brand/40"><Avatar name={inviter.display_name || inviter.username || ""} url={inviter.avatar_url ?? null} /><p className="flex-1 text-sm">@{inviter.username} te convidou para o TaskBio</p>{(() => { const rel = relation(inviter.id); return rel?.status === "accepted" ? <Button size="sm" variant="outline" disabled>Amigos ✓</Button> : rel ? <Button size="sm" variant="outline" disabled>Solicitação enviada</Button> : <Button size="sm" onClick={() => addFriend(inviter.id)}>Adicionar</Button>; })()}</section>}
       <section className="rounded-lg bg-card p-4 pb-5 ring-1 ring-line">
         {!rows ? <div className="h-24 animate-pulse rounded bg-mist" /> : <ol className="divide-y divide-line">{rows.map((r, i) => (
           <li key={r.user_id} className={`flex items-center gap-3 py-3 ${r.user_id === user?.id ? "font-medium" : ""}`}>
-            <span className="w-6 text-center font-display text-lg font-semibold">{i === 0 && r.week_xp > 0 ? <Crown className="mx-auto size-5 text-brand" aria-label="1º lugar" /> : `${i + 1}º`}</span>
-            <span className="grid h-11 w-11 shrink-0 place-items-center"><Avatar name={r.display_name || r.username || ""} url={r.avatar_url} champion={r.user_id === champ} /></span>
-            <div className="min-w-0 flex-1"><p title={`${r.display_name || r.username || "Sem nome"}${r.user_id === user?.id ? " (você)" : ""}`} className="block max-w-full truncate whitespace-nowrap leading-5">{r.display_name || r.username || "Sem nome"}{r.user_id === user?.id ? " (você)" : ""}</p>{((titles.get(r.user_id) as string[] | undefined) ?? []).length > 0 && <span className="mt-0.5 flex flex-wrap items-center gap-1">{((titles.get(r.user_id) as string[] | undefined) ?? []).map((t) => <span key={t} className={`rounded-full px-1.5 py-px text-[10px] font-semibold ring-1 ${t === "Campeão" ? "text-gold ring-gold/60" : t === "Recomeço" ? "text-accent ring-accent/50" : "text-good ring-good/50"}`}>{t}</span>)}</span>}<p className="mt-0.5 text-xs text-steel">{r.habits} hábitos · {r.meals} refeições · {r.workouts} treinos na semana · hoje {r.today_xp} XP</p></div>
-            <div className="flex shrink-0 flex-col items-end gap-1 text-right"><p className="font-display text-lg font-semibold">{r.week_xp} XP</p><p className="flex items-center justify-end gap-1 text-xs text-steel"><Flame className="size-3.5 text-brand" />{r.streak}</p>
+            <span className="w-6 text-center font-display text-lg font-semibold">{places[i] === 1 && (leaguePct(r) ?? 0) > 0 ? <Crown className="mx-auto size-5 text-brand" aria-label="1º lugar" /> : `${places[i]}º`}</span>
+            <span className="grid h-11 w-11 shrink-0 place-items-center"><Avatar name={r.display_name || r.username || ""} url={r.avatar_url} champion={champs.has(r.user_id)} /></span>
+            <div className="min-w-0 flex-1"><p title={`${r.display_name || r.username || "Sem nome"}${r.user_id === user?.id ? " (você)" : ""}`} className="flex max-w-full items-baseline leading-5"><span className="min-w-0 truncate whitespace-nowrap">{r.display_name || r.username || "Sem nome"}{r.user_id === user?.id ? " (você)" : ""}</span><span className="shrink-0 whitespace-nowrap">&nbsp;· {leaguePct(r) == null ? "—" : `${leaguePct(r)}%`}</span></p>{((titles.get(r.user_id) as string[] | undefined) ?? []).length > 0 && <span className="mt-0.5 flex flex-wrap items-center gap-1">{((titles.get(r.user_id) as string[] | undefined) ?? []).map((t) => <span key={t} className={`rounded-full px-1.5 py-px text-[10px] font-semibold ring-1 ${t === "Campeão" ? "text-gold ring-gold/60" : t === "Recomeço" ? "text-accent ring-accent/50" : "text-good ring-good/50"}`}>{t}</span>)}</span>}<p className="mt-0.5 text-xs text-steel">{r.habits} hábitos · {r.meals} refeições · {r.workouts} treinos na semana · hoje {r.today_xp} XP</p></div>
+            <div className="flex shrink-0 flex-col items-end gap-1 text-right"><p className="font-display text-lg font-semibold">{leaguePct(r) == null ? "—" : `${leaguePct(r)}%`}</p><p className="flex items-center justify-end gap-1 text-xs text-steel"><Flame className="size-3.5 text-brand" />{r.streak}</p>
             {r.user_id !== user?.id && inactive.has(r.user_id) && (state?.nudgedToday.includes(r.user_id)
               ? <Button size="sm" variant="outline" className="h-8 px-2 text-xs" disabled>Cutucado 👋</Button>
               : <Button size="sm" variant="outline" className="h-8 px-2 text-xs" onClick={() => nudge(r.user_id)}>Cutucar 👋</Button>)}</div>
@@ -157,8 +158,8 @@ function Amigos() {
         ))}</ol>}
         {rows && rows.length < 2 && <p className="mt-2 text-sm text-steel">Convide amigos para começar a competir.</p>}
         {rows && position > 0 && rows.length > 1 && <p className="mt-2 border-t border-line pt-3 text-sm">Você está em <strong>{position}º</strong> entre seus amigos.</p>}
-        <p className="mt-3 text-xs text-steel">❄️ {awards?.freezes ?? 0} congelamento(s) de sequência · o campeão da semana ganha troféu dourado e 1 congelamento.</p>
-        <p className="mt-1 pb-1 text-[11px] leading-relaxed text-steel">Até 100 XP por dia contam para a liga. Peso, medidas e dados de saúde nunca aparecem aqui.</p>
+        <p className="mt-3 text-xs text-steel">Vence a maior média de conclusão do dia na semana · empate divide o troféu dourado.</p>
+        <p className="mt-1 pb-1 text-[11px] leading-relaxed text-steel">Conta só o que você planejou nos seus módulos ativos. Peso, medidas e dados de saúde nunca aparecem aqui.</p>
       </section>
 
       <div className="mt-4 grid gap-3 md:grid-cols-2">
@@ -191,7 +192,7 @@ function Amigos() {
         <ul className="mt-2 divide-y divide-line">{state.sent.map((s) => <li key={s.id} className="flex flex-wrap items-center gap-2 py-2 text-sm"><span className="flex-1">{s.profile?.display_name || s.profile?.username || "Alguém"} <span className="text-xs text-steel">· pendente</span></span><Button size="sm" variant="outline" onClick={() => cancel(s.id)}>Cancelar</Button></li>)}</ul>
       </section>}
 
-      {!isMonday && <div className="mt-4"><WeeklyCard champion={!!user && champ === user.id} me={last.me} position={last.position} friends={last.rows?.length ?? 0} days={lastDays} label={label} /></div>}
+      {!isMonday && <div className="mt-4"><WeeklyCard champion={!!user && champs.has(user.id)} me={last.me} position={last.position} friends={last.rows?.length ?? 0} days={lastDays} label={label} /></div>}
     </main>
   );
 }
