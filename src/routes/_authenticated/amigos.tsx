@@ -38,7 +38,7 @@ function Avatar({ name, url, champion }: { name: string; url: string | null; cha
 function Amigos() {
   const { user } = useAuth();
   const { habitLog } = useTaskBio();
-  const { rows, position, reload } = useLeague();
+  const { rows, position, unrankedMe, reload } = useLeague();
   const last = useLeague(-1);
   const champs = new Set(last.rows ? weekChampions(last.rows) : []);
   const places = rows ? leaguePositions(rows) : [];
@@ -155,6 +155,15 @@ function Amigos() {
               : <Button size="sm" variant="outline" className="h-8 px-2 text-xs" onClick={() => nudge(r.user_id)}>Cutucar 👋</Button>)}</div>
           </li>
         ))}</ol>}
+        {rows && unrankedMe && <div className="flex items-center gap-3 border-t border-line py-3" aria-label="Sua pontuação fora da classificação">
+          <span className="w-6 shrink-0 text-center text-steel">—</span>
+          <span className="grid h-11 w-11 shrink-0 place-items-center"><Avatar name={unrankedMe.display_name || unrankedMe.username || ""} url={unrankedMe.avatar_url} /></span>
+          <div className="min-w-0 flex-1">
+            <p className="truncate font-medium" title={`${unrankedMe.display_name || unrankedMe.username || "Sem nome"} (você)`}>{unrankedMe.display_name || unrankedMe.username || "Sem nome"} (você)</p>
+            <p className="mt-1 text-sm text-steel">Sem blocos previstos nesta semana</p>
+            <p className="mt-1 text-xs text-steel">{unrankedMe.week_xp} XP na semana · hoje {unrankedMe.today_xp} XP</p>
+          </div>
+        </div>}
         {rows && rows.length < 2 && <p className="mt-2 text-sm text-steel">Convide amigos para começar a competir.</p>}
         {rows && position > 0 && rows.length > 1 && <p className="mt-2 border-t border-line pt-3 text-sm">Você está em <strong>{position}º</strong> entre seus amigos.</p>}
         <p className="mt-3 text-xs text-steel">Vence a maior média de conclusão na semana · empate decide pela sequência de rotina.</p>
