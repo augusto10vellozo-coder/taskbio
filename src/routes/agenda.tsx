@@ -15,7 +15,7 @@ import { formatFullDate, formatWeekRange, getWeekDates, toDateKey } from "@/lib/
 import { toast } from "sonner";
 import { DayTimeline } from "@/components/DayTimeline";
 import { WeekActions } from "@/components/WeekActions";
-import { ReadingGoalBar } from "@/components/ReadingGoalBar";
+import { AgendaDayOverview, AgendaGreeting } from "@/components/AgendaDayOverview";
 import { mealSummary } from "@/lib/meal-summary";
 
 export const Route = createFileRoute("/agenda")({
@@ -40,7 +40,7 @@ export const Route = createFileRoute("/agenda")({
 });
 
 function Agenda() {
-  const { plan, ready, replaceDays, clearWeek, getMeal, goal } = useTaskBio();
+  const { plan, ready, replaceDays, clearWeek, getMeal } = useTaskBio();
   const [selectedDate, setSelectedDate] = useState(() => {
     if (typeof window === "undefined") return new Date();
     const saved = sessionStorage.getItem("trilha:selected-date");
@@ -112,10 +112,6 @@ function Agenda() {
     toast.success("Semana de exemplo adicionada. Você pode editar ou limpar os itens.");
   };
 
-  const resumo = useMemo(() => {
-    const { cost } = mealSummary(blocks, getMeal);
-    return { cost, done: blocks.filter((b) => b.done).length };
-  }, [blocks, getMeal]);
 
   const semanaCusto = useMemo(() => mealSummary(weekKeys.flatMap((key) => plan[key] ?? []), getMeal).cost, [getMeal, plan, weekKeys]);
 
@@ -129,6 +125,7 @@ function Agenda() {
 
   return (
     <main ref={mainRef} className="mx-auto max-w-6xl px-5 pb-44 sm:px-8">
+      <AgendaGreeting />
       <div ref={dateStartRef} className="h-px" aria-hidden="true" />
       <div ref={dateHeaderRef} className="sticky top-0 z-35 -mx-5 border-b border-line bg-background px-5 pb-3 sm:-mx-8 sm:px-8" aria-label="Navegação de datas">
       <ModuleHeader title="Minha Agenda" />
@@ -175,13 +172,8 @@ function Agenda() {
         </div>
       </section>
       </div>
-      <div className="py-4">
-            <p className="mt-2 max-w-[48ch] text-pretty text-sm text-steel">
-              {resumo.done} de {blocks.length} blocos concluídos
-              {resumo.cost > 0 ? ` · ${brl(resumo.cost)}` : ""}
-              {goal ? ` · 🎯 ${goal}` : ""}
-            </p>
-            <ReadingGoalBar />
+      <div>
+        <AgendaDayOverview dateKey={dateKey} />
         {emptyWeek && !exampleDismissed && <div className="mt-5 border-y border-line py-5"><p className="font-display font-semibold">Comece com uma semana de exemplo</p><p className="mt-1 text-sm text-steel">Refeições, atividades e descanso editáveis. Você pode limpar a semana a qualquer momento.</p><div className="mt-3 flex flex-wrap gap-2"><Button size="sm" onClick={fillExample}>Preencher com semana de exemplo</Button><Button size="sm" variant="ghost" onClick={() => { localStorage.setItem("trilha:example-dismissed", "yes"); setExampleDismissed(true); }}>Agora não</Button></div></div>}
       </div>
 

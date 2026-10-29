@@ -22,7 +22,7 @@ export function AgendaDayOverview({ dateKey }: { dateKey: string }) {
   const [open, setOpen] = useState(false);
   const blocks = plan[dateKey] ?? [];
   const xp = league.me?.today_xp ?? 0;
-  const days = league.me?.streak_rotina ?? 0;
+  const days = league.me && "streak_rotina" in league.me ? league.me.streak_rotina : 0;
   const meals = blocks.filter((b) => b.kind === "refeicao");
   const workouts = blocks.filter((b) => b.kind === "treino");
   const dueHabits = habits.filter((h) => canMarkHabit(h, habitLog, dateKey));

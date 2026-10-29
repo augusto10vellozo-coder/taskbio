@@ -1,5 +1,6 @@
 import { ModuleHeader } from "@/components/ModuleHeader";
 import { ConsistencyCard } from "@/components/ConsistencyCard";
+import { ReadingGoalBar } from "@/components/ReadingGoalBar";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState, type ReactNode } from "react";
 import { format, isAfter, parseISO, subDays } from "date-fns";
@@ -90,6 +91,7 @@ function Progresso() {
       <section className="flex flex-wrap items-end justify-between gap-3 pb-5"><div><h2 className="font-display text-lg font-semibold">Evolução baseada nos seus registros</h2><p className="mt-2 text-sm text-steel">Registros pessoais não substituem orientação de profissional.</p></div><div className="flex gap-1" role="group" aria-label="Período">{([7, 30, 90] as const).map((days) => <Button key={days} size="sm" variant={period === days ? "default" : "outline"} onClick={() => setPeriod(days)}>{days} dias</Button>)}</div></section>
 
       <ConsistencyCard period={period} />
+      <ReadingGoalBar />
 
       {/* Rotina: primeiro card secundário (mesmo número da liga em 7 dias). */}
       <section aria-label={routineLabel} className="mt-4 rounded-lg bg-card p-4 ring-1 ring-line">
