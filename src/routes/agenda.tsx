@@ -1,5 +1,4 @@
 import { ModuleHeader } from "@/components/ModuleHeader";
-import { ProgressRecorder } from "@/components/ProgressRecorder";
 import { WeeklyGoals } from "@/components/WeeklyGoals";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -208,7 +207,6 @@ function Agenda() {
       </div>
       <Button size="icon" className="fixed right-5 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-40 size-14 rounded-full shadow-lg sm:right-8 xl:bottom-6" aria-label="Adicionar bloco" title="Adicionar bloco" onClick={planDay}><Plus className="size-6" /></Button>
       <WeeklyGoals />
-      <ProgressRecorder id="registros-agenda" title="Consistência" kinds={["consistency"]} />
     </main>
   );
 }
