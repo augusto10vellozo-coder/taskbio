@@ -134,40 +134,27 @@ function Agenda() {
         <Button variant="ghost" size="icon" className="size-11" onClick={() => setSelectedDate((date) => addDays(date, 1))} aria-label="Próximo dia" title="Próximo dia"><ChevronRight /></Button>
       </div>}
       <section className={compactDates ? "hidden" : undefined}>
-        <div className="flex flex-col justify-between gap-3 lg:flex-row lg:items-end">
-          <div>
-            <h2 className="max-w-[40ch] text-balance font-display text-xl font-semibold">
-              {formatFullDate(selectedDate)}
-            </h2>
-          </div>
-          <div className="flex flex-wrap items-center gap-2 lg:justify-end">
-            <Button asChild variant="outline" size="sm"><Link to="/calendario"><CalendarDays /> Mês</Link></Button>
-            <Button variant="outline" size="sm" onClick={() => setSelectedDate(new Date())}>Hoje</Button>
-            <div className="glass flex items-center rounded-lg p-1 ring-1 ring-black/5">
-              <Button variant="ghost" size="icon" className="size-8" onClick={() => setSelectedDate((date) => addDays(date, -7))} aria-label="Semana anterior" title="Semana anterior"><ChevronLeft /></Button>
-              <span className="min-w-32 px-2 text-center text-xs font-medium text-steel">{formatWeekRange(selectedDate)}</span>
-              <Button variant="ghost" size="icon" className="size-8" onClick={() => setSelectedDate((date) => addDays(date, 7))} aria-label="Próxima semana" title="Próxima semana"><ChevronRight /></Button>
-            </div>
-            <Popover>
-              <PopoverTrigger asChild><Button variant="outline" size="icon" aria-label="Abrir calendário" title="Escolher data"><CalendarDays /></Button></PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="end">
-                <Calendar mode="single" selected={selectedDate} onSelect={(date) => date && setSelectedDate(date)} defaultMonth={selectedDate} locale={ptBR} className="pointer-events-auto p-3" />
-              </PopoverContent>
-            </Popover>
-            <WeekActions empty={emptyWeek} onDuplicateDay={duplicateDay} onDuplicateWeek={duplicateWeek} onClear={() => { clearWeek(weekKeys); toast.success("Semana limpa."); }} />
-          </div>
+        <div className="flex items-center gap-1">
+          <Button asChild variant="ghost" size="icon" className="size-8 shrink-0 text-steel" aria-label="Ver mês" title="Ver mês"><Link to="/calendario"><CalendarDays className="size-4" /></Link></Button>
+          <p className="min-w-0 flex-1 truncate text-sm capitalize text-steel">{formatFullDate(selectedDate)}</p>
+          {!isSameDay(selectedDate, new Date()) && <Button variant="ghost" size="sm" className="h-8 shrink-0 px-2 text-steel" onClick={() => setSelectedDate(new Date())}>Hoje</Button>}
+          <WeekActions empty={emptyWeek} onDuplicateDay={duplicateDay} onDuplicateWeek={duplicateWeek} onClear={() => { clearWeek(weekKeys); toast.success("Semana limpa."); }} />
         </div>
-        <div className="mt-3 grid grid-cols-7 gap-1.5 sm:gap-2">
-          {weekDates.map((date) => {
-            const active = isSameDay(date, selectedDate);
-            const today = isSameDay(date, new Date());
-            const count = (plan[toDateKey(date)] ?? []).length;
-            return <Button key={toDateKey(date)} variant={active ? "default" : "outline"} onClick={() => setSelectedDate(date)} className="h-auto min-w-0 flex-col gap-0.5 px-1.5 py-2 sm:px-3" aria-pressed={active}>
-              <span className="text-[10px] font-medium uppercase sm:text-xs">{["dom", "seg", "ter", "qua", "qui", "sex", "sáb"][date.getDay()]}</span>
-              <span className="font-display text-lg font-semibold sm:text-xl">{format(date, "dd")}</span>
-              <span className="hidden text-[10px] font-normal sm:block">{format(date, "MMM", { locale: ptBR }).replace(".", "")}{today ? " · hoje" : count ? ` · ${count}` : ""}</span>
-            </Button>;
-          })}
+        <div className="mt-1 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-1">
+          <Button variant="ghost" size="icon" className="size-10 text-steel" onClick={() => setSelectedDate((date) => addDays(date, -7))} aria-label="Semana anterior" title="Semana anterior"><ChevronLeft /></Button>
+          <div className="grid grid-cols-7 gap-1.5 sm:gap-2">
+            {weekDates.map((date) => {
+              const active = isSameDay(date, selectedDate);
+              const today = isSameDay(date, new Date());
+              const count = (plan[toDateKey(date)] ?? []).length;
+              return <Button key={toDateKey(date)} variant={active ? "default" : "outline"} onClick={() => setSelectedDate(date)} className="h-auto min-w-0 flex-col gap-0.5 px-1.5 py-2 sm:px-3" aria-pressed={active}>
+                <span className="text-[10px] font-medium uppercase sm:text-xs">{["dom", "seg", "ter", "qua", "qui", "sex", "sáb"][date.getDay()]}</span>
+                <span className="font-display text-lg font-semibold sm:text-xl">{format(date, "dd")}</span>
+                <span className="hidden text-[10px] font-normal sm:block">{format(date, "MMM", { locale: ptBR }).replace(".", "")}{today ? " · hoje" : count ? ` · ${count}` : ""}</span>
+              </Button>;
+            })}
+          </div>
+          <Button variant="ghost" size="icon" className="size-10 text-steel" onClick={() => setSelectedDate((date) => addDays(date, 7))} aria-label="Próxima semana" title="Próxima semana"><ChevronRight /></Button>
         </div>
       </section>
       </div>
