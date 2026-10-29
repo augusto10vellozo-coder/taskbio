@@ -13,7 +13,7 @@ export function WeekActions({ onDuplicateDay, onDuplicateWeek, onClear, empty }:
   const [step, setStep] = useState<0 | 1 | 2>(0);
   return <>
     <DropdownMenu>
-      <DropdownMenuTrigger asChild><Button variant="outline" size="icon" aria-label="Opções da semana" title="Opções da semana"><MoreHorizontal /></Button></DropdownMenuTrigger>
+      <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="size-8 shrink-0 text-steel" aria-label="Opções da semana" title="Opções da semana"><MoreHorizontal /></Button></DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem onSelect={onDuplicateDay}><Copy />Duplicar dia anterior</DropdownMenuItem>
         <DropdownMenuItem onSelect={onDuplicateWeek}><Copy />Duplicar semana inteira</DropdownMenuItem>
