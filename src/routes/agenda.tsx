@@ -125,8 +125,8 @@ function Agenda() {
       <AgendaGreeting />
       <div ref={dateStartRef} className="h-px" aria-hidden="true" />
       <div ref={dateHeaderRef} className="sticky top-0 z-35 -mx-5 border-b border-line bg-background px-5 pb-3 sm:-mx-8 sm:px-8" aria-label="Navegação de datas">
-      <ModuleHeader title="Minha Agenda" />
-      {compactDates && <div className="grid grid-cols-[2.75rem_minmax(0,1fr)_2.75rem] items-center gap-2">
+      {!compactDates && <ModuleHeader title="Minha Agenda" />}
+      {compactDates && <div className="grid grid-cols-[2.75rem_minmax(0,1fr)_2.75rem] items-center gap-2 pt-1">
         <Button variant="ghost" size="icon" className="size-11" onClick={() => setSelectedDate((date) => addDays(date, -1))} aria-label="Dia anterior" title="Dia anterior"><ChevronLeft /></Button>
         <h2 className="min-w-0 text-center font-display text-sm font-semibold first-letter:uppercase">{format(selectedDate, "EEEE, d 'de' MMMM", { locale: ptBR })}</h2>
         <Button variant="ghost" size="icon" className="size-11" onClick={() => setSelectedDate((date) => addDays(date, 1))} aria-label="Próximo dia" title="Próximo dia"><ChevronRight /></Button>
