@@ -14,6 +14,14 @@ import { WorkoutSeries, SessionProgress } from "@/components/WorkoutSeries";
 import { exerciseSeries } from "@/lib/training-session";
 import { RestTimer } from "@/components/RestTimer";
 
+const cardColor: Record<BlockKind, string> = {
+  treino: "bg-good/10 ring-good/30",
+  refeicao: "bg-accent/10 ring-accent/30",
+  compromisso: "bg-card ring-line",
+  descanso: "bg-card ring-line",
+  leitura: "bg-brand/10 ring-brand/30",
+};
+
 const dotColor: Record<BlockKind, string> = {
   leitura: "ring-accent",
   refeicao: "ring-good",
@@ -56,7 +64,7 @@ export function DayTimeline({
     <>
       {openWorkout && blocks.some(b => b.workoutId === openWorkout) && <RestTimer />}
       <section id={id} aria-label="Linha do dia" className={className}>
-        <div className="glass-strong rounded-2xl p-5 ring-1 ring-black/5 sm:p-6">
+        <div className="glass-strong rounded-3xl p-5 ring-1 ring-black/5 sm:p-6">
           <div className="mb-5 flex items-center justify-between">
             <div><h2 className="font-display text-lg font-semibold tracking-tight">Linha do dia</h2><p className="mt-1 text-xs text-steel">Refeições: {mealProgress.completed} de {mealProgress.total}</p></div>
             <Button variant="ghost" size="sm" onClick={() => onAddingChange(!adding)} className="text-brand-deep ring-1 ring-brand/20">
@@ -76,7 +84,7 @@ export function DayTimeline({
           )}
 
           {billRemindersOn(finance?.bills ?? [], dateKey).map((bill) => (
-            <Link key={bill.id} to="/financas" className="mb-3 flex items-center gap-3 rounded-lg bg-mist/60 px-3 py-2 text-sm ring-1 ring-line" aria-label={`Conta a pagar: ${bill.title}`}>
+            <Link key={bill.id} to="/financas" className="mb-4 flex items-center gap-3 rounded-2xl border-l-4 border-accent/60 bg-card px-4 py-3 text-sm ring-1 ring-line" aria-label={`Conta a pagar: ${bill.title}`}>
               <Wallet className="size-4 shrink-0 text-accent" />
               <span className="min-w-0 flex-1 break-words"><span className="text-[10px] font-medium uppercase tracking-wide text-steel">Conta a pagar · vence amanhã</span><br />{bill.title}</span>
               <span className="shrink-0 font-medium">{brlFinance(bill.amount)}</span>
@@ -95,7 +103,7 @@ export function DayTimeline({
               const workout = getWorkout(b.workoutId);
               const open = workout && openWorkout === workout.id;
               return (
-                <li key={b.id} className="relative pb-5 pl-8">
+                <li key={b.id} className="relative pb-7 pl-8">
                   <span className={`absolute left-0 top-1.5 size-4 rounded-full bg-white ring-2 ${dotColor[b.kind]}`} />
                   <div className="flex items-center gap-2 text-xs text-steel">
                     <span className="font-display font-medium text-ink">{b.time}</span>
@@ -104,9 +112,9 @@ export function DayTimeline({
                     {b.kind === "leitura" && <BookOpen className="size-3.5 text-accent" />}
                   </div>
 
-                  <div className={`mt-2 rounded-xl p-3 ring-1 ring-black/5 ${workout ? "rail glass pl-4" : "glass"}`}>
+                  <div className={`mt-2 min-h-[4.5rem] rounded-2xl p-4 ring-1 transition-opacity ${cardColor[b.kind]} ${completed ? "opacity-70" : ""}`}>
                     <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
-                      <div className="min-w-0"><p className="break-words text-sm font-medium [overflow-wrap:anywhere]">{b.kind === "refeicao" ? `${b.title}${nutrition.known ? ` · ${nutrition.kcal} kcal${nutrition.cost > 0 ? ` · ${brl(nutrition.cost)}` : ""}` : ""}` : workout ? `${workout.name} — ${workout.focus}` : (b.manualMeal ? b.title : meal?.items ?? b.title)}</p>{b.kind === "refeicao" && <p className={`mt-1 text-[11px] ${recorded ? "text-good" : "text-steel"}`}>{recorded ? b.plannedMeal || b.mealId ? "Concluído" : "Não planejado" : "Planejado"}{recorded && b.mealConfirmedAt ? ` · ${new Date(b.mealConfirmedAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}` : ""}</p>}</div>
+                      <div className="min-w-0"><p className={`break-words text-sm [overflow-wrap:anywhere] ${completed ? "font-normal" : "font-semibold"}`}>{completed && <Check className="mr-1 inline size-4 text-good" aria-hidden="true" />}{b.kind === "refeicao" ? `${b.title}${nutrition.known ? ` · ${nutrition.kcal} kcal${nutrition.cost > 0 ? ` · ${brl(nutrition.cost)}` : ""}` : ""}` : workout ? `${workout.name} — ${workout.focus}` : (b.manualMeal ? b.title : meal?.items ?? b.title)}</p>{b.kind === "refeicao" && <p className={`mt-1 text-[11px] ${recorded ? "text-good" : "text-steel"}`}>{recorded ? b.plannedMeal || b.mealId ? "Concluído" : "Não planejado" : "Planejado"}{recorded && b.mealConfirmedAt ? ` · ${new Date(b.mealConfirmedAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}` : ""}</p>}</div>
                       <div className="flex min-w-0 flex-wrap items-center gap-1.5 sm:justify-end">
                         {b.endTime && <span className="text-[11px] text-steel">{b.time} — {b.endTime}</span>}
                         {b.reminderMinutes ? <span title={`Lembrete ${b.reminderMinutes} minutos antes`} className="text-brand-deep"><Bell className="size-3.5" /></span> : null}
