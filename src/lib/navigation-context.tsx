@@ -8,8 +8,6 @@ declare module "@tanstack/react-router" {
   }
 }
 
-const NavigationContext = createContext<NavigationHistory | null>(null);
-
 export function NavigationProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const ledger = useRef<NavigationHistory | null>(null);
@@ -54,8 +52,11 @@ export function useEntryState<T>(field: string, initial: T | (() => T)) {
     const fallback = () => typeof initial === "function" ? (initial as () => T)() : initial;
     return ledger?.current?.read(key, field, fallback) ?? fallback();
   });
+  const valueRef = useRef(value);
+  useEffect(() => { ledger?.current?.write(key, field, valueRef.current); }, [ledger, key, field]);
   const update = (action: SetStateAction<T>) => {
-    const next = typeof action === "function" ? (action as (previous: T) => T)(value) : action;
+    const next = typeof action === "function" ? (action as (previous: T) => T)(valueRef.current) : action;
+    valueRef.current = next;
     ledger?.current?.write(key, field, next);
     setValue(next);
   };

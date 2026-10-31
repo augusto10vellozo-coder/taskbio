@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useEntryState } from "@/lib/navigation-context";
 import { useSearch } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
@@ -37,14 +38,14 @@ export function ReadingModule() {
   const sessions = trackers.leitura ?? [];
   const goal = trackers.readingGoal ?? DEFAULT_READING_GOAL;
   const [today, setToday] = useState<string | null>(null);
-  const [filter, setFilter] = useState<BookStatus>("lendo");
+  const [filter, setFilter] = useEntryState<BookStatus>("reading:filter", "lendo");
   const [q, setQ] = useState("");
   const [results, setResults] = useState<BookResult[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [manual, setManual] = useState(false);
   const [m, setM] = useState({ title: "", author: "", pages: "" });
   const [sel, setSel] = useState({ bookId: "", minutes: "", pages: "", mode: "pages" as "pages" | "percent" });
-  const [openId, setOpenId] = useState<string | null>(null);
+  const [openId, setOpenId] = useEntryState<string | null>("reading:open", null);
   const [rateId, setRateId] = useState<string | null>(null);
   useEffect(() => {
     const refresh = () => setToday(brasiliaDay(new Date()));

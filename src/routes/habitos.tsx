@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useEntryState } from "@/lib/navigation-context";
 import { ChevronLeft, ChevronRight, CheckSquare, Flame, Plus, LockKeyhole, Snowflake } from "lucide-react";
 import { EmptyState, ModuleGate } from "@/components/EmptyState";
 import { addDays, format } from "date-fns";
@@ -32,13 +33,13 @@ export const Route = createFileRoute("/habitos")({
 
 function Habitos() {
   const { habits, habitLog, addHabit, updateHabit, removeHabit, toggleHabit, toggleHabitStreak } = useTaskBio();
-  const [ref, setRef] = useState<Date | null>(null);
+  const [ref, setRef] = useEntryState<Date | null>("habits:week", null);
   const [editing, setEditing] = useState<Habit | "new" | null>(null);
   const [explainFreeze, setExplainFreeze] = useState(false);
   const freezeQuery = useHabitFreezes();
   const protection = freezeQuery.data ?? emptyFreezeState;
   const frozenFor = (id: string) => protection.frozen.filter(f => f.habitId === id).map(f => f.day);
-  useEffect(() => setRef(new Date()), []);
+  useEffect(() => setRef(value => value ?? new Date()), []);
   if (!ref) return <main className="mx-auto max-w-4xl px-5 pt-8"><div className="h-60 animate-pulse rounded-lg bg-mist" /></main>;
   const week = getWeekDates(ref);
   const month = lastDays(new Date(), 35);

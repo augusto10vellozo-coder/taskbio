@@ -3,10 +3,10 @@ export type AppHistoryEntry = {
   key: string;
   index: number;
   pathname: string;
-  tab?: boolean;
+  tab?: boolean | undefined;
 };
 
-type EntryRecord = { entry: AppHistoryEntry; parent?: string; values: Map<string, unknown> };
+type EntryRecord = { entry: AppHistoryEntry; parent?: string | undefined; values: Map<string, unknown> };
 
 export class NavigationHistory {
   private records = new Map<string, EntryRecord>();

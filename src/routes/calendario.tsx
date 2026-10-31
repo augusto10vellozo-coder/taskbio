@@ -1,6 +1,7 @@
 import { ModuleHeader } from "@/components/ModuleHeader";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
+import { useEntryState } from "@/lib/navigation-context";
 import { addMonths, eachDayOfInterval, endOfMonth, endOfWeek, format, isSameMonth, startOfMonth, startOfWeek, subMonths } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
@@ -22,7 +23,7 @@ export const Route = createFileRoute("/calendario")({
 
 function MonthlyCalendar() {
   const { plan } = useTaskBio();
-  const [month, setMonth] = useState(() => new Date());
+  const [month, setMonth] = useEntryState("calendar:month", () => new Date());
   const days = useMemo(() => eachDayOfInterval({ start: startOfWeek(startOfMonth(month), { weekStartsOn: 1 }), end: endOfWeek(endOfMonth(month), { weekStartsOn: 1 }) }), [month]);
   return <main className="mx-auto max-w-6xl px-5 pb-20 sm:px-8">
     <ModuleHeader title="Calendário" /><section className="flex flex-col justify-between gap-4 pb-5 sm:flex-row sm:items-end"><div><h2 className="font-display text-lg font-semibold">Visão mensal</h2><p className="mt-2 text-sm text-steel">Selecione um dia para abrir e organizar seus detalhes.</p></div><Button asChild variant="outline"><Link to="/agenda"><CalendarDays /> Ver semana</Link></Button></section>
