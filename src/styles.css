@@ -128,9 +128,6 @@
   --ring: var(--brand);
 }
 
-.dark .bg-white, .dark .bg-white\/50 { background-color: var(--card); }
-.dark .text-white { color: var(--primary-foreground); }
-.dark .ring-black\/5, .dark .ring-black\/10, .dark .border-white\/40 { --tw-ring-color: var(--line); border-color: var(--line); }
 
 @layer base {
   * {
