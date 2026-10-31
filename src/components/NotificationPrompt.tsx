@@ -50,7 +50,7 @@ export function NotificationPrompt() {
   };
 
   return (
-    <div className="fixed inset-x-4 bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-40 mx-auto max-w-lg rounded-2xl border border-line bg-card p-4 xl:bottom-6">
+    <div className="fixed inset-x-4 bottom-[calc(9.5rem+env(safe-area-inset-bottom))] z-40 mx-auto max-w-lg rounded-2xl border border-line bg-card p-4 xl:bottom-6">
       <div className="flex items-center gap-3">
         <Bell className="size-5 shrink-0 text-accent" aria-hidden="true" />
         <p className="min-w-0 flex-1 text-sm font-medium text-ink">Quer que eu te avise quando o dia estiver fechando?</p>
