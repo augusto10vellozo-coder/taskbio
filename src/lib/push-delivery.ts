@@ -19,6 +19,7 @@ export async function performDelivery(send: () => Promise<{ status: number }>, r
   return { result, status };
 }
 export function canDeliver(layer: string, prefs: NotifPrefs, timeZone: string, now: Date) {
+  if (["league", "leaguemove", "invite", "friend", "nudge"].includes(layer)) return false;
   if (prefs.master === false) return false;
   if (inQuietHours(wallClockMs(now, timeZone))) return false;
   return !(layer in prefs) || prefs[layer as keyof NotifPrefs];
