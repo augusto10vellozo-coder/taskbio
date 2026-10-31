@@ -6,7 +6,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { addDays, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarPlus, ChevronLeft, ChevronRight, Plus, ArrowRight, ChevronDown } from "lucide-react";
+import { CalendarPlus, ChevronLeft, ChevronRight, Plus, ArrowRight, ChevronDown, UtensilsCrossed } from "lucide-react";
+import { EmptyState, ModuleGate } from "@/components/EmptyState";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -166,7 +167,7 @@ function Alimentacao() {
 
   return (
     <main className="mx-auto max-w-6xl px-5 pb-20 sm:px-8">
-      <ModuleHeader title="Alimentação" /><section className="pb-5">
+      <ModuleHeader title="Alimentação" /><ModuleGate id="alimentacao"><section className="pb-5">
         <div className="mt-2 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
           <div><h2 className="font-display text-lg font-semibold">Planeje suas refeições</h2><p className="mt-2 max-w-[62ch] text-sm leading-6 text-steel">Escolha o que vai preparar em cada dia. Valores estimados.</p></div>
         </div>
@@ -210,7 +211,7 @@ function Alimentacao() {
           savePlannedMeal(date, makePlannedMeal(`p-${crypto.randomUUID()}`, type, repeatOffer.title, repeatOffer.time, repeatOffer.food));
           setRepeatOffer(null); toast.success(`Refeição planejada em ${format(new Date(`${date}T12:00:00`), "dd/MM")}.`);
         }}>Repetir nas próximas semanas</Button><Button variant="ghost" size="sm" onClick={() => setRepeatOffer(null)}>Agora não</Button></div></div>}
-        {visibleMeals.length === 0 ? <p className="py-5 text-sm text-steel">{mode === "planejar" ? "Planeje sua primeira refeição neste dia." : "Registre sua primeira refeição neste dia."}</p> :
+        {visibleMeals.length === 0 ? <EmptyState icon={UtensilsCrossed} title="O que você comeu hoje?" context="Registre uma refeição e o TaskBio calcula calorias, macros e custo." actionLabel="Registrar refeição" onAction={() => { setMode("registrar"); setEditingMeal(null); setFormMode("registrar"); setMealType("Almoço"); setManualMeal(emptyManualMeal); setManualOpen(true); }} secondaryLabel="Montar plano da semana" onSecondary={() => setMode("planejar")} /> :
           <ul className="divide-y divide-line">{visibleMeals.map((block) => {
             const meal = getMeal(block.mealId);
             const shown = mode === "planejar" ? predictedMeal(block) : block;
