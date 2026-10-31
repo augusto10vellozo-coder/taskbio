@@ -10,7 +10,7 @@ export type SavedMapping = ImportMapping & { id: string; name: string; hasHeader
 
 export type RawRow = string[];
 
-export type ParsedAmount = { amount: number; type?: "gasto" | "receita" };
+export type ParsedAmount = { amount: number; type?: "gasto" | "receita" | undefined };
 
 /** Pick the delimiter that appears most consistently across the first lines: comma, semicolon or tab. */
 export function detectDelimiter(sample: string): "," | ";" | "\t" {
