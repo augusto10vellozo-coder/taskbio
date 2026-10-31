@@ -197,10 +197,6 @@ export function TrainingExplore() {
                 </div>
               )}
 
-              <div className="mt-4 flex items-start gap-2 rounded-lg bg-mist p-3 text-xs leading-5 text-steel">
-                <CircleAlert className="mt-0.5 size-4 shrink-0 text-brand-deep" />
-                <p>Estes são apenas exemplos gerais, não aulas nem prescrição individual. Para segurança, técnica e um plano adequado ao seu corpo, procure um profissional de educação física.</p>
-              </div>
             </div>
 
             <div className="glass-strong rounded-2xl p-5 ring-1 ring-line">
