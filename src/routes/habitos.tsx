@@ -67,9 +67,10 @@ function Habitos() {
       <section className="pb-5"><h2 className="font-display text-lg font-semibold">Tabela da semana</h2><p className="mt-2 text-sm text-steel">Toque pra marcar o dia · 🔥 = conta pro seu streak</p></section>
       {habits.length > 0 && <Button variant="outline" className="mb-4 min-h-11" onClick={() => setEditing("new")}><Plus /> Novo hábito</Button>}
       {editing && <HabitForm habit={editing === "new" ? undefined : editing} onClose={() => setEditing(null)} onSave={patch => { if (editing === "new") addHabit(patch.name, patch); else updateHabit(editing.id, patch); }} />}
+      {habits.length === 0 ? <EmptyState icon={CheckSquare} title="Comece com um hábito" context="Um hábito por vez, marcado na Agenda, constrói sua sequência." actionLabel="Criar primeiro hábito" onAction={() => setEditing("new")} /> : (
       <section aria-label="Tabela semanal de hábitos" className="min-w-0 rounded-lg bg-card px-2 py-3 ring-1 ring-line sm:p-4">
         <div className="mb-3 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-1"><Button variant="ghost" size="icon" aria-label="Semana anterior" onClick={() => setRef(addDays(ref, -7))}><ChevronLeft /></Button><span className="min-w-0 text-center text-xs font-medium sm:text-sm">{week[0] && format(week[0], "d MMM", { locale: ptBR })} – {week[6] && format(week[6], "d MMM", { locale: ptBR })}</span><Button variant="ghost" size="icon" aria-label="Próxima semana" onClick={() => setRef(addDays(ref, 7))}><ChevronRight /></Button></div>
-        {habits.length === 0 ? <EmptyState icon={CheckSquare} title="Comece com um hábito" context="Um hábito por vez, marcado na Agenda, constrói sua sequência." actionLabel="Criar primeiro hábito" onAction={() => setEditing("new")} /> : (
+        {(
           <table className="w-full table-fixed text-xs sm:text-sm">
             <colgroup><col className="w-1/4" />{week.map((d) => <col key={toDateKey(d)} />)}</colgroup>
             <thead><tr><th scope="col" className="pb-2 text-left text-[10px] font-medium text-steel sm:text-xs">Hábito</th>{week.map((d, index) => <th scope="col" key={toDateKey(d)} className="px-0 pb-2 text-center text-[10px] font-medium text-steel sm:text-xs">{["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"][index]}<br />{format(d, "d")}</th>)}</tr></thead>
