@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { HierarchicalBackButton } from "@/components/ModuleHeader";
 import { CalendarDays, ChevronRight, Settings2, Snowflake, type LucideIcon } from "lucide-react";
 import { MODULES, isModuleOn, type ModuleId } from "@/lib/modules";
 import { useTaskBio } from "@/lib/trilha-store";
@@ -80,7 +81,7 @@ function Rotina() {
 
   return (
     <main className="mx-auto max-w-2xl px-5 pb-24 sm:px-8">
-      <h1 className="pt-6 text-2xl font-semibold text-ink">Rotina</h1>
+      <div className="flex items-center gap-2 pt-6"><HierarchicalBackButton /><h1 className="min-w-0 text-2xl font-semibold text-ink">Rotina</h1></div>
 
       {user && freezes != null && (
         <div className="mt-4 flex items-center gap-3 rounded-2xl border border-line bg-card p-4">
