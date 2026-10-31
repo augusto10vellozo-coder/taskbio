@@ -7,7 +7,7 @@ export type RoutineProgress = { pct: number | null; done: number; planned: numbe
 
 const shift = (day: string, n: number) => { const d = new Date(`${day}T12:00:00Z`); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
 
-/** Server-computed routine %. 7 days = current league week (same number as Amigos); 30/90 = last N days. */
+/** Owner-only routine %. 7 days = current calendar week; 30/90 = last N days. */
 export function useRoutineProgress(period: 7 | 30 | 90) {
   const { user } = useAuth();
   return useQuery({

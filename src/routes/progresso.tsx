@@ -99,7 +99,7 @@ function Progresso() {
       <ConsistencyCard period={period} />
       <ReadingGoalBar />
 
-      {/* Rotina: primeiro card secundário (mesmo número da liga em 7 dias). */}
+      {/* Rotina pessoal: resumo dos blocos do próprio usuário. */}
       <section aria-label={routineLabel} className="mt-4 rounded-lg bg-card p-4 ring-1 ring-line">
         <p className="text-sm font-medium text-steel">{routineLabel}</p>
         {routine.isPending ? <div className="mt-3 h-14 w-32 animate-pulse rounded-lg bg-mist" /> : pct === null ? <>
