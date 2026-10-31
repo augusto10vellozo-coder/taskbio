@@ -89,6 +89,7 @@ function Habitos() {
           </table>
         )}
       </section>
+      )}
       <section className="mt-5 rounded-lg bg-card p-4 ring-1 ring-line">
         <h2 className="font-display text-lg font-semibold">Mapa de consistência</h2><p className="text-xs text-steel">{consistency.percent}% de constância · {consistency.recent ? "desde a criação" : "últimos 35 dias"}</p>
         <div className="mt-3 grid grid-cols-7 gap-1.5 sm:max-w-sm">{month.map((k) => { const n = (habitLog[k] ?? []).length; const o = n === 0 ? 0 : 0.25 + 0.75 * Math.min(1, n / max); return <div key={k} title={`${k.split("-").reverse().join("/")}: ${n}`} className="aspect-square rounded-sm bg-mist"><div className="size-full rounded-sm bg-brand" style={{ opacity: o }} /></div>; })}</div>
