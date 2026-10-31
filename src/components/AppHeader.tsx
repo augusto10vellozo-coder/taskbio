@@ -40,7 +40,7 @@ export function AppHeader() {
     <header className="sticky top-0 z-30 glass-strong border-b border-line">
       <div className="mx-auto grid min-h-16 max-w-6xl grid-cols-[minmax(0,1fr)_auto] items-center gap-2 px-4 sm:px-8 xl:flex xl:justify-between">
         <div className="min-w-0">
-          <Link to="/" className="flex min-w-0 items-center gap-2 sm:gap-3">
+          <Link to="/" state={{ taskbioTab: true }} className="flex min-w-0 items-center gap-2 sm:gap-3">
           <img src="/icons/taskbio-192-v3.png" alt="" width={36} height={36} className="size-9 shrink-0 rounded-xl ring-1 ring-line" />
           <div className="min-w-0 leading-none">
             <p className="font-display text-[15px] font-semibold tracking-tight">TaskBio</p>
@@ -59,6 +59,7 @@ export function AppHeader() {
             <Link
               key={l.to}
               to={l.to}
+              state={{ taskbioTab: true }}
               activeOptions={{ exact: l.exact }}
               className="rounded-lg px-3 py-2 font-medium text-steel hover:text-ink"
               activeProps={{ className: "rounded-lg px-3 py-2 font-medium bg-ink text-background" }}

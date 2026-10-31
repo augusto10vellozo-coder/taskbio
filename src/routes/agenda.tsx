@@ -2,6 +2,7 @@ import { ModuleHeader } from "@/components/ModuleHeader";
 import { WeeklyGoals } from "@/components/WeeklyGoals";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useEntryState } from "@/lib/navigation-context";
 import { addDays, format, isSameDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { CalendarDays, ChevronLeft, ChevronRight, Plus } from "lucide-react";
@@ -38,7 +39,7 @@ export const Route = createFileRoute("/agenda")({
 
 function Agenda() {
   const { plan, ready, replaceDays, clearWeek, getMeal } = useTaskBio();
-  const [selectedDate, setSelectedDate] = useState(() => {
+  const [selectedDate, setSelectedDate] = useEntryState("agenda:date", () => {
     if (typeof window === "undefined") return new Date();
     const saved = sessionStorage.getItem("trilha:selected-date");
     if (saved) { sessionStorage.removeItem("trilha:selected-date"); return new Date(`${saved}T12:00:00`); }
@@ -122,7 +123,7 @@ function Agenda() {
 
   return (
     <main ref={mainRef} className="mx-auto max-w-6xl px-5 pb-44 sm:px-8">
-      <AgendaGreeting />
+      <AgendaGreeting showBack={false} />
       <div ref={dateStartRef} className="h-px" aria-hidden="true" />
       <div ref={dateHeaderRef} className="sticky top-0 z-35 -mx-5 border-b border-line bg-background px-5 pb-3 sm:-mx-8 sm:px-8" aria-label="Navegação de datas">
       {!compactDates && <ModuleHeader title="Minha Agenda" />}

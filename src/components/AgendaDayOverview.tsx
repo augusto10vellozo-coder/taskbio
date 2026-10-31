@@ -1,4 +1,5 @@
 import { Flame } from "lucide-react";
+import { HierarchicalBackButton } from "@/components/ModuleHeader";
 import { useAuth } from "@/lib/auth-context";
 import { useTaskBio } from "@/lib/trilha-store";
 import { greeting } from "@/lib/engagement";
@@ -8,12 +9,12 @@ import { isMealRecorded } from "@/lib/meal-planning";
 import { formatFullDate } from "@/lib/calendar-utils";
 
 /** Greeting with the day's date, shown above the Agenda header. Reads existing values only. */
-export function AgendaGreeting() {
+export function AgendaGreeting({ showBack = true }: { showBack?: boolean }) {
   const { user } = useAuth();
   const name = typeof user?.user_metadata?.["display_name"] === "string" && user.user_metadata["display_name"] ? String(user.user_metadata["display_name"]).split(" ")[0] : null;
   return (
     <div className="pt-5">
-      <h1 className="text-[22px] font-semibold text-ink">{greeting(new Date().getHours())}{name ? `, ${name}` : ""}</h1>
+      <div className="flex items-center gap-2">{showBack && <HierarchicalBackButton />}<h1 className="min-w-0 text-[22px] font-semibold text-ink">{greeting(new Date().getHours())}{name ? `, ${name}` : ""}</h1></div>
       <p className="mt-0.5 text-[13px] capitalize text-steel">{formatFullDate(new Date())}</p>
     </div>
   );

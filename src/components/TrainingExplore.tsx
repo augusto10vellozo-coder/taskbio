@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useEntryState } from "@/lib/navigation-context";
 import { addDays, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
@@ -48,9 +49,9 @@ const i18nDay = (d: Date) => format(d, "EEE d", { locale: ptBR });
 export function TrainingExplore() {
   const { workouts: allWorkouts, workoutHistory, addWorkout, removeWorkout, goal, setGoal, preferredModality, setPreferredModality } = useTaskBio();
   const workouts = allWorkouts.filter((w) => !w.templateId);
-  const [selected, setSelected] = useState<string | null>(workouts[0]?.id ?? null);
+  const [selected, setSelected] = useEntryState<string | null>("training:model", workouts[0]?.id ?? null);
   const [creating, setCreating] = useState(false);
-  const [openExample, setOpenExample] = useState<string | null>(null);
+  const [openExample, setOpenExample] = useEntryState<string | null>("training:example", null);
   const workout = workouts.find((w) => w.id === selected);
   const examples = preferredModality ? getWorkoutExamples(preferredModality, goal) : [];
   const objectiveEffect = goal ? OBJECTIVE_EFFECTS[goal] : null;

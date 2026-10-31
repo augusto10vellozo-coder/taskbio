@@ -4,6 +4,7 @@ import { makePlannedMeal, mealsForMode, mealsForTotals, predictedMeal, nextMealD
 import { ModuleHeader } from "@/components/ModuleHeader";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
+import { useEntryState } from "@/lib/navigation-context";
 import { addDays, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { CalendarPlus, ChevronLeft, ChevronRight, Plus, ArrowRight, ChevronDown, UtensilsCrossed } from "lucide-react";
@@ -78,9 +79,9 @@ const toNonNegativeNumber = (value: string) => {
 
 function Alimentacao() {
   const { meals, plan, addBlock, registerMeal, removeBlock, getMeal, customFoods, addCustomFood, savePlannedMeal, consumeMeal, skipMeal } = useTaskBio();
-  const [referenceDate, setReferenceDate] = useState(() => new Date());
-  const [selectedDate, setSelectedDate] = useState(() => new Date());
-  const [mode, setMode] = useState<MealMode>("planejar");
+  const [referenceDate, setReferenceDate] = useEntryState("food:week", () => new Date());
+  const [selectedDate, setSelectedDate] = useEntryState("food:day", () => new Date());
+  const [mode, setMode] = useEntryState<MealMode>("food:mode", "planejar");
   const [formMode, setFormMode] = useState<MealMode>("registrar");
   const [mealType, setMealType] = useState<(typeof mealTypes)[number]>("Almoço");
   const [repeatOffer, setRepeatOffer] = useState<{ date: string; title: string; time: string; food: NonNullable<Block["manualMeal"]> } | null>(null);

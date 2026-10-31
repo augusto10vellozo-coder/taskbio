@@ -5,6 +5,7 @@ import { ProgressRecorder } from "@/components/ProgressRecorder";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { TrainingExplore, useScheduleWorkout } from "@/components/TrainingExplore";
 import { useEffect, useMemo, useState } from "react";
+import { useEntryState } from "@/lib/navigation-context";
 import { addDays, format, getISOWeek } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { CalendarPlus, ChevronLeft, ChevronRight, Dumbbell, FileUp, Plus, Trash2, TrendingUp, X } from "lucide-react";
@@ -67,10 +68,10 @@ function WeekTab({ onExplore }: { onExplore: () => void }) {
   const models = workouts.filter((w) => !w.templateId);
   const examples = getWorkoutExamples(store.preferredModality ?? "Musculação", store.goal);
   const schedule = useScheduleWorkout();
-  const [ref, setRef] = useState<Date | null>(null);
-  const [selected, setSelected] = useState<string | null>(null);
+  const [ref, setRef] = useEntryState<Date | null>("training:week", null);
+  const [selected, setSelected] = useEntryState<string | null>("training:day", null);
   const [importing, setImporting] = useState(false);
-  useEffect(() => { const d = new Date(); setRef(d); setSelected(toDateKey(d)); }, []);
+  useEffect(() => { const d = new Date(); setRef(value => value ?? d); setSelected(value => value ?? toDateKey(d)); }, []);
   if (!ref || !selected) return <div className="h-60 animate-pulse rounded-lg bg-mist" />;
 
   const week = getWeekDates(ref);

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useEntryState } from "@/lib/navigation-context";
 import { useServerFn } from "@tanstack/react-start";
 import { CalendarClock, Check, Flame, Pause, Play, Plus, Square, Timer, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -25,7 +26,7 @@ export function StudyModule() {
   const exams = trackers.exams ?? [];
   const pomo = trackers.pomodoro ?? DEFAULT_POMODORO;
   const [today, setToday] = useState<string | null>(null);
-  const [subjectId, setSubjectId] = useState("");
+  const [subjectId, setSubjectId] = useEntryState("study:subject", "");
   const [minutes, setMinutes] = useState("");
   const [learned, setLearned] = useState("");
   const [newSub, setNewSub] = useState({ name: "", color: "", touched: false });

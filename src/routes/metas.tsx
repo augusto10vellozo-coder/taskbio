@@ -2,6 +2,7 @@ import { ModuleHeader } from "@/components/ModuleHeader";
 import { ModuleGate } from "@/components/EmptyState";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useEntryState } from "@/lib/navigation-context";
 import { Minus, Plus, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -26,12 +27,12 @@ const SOURCES = { manual: "Manual", workouts: "Treinos concluídos (automático)
 
 function Metas() {
   const { monthGoals, saveMonthGoal, removeMonthGoal, workoutHistory, habitLog, plan } = useTaskBio();
-  const [month, setMonth] = useState<string | null>(null);
+  const [month, setMonth] = useEntryState<string | null>("goals:month", null);
   const [title, setTitle] = useState("");
   const [target, setTarget] = useState("12");
   const [unit, setUnit] = useState("vezes");
   const [source, setSource] = useState<MonthGoal["source"]>("manual");
-  useEffect(() => setMonth(format(new Date(), "yyyy-MM")), []);
+  useEffect(() => setMonth(value => value ?? format(new Date(), "yyyy-MM")), []);
   if (!month) return <main className="mx-auto max-w-4xl px-5 pt-8"><div className="h-60 animate-pulse rounded-lg bg-mist" /></main>;
   const goals = monthGoals.filter((g) => g.month === month);
 

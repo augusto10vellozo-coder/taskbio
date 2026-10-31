@@ -1,6 +1,7 @@
 import { ModuleHeader } from "@/components/ModuleHeader";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
+import { useEntryState } from "@/lib/navigation-context";
 import { Check, ChevronLeft, ChevronRight, Pencil, Plus, Trash2, Wallet, X } from "lucide-react";
 import { EmptyState, ModuleGate } from "@/components/EmptyState";
 import { addMonths, format, parseISO } from "date-fns";
@@ -36,7 +37,7 @@ function Financas() {
   const { finance: raw, setFinance } = useTaskBio();
   const f = { ...emptyFinance, ...raw };
   const [today, setToday] = useState<Date | null>(null);
-  const [month, setMonthState] = useState<string | null>(null);
+  const [month, setMonthState] = useEntryState<string | null>("finance:month", null);
   const [amount, setAmount] = useState("");
   const [desc, setDesc] = useState("");
   const [cat, setCat] = useState("Outros");
@@ -46,7 +47,7 @@ function Financas() {
   const [editingBill, setEditingBill] = useState<string | null>(null);
   const [budgetInput, setBudgetInput] = useState<string | null>(null);
   const amountRef = useRef<HTMLInputElement>(null);
-  useEffect(() => { const d = new Date(); setToday(d); setMonthState(sessionMonth ?? toDateKey(d).slice(0, 7)); }, []);
+  useEffect(() => { const d = new Date(); setToday(d); setMonthState(value => value ?? sessionMonth ?? toDateKey(d).slice(0, 7)); }, []);
   if (!today || !month) return <main className="mx-auto max-w-4xl px-5 pt-8"><div className="h-60 animate-pulse rounded-lg bg-mist" /></main>;
 
   const todayKey = toDateKey(today);
