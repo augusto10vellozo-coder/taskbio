@@ -1,8 +1,8 @@
 import { ModuleHeader } from "@/components/ModuleHeader";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useEntryState } from "@/lib/navigation-context";
-import { Check, ChevronLeft, ChevronRight, Pencil, Plus, Trash2, Wallet, X } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, FileUp, Pencil, Plus, Trash2, Wallet, X } from "lucide-react";
 import { EmptyState, ModuleGate } from "@/components/EmptyState";
 import { addMonths, format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -101,6 +101,9 @@ function Financas() {
     <main className="mx-auto max-w-4xl px-5 pb-20 sm:px-8">
       <ModuleHeader title="Finanças" />
       <ModuleGate id="financas">
+      <div className="mb-3 flex justify-end">
+        <Button variant="outline" size="sm" asChild><Link to="/financas-importar"><FileUp /> Importar</Link></Button>
+      </div>
       <div className="mb-4 flex items-center justify-between rounded-lg bg-card p-2 ring-1 ring-line">
         <Button variant="ghost" size="icon" aria-label="Mês anterior" onClick={() => changeMonth(-1)}><ChevronLeft /></Button>
         <h2 className="font-display text-lg font-semibold">{monthLabel(month)}</h2>

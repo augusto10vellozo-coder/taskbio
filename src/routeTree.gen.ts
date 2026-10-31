@@ -22,6 +22,7 @@ import { Route as ContatoRouteImport } from './routes/contato'
 import { Route as EsqueciSenhaRouteImport } from './routes/esqueci-senha'
 import { Route as EstudosRouteImport } from './routes/estudos'
 import { Route as FinancasRouteImport } from './routes/financas'
+import { Route as FinancasImportarRouteImport } from './routes/financas-importar'
 import { Route as HabitosRouteImport } from './routes/habitos'
 import { Route as HojeRouteImport } from './routes/hoje'
 import { Route as LeituraRouteImport } from './routes/leitura'
@@ -107,6 +108,11 @@ const EstudosRoute = EstudosRouteImport.update({
 const FinancasRoute = FinancasRouteImport.update({
   id: '/financas',
   path: '/financas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FinancasImportarRoute = FinancasImportarRouteImport.update({
+  id: '/financas-importar',
+  path: '/financas-importar',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HabitosRoute = HabitosRouteImport.update({
@@ -234,6 +240,7 @@ export interface FileRoutesByFullPath {
   '/esqueci-senha': typeof EsqueciSenhaRoute
   '/estudos': typeof EstudosRoute
   '/financas': typeof FinancasRoute
+  '/financas-importar': typeof FinancasImportarRoute
   '/habitos': typeof HabitosRoute
   '/hoje': typeof HojeRoute
   '/leitura': typeof LeituraRoute
@@ -270,6 +277,7 @@ export interface FileRoutesByTo {
   '/esqueci-senha': typeof EsqueciSenhaRoute
   '/estudos': typeof EstudosRoute
   '/financas': typeof FinancasRoute
+  '/financas-importar': typeof FinancasImportarRoute
   '/habitos': typeof HabitosRoute
   '/hoje': typeof HojeRoute
   '/leitura': typeof LeituraRoute
@@ -308,6 +316,7 @@ export interface FileRoutesById {
   '/esqueci-senha': typeof EsqueciSenhaRoute
   '/estudos': typeof EstudosRoute
   '/financas': typeof FinancasRoute
+  '/financas-importar': typeof FinancasImportarRoute
   '/habitos': typeof HabitosRoute
   '/hoje': typeof HojeRoute
   '/leitura': typeof LeituraRoute
@@ -346,6 +355,7 @@ export interface FileRouteTypes {
     | '/esqueci-senha'
     | '/estudos'
     | '/financas'
+    | '/financas-importar'
     | '/habitos'
     | '/hoje'
     | '/leitura'
@@ -382,6 +392,7 @@ export interface FileRouteTypes {
     | '/esqueci-senha'
     | '/estudos'
     | '/financas'
+    | '/financas-importar'
     | '/habitos'
     | '/hoje'
     | '/leitura'
@@ -419,6 +430,7 @@ export interface FileRouteTypes {
     | '/esqueci-senha'
     | '/estudos'
     | '/financas'
+    | '/financas-importar'
     | '/habitos'
     | '/hoje'
     | '/leitura'
@@ -457,6 +469,7 @@ export interface RootRouteChildren {
   EsqueciSenhaRoute: typeof EsqueciSenhaRoute
   EstudosRoute: typeof EstudosRoute
   FinancasRoute: typeof FinancasRoute
+  FinancasImportarRoute: typeof FinancasImportarRoute
   HabitosRoute: typeof HabitosRoute
   HojeRoute: typeof HojeRoute
   LeituraRoute: typeof LeituraRoute
@@ -569,6 +582,13 @@ declare module '@tanstack/react-router' {
       path: '/financas'
       fullPath: '/financas'
       preLoaderRoute: typeof FinancasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/financas-importar': {
+      id: '/financas-importar'
+      path: '/financas-importar'
+      fullPath: '/financas-importar'
+      preLoaderRoute: typeof FinancasImportarRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/habitos': {
@@ -757,6 +777,7 @@ const rootRouteChildren: RootRouteChildren = {
   EsqueciSenhaRoute: EsqueciSenhaRoute,
   EstudosRoute: EstudosRoute,
   FinancasRoute: FinancasRoute,
+  FinancasImportarRoute: FinancasImportarRoute,
   HabitosRoute: HabitosRoute,
   HojeRoute: HojeRoute,
   LeituraRoute: LeituraRoute,
