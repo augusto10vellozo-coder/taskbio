@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ReadingModule } from "@/components/ReadingModule";
+import { ModuleGate } from "@/components/EmptyState";
 
 export const Route = createFileRoute("/leitura")({
   validateSearch: (search: Record<string, unknown>): { blockId?: string | undefined; date?: string | undefined } => ({
@@ -14,5 +15,5 @@ export const Route = createFileRoute("/leitura")({
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary" },
   ] }),
-  component: ReadingModule,
+  component: () => <ModuleGate id="leitura"><ReadingModule /></ModuleGate>,
 });

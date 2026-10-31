@@ -8,6 +8,7 @@ import { brasiliaDay } from "@/lib/xp";
 import { BookOpen, Check, Loader2, Plus, Quote as QuoteIcon, Search, Star, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { ModuleHeader } from "@/components/ModuleHeader";
+import { EmptyState } from "@/components/EmptyState";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useTaskBio } from "@/lib/trilha-store";
@@ -97,7 +98,7 @@ export function ReadingModule() {
 
       <section aria-labelledby="sessao" className="rounded-lg bg-card p-4 ring-1 ring-line">
         <h2 id="sessao" className="font-display text-lg font-semibold">Registrar sessão</h2>
-        {books.length === 0 ? <p className="mt-2 text-sm text-steel">Adicione seu primeiro livro pra registrar a leitura.</p> : (
+        {books.length === 0 ? <EmptyState icon={BookOpen} title="Nenhum livro em andamento" context="Adicione um livro e registre as páginas lidas a cada dia." actionLabel="Adicionar livro" onAction={() => document.getElementById("buscar-livro")?.focus()} secondaryLabel="Ver meta de leitura" onSecondary={() => document.getElementById("meta-leitura")?.scrollIntoView({ behavior: "smooth", block: "center" })} /> : (
           <form className="mt-3 grid grid-cols-2 gap-2" onSubmit={async (e) => {
             e.preventDefault();
             if (busy || (agendaBlock?.done && sessions.some(s => s.agendaBlockId === agendaBlock.id && s.date === search.date))) return;
@@ -141,7 +142,7 @@ export function ReadingModule() {
 
       <div className="mt-4 grid grid-cols-2 gap-3">
         <Stat label="Hoje" value={`${todayMin} min`} />
-        <section className="rounded-lg bg-card p-4 ring-1 ring-line">
+        <section id="meta-leitura" className="rounded-lg bg-card p-4 ring-1 ring-line">
           <p className="text-xs font-medium text-steel">Meta semanal</p>
           <p className="mt-1 font-display text-2xl font-semibold">{weekMin}<span className="text-sm font-normal text-steel"> / {goal} min</span></p>
           <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-mist"><div className="h-full bg-brand" style={{ width: `${Math.min(100, (weekMin / Math.max(1, goal)) * 100)}%` }} /></div>
@@ -153,7 +154,7 @@ export function ReadingModule() {
         <h2 id="livros" className="font-display text-lg font-semibold">Meus Livros</h2>
         <div className="relative mt-3">
           <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-steel" />
-          <input type="search" aria-label="Buscar livro" placeholder="Buscar livro..." value={q} onChange={(e) => setQ(e.target.value)} className={`${input} w-full pl-9`} />
+          <input id="buscar-livro" type="search" aria-label="Buscar livro" placeholder="Buscar livro..." value={q} onChange={(e) => setQ(e.target.value)} className={`${input} w-full pl-9`} />
         </div>
         {loading && <p className="mt-3 flex items-center gap-2 text-sm text-steel"><Loader2 className="size-4 animate-spin" /> Buscando…</p>}
         {!loading && results && results.length === 0 && <p className="mt-3 text-sm text-steel">Não achamos esse livro. Tente outro título ou adicione você mesmo.</p>}
@@ -183,7 +184,7 @@ export function ReadingModule() {
           ))}
         </div>
         <ul className="mt-3 grid gap-3 sm:grid-cols-2">
-          {books.filter((b) => b.status === filter).length === 0 && <li className="rounded-lg bg-card p-6 text-center text-sm text-steel ring-1 ring-line sm:col-span-2">Nenhum livro aqui ainda.</li>}
+          {books.length > 0 && books.filter((b) => b.status === filter).length === 0 && <li className="rounded-lg bg-card p-6 text-center text-sm text-steel ring-1 ring-line sm:col-span-2">Nenhum livro aqui ainda.</li>}
           {books.filter((b) => b.status === filter).map((b) => { const pct = bookPercent(b); const remaining = b.status === "lendo" ? remainingReadingMinutes(b, sessions) : null; return (
             <li key={b.id}><button type="button" onClick={() => setOpenId(b.id)} className="flex w-full gap-3 rounded-lg bg-card p-3 text-left ring-1 ring-line hover:ring-brand">
               <Cover book={b} />
