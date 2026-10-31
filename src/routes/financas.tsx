@@ -1,5 +1,5 @@
 import { ModuleHeader } from "@/components/ModuleHeader";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useEntryState } from "@/lib/navigation-context";
 import { Check, ChevronLeft, ChevronRight, FileUp, Pencil, Plus, Trash2, Wallet, X } from "lucide-react";
@@ -36,6 +36,7 @@ const emptyBill = { title: "", amount: "", dueDate: "", category: "Contas fixas"
 function Financas() {
   const { finance: raw, setFinance } = useTaskBio();
   const f = { ...emptyFinance, ...raw };
+  const navigate = useNavigate();
   const [today, setToday] = useState<Date | null>(null);
   const [month, setMonthState] = useEntryState<string | null>("finance:month", null);
   const [amount, setAmount] = useState("");
@@ -177,7 +178,7 @@ function Financas() {
       </section>
 
       <section className="mt-4 rounded-lg bg-card p-4 ring-1 ring-line"><h2 className="font-display text-lg font-semibold">Últimos registros</h2>
-        <ul className="mt-2 divide-y divide-line">{monthEntries.slice(0, 30).map((e) => <li key={e.id} className="flex items-center gap-3 py-2 text-sm"><span className="min-w-0 flex-1 break-words">{e.description} <span className="text-xs text-steel">· {e.category} · {e.date.split("-").reverse().join("/")}{e.billId ? " · conta" : ""}</span></span><span className={e.type === "receita" ? "font-medium text-brand-deep" : "font-medium"}>{e.type === "receita" ? "+" : "−"}{brl(e.amount)}</span><Button variant="ghost" size="icon" className="size-7" aria-label={`Remover ${e.description}`} onClick={() => { const pb = e.billId ? f.bills.find((x) => x.id === e.billId) : undefined; if (pb?.paid) emitXp({ kind: "bill", ref: `${pb.id}:${pb.dueDate}`, date: todayKey, on: false }); setFinance((s) => e.billId ? unpayBill(s, e.billId) : { ...s, entries: s.entries.filter((x) => x.id !== e.id) }); }}><Trash2 /></Button></li>)}</ul>
+        <ul className="mt-2 divide-y divide-line">{monthEntries.slice(0, 30).map((e) => <li key={e.id} className="flex items-center gap-3 py-2 text-sm"><span className="min-w-0 flex-1 break-words">{e.description} <span className="text-xs text-steel">· {e.category} · {e.date.split("-").reverse().join("/")}{e.billId ? " · conta" : ""}{e.source === "importado" ? " · importado" : ""}</span></span><span className={e.type === "receita" ? "font-medium text-brand-deep" : "font-medium"}>{e.type === "receita" ? "+" : "−"}{brl(e.amount)}</span><Button variant="ghost" size="icon" className="size-7" aria-label={`Remover ${e.description}`} onClick={() => { const pb = e.billId ? f.bills.find((x) => x.id === e.billId) : undefined; if (pb?.paid) emitXp({ kind: "bill", ref: `${pb.id}:${pb.dueDate}`, date: todayKey, on: false }); setFinance((s) => e.billId ? unpayBill(s, e.billId) : { ...s, entries: s.entries.filter((x) => x.id !== e.id) }); }}><Trash2 /></Button></li>)}</ul>
       </section>
       </ModuleGate>
     </main>
