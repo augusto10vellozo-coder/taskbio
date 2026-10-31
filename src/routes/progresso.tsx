@@ -1,7 +1,7 @@
 import { ModuleHeader } from "@/components/ModuleHeader";
 import { ConsistencyCard } from "@/components/ConsistencyCard";
 import { ReadingGoalBar } from "@/components/ReadingGoalBar";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState, type ReactNode } from "react";
 import { format, isAfter, parseISO, subDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -52,6 +52,7 @@ function MetricCard({ icon, value, label, origin, emptyText }: { icon: ReactNode
 }
 
 function Progresso() {
+  const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { plan, workoutHistory, getMeal, modules } = useTaskBio();
   const { entries, loading } = useProgressEntries();
@@ -93,7 +94,7 @@ function Progresso() {
       <ModuleGate id="progresso">
       <section className="flex flex-wrap items-end justify-between gap-3 pb-5"><div><h2 className="font-display text-lg font-semibold">Evolução baseada nos seus registros</h2></div><div className="flex gap-1" role="group" aria-label="Período">{([7, 30, 90] as const).map((days) => <Button key={days} size="sm" variant={period === days ? "default" : "outline"} onClick={() => setPeriod(days)}>{days} dias</Button>)}</div></section>
 
-      {!loading && entries.length === 0 && workoutHistory.length === 0 && <EmptyState icon={LineChart} title="Ainda sem dados para comparar" context="Registre treino, peso ou medidas e o progresso aparece aqui." actionLabel="Registrar medida" onAction={() => { document.getElementById("registrar-medida-link")?.click(); }} secondaryLabel="Ver metas da semana" onSecondary={() => { document.getElementById("metas-semana-link")?.click(); }} />}
+      {!loading && entries.length === 0 && workoutHistory.length === 0 && <EmptyState icon={LineChart} title="Ainda sem dados para comparar" context="Registre treino, peso ou medidas e o progresso aparece aqui." actionLabel="Registrar medida" onAction={() => void navigate({ to: "/saude", hash: "registros-saude" })} secondaryLabel="Ver metas da semana" onSecondary={() => void navigate({ to: "/agenda" })} />}
 
       <ConsistencyCard period={period} />
       <ReadingGoalBar />
