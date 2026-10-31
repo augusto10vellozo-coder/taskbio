@@ -24,7 +24,7 @@ function Convite() {
   useEffect(() => { if (/^[a-f0-9]{6,20}$/.test(ref)) localStorage.setItem(INVITE_KEY, ref); }, [ref]);
   return (
     <main className="mx-auto grid min-h-[calc(100vh-4rem)] max-w-lg place-items-center px-5 py-12">
-      <section className="glass-strong w-full rounded-2xl p-7 text-center ring-1 ring-black/5">
+      <section className="glass-strong w-full rounded-2xl p-7 text-center ring-1 ring-line">
         <Trophy className="mx-auto size-10 text-brand" />
         <h1 className="mt-3 font-display text-3xl font-semibold">Você foi convidado para uma liga</h1>
         <p className="mt-3 text-sm leading-6 text-steel">No TaskBio você organiza agenda, treinos e refeições — e compete com amigos marcando seus hábitos. A liga premia a constância.</p>

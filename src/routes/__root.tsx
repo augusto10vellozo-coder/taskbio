@@ -23,6 +23,7 @@ import { InviteManager } from "../components/InviteManager";
 import { PendingProfessionalInvites } from "../components/PendingProfessionalInvites";
 import { PrivacyConsent } from "../components/PrivacyConsent";
 import { ThemeProvider } from "../lib/theme-context";
+import { ThemeOnboarding } from "../components/ThemeOnboarding";
 import { StudyTimerProvider } from "../components/StudyTimerProvider";
 import { HabitFreezeNotices } from "../components/HabitFreezeNotices";
 
@@ -91,7 +92,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { name: "theme-color", content: "#3859c7" },
+      { name: "theme-color", content: "#FAF8F4" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { title: "TaskBio — Organização de vida saudável" },
       { name: "description", content: "Organize rotina, atividades físicas, alimentação e progresso em um só lugar." },
@@ -124,6 +125,12 @@ function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="pt-BR">
       <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              'try{var t=localStorage.getItem("trilha:theme");var d=t==="dark"||(t==="system"&&window.matchMedia("(prefers-color-scheme: dark)").matches);var r=document.documentElement;r.classList.toggle("dark",d);r.dataset.theme=d?"dark":"light";}catch(e){}',
+          }}
+        />
         <HeadContent />
       </head>
       <body>
@@ -149,6 +156,7 @@ function RootComponent() {
           <AppFooter />
           <BottomNav />
           <PrivacyConsent />
+          <ThemeOnboarding />
           <SyncManager />
           <HabitFreezeNotices />
           <ReminderManager />

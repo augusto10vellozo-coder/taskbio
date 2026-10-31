@@ -36,7 +36,7 @@ function ForgotPasswordPage() {
   }
 
   return <main className="mx-auto grid min-h-[calc(100vh-4rem)] max-w-md place-items-center px-5 py-12">
-    <section className="glass-strong w-full rounded-2xl p-7 ring-1 ring-black/5">
+    <section className="glass-strong w-full rounded-2xl p-7 ring-1 ring-line">
       <div className="grid size-11 place-items-center rounded-lg bg-brand/10 text-brand-deep"><Mail /></div>
       <h1 className="mt-5 font-display text-3xl font-semibold">Recuperar senha</h1>
       <p className="mt-2 text-sm leading-6 text-steel">{sent ? "Se houver uma conta com esse e-mail, você receberá um link para criar uma nova senha." : "Informe seu e-mail para receber um link seguro de recuperação."}</p>

@@ -82,7 +82,7 @@ function AuthPage() {
   if (confirmationEmail) {
     return (
       <main className="mx-auto grid min-h-[calc(100vh-4rem)] max-w-lg place-items-center px-5 py-12">
-        <section className="glass-strong w-full rounded-2xl p-7 ring-1 ring-black/5">
+        <section className="glass-strong w-full rounded-2xl p-7 ring-1 ring-line">
           <p className="text-xs font-medium uppercase tracking-[0.18em] text-brand-deep">Confirme sua conta</p>
           <h1 className="mt-3 font-display text-3xl font-semibold">Confira seu e-mail</h1>
           <p className="mt-3 text-sm leading-6 text-steel">
@@ -102,7 +102,7 @@ function AuthPage() {
         <p className="mt-5 max-w-lg text-base leading-7 text-steel">Sincronize agenda, treinos, refeições e progresso com segurança em todos os seus dispositivos.</p>
       </section>
 
-      <section className="glass-strong rounded-2xl p-6 ring-1 ring-black/5 sm:p-8">
+      <section className="glass-strong rounded-2xl p-6 ring-1 ring-line sm:p-8">
         <div className="grid grid-cols-2 rounded-lg bg-mist p-1">
           {(["entrar", "criar"] as const).map((item) => (
             <button key={item} type="button" onClick={() => setMode(item)} className={`rounded-md px-3 py-2 text-sm font-medium ${mode === item ? "bg-card text-ink shadow-sm" : "text-steel"}`}>
