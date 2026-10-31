@@ -123,7 +123,7 @@ function Agenda() {
 
   return (
     <main ref={mainRef} className="mx-auto max-w-6xl px-5 pb-44 sm:px-8">
-      <AgendaGreeting />
+      <AgendaGreeting showBack={false} />
       <div ref={dateStartRef} className="h-px" aria-hidden="true" />
       <div ref={dateHeaderRef} className="sticky top-0 z-35 -mx-5 border-b border-line bg-background px-5 pb-3 sm:-mx-8 sm:px-8" aria-label="Navegação de datas">
       {!compactDates && <ModuleHeader title="Minha Agenda" />}
