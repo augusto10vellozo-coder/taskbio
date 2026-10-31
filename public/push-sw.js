@@ -7,8 +7,8 @@ self.addEventListener("push", (event) => {
   try { data = { ...data, ...event.data.json() }; } catch (e) { /* payload inválido */ }
   event.waitUntil(self.registration.showNotification(data.title, {
     body: data.body,
-    icon: "/icons/taskbio-192-v2.png",
-    badge: "/icons/taskbio-192-v2.png",
+    icon: "/icons/taskbio-192-v3.png",
+    badge: "/icons/taskbio-192-v3.png",
     tag: data.tag || undefined,
     renotify: !!data.tag,
     vibrate: [120, 60, 120],
