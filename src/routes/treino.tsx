@@ -78,6 +78,7 @@ function WeekTab({ onExplore }: { onExplore: () => void }) {
   const blockOf = (k: string) => (plan[k] ?? []).find((b) => b.kind === "treino");
   const selBlock = blockOf(selected);
   const selWorkout = selBlock?.workoutId ? workouts.find((w) => w.id === selBlock.workoutId) : undefined;
+  const firstUse = models.length === 0 && !week.some((d) => blockOf(toDateKey(d)));
 
   const assign = (dateKey: string, workout: Workout) => schedule(dateKey, workout);
   const createAndAssign = (dateKey: string, name: string) => {
@@ -101,6 +102,9 @@ function WeekTab({ onExplore }: { onExplore: () => void }) {
           </div>); })}
       </div>
 
+      {firstUse ? (
+        <EmptyState icon={Dumbbell} title="Sua primeira ficha começa aqui" context="Monte o treino da semana e acompanhe carga e volume a cada sessão." actionLabel="Montar ficha" onAction={onExplore} secondaryLabel="Ver exercícios disponíveis" onSecondary={onExplore} />
+      ) : (
       <section className="mt-5 rounded-lg bg-card p-5 ring-1 ring-line">
         <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="font-display text-xl font-semibold">{selBlock ? format(new Date(`${selected}T12:00:00`), "EEEE, d 'de' MMMM", { locale: ptBR }) : "Nada agendado neste dia"}</h2>{selBlock && <Button variant="ghost" size="sm" onClick={() => removeBlock(selected, selBlock.id)}><X /> Tirar do dia</Button>}</div>
         {!selBlock ? <>
