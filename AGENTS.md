@@ -17,7 +17,7 @@ Public analytics uses opt-in browser consent and stores only event type, known p
 
 Agenda/Alimentação share dated blocks and atomic same-ID confirmation/undo without XP; meal-planning owns timestamps and recorded-state selectors. Legacy merges keep food-bearing IDs; plannedMeal retains its snapshot. Copy resets execution; shopping reads pending snapshots only on explicit generation, tracking origin. Food totals use meal-summary; absent nutrition stays unknown and fixes never change stored data. Why: preserves predictions, single records and manual carts.
 
-Legacy `/rotina` redirects to the main agenda at `/` to keep old links working. Home-screen install uses a manifest without caching to avoid stale deployments.
+`/rotina` is the Rotina module hub (groups Corpo/Mente/Casa); the bottom nav has 4 fixed items (Hoje, Rotina, Progresso, Perfil) and module URLs highlight the Rotina tab. Home-screen install uses a manifest without caching to avoid stale deployments.
 
 Navigation uses the registry-driven fixed BottomNav below the desktop-header breakpoint; sync and consent overlays sit above it so every module stays reachable without obstructed controls.
 
