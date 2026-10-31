@@ -26,6 +26,7 @@ import { ThemeOnboarding } from "../components/ThemeOnboarding";
 import { StudyTimerProvider } from "../components/StudyTimerProvider";
 import { HabitFreezeNotices } from "../components/HabitFreezeNotices";
 import { NotificationPrompt } from "../components/NotificationPrompt";
+import { NavigationProvider } from "../lib/navigation-context";
 
 function NotFoundComponent() {
   return (
@@ -150,6 +151,7 @@ function RootComponent() {
       <AuthProvider>
         <TaskBioProvider>
           <StudyTimerProvider>
+          <NavigationProvider>
           <div className="app-glow" />
           <AppHeader />
           <Outlet />
@@ -163,6 +165,7 @@ function RootComponent() {
           <ReminderManager />
           <PendingProfessionalInvites />
           <Toaster position="top-center" richColors />
+          </NavigationProvider>
           </StudyTimerProvider>
         </TaskBioProvider>
       </AuthProvider>

@@ -21,7 +21,7 @@ Agenda/Alimentação share dated blocks and atomic same-ID confirmation/undo wit
 
 Navigation uses the registry-driven fixed BottomNav below the desktop-header breakpoint; sync and consent overlays sit above it so every module stays reachable without obstructed controls.
 
-Module screens use the shared ModuleHeader for their primary title and history-back control with a direct-entry fallback to Modules; back navigation belongs to the screen, never the global brand header.
+ModuleHeader offers history.back only for hierarchical in-app entries tracked by the per-visit NavigationProvider ledger; tabs explicitly mark tab intent and direct/reloaded entries never offer a fallback arrow. Selection state uses useEntryState and TanStack owns scroll restoration. Why: exact originating screen/filters without mistaking external history for an app parent.
 
 Visible copy stays pt-BR; auth failures use the shared pt-BR message helper, never raw backend text.
 - Optional app modules are declared in src/lib/modules.ts; nav, home shortcuts and settings read that registry so new modules need no refactor.

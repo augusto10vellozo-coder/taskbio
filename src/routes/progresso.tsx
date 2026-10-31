@@ -2,7 +2,8 @@ import { ModuleHeader } from "@/components/ModuleHeader";
 import { ConsistencyCard } from "@/components/ConsistencyCard";
 import { ReadingGoalBar } from "@/components/ReadingGoalBar";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useMemo, useState, type ReactNode } from "react";
+import { useMemo, type ReactNode } from "react";
+import { useEntryState } from "@/lib/navigation-context";
 import { format, isAfter, parseISO, subDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Activity, Dumbbell, Scale, TrendingUp, UtensilsCrossed, Weight } from "lucide-react";
@@ -56,8 +57,8 @@ function Progresso() {
   const { user, loading: authLoading } = useAuth();
   const { plan, workoutHistory, getMeal, modules } = useTaskBio();
   const { entries, loading } = useProgressEntries();
-  const [period, setPeriod] = useState<7 | 30 | 90>(30);
-  const [kind, setKind] = useState<keyof typeof kinds>("weight");
+  const [period, setPeriod] = useEntryState<7 | 30 | 90>("progress:period", 30);
+  const [kind, setKind] = useEntryState<keyof typeof kinds>("progress:kind", "weight");
   const routine = useRoutineProgress(period);
 
   const filtered = useMemo(() => {
