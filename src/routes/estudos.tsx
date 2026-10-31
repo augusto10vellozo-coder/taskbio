@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { StudyModule } from "@/components/StudyModule";
+import { ModuleGate } from "@/components/EmptyState";
 
 export const Route = createFileRoute("/estudos")({
   head: () => ({ meta: [
@@ -10,5 +11,5 @@ export const Route = createFileRoute("/estudos")({
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary" },
   ] }),
-  component: StudyModule,
+  component: () => <ModuleGate id="estudos"><StudyModule /></ModuleGate>,
 });
