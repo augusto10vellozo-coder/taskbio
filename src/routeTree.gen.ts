@@ -25,6 +25,7 @@ import { Route as FinancasRouteImport } from './routes/financas'
 import { Route as HabitosRouteImport } from './routes/habitos'
 import { Route as HojeRouteImport } from './routes/hoje'
 import { Route as LeituraRouteImport } from './routes/leitura'
+import { Route as LigaRouteImport } from './routes/liga'
 import { Route as MetasRouteImport } from './routes/metas'
 import { Route as ModulosRouteImport } from './routes/modulos'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
@@ -121,6 +122,11 @@ const HojeRoute = HojeRouteImport.update({
 const LeituraRoute = LeituraRouteImport.update({
   id: '/leitura',
   path: '/leitura',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LigaRoute = LigaRouteImport.update({
+  id: '/liga',
+  path: '/liga',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MetasRoute = MetasRouteImport.update({
@@ -231,6 +237,7 @@ export interface FileRoutesByFullPath {
   '/habitos': typeof HabitosRoute
   '/hoje': typeof HojeRoute
   '/leitura': typeof LeituraRoute
+  '/liga': typeof LigaRoute
   '/metas': typeof MetasRoute
   '/modulos': typeof ModulosRoute
   '/privacidade': typeof PrivacidadeRoute
@@ -266,6 +273,7 @@ export interface FileRoutesByTo {
   '/habitos': typeof HabitosRoute
   '/hoje': typeof HojeRoute
   '/leitura': typeof LeituraRoute
+  '/liga': typeof LigaRoute
   '/metas': typeof MetasRoute
   '/modulos': typeof ModulosRoute
   '/privacidade': typeof PrivacidadeRoute
@@ -303,6 +311,7 @@ export interface FileRoutesById {
   '/habitos': typeof HabitosRoute
   '/hoje': typeof HojeRoute
   '/leitura': typeof LeituraRoute
+  '/liga': typeof LigaRoute
   '/metas': typeof MetasRoute
   '/modulos': typeof ModulosRoute
   '/privacidade': typeof PrivacidadeRoute
@@ -340,6 +349,7 @@ export interface FileRouteTypes {
     | '/habitos'
     | '/hoje'
     | '/leitura'
+    | '/liga'
     | '/metas'
     | '/modulos'
     | '/privacidade'
@@ -375,6 +385,7 @@ export interface FileRouteTypes {
     | '/habitos'
     | '/hoje'
     | '/leitura'
+    | '/liga'
     | '/metas'
     | '/modulos'
     | '/privacidade'
@@ -411,6 +422,7 @@ export interface FileRouteTypes {
     | '/habitos'
     | '/hoje'
     | '/leitura'
+    | '/liga'
     | '/metas'
     | '/modulos'
     | '/privacidade'
@@ -448,6 +460,7 @@ export interface RootRouteChildren {
   HabitosRoute: typeof HabitosRoute
   HojeRoute: typeof HojeRoute
   LeituraRoute: typeof LeituraRoute
+  LigaRoute: typeof LigaRoute
   MetasRoute: typeof MetasRoute
   ModulosRoute: typeof ModulosRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
@@ -577,6 +590,13 @@ declare module '@tanstack/react-router' {
       path: '/leitura'
       fullPath: '/leitura'
       preLoaderRoute: typeof LeituraRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/liga': {
+      id: '/liga'
+      path: '/liga'
+      fullPath: '/liga'
+      preLoaderRoute: typeof LigaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/metas': {
@@ -740,6 +760,7 @@ const rootRouteChildren: RootRouteChildren = {
   HabitosRoute: HabitosRoute,
   HojeRoute: HojeRoute,
   LeituraRoute: LeituraRoute,
+  LigaRoute: LigaRoute,
   MetasRoute: MetasRoute,
   ModulosRoute: ModulosRoute,
   PrivacidadeRoute: PrivacidadeRoute,
