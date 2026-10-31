@@ -190,7 +190,7 @@ function Agenda() {
           </div>}
         </aside>
       </div>
-      <Button size="icon" className="fixed right-5 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-40 size-14 rounded-full shadow-lg sm:right-8 xl:bottom-6" aria-label="Adicionar bloco" title="Adicionar bloco" onClick={planDay}><Plus className="size-6" /></Button>
+      <Button size="icon" className="fixed right-5 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-40 size-14 rounded-full border border-brand sm:right-8 xl:bottom-6" aria-label="Adicionar bloco" title="Adicionar bloco" onClick={planDay}><Plus className="size-6" /></Button>
       <WeeklyGoals />
     </main>
   );
