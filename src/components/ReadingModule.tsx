@@ -96,9 +96,10 @@ export function ReadingModule() {
         <div><span className={`inline-flex items-center gap-1 rounded-full bg-card px-3 py-1 font-medium ring-1 ring-line ${streak ? "text-foreground" : "text-steel"}`}>🔥 {streak} {streak === 1 ? "dia seguido" : "dias seguidos"}</span><p className="mt-1 text-xs">Melhor sequência: {best} {best === 1 ? "dia" : "dias"}</p></div>
       </div>
 
+      {books.length === 0 ? <EmptyState icon={BookOpen} title="Nenhum livro em andamento" context="Adicione um livro e registre as páginas lidas a cada dia." actionLabel="Adicionar livro" onAction={() => document.getElementById("buscar-livro")?.focus()} secondaryLabel="Ver meta de leitura" onSecondary={() => document.getElementById("meta-leitura")?.scrollIntoView({ behavior: "smooth", block: "center" })} /> : (
       <section aria-labelledby="sessao" className="rounded-lg bg-card p-4 ring-1 ring-line">
         <h2 id="sessao" className="font-display text-lg font-semibold">Registrar sessão</h2>
-        {books.length === 0 ? <EmptyState icon={BookOpen} title="Nenhum livro em andamento" context="Adicione um livro e registre as páginas lidas a cada dia." actionLabel="Adicionar livro" onAction={() => document.getElementById("buscar-livro")?.focus()} secondaryLabel="Ver meta de leitura" onSecondary={() => document.getElementById("meta-leitura")?.scrollIntoView({ behavior: "smooth", block: "center" })} /> : (
+        {(
           <form className="mt-3 grid grid-cols-2 gap-2" onSubmit={async (e) => {
             e.preventDefault();
             if (busy || (agendaBlock?.done && sessions.some(s => s.agendaBlockId === agendaBlock.id && s.date === search.date))) return;
