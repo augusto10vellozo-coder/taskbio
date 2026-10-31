@@ -2,7 +2,8 @@ import { ModuleHeader } from "@/components/ModuleHeader";
 import { createFileRoute } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { ShoppingPlanGenerator } from "@/components/ShoppingPlanGenerator";
-import { Plus, RotateCcw, Trash2 } from "lucide-react";
+import { Plus, RotateCcw, ShoppingBasket, Trash2 } from "lucide-react";
+import { EmptyState, ModuleGate } from "@/components/EmptyState";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -44,8 +45,9 @@ function Compras() {
   return (
     <main className="mx-auto max-w-4xl px-5 pb-20 sm:px-8">
       <ModuleHeader title="Compras" />
+      <ModuleGate id="compras">
       <section className="pb-5"><h2 className="font-display text-lg font-semibold">Lista consolidada da semana</h2><p className="mt-2 text-sm text-steel">Somamos os ingredientes repetidos pra sua lista ficar enxuta.</p></section>
-       <div className="mb-4"><ShoppingPlanGenerator /></div>
+       <div className="mb-4" id="shopping-plan-generator"><ShoppingPlanGenerator /></div>
        <div className="mb-4 flex justify-end" title={shoppingItems.length ? undefined : "Planeje refeições primeiro"}>
          <DropdownMenu><DropdownMenuTrigger asChild><Button variant="outline" disabled={shoppingItems.length === 0}>Exportar lista</Button></DropdownMenuTrigger><DropdownMenuContent align="end"><DropdownMenuItem onSelect={copyList}>Copiar como texto</DropdownMenuItem><DropdownMenuItem onSelect={() => { downloadShoppingPdf(shoppingItems, cost).catch(() => toast.error("Não foi possível baixar o PDF.")); }}>Baixar PDF</DropdownMenuItem></DropdownMenuContent></DropdownMenu>
        </div>
