@@ -51,19 +51,22 @@ export function AppHeader() {
         </div>
 
         <nav className="hidden min-w-0 flex-wrap items-center justify-center gap-1 py-2 text-sm xl:flex">
-          {links.map((l) => (
+          {[
+            { to: "/", label: "Hoje", exact: true },
+            { to: "/rotina", label: "Rotina", exact: false },
+            { to: "/progresso", label: "Progresso", exact: false },
+            { to: "/perfil", label: "Perfil", exact: false },
+          ].map((l) => (
             <Link
               key={l.to}
               to={l.to}
-              activeOptions={{ exact: l.to === "/" }}
+              activeOptions={{ exact: l.exact }}
               className="rounded-lg px-3 py-2 font-medium text-steel hover:text-ink"
               activeProps={{ className: "rounded-lg px-3 py-2 font-medium bg-ink text-background" }}
             >
               {l.label}
             </Link>
           ))}
-          <Link to="/modulos" className="rounded-lg px-3 py-2 font-medium text-steel hover:text-ink" activeProps={{ className: "rounded-lg px-3 py-2 font-medium bg-ink text-background" }}>Módulos</Link>
-          {user && <Link to="/amigos" className="rounded-lg px-3 py-2 font-medium text-steel hover:text-ink" activeProps={{ className: "rounded-lg px-3 py-2 font-medium bg-ink text-background" }}>Amigos</Link>}
         </nav>
 
         <div className="flex shrink-0 items-center gap-1 sm:gap-2">

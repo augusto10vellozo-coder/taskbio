@@ -1,34 +1,23 @@
-import { Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Check, Flame, Settings2, Users } from "lucide-react";
+import { Check } from "lucide-react";
 import { toast } from "sonner";
-import { useAuth } from "@/lib/auth-context";
 import { useTaskBio } from "@/lib/trilha-store";
 import { toDateKey } from "@/lib/calendar-utils";
-import { dayScore, greeting, isMilestone, streak } from "@/lib/engagement";
-import { MODULES, isModuleOn } from "@/lib/modules";
-import { Button } from "@/components/ui/button";
-import { agendaSummary } from "@/lib/agenda-overview";
-import { isActiveDay } from "@/lib/engagement";
-import { useLeague } from "@/lib/use-league";
+import { isMilestone, streak } from "@/lib/engagement";
 import { useAwards } from "@/lib/use-awards";
+import { AgendaDayOverview, AgendaGreeting } from "@/components/AgendaDayOverview";
+import { DayTimeline } from "@/components/DayTimeline";
 
+/** Home: greeting, compact status strip, day progress bar and today's timeline. */
 export function TodayPanel() {
-  const { user } = useAuth();
-  const { plan, habits, habitLog, modules, toggleBlock, toggleHabit, ready } = useTaskBio();
-  const league = useLeague();
+  const { plan, habitLog, habits, ready } = useTaskBio();
   const awards = useAwards();
   const frozen = useMemo(() => new Set(awards?.freezeDays ?? []), [awards]);
   const [now, setNow] = useState<Date | null>(null);
+  const [adding, setAdding] = useState(false);
   useEffect(() => setNow(new Date()), []);
   const today = now ? toDateKey(now) : "";
-  const blocks = useMemo(() => [...(plan[today] ?? [])].sort((a, b) => a.time.localeCompare(b.time)), [plan, today]);
-  const score = now ? dayScore(plan, habits, habitLog, today) : 0;
   const days = now ? streak(plan, habitLog, now, habits, frozen) : 0;
-  const summary = agendaSummary(blocks);
-  const hasStarted = [...Object.keys(plan), ...Object.keys(habitLog)].some((date) => isActiveDay(plan, habitLog, date, habits));
-  const habitsOn = isModuleOn(modules, "habitos");
-  const workoutToday = isModuleOn(modules, "treino") ? blocks.find((b) => b.kind === "treino") : undefined;
 
   useEffect(() => {
     if (!ready || !now || !isMilestone(days)) return;
@@ -39,31 +28,12 @@ export function TodayPanel() {
   }, [days, ready, now, today]);
 
   if (!now) return <div className="mt-8 h-40 animate-pulse rounded-lg bg-mist" />;
-  const name = typeof user?.user_metadata?.["display_name"] === "string" && user.user_metadata["display_name"]
-    ? String(user.user_metadata["display_name"]).split(" ")[0] : null;
 
   return (
-    <section className="pt-8">
-      <h2 className="font-display text-2xl font-semibold tracking-tight">{greeting(now.getHours())}{name ? `, ${name}` : ""}</h2>
-      <p className="mt-1 text-sm text-steel">O que importa hoje</p>
-      <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-[180px_180px_1fr]">
-        <div className="rounded-lg bg-card p-3 ring-1 ring-line sm:p-4"><p className="text-xs text-steel">Pontuação do dia</p>{score > 0 ? <><p className="font-display text-3xl font-semibold sm:text-4xl">{score}%</p><div className="mt-2 h-1.5 rounded-full bg-mist"><div className="h-full rounded-full bg-brand transition-all" style={{ width: `${score}%` }} /></div></> : <p className="mt-1 text-xs leading-snug text-steel">Conclua um item para começar hoje.</p>}</div>
-        <div className="rounded-lg bg-card p-3 ring-1 ring-line sm:p-4"><p className="text-xs text-steel">Sequência</p>{hasStarted ? <><p className="flex items-center gap-1 font-display text-3xl font-semibold sm:text-4xl"><Flame className={days > 0 ? "size-6 text-brand sm:size-7" : "size-6 text-steel sm:size-7"} />{days}</p><p className="text-xs text-steel">{days === 1 ? "dia seguido" : "dias seguidos"}{isMilestone(days) ? " · marco!" : ""}</p></> : <p className="mt-1 text-xs leading-snug text-steel">Marque algo hoje para começar</p>}{league.me && <p className="mt-1 text-[11px] font-medium leading-snug text-brand-deep">{league.me.today_xp} XP hoje · {league.me.week_pct == null ? "sem plano na semana" : `${Math.round(league.me.week_pct * 100)}% na semana`}</p>}{league.rows && league.rows.length > 1 && league.position > 0 && <Link to="/amigos" className="mt-0.5 block text-[11px] text-steel underline-offset-2 hover:underline">Você está em {league.position}º entre seus amigos · o campeão da semana leva troféu 🏆</Link>}</div>
-        <div className="col-span-2 rounded-lg bg-card p-3 ring-1 ring-line sm:col-span-1 sm:p-4">
-          <p className="text-xs text-steel">Hoje</p>
-          <Link to="/hoje" className="mt-1 block w-full whitespace-normal px-0 py-2 text-left" aria-label="Abrir a linha do dia de hoje em uma tela própria"><span aria-live="polite">{summary.total} {summary.total === 1 ? "item hoje" : "itens hoje"} · {summary.completed} {summary.completed === 1 ? "concluído" : "concluídos"}</span></Link>
-        </div>
-      </div>
-      {workoutToday && <div className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-lg bg-card p-4 ring-1 ring-brand/40">
-        <div className="min-w-0"><p className="text-xs text-steel">Treino de hoje · {workoutToday.time}</p><p className="line-clamp-2 break-words font-display text-lg font-semibold leading-snug">{workoutToday.title}</p></div>
-        <div className="flex flex-wrap gap-2"><Button asChild variant="outline" size="sm"><Link to="/treino">Registrar exercícios</Link></Button><Button size="sm" variant={workoutToday.done ? "outline" : "default"} aria-pressed={workoutToday.done} onClick={() => { toggleBlock(today, workoutToday.id); if (!workoutToday.done) toast.success("Treino concluído!"); }}><Tick on={workoutToday.done} />{workoutToday.done ? "Concluído" : "Concluir treino"}</Button></div>
-      </div>}
-      {habitsOn && habits.length > 0 && <div className="mt-3"><p className="mb-2 text-xs text-steel">Hábitos de hoje</p><div className="flex flex-wrap gap-2">{habits.map((habit) => { const done = (habitLog[today] ?? []).includes(habit.id); return <Button key={habit.id} variant="outline" size="sm" aria-pressed={done} onClick={() => toggleHabit(today, habit.id)}><Tick on={done} />{habit.name}</Button>; })}</div></div>}
-      <div className="mt-3 grid grid-cols-4 gap-2 sm:grid-cols-8">
-        {MODULES.filter((m) => isModuleOn(modules, m.id) && m.id !== "agenda").map((m) => <Link key={m.id} to={m.to} className="flex flex-col items-center gap-1 rounded-lg bg-card p-3 text-center text-[11px] font-medium ring-1 ring-line hover:ring-brand"><m.icon className="size-5 text-brand" />{m.label}</Link>)}
-        <Link to="/modulos" className="flex flex-col items-center gap-1 rounded-lg bg-card p-3 text-center text-[11px] font-medium ring-1 ring-line hover:ring-brand"><Settings2 className="size-5 text-brand" />Módulos</Link>
-        {user && <Link to="/amigos" className="flex flex-col items-center gap-1 rounded-lg bg-card p-3 text-center text-[11px] font-medium ring-1 ring-line hover:ring-brand"><Users className="size-5 text-brand" />Amigos</Link>}
-      </div>
+    <section>
+      <AgendaGreeting />
+      <AgendaDayOverview dateKey={today} />
+      <DayTimeline dateKey={today} adding={adding} onAddingChange={setAdding} />
     </section>
   );
 }
