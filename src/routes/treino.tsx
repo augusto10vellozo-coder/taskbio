@@ -7,7 +7,7 @@ import { TrainingExplore, useScheduleWorkout } from "@/components/TrainingExplor
 import { useEffect, useMemo, useState } from "react";
 import { addDays, format, getISOWeek } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarPlus, ChevronLeft, ChevronRight, FileUp, Plus, Trash2, TrendingUp, X } from "lucide-react";
+import { CalendarPlus, ChevronLeft, ChevronRight, Dumbbell, FileUp, Plus, Trash2, TrendingUp, X } from "lucide-react";
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
@@ -25,6 +25,7 @@ import { WorkoutSeries, SessionProgress } from "@/components/WorkoutSeries";
 import { Progress } from "@/components/ui/progress";
 import { exerciseSeries, weeklyTrainingProgress } from "@/lib/training-session";
 import { WorkoutPhotoImport } from "@/components/WorkoutPhotoImport";
+import { EmptyState, ModuleGate } from "@/components/EmptyState";
 
 export const Route = createFileRoute("/treino")({
   head: () => ({ meta: [
@@ -52,8 +53,10 @@ function Treino() {
           {([["semana", "Minha semana"], ["explorar", "Explorar e criar"]] as const).map(([id, label]) => <button key={id} role="tab" aria-selected={tab === id} onClick={() => navigate({ search: id === "explorar" ? { aba: "explorar" } : {}, replace: true })} className={`rounded-md px-3 py-1.5 font-medium ${tab === id ? "bg-ink text-background" : "text-steel"}`}>{label}</button>)}
         </div>
       </section>
-      {tab === "semana" ? <WeekTab onExplore={() => navigate({ search: { aba: "explorar" } })} /> : <TrainingExplore />}
-      <ProgressRecorder id="registros-treino" title="Carga e corrida" kinds={["strength", "run"]} />
+      <ModuleGate id="treino">
+        {tab === "semana" ? <WeekTab onExplore={() => navigate({ search: { aba: "explorar" } })} /> : <TrainingExplore />}
+        <ProgressRecorder id="registros-treino" title="Carga e corrida" kinds={["strength", "run"]} />
+      </ModuleGate>
     </main>
   );
 }
