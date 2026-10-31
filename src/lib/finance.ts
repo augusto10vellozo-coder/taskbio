@@ -1,9 +1,10 @@
 import { addDays, differenceInCalendarDays, format, getDaysInMonth, parseISO } from "date-fns";
 
-export type FinanceEntry = { id: string; date: string; amount: number; description: string; category: string; type: "gasto" | "receita"; billId?: string | undefined; source?: "compras" };
+export type FinanceEntry = { id: string; date: string; amount: number; description: string; category: string; type: "gasto" | "receita"; billId?: string | undefined; source?: "compras" | "importado" };
 export type Bill = { id: string; title: string; amount: number; dueDate: string; category?: string; paid?: boolean; paidDate?: string | undefined };
 export type ShoppingRecord = { signature: string; amount: number; date: string };
-export type FinanceState = { entries: FinanceEntry[]; bills: Bill[]; monthlyBudget: number; budgets?: Record<string, number>; customCategories: string[]; shoppingRecord?: ShoppingRecord };
+export type SavedImportMapping = { id: string; name: string; hasHeader: boolean; date: number; amount: number; description: number; type?: number | undefined; category?: number | undefined };
+export type FinanceState = { entries: FinanceEntry[]; bills: Bill[]; monthlyBudget: number; budgets?: Record<string, number>; customCategories: string[]; shoppingRecord?: ShoppingRecord; importMappings?: SavedImportMapping[] };
 
 export const FIXED_CATEGORIES = ["Alimentação", "Mercado", "Compras", "Contas fixas", "Transporte", "Moradia", "Saúde", "Lazer", "Educação", "Outros"];
 export const emptyFinance: FinanceState = { entries: [], bills: [], monthlyBudget: 0, budgets: {}, customCategories: [] };
