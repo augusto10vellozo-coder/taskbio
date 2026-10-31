@@ -150,7 +150,7 @@ function Financas() {
 
       <section className="mt-4 rounded-lg bg-card p-4 ring-1 ring-line"><h2 className="font-display text-lg font-semibold">Gastos por categoria</h2>
         {sum.categories.length === 0 ? null
-          : <ul
+          : <ul className="mt-3 space-y-2">{sum.categories.map((c) => <li key={c.category} className="text-sm"><div className="flex justify-between gap-2"><span className="min-w-0 truncate">{c.category}</span><span className="shrink-0 font-medium">{brl(c.total)} <span className="text-xs text-steel">· {c.percent}%</span></span></div><div className="mt-1 h-2 rounded-full bg-mist"><div className="h-2 rounded-full bg-brand" style={{ width: `${(c.total / max) * 100}%` }} /></div></li>)}</ul>}
       </section>
 
       <section className="mt-4 rounded-lg bg-card p-4 ring-1 ring-line"><h2 className="font-display text-lg font-semibold">Contas a pagar</h2><p className="text-xs text-steel">A gente te lembra na Agenda um dia antes do vencimento.</p>
