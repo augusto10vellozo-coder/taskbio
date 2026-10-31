@@ -1,11 +1,12 @@
 import { ModuleHeader } from "@/components/ModuleHeader";
 import { ConsistencyCard } from "@/components/ConsistencyCard";
 import { ReadingGoalBar } from "@/components/ReadingGoalBar";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState, type ReactNode } from "react";
 import { format, isAfter, parseISO, subDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Activity, Dumbbell, Scale, UtensilsCrossed, Weight } from "lucide-react";
+import { Activity, Dumbbell, Scale, TrendingUp, UtensilsCrossed, Weight } from "lucide-react";
+import { EmptyState, ModuleGate } from "@/components/EmptyState";
 import { Line, LineChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import { Button } from "@/components/ui/button";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
@@ -51,6 +52,7 @@ function MetricCard({ icon, value, label, origin, emptyText }: { icon: ReactNode
 }
 
 function Progresso() {
+  const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { plan, workoutHistory, getMeal, modules } = useTaskBio();
   const { entries, loading } = useProgressEntries();
@@ -89,7 +91,10 @@ function Progresso() {
   return (
     <main className="mx-auto max-w-6xl px-5 pb-20 sm:px-8">
       <ModuleHeader title="Progresso" />
-      <section className="flex flex-wrap items-end justify-between gap-3 pb-5"><div><h2 className="font-display text-lg font-semibold">Evolução baseada nos seus registros</h2><p className="mt-2 text-sm text-steel">Registros pessoais não substituem orientação de profissional.</p></div><div className="flex gap-1" role="group" aria-label="Período">{([7, 30, 90] as const).map((days) => <Button key={days} size="sm" variant={period === days ? "default" : "outline"} onClick={() => setPeriod(days)}>{days} dias</Button>)}</div></section>
+      <ModuleGate id="progresso">
+      <section className="flex flex-wrap items-end justify-between gap-3 pb-5"><div><h2 className="font-display text-lg font-semibold">Evolução baseada nos seus registros</h2></div><div className="flex gap-1" role="group" aria-label="Período">{([7, 30, 90] as const).map((days) => <Button key={days} size="sm" variant={period === days ? "default" : "outline"} onClick={() => setPeriod(days)}>{days} dias</Button>)}</div></section>
+
+      {!loading && entries.length === 0 && workoutHistory.length === 0 && <EmptyState icon={TrendingUp} title="Ainda sem dados para comparar" context="Registre treino, peso ou medidas e o progresso aparece aqui." actionLabel="Registrar medida" onAction={() => void navigate({ to: "/saude", hash: "registros-saude" })} secondaryLabel="Ver metas da semana" onSecondary={() => void navigate({ to: "/agenda" })} />}
 
       <ConsistencyCard period={period} />
       <ReadingGoalBar />
@@ -121,6 +126,7 @@ function Progresso() {
         {loading ? <div className="mt-6 h-64 animate-pulse rounded-lg bg-mist" /> : !yAxis || !xAxis ? <p className="mt-6 text-sm text-steel">Nenhum registro nesse período · <OriginLink origin={kindOrigin[kind]} empty /></p> : <ChartContainer config={chartConfig} className="mt-5 h-72 w-full aspect-auto"><LineChart data={chartData} margin={{ left: 4, right: 16, top: 12 }}><CartesianGrid vertical={false} /><XAxis dataKey="timestamp" type="number" scale="time" domain={xAxis.domain} ticks={xAxis.ticks} minTickGap={24} tickFormatter={(timestamp) => new Date(timestamp).toLocaleDateString("pt-BR", { timeZone: "UTC", day: "2-digit", month: "2-digit" })} tickLine={false} axisLine={false} /><YAxis domain={yAxis.domain} ticks={yAxis.ticks} allowDataOverflow tickFormatter={(number) => `${Number(number).toLocaleString("pt-BR", { maximumFractionDigits: 4 })} ${axisUnit}`} tickLine={false} axisLine={false} width={76} /><ChartTooltip content={<ChartTooltipContent labelFormatter={(_, payload) => { const timestamp = payload[0]?.payload?.timestamp; return typeof timestamp === "number" ? new Date(timestamp).toLocaleDateString("pt-BR", { timeZone: "UTC" }) : ""; }} formatter={(value, _, item) => <span>{Number(value).toLocaleString("pt-BR")} {item.payload?.unit ?? axisUnit}</span>} />} /><Line dataKey="value" type="linear" stroke="var(--color-value)" strokeWidth={3} dot={{ r: 4 }} isAnimationActive={false} /></LineChart></ChartContainer>}
         {filtered.length > 0 && <div className="mt-5 border-t border-line pt-4"><h3 className="text-sm font-semibold">Registros recentes</h3><ul className="mt-2 divide-y divide-line">{[...filtered].reverse().slice(0, 8).map((entry) => <li key={entry.id} className="flex items-center justify-between gap-3 py-3"><div><p className="text-sm font-medium">{entry.label}</p><p className="text-xs text-steel">{format(parseISO(entry.entry_date), "dd 'de' MMMM", { locale: ptBR })}{entry.notes ? ` · ${entry.notes}` : ""}</p></div><span className="text-sm font-semibold">{Number(entry.value).toLocaleString("pt-BR")} {entry.unit}</span></li>)}</ul><OriginLink origin={kindOrigin[kind]} /></div>}
       </section>
+      </ModuleGate>
     </main>
   );
 }

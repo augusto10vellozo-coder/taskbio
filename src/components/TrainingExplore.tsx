@@ -4,7 +4,7 @@ import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
 import { toDateKey } from "@/lib/calendar-utils";
 import type { Block } from "@/lib/trilha-data";
-import { CalendarPlus, ChevronDown, ChevronUp, CircleAlert, Dumbbell, History, Plus, Sparkles, Trash2, X } from "lucide-react";
+import { CalendarPlus, ChevronDown, ChevronUp, Dumbbell, History, Plus, Sparkles, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -74,7 +74,7 @@ export function TrainingExplore() {
   return (
     <>
       <div>
-        <p className="mb-4 max-w-[52ch] text-pretty text-sm text-steel">Escolha a modalidade e monte seu treino. Sugestões gerais, não substituem orientação de profissional.</p>
+        <p className="mb-4 max-w-[52ch] text-pretty text-sm text-steel">Escolha a modalidade e monte seu treino.</p>
 
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
           <section className="lg:col-span-5 space-y-5">
@@ -197,10 +197,6 @@ export function TrainingExplore() {
                 </div>
               )}
 
-              <div className="mt-4 flex items-start gap-2 rounded-lg bg-mist p-3 text-xs leading-5 text-steel">
-                <CircleAlert className="mt-0.5 size-4 shrink-0 text-brand-deep" />
-                <p>Estes são apenas exemplos gerais, não aulas nem prescrição individual. Para segurança, técnica e um plano adequado ao seu corpo, procure um profissional de educação física.</p>
-              </div>
             </div>
 
             <div className="glass-strong rounded-2xl p-5 ring-1 ring-line">

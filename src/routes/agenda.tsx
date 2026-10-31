@@ -184,9 +184,6 @@ function Agenda() {
                 </li>
               ))}
             </ul>
-            <p className="mt-3 text-[11px] text-steel">
-              Valores estimados para planejamento — não substituem orientação de um profissional de saúde.
-            </p>
           </div>}
         </aside>
       </div>

@@ -7,7 +7,7 @@ import { TrainingExplore, useScheduleWorkout } from "@/components/TrainingExplor
 import { useEffect, useMemo, useState } from "react";
 import { addDays, format, getISOWeek } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarPlus, ChevronLeft, ChevronRight, FileUp, Plus, Trash2, TrendingUp, X } from "lucide-react";
+import { CalendarPlus, ChevronLeft, ChevronRight, Dumbbell, FileUp, Plus, Trash2, TrendingUp, X } from "lucide-react";
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
@@ -25,6 +25,7 @@ import { WorkoutSeries, SessionProgress } from "@/components/WorkoutSeries";
 import { Progress } from "@/components/ui/progress";
 import { exerciseSeries, weeklyTrainingProgress } from "@/lib/training-session";
 import { WorkoutPhotoImport } from "@/components/WorkoutPhotoImport";
+import { EmptyState, ModuleGate } from "@/components/EmptyState";
 
 export const Route = createFileRoute("/treino")({
   head: () => ({ meta: [
@@ -52,8 +53,10 @@ function Treino() {
           {([["semana", "Minha semana"], ["explorar", "Explorar e criar"]] as const).map(([id, label]) => <button key={id} role="tab" aria-selected={tab === id} onClick={() => navigate({ search: id === "explorar" ? { aba: "explorar" } : {}, replace: true })} className={`rounded-md px-3 py-1.5 font-medium ${tab === id ? "bg-ink text-background" : "text-steel"}`}>{label}</button>)}
         </div>
       </section>
-      {tab === "semana" ? <WeekTab onExplore={() => navigate({ search: { aba: "explorar" } })} /> : <TrainingExplore />}
-      <ProgressRecorder id="registros-treino" title="Carga e corrida" kinds={["strength", "run"]} />
+      <ModuleGate id="treino">
+        {tab === "semana" ? <WeekTab onExplore={() => navigate({ search: { aba: "explorar" } })} /> : <TrainingExplore />}
+        <ProgressRecorder id="registros-treino" title="Carga e corrida" kinds={["strength", "run"]} />
+      </ModuleGate>
     </main>
   );
 }
@@ -75,6 +78,7 @@ function WeekTab({ onExplore }: { onExplore: () => void }) {
   const blockOf = (k: string) => (plan[k] ?? []).find((b) => b.kind === "treino");
   const selBlock = blockOf(selected);
   const selWorkout = selBlock?.workoutId ? workouts.find((w) => w.id === selBlock.workoutId) : undefined;
+  const firstUse = models.length === 0 && !week.some((d) => blockOf(toDateKey(d)));
 
   const assign = (dateKey: string, workout: Workout) => schedule(dateKey, workout);
   const createAndAssign = (dateKey: string, name: string) => {
@@ -98,20 +102,23 @@ function WeekTab({ onExplore }: { onExplore: () => void }) {
           </div>); })}
       </div>
 
+      {firstUse ? (
+        <EmptyState icon={Dumbbell} title="Sua primeira ficha começa aqui" context="Monte o treino da semana e acompanhe carga e volume a cada sessão." actionLabel="Montar ficha" onAction={onExplore} secondaryLabel="Ver exercícios disponíveis" onSecondary={onExplore} />
+      ) : (
       <section className="mt-5 rounded-lg bg-card p-5 ring-1 ring-line">
         <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="font-display text-xl font-semibold">{selBlock ? format(new Date(`${selected}T12:00:00`), "EEEE, d 'de' MMMM", { locale: ptBR }) : "Nada agendado neste dia"}</h2>{selBlock && <Button variant="ghost" size="sm" onClick={() => removeBlock(selected, selBlock.id)}><X /> Tirar do dia</Button>}</div>
         {!selBlock ? <>
           <h3 className="mt-4 text-sm font-semibold">Exemplos disponíveis para agendar</h3>
           <p className="mt-2 border-l-2 border-brand bg-mist px-3 py-2 text-sm text-steel">Toque num treino pra colocá-lo na sua semana.</p>
           <div className="mt-3 grid gap-3 sm:grid-cols-2">{examples.map((w) => <article key={w.id} className="rounded-lg border border-line p-3"><p className="text-[11px] uppercase text-steel">Exemplo</p><h4 className="mt-1 text-sm font-semibold">{w.name}</h4><p className="mt-1 text-xs text-steel">{w.focus} · {w.exercises.length} exercícios</p><Button variant="outline" size="sm" className="mt-3" onClick={() => { assign(selected, w); toast.success("Treino adicionado ao dia"); }}><CalendarPlus /> Agendar</Button></article>)}</div>
-          <p className="mt-3 text-xs leading-5 text-steel">Registros pessoais. Não substituem orientação de profissional.</p>
           <h3 className="mt-5 text-sm font-semibold">Meus treinos</h3>
           <AssignForm workouts={models} onPick={(w) => { assign(selected, w); toast.success("Treino adicionado ao dia"); }} onCreate={(n) => createAndAssign(selected, n)} />
         </>
           : !selWorkout ? <div className="mt-3"><p className="text-sm text-steel">Escolha um treino abaixo pra registrar seus exercícios.</p><AssignForm workouts={models} onPick={(w) => assign(selected, w)} onCreate={(n) => createAndAssign(selected, n)} /></div>
           : <WorkoutDetail workout={selWorkout} dateKey={selected} />}
       </section>
-      <p className="mt-4 text-xs leading-5 text-steel">Registros pessoais. Não substituem orientação de profissional. Quer ideias? <button type="button" onClick={onExplore} className="underline">Explorar e criar</button>.</p>
+      )}
+      {!firstUse && <p className="mt-4 text-xs leading-5 text-steel">Quer ideias? <button type="button" onClick={onExplore} className="underline">Explorar e criar</button>.</p>}
       <ImportDialog open={importing} onOpenChange={setImporting} week={week} onAssign={assign} />
     </div>
   );

@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight, Flame, Plus, LockKeyhole, Snowflake } from "lucide-react";
+import { ChevronLeft, ChevronRight, CheckSquare, Flame, Plus, LockKeyhole, Snowflake } from "lucide-react";
+import { EmptyState, ModuleGate } from "@/components/EmptyState";
 import { addDays, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
@@ -55,6 +56,7 @@ function Habitos() {
   return (
     <main className="mx-auto max-w-4xl px-5 pb-20 sm:px-8">
       <ModuleHeader title="Hábitos" />
+      <ModuleGate id="habitos">
       <div className="mb-5">
         {freezeQuery.signedIn ? <>
           <Button variant="outline" className="min-h-11" aria-expanded={explainFreeze} onClick={() => setExplainFreeze(v => !v)}><Snowflake className="size-4 text-brand" />{freezeQuery.isError ? "Congelamentos indisponíveis" : freezeQuery.data ? `${protection.balance} congelamentos` : "Carregando congelamentos…"}</Button>
@@ -63,11 +65,12 @@ function Habitos() {
         </> : <p className="text-sm text-steel">Entre na sua conta para proteger suas sequências.</p>}
       </div>
       <section className="pb-5"><h2 className="font-display text-lg font-semibold">Tabela da semana</h2><p className="mt-2 text-sm text-steel">Toque pra marcar o dia · 🔥 = conta pro seu streak</p></section>
-      <Button variant="outline" className="mb-4 min-h-11" onClick={() => setEditing("new")}><Plus /> Novo hábito</Button>
+      {habits.length > 0 && <Button variant="outline" className="mb-4 min-h-11" onClick={() => setEditing("new")}><Plus /> Novo hábito</Button>}
       {editing && <HabitForm habit={editing === "new" ? undefined : editing} onClose={() => setEditing(null)} onSave={patch => { if (editing === "new") addHabit(patch.name, patch); else updateHabit(editing.id, patch); }} />}
+      {habits.length === 0 ? <EmptyState icon={CheckSquare} title="Comece com um hábito" context="Um hábito por vez, marcado na Agenda, constrói sua sequência." actionLabel="Criar primeiro hábito" onAction={() => setEditing("new")} /> : (
       <section aria-label="Tabela semanal de hábitos" className="min-w-0 rounded-lg bg-card px-2 py-3 ring-1 ring-line sm:p-4">
         <div className="mb-3 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-1"><Button variant="ghost" size="icon" aria-label="Semana anterior" onClick={() => setRef(addDays(ref, -7))}><ChevronLeft /></Button><span className="min-w-0 text-center text-xs font-medium sm:text-sm">{week[0] && format(week[0], "d MMM", { locale: ptBR })} – {week[6] && format(week[6], "d MMM", { locale: ptBR })}</span><Button variant="ghost" size="icon" aria-label="Próxima semana" onClick={() => setRef(addDays(ref, 7))}><ChevronRight /></Button></div>
-        {habits.length === 0 ? <p className="py-8 text-center text-sm text-steel">Crie seu primeiro hábito e comece hoje.</p> : (
+        {(
           <table className="w-full table-fixed text-xs sm:text-sm">
             <colgroup><col className="w-1/4" />{week.map((d) => <col key={toDateKey(d)} />)}</colgroup>
             <thead><tr><th scope="col" className="pb-2 text-left text-[10px] font-medium text-steel sm:text-xs">Hábito</th>{week.map((d, index) => <th scope="col" key={toDateKey(d)} className="px-0 pb-2 text-center text-[10px] font-medium text-steel sm:text-xs">{["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"][index]}<br />{format(d, "d")}</th>)}</tr></thead>
@@ -86,11 +89,13 @@ function Habitos() {
           </table>
         )}
       </section>
+      )}
       <section className="mt-5 rounded-lg bg-card p-4 ring-1 ring-line">
         <h2 className="font-display text-lg font-semibold">Mapa de consistência</h2><p className="text-xs text-steel">{consistency.percent}% de constância · {consistency.recent ? "desde a criação" : "últimos 35 dias"}</p>
         <div className="mt-3 grid grid-cols-7 gap-1.5 sm:max-w-sm">{month.map((k) => { const n = (habitLog[k] ?? []).length; const o = n === 0 ? 0 : 0.25 + 0.75 * Math.min(1, n / max); return <div key={k} title={`${k.split("-").reverse().join("/")}: ${n}`} className="aspect-square rounded-sm bg-mist"><div className="size-full rounded-sm bg-brand" style={{ opacity: o }} /></div>; })}</div>
         <div className="mt-2 flex items-center gap-1.5 text-[10px] text-steel"><span>menos</span><span className="size-3 rounded-sm bg-brand/25" /><span className="size-3 rounded-sm bg-brand/60" /><span className="size-3 rounded-sm bg-brand" /><span>mais</span></div>
       </section>
+      </ModuleGate>
     </main>
   );
 }
