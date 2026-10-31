@@ -41,7 +41,7 @@ function FinancasImportar() {
   const [fileName, setFileName] = useState<string | null>(null);
   const [rows, setRows] = useState<RawRow[]>([]);
   const [hasHeader, setHasHeader] = useState(true);
-  const [mapping, setMapping] = useState<Partial<Record<ImportField, number>>>({});
+  const [mapping, setMapping] = useState<Partial<Record<ImportField, number | undefined>>>({});
   const [review, setReview] = useState<ReviewRow[]>([]);
   const [savedId, setSavedId] = useState<string | null>(null);
   const [mappingName, setMappingName] = useState("");
