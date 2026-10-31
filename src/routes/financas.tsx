@@ -150,7 +150,7 @@ function Financas() {
         </section>
       </div>
 
-      {monthEntries.length === 0 && <EmptyState icon={Wallet} title="Nada lançado ainda" context="Registre gastos e o TaskBio soma com o custo estimado das refeições." actionLabel="Lançar primeiro gasto" onAction={() => { setType("gasto"); window.scrollTo({ top: 0, behavior: "smooth" }); amountRef.current?.focus(); }} secondaryLabel="Definir orçamento do mês" onSecondary={() => setBudgetInput("")} />}
+      {monthEntries.length === 0 && <EmptyState icon={Wallet} title="Nada lançado ainda" context="Registre gastos e o TaskBio soma com o custo estimado das refeições." actionLabel="Lançar primeiro gasto" onAction={() => { setType("gasto"); window.scrollTo({ top: 0, behavior: "smooth" }); amountRef.current?.focus(); }} secondaryLabel="Importar extrato" onSecondary={() => navigate({ to: "/financas-importar" })} />}
 
       <section className="mt-4 rounded-lg bg-card p-4 ring-1 ring-line"><h2 className="font-display text-lg font-semibold">Gastos por categoria</h2>
         {sum.categories.length === 0 ? null
