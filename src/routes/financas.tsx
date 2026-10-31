@@ -1,8 +1,8 @@
 import { ModuleHeader } from "@/components/ModuleHeader";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useEntryState } from "@/lib/navigation-context";
-import { Check, ChevronLeft, ChevronRight, Pencil, Plus, Trash2, Wallet, X } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, FileUp, Pencil, Plus, Trash2, Wallet, X } from "lucide-react";
 import { EmptyState, ModuleGate } from "@/components/EmptyState";
 import { addMonths, format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -36,6 +36,7 @@ const emptyBill = { title: "", amount: "", dueDate: "", category: "Contas fixas"
 function Financas() {
   const { finance: raw, setFinance } = useTaskBio();
   const f = { ...emptyFinance, ...raw };
+  const navigate = useNavigate();
   const [today, setToday] = useState<Date | null>(null);
   const [month, setMonthState] = useEntryState<string | null>("finance:month", null);
   const [amount, setAmount] = useState("");
@@ -101,6 +102,9 @@ function Financas() {
     <main className="mx-auto max-w-4xl px-5 pb-20 sm:px-8">
       <ModuleHeader title="Finanças" />
       <ModuleGate id="financas">
+      <div className="mb-3 flex justify-end">
+        <Button variant="outline" size="sm" asChild><Link to="/financas-importar"><FileUp /> Importar</Link></Button>
+      </div>
       <div className="mb-4 flex items-center justify-between rounded-lg bg-card p-2 ring-1 ring-line">
         <Button variant="ghost" size="icon" aria-label="Mês anterior" onClick={() => changeMonth(-1)}><ChevronLeft /></Button>
         <h2 className="font-display text-lg font-semibold">{monthLabel(month)}</h2>
@@ -147,7 +151,7 @@ function Financas() {
         </section>
       </div>
 
-      {monthEntries.length === 0 && <EmptyState icon={Wallet} title="Nada lançado ainda" context="Registre gastos e o TaskBio soma com o custo estimado das refeições." actionLabel="Lançar primeiro gasto" onAction={() => { setType("gasto"); window.scrollTo({ top: 0, behavior: "smooth" }); amountRef.current?.focus(); }} secondaryLabel="Definir orçamento do mês" onSecondary={() => setBudgetInput("")} />}
+      {monthEntries.length === 0 && <EmptyState icon={Wallet} title="Nada lançado ainda" context="Registre gastos e o TaskBio soma com o custo estimado das refeições." actionLabel="Lançar primeiro gasto" onAction={() => { setType("gasto"); window.scrollTo({ top: 0, behavior: "smooth" }); amountRef.current?.focus(); }} secondaryLabel="Importar extrato" onSecondary={() => navigate({ to: "/financas-importar" })} />}
 
       <section className="mt-4 rounded-lg bg-card p-4 ring-1 ring-line"><h2 className="font-display text-lg font-semibold">Gastos por categoria</h2>
         {sum.categories.length === 0 ? null
@@ -174,7 +178,7 @@ function Financas() {
       </section>
 
       <section className="mt-4 rounded-lg bg-card p-4 ring-1 ring-line"><h2 className="font-display text-lg font-semibold">Últimos registros</h2>
-        <ul className="mt-2 divide-y divide-line">{monthEntries.slice(0, 30).map((e) => <li key={e.id} className="flex items-center gap-3 py-2 text-sm"><span className="min-w-0 flex-1 break-words">{e.description} <span className="text-xs text-steel">· {e.category} · {e.date.split("-").reverse().join("/")}{e.billId ? " · conta" : ""}</span></span><span className={e.type === "receita" ? "font-medium text-brand-deep" : "font-medium"}>{e.type === "receita" ? "+" : "−"}{brl(e.amount)}</span><Button variant="ghost" size="icon" className="size-7" aria-label={`Remover ${e.description}`} onClick={() => { const pb = e.billId ? f.bills.find((x) => x.id === e.billId) : undefined; if (pb?.paid) emitXp({ kind: "bill", ref: `${pb.id}:${pb.dueDate}`, date: todayKey, on: false }); setFinance((s) => e.billId ? unpayBill(s, e.billId) : { ...s, entries: s.entries.filter((x) => x.id !== e.id) }); }}><Trash2 /></Button></li>)}</ul>
+        <ul className="mt-2 divide-y divide-line">{monthEntries.slice(0, 30).map((e) => <li key={e.id} className="flex items-center gap-3 py-2 text-sm"><span className="min-w-0 flex-1 break-words">{e.description} <span className="text-xs text-steel">· {e.category} · {e.date.split("-").reverse().join("/")}{e.billId ? " · conta" : ""}{e.source === "importado" ? " · importado" : ""}</span></span><span className={e.type === "receita" ? "font-medium text-brand-deep" : "font-medium"}>{e.type === "receita" ? "+" : "−"}{brl(e.amount)}</span><Button variant="ghost" size="icon" className="size-7" aria-label={`Remover ${e.description}`} onClick={() => { const pb = e.billId ? f.bills.find((x) => x.id === e.billId) : undefined; if (pb?.paid) emitXp({ kind: "bill", ref: `${pb.id}:${pb.dueDate}`, date: todayKey, on: false }); setFinance((s) => e.billId ? unpayBill(s, e.billId) : { ...s, entries: s.entries.filter((x) => x.id !== e.id) }); }}><Trash2 /></Button></li>)}</ul>
       </section>
       </ModuleGate>
     </main>
