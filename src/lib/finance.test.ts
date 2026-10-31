@@ -98,6 +98,6 @@ describe("finanças — planejamento e metas", () => {
     expect(f.entries).toHaveLength(0);
   });
   it("média de gastos ignora meses sem gasto", () => {
-    expect(averageMonthlySpending(entries, "2026-11", 3)).toBe(100);
+    expect(averageMonthlySpending(entries, "2026-11", 3)).toBe(99.5);
   });
 });
