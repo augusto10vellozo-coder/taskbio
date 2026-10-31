@@ -79,7 +79,7 @@ function Saude() {
     </div>
     <section className="mt-5 border-t border-line pt-4">
       <h2 className="flex items-center gap-2 font-display text-lg font-semibold"><Pill className="size-4 text-brand" />Medicamentos de hoje</h2>
-      <p className="mt-1 text-xs text-steel">A gente te lembra no horário. Siga sempre a prescrição do seu médico.</p>
+      <p className="mt-1 text-xs text-steel">A gente te lembra no horário.</p>
       <form className="mt-4 space-y-3" onSubmit={e => { e.preventDefault(); if (!med.name.trim() || !med.time || !med.start || (med.period && (!med.end || med.end < med.start))) { toast.error("Preencha o medicamento e as datas do período."); return; } const item: Medication = { id: `m-${crypto.randomUUID()}`, name: med.name.trim(), time: med.time, intervalHours: med.interval as 4 | 6 | 8 | 12 | 24, startDate: med.start, ...(med.period ? { endDate: med.end } : {}) }; setHealth(h => ({ ...h, meds: [...(h.meds ?? []), item] })); setMed(m => ({ ...m, name: "" })); toast.success("Medicamento adicionado"); }}>
         <div className="grid gap-3 sm:grid-cols-2"><label className="space-y-1 text-xs text-steel block">Medicamento<input id="med-name" aria-label="Medicamento" list="medicamentos-comuns" className={field} value={med.name} onChange={e => setMed({ ...med, name: e.target.value })} placeholder="Nome do medicamento" required /></label><label className="block space-y-1 text-xs text-steel">Primeira dose<input aria-label="Primeira dose" type="time" className={field} value={med.time} onChange={e => setMed({ ...med, time: e.target.value })} required /></label></div>
         <datalist id="medicamentos-comuns">{commonMedications.map(n => <option key={n} value={n} />)}</datalist>
