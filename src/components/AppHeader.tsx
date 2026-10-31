@@ -15,7 +15,6 @@ export function AppHeader() {
   const { user, loading } = useAuth();
   const { theme, setTheme } = useThemePreference();
   const { modules, setModule } = useTaskBio();
-  const links = MODULES.filter((m) => isModuleOn(modules, m.id));
   const [isAdmin, setIsAdmin] = useState(false);
   const [reminders, setReminders] = useState<ReminderPreferences>(defaultReminderPreferences);
   useEffect(() => setReminders(readReminderPreferences()), []);
