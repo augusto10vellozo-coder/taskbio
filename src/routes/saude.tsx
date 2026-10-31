@@ -1,6 +1,6 @@
 import { ModuleHeader } from "@/components/ModuleHeader";
 import { ProgressRecorder } from "@/components/ProgressRecorder";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
 import { ChevronLeft, ChevronRight, Droplets, Minus, Moon, Pill, Plus, Scale, Trash2 } from "lucide-react";
 import { EmptyState, ModuleGate } from "@/components/EmptyState";
@@ -26,6 +26,7 @@ export const Route = createFileRoute("/saude")({
 });
 const field = "h-10 min-w-0 w-full rounded-md bg-background px-3 text-sm ring-1 ring-line";
 function Saude() {
+  const navigate = useNavigate();
   const { health: raw, setHealth } = useTaskBio();
   const { user } = useAuth();
   const { entries, saveWeight, loading: weightLoading, error: weightError } = useProgressEntries();
@@ -89,10 +90,11 @@ function Saude() {
         <div className="grid gap-3 sm:grid-cols-2"><label className="block space-y-1 text-xs text-steel">Data de início<input aria-label="Data de início" type="date" className={field} value={med.start} onChange={e => setMed({ ...med, start: e.target.value })} required /></label>{med.period && <label className="block space-y-1 text-xs text-steel">Data de fim<input aria-label="Data de fim" type="date" min={med.start} className={field} value={med.end} onChange={e => setMed({ ...med, end: e.target.value })} required /></label>}</div>
         <Button><Plus /> Adicionar</Button>
       </form>
-      {(health.meds ?? []).length === 0 ? <EmptyState icon={Pill} title="Nenhum remédio cadastrado" context="Cadastre seus remédios para receber o lembrete no horário certo." actionLabel="Cadastrar remédio" onAction={() => document.getElementById("med-name")?.focus()} secondaryLabel="Ver consultas" onSecondary={() => { document.getElementById("agenda-link")?.click(); }} /> : doses.length === 0 ? <p className="mt-4 text-sm text-steel">Nenhuma dose prevista para hoje.</p> : <ul className="mt-3 divide-y divide-line">{doses.map(dose => { const taken = doseTaken(dose, marks); return <li key={dose.id} className="flex items-start gap-3 py-3 text-sm"><input className="mt-1 size-4 shrink-0" type="checkbox" checked={taken} aria-label={`${dose.time} · ${dose.name} tomado hoje`} onChange={() => setHealth(h => { const cur = h.medsTaken?.[today] ?? []; return { ...h, medsTaken: { ...h.medsTaken, [today]: taken ? cur.filter(id => id !== dose.id && !(dose.legacy && id === dose.medicationId)) : [...cur, dose.id] } }; })} /><div className="min-w-0 flex-1"><span className={taken ? "text-steel line-through break-words" : "break-words"}>{dose.time} · {dose.name}</span>{dose.remainingDays !== undefined && <p className="mt-1 text-xs text-steel">{dose.remainingDays === 0 ? "Último dia deste medicamento" : `faltam ${dose.remainingDays} dias`}</p>}</div><Button variant="ghost" size="icon" className="size-8 shrink-0" aria-label={`Remover ${dose.name}`} onClick={() => setHealth(h => ({ ...h, meds: (h.meds ?? []).filter(m => m.id !== dose.medicationId) }))}><Trash2 /></Button></li>; })}</ul>}
+      {(health.meds ?? []).length === 0 ? <EmptyState icon={Pill} title="Nenhum remédio cadastrado" context="Cadastre seus remédios para receber o lembrete no horário certo." actionLabel="Cadastrar remédio" onAction={() => document.getElementById("med-name")?.focus()} secondaryLabel="Ver consultas" onSecondary={() => void navigate({ to: "/agenda" })} /> : doses.length === 0 ? <p className="mt-4 text-sm text-steel">Nenhuma dose prevista para hoje.</p> : <ul className="mt-3 divide-y divide-line">{doses.map(dose => { const taken = doseTaken(dose, marks); return <li key={dose.id} className="flex items-start gap-3 py-3 text-sm"><input className="mt-1 size-4 shrink-0" type="checkbox" checked={taken} aria-label={`${dose.time} · ${dose.name} tomado hoje`} onChange={() => setHealth(h => { const cur = h.medsTaken?.[today] ?? []; return { ...h, medsTaken: { ...h.medsTaken, [today]: taken ? cur.filter(id => id !== dose.id && !(dose.legacy && id === dose.medicationId)) : [...cur, dose.id] } }; })} /><div className="min-w-0 flex-1"><span className={taken ? "text-steel line-through break-words" : "break-words"}>{dose.time} · {dose.name}</span>{dose.remainingDays !== undefined && <p className="mt-1 text-xs text-steel">{dose.remainingDays === 0 ? "Último dia deste medicamento" : `faltam ${dose.remainingDays} dias`}</p>}</div><Button variant="ghost" size="icon" className="size-8 shrink-0" aria-label={`Remover ${dose.name}`} onClick={() => setHealth(h => ({ ...h, meds: (h.meds ?? []).filter(m => m.id !== dose.medicationId) }))}><Trash2 /></Button></li>; })}</ul>}
     </section>
     <div className="mt-5 grid gap-3 md:grid-cols-3"><HealthChart title="Água (copos)" data={series(health.water)} goal={health.waterGoal} labels /><HealthChart title="Sono (horas)" data={series(health.sleep)} goal={health.sleepGoal} sleep /><HealthChart title="Peso (kg)" data={series(weights)} labels loading={weightLoading} /></div>
     <ProgressRecorder id="registros-saude" title="Peso e medidas" kinds={["weight", "measurement"]} />
+    </ModuleGate>
   </main>;
 }
 function Card({ icon, title, tools, children }: { icon: ReactNode; title: string; tools?: ReactNode; children: ReactNode }) {
