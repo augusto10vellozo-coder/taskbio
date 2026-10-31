@@ -59,3 +59,45 @@ describe("finanças", () => {
     expect(billStatus(b, "2026-11-02").label).toBe("Atrasada há 3 dias");
   });
 });
+
+import { addForecast, averageMonthlySpending, canGoToMonth, contributeGoal, forecastHorizon, forecastSummary, goalProgress, removeForecast } from "./finance";
+
+describe("finanças — planejamento e metas", () => {
+  it("permite navegar para meses futuros até dezembro de 2027 a partir de outubro de 2026", () => {
+    expect(canGoToMonth("2027-12", "2026-10")).toBe(true);
+    expect(canGoToMonth("2029-11", "2026-10")).toBe(false);
+  });
+  it("previsão repetida por 15 meses cobre de outubro/2026 a dezembro/2027", () => {
+    const f = addForecast(emptyFinance, { type: "receita", amount: 3000, description: "Salário", category: "Receita" }, "2026-10", 15, 1);
+    expect(f.forecasts).toHaveLength(15);
+    expect(f.forecasts!.at(-1)!.month).toBe("2027-12");
+    expect(f.entries).toHaveLength(0);
+  });
+  it("previsto não altera o realizado e saldo previsto = receitas − custos", () => {
+    let f = addForecast(emptyFinance, { type: "receita", amount: 3000, description: "Salário", category: "Receita" }, "2027-01", 1, 1);
+    f = addForecast(f, { type: "gasto", amount: 1200, description: "Aluguel", category: "Moradia" }, "2027-01", 1, 2);
+    const s = forecastSummary(f, "2027-01");
+    expect([s.income, s.costs, s.balance, s.actual.spent]).toEqual([3000, 1200, 1800, 0]);
+  });
+  it("horizonte acumula saldos previstos", () => {
+    const f = addForecast(emptyFinance, { type: "receita", amount: 500, description: "", category: "Receita" }, "2027-01", 3, 1);
+    expect(forecastHorizon(f, "2027-01", 3).map((m) => m.cumulative)).toEqual([500, 1000, 1500]);
+  });
+  it("remover 'daqui em diante' apaga só os meses seguintes da série", () => {
+    const f = addForecast(emptyFinance, { type: "gasto", amount: 100, description: "", category: "Outros" }, "2027-01", 4, 1);
+    const r = removeForecast(f, "p-1-2", true);
+    expect(r.forecasts!.map((x) => x.month)).toEqual(["2027-01", "2027-02"]);
+  });
+  it("meta de 6000 com 1500 guardados e prazo em 9 meses pede 500 por mês", () => {
+    const p = goalProgress({ id: "g", name: "Reserva", target: 6000, saved: 1500, deadline: "2027-06" }, "2026-10");
+    expect([p.percent, p.remaining, p.perMonth]).toEqual([25, 4500, 500]);
+  });
+  it("retirada da meta nunca deixa saldo negativo e não cria lançamento", () => {
+    const f = contributeGoal({ ...emptyFinance, goals: [{ id: "g", name: "R", target: 100, saved: 30 }] }, "g", -50);
+    expect(f.goals![0]!.saved).toBe(0);
+    expect(f.entries).toHaveLength(0);
+  });
+  it("média de gastos ignora meses sem gasto", () => {
+    expect(averageMonthlySpending(entries, "2026-11", 3)).toBe(100);
+  });
+});

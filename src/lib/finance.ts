@@ -1,10 +1,14 @@
-import { addDays, differenceInCalendarDays, format, getDaysInMonth, parseISO } from "date-fns";
+import { addDays, addMonths, differenceInCalendarDays, format, getDaysInMonth, parseISO } from "date-fns";
 
 export type FinanceEntry = { id: string; date: string; amount: number; description: string; category: string; type: "gasto" | "receita"; billId?: string | undefined; source?: "compras" | "importado" };
 export type Bill = { id: string; title: string; amount: number; dueDate: string; category?: string; paid?: boolean; paidDate?: string | undefined };
 export type ShoppingRecord = { signature: string; amount: number; date: string };
 export type SavedImportMapping = { id: string; name: string; hasHeader: boolean; date: number; amount: number; description: number; type?: number | undefined; category?: number | undefined };
-export type FinanceState = { entries: FinanceEntry[]; bills: Bill[]; monthlyBudget: number; budgets?: Record<string, number>; customCategories: string[]; shoppingRecord?: ShoppingRecord; importMappings?: SavedImportMapping[] };
+export type FinanceState = { entries: FinanceEntry[]; bills: Bill[]; monthlyBudget: number; budgets?: Record<string, number>; customCategories: string[]; shoppingRecord?: ShoppingRecord; importMappings?: SavedImportMapping[]; forecasts?: Forecast[]; goals?: FinanceGoal[] };
+/** Planned (estimated) income or cost for a month; never counts as a real entry. */
+export type Forecast = { id: string; month: string; type: "gasto" | "receita"; amount: number; description: string; category: string; series?: string | undefined };
+/** Savings goal (e.g. emergency fund); contributions only move `saved`, never create entries. */
+export type FinanceGoal = { id: string; name: string; target: number; saved: number; deadline?: string | undefined };
 
 export const FIXED_CATEGORIES = ["Alimentação", "Mercado", "Compras", "Contas fixas", "Transporte", "Moradia", "Saúde", "Lazer", "Educação", "Outros"];
 export const emptyFinance: FinanceState = { entries: [], bills: [], monthlyBudget: 0, budgets: {}, customCategories: [] };
@@ -78,3 +82,68 @@ export const shoppingSignature = (items: { name: string; amount: number; unit: s
 
 const round = (n: number) => Math.round(n * 100) / 100;
 export const brl = (n: number) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+
+/** How far ahead months can be planned. */
+export const MAX_MONTHS_AHEAD = 36;
+export const shiftMonth = (month: string, delta: number) => format(addMonths(parseISO(`${month}-01`), delta), "yyyy-MM");
+export const canGoToMonth = (month: string, currentMonth: string) => month <= shiftMonth(currentMonth, MAX_MONTHS_AHEAD);
+
+/** Adds the same forecast to `month` and the next `repeat - 1` months, sharing one series id. */
+export function addForecast(f: FinanceState, base: Omit<Forecast, "id" | "month" | "series">, month: string, repeat = 1, idSeed = Date.now()): FinanceState {
+  const n = Math.max(1, Math.min(MAX_MONTHS_AHEAD + 1, Math.floor(repeat)));
+  const series = n > 1 ? `s-${idSeed}` : undefined;
+  const items: Forecast[] = Array.from({ length: n }, (_, i) => ({ ...base, id: `p-${idSeed}-${i}`, month: shiftMonth(month, i), series }));
+  return { ...f, forecasts: [...(f.forecasts ?? []), ...items] };
+}
+
+/** Removes one forecast, or it and every later month of the same series. */
+export function removeForecast(f: FinanceState, id: string, fromHereOn = false): FinanceState {
+  const all = f.forecasts ?? [];
+  const it = all.find((x) => x.id === id);
+  if (!it) return f;
+  return { ...f, forecasts: all.filter((x) => x.id !== id && !(fromHereOn && it.series && x.series === it.series && x.month >= it.month)) };
+}
+
+/** Planned vs actual for one month. */
+export function forecastSummary(f: FinanceState, month: string) {
+  const items = (f.forecasts ?? []).filter((x) => x.month === month);
+  const income = round(items.filter((x) => x.type === "receita").reduce((n, x) => n + x.amount, 0));
+  const costs = round(items.filter((x) => x.type === "gasto").reduce((n, x) => n + x.amount, 0));
+  const actual = monthSummary(f.entries, month);
+  return { items, income, costs, balance: round(income - costs), actual };
+}
+
+/** Next months: planned income, costs, balance and the running total of planned balances. */
+export function forecastHorizon(f: FinanceState, fromMonth: string, months: number) {
+  let cumulative = 0;
+  return Array.from({ length: months }, (_, i) => {
+    const month = shiftMonth(fromMonth, i);
+    const s = forecastSummary(f, month);
+    cumulative = round(cumulative + s.balance);
+    return { month, income: s.income, costs: s.costs, balance: s.balance, cumulative };
+  });
+}
+
+/** Average monthly spending over the last `months` full months before `currentMonth` that had any expense. */
+export function averageMonthlySpending(entries: FinanceEntry[], currentMonth: string, months = 3) {
+  const totals = Array.from({ length: months }, (_, i) => monthSummary(entries, shiftMonth(currentMonth, -(i + 1))).spent).filter((v) => v > 0);
+  return totals.length ? round(totals.reduce((a, b) => a + b, 0) / totals.length) : 0;
+}
+
+/** Goal progress and, when a deadline exists, the monthly amount still needed (deadline month included). */
+export function goalProgress(g: FinanceGoal, currentMonth: string) {
+  const remaining = round(Math.max(0, g.target - g.saved));
+  const percent = g.target > 0 ? Math.min(100, Math.round((g.saved / g.target) * 100)) : 0;
+  let perMonth: number | null = null;
+  if (g.deadline && remaining > 0) {
+    const [y1, m1] = currentMonth.split("-").map(Number) as [number, number];
+    const [y2, m2] = g.deadline.split("-").map(Number) as [number, number];
+    const left = (y2 - y1) * 12 + (m2 - m1) + 1;
+    perMonth = left > 0 ? round(remaining / left) : remaining;
+  }
+  return { remaining, percent, perMonth, done: remaining === 0 && g.target > 0 };
+}
+
+export function contributeGoal(f: FinanceState, id: string, delta: number): FinanceState {
+  return { ...f, goals: (f.goals ?? []).map((g) => (g.id === id ? { ...g, saved: round(Math.max(0, g.saved + delta)) } : g)) };
+}
