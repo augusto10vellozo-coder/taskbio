@@ -140,6 +140,7 @@ export function ReadingModule() {
         {xpNote && <p role="status" className="mt-2 text-xs text-steel">{xpNote}</p>}
         {agendaBlock?.done && <p className="mt-2 text-xs text-good">Leitura da Agenda concluída ✅</p>}
       </section>
+      )}
 
       <div className="mt-4 grid grid-cols-2 gap-3">
         <Stat label="Hoje" value={`${todayMin} min`} />
