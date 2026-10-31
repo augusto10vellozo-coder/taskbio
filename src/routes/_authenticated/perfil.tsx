@@ -153,7 +153,13 @@ function NotificationPrefsSection() {
     { key: "weekly", label: "Resumo semanal", hint: "Domingo às 20h, com seus números da semana" },
     { key: "exams", label: "Provas e entregas", hint: "Avisos no dia anterior e no dia marcado" },
   ] as const;
-  return <section className="mt-6 rounded-lg bg-card p-5 ring-1 ring-line"><h2 className="font-display text-xl font-semibold">Notificações</h2><p className="mt-2 text-sm text-steel">Escolha quais avisos quer receber. Nada é enviado entre 22h30 e 7h.</p><div className="mt-4 grid gap-2 sm:grid-cols-2">{layers.map((layer) => <label key={layer.key} className="flex items-start gap-3 rounded-lg bg-mist/60 p-3 ring-1 ring-line"><input type="checkbox" checked={notifPrefs[layer.key]} onChange={(event) => setNotifPref(layer.key, event.target.checked)} className="mt-0.5 size-4 accent-brand" /><span><span className="block text-sm font-medium">{layer.label}</span><span className="block text-xs text-steel">{layer.hint}</span></span></label>)}</div></section>;
+  const toggleMaster = (on: boolean) => {
+    setNotifPref("master", on);
+    if (on && typeof Notification !== "undefined" && Notification.permission === "denied") {
+      toast.info("As notificações estão bloqueadas no aparelho. Libere o TaskBio nos ajustes do sistema para receber os avisos.");
+    }
+  };
+  return <section className="mt-6 rounded-lg bg-card p-5 ring-1 ring-line"><h2 className="font-display text-xl font-semibold">Notificações</h2><p className="mt-2 text-sm text-steel">Escolha quais avisos quer receber. Nada é enviado entre 22h30 e 7h.</p><label className="mt-4 flex items-start gap-3 rounded-lg bg-card p-3 ring-1 ring-brand/40"><input type="checkbox" checked={notifPrefs.master} onChange={(event) => toggleMaster(event.target.checked)} className="mt-0.5 size-4 accent-brand" /><span><span className="block text-sm font-medium">Notificações</span><span className="block text-xs text-steel">Desligar pausa todos os avisos do app, sem remover a permissão do aparelho</span></span></label><div className="mt-2 grid gap-2 sm:grid-cols-2">{layers.map((layer) => <label key={layer.key} className={`flex items-start gap-3 rounded-lg bg-mist/60 p-3 ring-1 ring-line ${notifPrefs.master ? "" : "opacity-50"}`}><input type="checkbox" disabled={!notifPrefs.master} checked={notifPrefs[layer.key]} onChange={(event) => setNotifPref(layer.key, event.target.checked)} className="mt-0.5 size-4 accent-brand" /><span><span className="block text-sm font-medium">{layer.label}</span><span className="block text-xs text-steel">{layer.hint}</span></span></label>)}</div></section>;
 }
 function AwardsBox({ months }: { months: string[] }) {
   const awards = useAwards();

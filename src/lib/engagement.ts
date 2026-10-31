@@ -22,6 +22,8 @@ export type HealthLog = {
   weight: Record<string, number>;
   meds?: Medication[];
   medsTaken?: Record<string, string[]>;
+  /** Daily mood (1–5), registered from the quick sheet or Saúde. */
+  mood?: Record<string, number>;
 };
 export type Medication = { id: string; name: string; time: string; intervalHours?: 4 | 6 | 8 | 12 | 24; startDate?: string; endDate?: string };
 export type SessionEntry = { id: string; date: string; minutes: number; title: string; bookId?: string; pages?: number; progressMode?: "pages" | "percent"; progressPercent?: number; agendaBlockId?: string; subjectId?: string; learned?: string };

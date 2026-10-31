@@ -38,4 +38,11 @@ describe("all layers obey silence and preferences", () => {
   it("exams toggle actually disables exams", () => {
     expect(canDeliver("exams", { ...defaultNotifPrefs, exams: false }, "America/Sao_Paulo", new Date("2026-10-20T12:00:00Z"))).toBe(false);
   });
+  it("master toggle pauses every layer without touching individual prefs", () => {
+    const off = { ...defaultNotifPrefs, master: false };
+    for (const layer of ["streak", "dayClose", "meals", "league", "tasks", "workouts", "weekly", "exams", "bill", "med"]) {
+      expect(canDeliver(layer, off, "America/Sao_Paulo", new Date("2026-10-20T12:00:00Z"))).toBe(false);
+    }
+    expect(canDeliver("tasks", { ...off, master: true }, "America/Sao_Paulo", new Date("2026-10-20T12:00:00Z"))).toBe(true);
+  });
 });

@@ -4,15 +4,15 @@ import type { Medication } from "./engagement";
 type ReminderBlock = { id: string; time: string; kind: string; title: string; done?: boolean; reminderMinutes?: number };
 export type DueReminder = { key: string; title: string; body: string; url: string; tag?: string };
 
-/** Per-layer notification toggles stored in user_data.settings.notifPrefs; all on by default. */
-export type NotifPrefs = { streak: boolean; dayClose: boolean; meals: boolean; league: boolean; tasks: boolean; workouts: boolean; weekly: boolean; exams: boolean };
-export const defaultNotifPrefs: NotifPrefs = { streak: true, dayClose: true, meals: true, league: true, tasks: true, workouts: true, weekly: true, exams: true };
+/** Per-layer notification toggles stored in user_data.settings.notifPrefs; all on by default. `master` pauses every layer without revoking the OS permission. */
+export type NotifPrefs = { master: boolean; streak: boolean; dayClose: boolean; meals: boolean; league: boolean; tasks: boolean; workouts: boolean; weekly: boolean; exams: boolean };
+export const defaultNotifPrefs: NotifPrefs = { master: true, streak: true, dayClose: true, meals: true, league: true, tasks: true, workouts: true, weekly: true, exams: true };
 export function readNotifPrefs(settings: unknown): NotifPrefs {
   const raw = settings && typeof settings === "object" && !Array.isArray(settings)
     ? (settings as Record<string, unknown>)["notifPrefs"] : undefined;
   const p = raw && typeof raw === "object" && !Array.isArray(raw) ? raw as Record<string, unknown> : {};
   const on = (k: keyof NotifPrefs) => typeof p[k] === "boolean" ? (p[k] as boolean) : true;
-  return { streak: on("streak"), dayClose: on("dayClose"), meals: on("meals"), league: on("league"), tasks: on("tasks"), workouts: on("workouts"), weekly: on("weekly"), exams: on("exams") };
+  return { master: on("master"), streak: on("streak"), dayClose: on("dayClose"), meals: on("meals"), league: on("league"), tasks: on("tasks"), workouts: on("workouts"), weekly: on("weekly"), exams: on("exams") };
 }
 
 /** No notifications between 22:30 and 07:00 (user-local wall clock ms from localWallClock). */

@@ -26,6 +26,7 @@ import { ThemeProvider } from "../lib/theme-context";
 import { ThemeOnboarding } from "../components/ThemeOnboarding";
 import { StudyTimerProvider } from "../components/StudyTimerProvider";
 import { HabitFreezeNotices } from "../components/HabitFreezeNotices";
+import { NotificationPrompt } from "../components/NotificationPrompt";
 
 function NotFoundComponent() {
   return (
@@ -159,6 +160,7 @@ function RootComponent() {
           <ThemeOnboarding />
           <SyncManager />
           <HabitFreezeNotices />
+          <NotificationPrompt />
           <ReminderManager />
           <InviteManager />
           <PendingProfessionalInvites />

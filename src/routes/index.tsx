@@ -1,10 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth-context";
 import { AdSlot } from "@/components/AdSlot";
 import { TodayPanel } from "@/components/TodayPanel";
+import { QuickRegisterSheet } from "@/components/QuickRegisterSheet";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -31,6 +32,7 @@ function Inicio() {
   const { user, loading } = useAuth();
   const [installPrompt, setInstallPrompt] = useState<Event | null>(null);
   const [installed, setInstalled] = useState(false);
+  const [quickOpen, setQuickOpen] = useState(false);
   useEffect(() => {
     setInstalled(window.matchMedia("(display-mode: standalone)").matches || (navigator as Navigator & { standalone?: boolean }).standalone === true);
     const onPrompt = (event: Event) => { event.preventDefault(); setInstallPrompt(event); };
@@ -50,6 +52,8 @@ function Inicio() {
         {installPrompt && !installed && <div className="mt-4 flex items-center justify-between gap-3 border-t border-line pt-4 text-sm"><span>Instalar TaskBio neste aparelho</span><Button variant="outline" size="sm" onClick={async () => { const prompt = installPrompt as Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: string }> }; await prompt.prompt(); await prompt.userChoice; setInstallPrompt(null); }}>Instalar</Button></div>}
       </main>
       <AdSlot page="/" slot="home-inline" />
+      {user && <Button size="icon" className="fixed right-5 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-40 size-14 rounded-full border border-brand sm:right-8 xl:bottom-6" aria-label="Registrar agora" title="Registrar agora" onClick={() => setQuickOpen(true)}><Plus className="size-6" /></Button>}
+      <QuickRegisterSheet open={quickOpen} onClose={() => setQuickOpen(false)} />
     </>
   );
 }

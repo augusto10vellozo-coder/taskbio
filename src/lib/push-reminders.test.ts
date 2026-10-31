@@ -115,9 +115,10 @@ describe("dueLeagueOpen", () => {
 
 describe("preferências e horário de silêncio", () => {
   it("lê toggles salvos e liga tudo por padrão", () => {
-    expect(readNotifPrefs(null)).toEqual({ streak: true, dayClose: true, meals: true, league: true, tasks: true, workouts: true, weekly: true, exams: true });
+    expect(readNotifPrefs(null)).toEqual({ master: true, streak: true, dayClose: true, meals: true, league: true, tasks: true, workouts: true, weekly: true, exams: true });
     expect(readNotifPrefs({ notifPrefs: { streak: false } }).streak).toBe(false);
     expect(readNotifPrefs({ notifPrefs: { streak: false } }).meals).toBe(true);
+    expect(readNotifPrefs({ notifPrefs: { master: false } }).master).toBe(false);
   });
   it("silencia entre 22h30 e 7h no fuso do usuário", () => {
     expect(inQuietHours(wallClockMs(new Date("2026-10-15T01:40:00Z"), TZ))).toBe(true); // 22:40 SP
