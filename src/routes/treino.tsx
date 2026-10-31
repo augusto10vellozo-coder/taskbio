@@ -111,14 +111,14 @@ function WeekTab({ onExplore }: { onExplore: () => void }) {
           <h3 className="mt-4 text-sm font-semibold">Exemplos disponíveis para agendar</h3>
           <p className="mt-2 border-l-2 border-brand bg-mist px-3 py-2 text-sm text-steel">Toque num treino pra colocá-lo na sua semana.</p>
           <div className="mt-3 grid gap-3 sm:grid-cols-2">{examples.map((w) => <article key={w.id} className="rounded-lg border border-line p-3"><p className="text-[11px] uppercase text-steel">Exemplo</p><h4 className="mt-1 text-sm font-semibold">{w.name}</h4><p className="mt-1 text-xs text-steel">{w.focus} · {w.exercises.length} exercícios</p><Button variant="outline" size="sm" className="mt-3" onClick={() => { assign(selected, w); toast.success("Treino adicionado ao dia"); }}><CalendarPlus /> Agendar</Button></article>)}</div>
-          <p className="mt-3 text-xs leading-5 text-steel">Registros pessoais. Não substituem orientação de profissional.</p>
           <h3 className="mt-5 text-sm font-semibold">Meus treinos</h3>
           <AssignForm workouts={models} onPick={(w) => { assign(selected, w); toast.success("Treino adicionado ao dia"); }} onCreate={(n) => createAndAssign(selected, n)} />
         </>
           : !selWorkout ? <div className="mt-3"><p className="text-sm text-steel">Escolha um treino abaixo pra registrar seus exercícios.</p><AssignForm workouts={models} onPick={(w) => assign(selected, w)} onCreate={(n) => createAndAssign(selected, n)} /></div>
           : <WorkoutDetail workout={selWorkout} dateKey={selected} />}
       </section>
-      <p className="mt-4 text-xs leading-5 text-steel">Registros pessoais. Não substituem orientação de profissional. Quer ideias? <button type="button" onClick={onExplore} className="underline">Explorar e criar</button>.</p>
+      )}
+      {!firstUse && <p className="mt-4 text-xs leading-5 text-steel">Quer ideias? <button type="button" onClick={onExplore} className="underline">Explorar e criar</button>.</p>}
       <ImportDialog open={importing} onOpenChange={setImporting} week={week} onAssign={assign} />
     </div>
   );
