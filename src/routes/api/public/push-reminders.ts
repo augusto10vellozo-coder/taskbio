@@ -1,10 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { buildPushPayload } from "@block65/webcrypto-web-push";
-import { dueDayComplete, dueLeagueMove, dueStreakMilestone, dueWeeklySummary, dueDayClose, dueLeagueOpen, dueMealReminders, dueReminders, dueSettingsReminders, dueStreakRisk, inQuietHours, readNotifPrefs, wallClockMs } from "@/lib/push-reminders";
+import { dueDayComplete, dueStreakMilestone, dueWeeklySummary, dueDayClose, dueMealReminders, dueReminders, dueSettingsReminders, dueStreakRisk, inQuietHours, readNotifPrefs, wallClockMs } from "@/lib/push-reminders";
 import { VAPID_PUBLIC_KEY } from "@/lib/push-config";
 import { canDeliver, performDelivery, reminderLayer, retryAllowed } from "@/lib/push-delivery";
 import { mealSummary } from "@/lib/meal-summary";
-import { leaguePositions, rankLeague } from "@/lib/xp";
 import { MEALS } from "@/lib/trilha-data";
 import type { Block, Meal } from "@/lib/trilha-data";
 
@@ -39,24 +38,16 @@ export const Route = createFileRoute("/api/public/push-reminders")({
         if (jobsError) return new Response("Delivery storage unavailable", { status: 503 });
         const now = executionNow;
         const todaySp = now.toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" });
-        const lastWeekStart = (() => { const d = new Date(`${todaySp}T12:00:00Z`); d.setUTCDate(d.getUTCDate() - d.getUTCDay() - 7); return d.toISOString().slice(0, 10); })();
-        const thisWeekStart = (() => { const d = new Date(`${todaySp}T12:00:00Z`); d.setUTCDate(d.getUTCDate() - d.getUTCDay()); return d.toISOString().slice(0, 10); })();
-        const checkLeague = now.getUTCMinutes() % 15 === 0;
-        const [{ data: xpRows }, { data: freezeRows }, { data: winRows }, { data: profileRows }, { data: posRows }] = await Promise.all([
+        const [{ data: xpRows }, { data: freezeRows }, { data: profileRows }] = await Promise.all([
           supabaseAdmin.from("xp_events").select("user_id, points").in("user_id", userIds).eq("day", todaySp),
           supabaseAdmin.from("streak_freezes").select("user_id, day").in("user_id", userIds),
-          supabaseAdmin.from("league_wins").select("user_id").in("user_id", userIds),
           supabaseAdmin.from("profiles").select("id, display_name").in("id", userIds),
-          supabaseAdmin.from("league_positions").select("user_id, position").in("user_id", userIds).eq("week_start", thisWeekStart),
         ]);
         const nameBy = new Map((profileRows ?? []).map((p) => [p.id, p.display_name]));
-        const posBy = new Map((posRows ?? []).map((p) => [p.user_id, p.position]));
         const todayXp = new Map<string, number>();
         for (const e of xpRows ?? []) todayXp.set(e.user_id, (todayXp.get(e.user_id) ?? 0) + e.points);
         const freezesBy = new Map<string, string[]>();
         for (const f of freezeRows ?? []) freezesBy.set(f.user_id, [...(freezesBy.get(f.user_id) ?? []), f.day]);
-        const winsBy = new Map<string, number>();
-        for (const w of winRows ?? []) winsBy.set(w.user_id, (winsBy.get(w.user_id) ?? 0) + 1);
         let sent = 0;
 
         for (const row of rows ?? []) {
@@ -65,7 +56,7 @@ export const Route = createFileRoute("/api/public/push-reminders")({
           const settings = row.settings && typeof row.settings === "object" && !Array.isArray(row.settings) ? row.settings as Record<string, unknown> : {};
           const prefs = readNotifPrefs(settings);
           const frozenDays = freezesBy.get(row.user_id) ?? [];
-          const freezesAvailable = 0; // the league no longer grants streak freezes
+          const freezesAvailable = 0; // routine streak has no automatic protection
           const scheduled: { key: string; title: string; body: string; url: string; tag?: string; bonus?: number }[] = [];
           const userMeals = [...MEALS, ...(Array.isArray(row.meals) ? row.meals as unknown as Meal[] : [])];
           const getMeal = (id?: string) => userMeals.find((m) => m.id === id);
@@ -81,33 +72,7 @@ export const Route = createFileRoute("/api/public/push-reminders")({
             if (prefs.weekly) scheduled.push(...dueWeeklySummary({ plan: row.plan, habitLog: settings["habitLog"], kcalFor: (blocks) => mealSummary(blocks as Block[], getMeal).kcal }, tz, now));
             if (prefs.dayClose) scheduled.push(...dueDayClose(row.plan, todayXp.get(row.user_id) ?? 0, tz, now));
             if (prefs.meals) scheduled.push(...dueMealReminders(row.plan, tz, now));
-            if (prefs.league) {
-              // Query only when the layer is due; use the exact same group and ranking as the app.
-              if (dueLeagueOpen(1, tz, now).length) {
-                const { data: ranked, error } = await supabaseAdmin.rpc("league_week_for", { _start: lastWeekStart, _user_id: row.user_id });
-                if (!error && ranked && ranked.length >= 2) {
-                  const sorted = rankLeague(ranked);
-                  const i = sorted.findIndex((r) => r.user_id === row.user_id);
-                  const pos = i >= 0 ? leaguePositions(sorted)[i]! : 0;
-                  if (pos > 0) scheduled.push(...dueLeagueOpen(pos, tz, now));
-                }
-              }
-              if (checkLeague) {
-                const { data: rawRanked } = await supabaseAdmin.rpc("league_week_for", { _start: thisWeekStart, _user_id: row.user_id });
-                const ranked = rawRanked ? rankLeague(rawRanked) : null;
-                if (ranked && ranked.length >= 2 && (ranked[0]?.week_pct ?? 0) > 0) {
-                  const idx = ranked.findIndex((r) => r.user_id === row.user_id);
-                  if (idx >= 0) {
-                    const pos = leaguePositions(ranked)[idx]!;
-                    const retryMove = (pendingJobs ?? []).find(j => j.user_id === row.user_id && j.layer === "league" && j.reminder_key.startsWith("leaguemove|") && j.due_at === now.toISOString());
-                    const prev = retryMove ? (retryMove.reminder_key.includes("|lead|") ? 2 : 1) : posBy.get(row.user_id) ?? null;
-                    const leader = pos > 1 ? { name: (ranked[0]?.display_name ?? ""), xpGap: 0, pctGap: Number(ranked[0]?.week_pct ?? 0) - Number(ranked[idx]?.week_pct ?? 0) } : null;
-                    scheduled.push(...dueLeagueMove(prev, pos, leader, tz, now));
-                    if (prev !== pos) await supabaseAdmin.from("league_positions").upsert({ user_id: row.user_id, week_start: thisWeekStart, position: pos, updated_at: now.toISOString() });
-                  }
-                }
-              }
-            }
+
           }
           scheduled.push(...dueReminders(row.plan, tz, now, prefs), ...dueSettingsReminders(row.settings, tz, now, prefs));
           }

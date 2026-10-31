@@ -8,7 +8,7 @@ import { useTaskBio } from "@/lib/trilha-store";
 import { PhotoBonus } from "@/components/PhotoBonus";
 import { mealNutrition } from "@/lib/meal-summary";
 import { isMealRecorded, predictedMeal } from "@/lib/meal-planning";
-import { useLeague } from "@/lib/use-league";
+import { usePersonalStatus } from "@/lib/use-personal-status";
 import { toast } from "sonner";
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog";
 import { WorkoutSeries, SessionProgress } from "@/components/WorkoutSeries";
@@ -37,7 +37,7 @@ export function DayTimeline({
   className?: string;
 }) {
   const { plan, getMeal, getWorkout, toggleBlock, removeBlock, addBlock, updateBlock, finance, consumeMeal, undoMeal } = useTaskBio();
-  const league = useLeague();
+  const personal = usePersonalStatus();
   const [undoingMeal, setUndoingMeal] = useState<Block | null>(null);
   const [openWorkout, setOpenWorkout] = useState<string | null>("w1");
   const [editing, setEditing] = useState<Block | null>(null);
@@ -54,7 +54,7 @@ export function DayTimeline({
   );
   const doneCount = blocks.filter((b) => (b.kind === "refeicao" ? isMealRecorded(b) : b.done)).length;
   const dayComplete = blocks.length > 0 && doneCount === blocks.length;
-  const todayXp = league.me?.today_xp ?? 0;
+  const todayXp = personal.todayXp;
 
   return (
     <>

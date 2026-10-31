@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AgendaRouteImport } from './routes/agenda'
 import { Route as AlimentacaoRouteImport } from './routes/alimentacao'
+import { Route as AmigosRouteImport } from './routes/amigos'
 import { Route as AtividadesRouteImport } from './routes/atividades'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CalendarioRouteImport } from './routes/calendario'
@@ -24,6 +25,7 @@ import { Route as FinancasRouteImport } from './routes/financas'
 import { Route as HabitosRouteImport } from './routes/habitos'
 import { Route as HojeRouteImport } from './routes/hoje'
 import { Route as LeituraRouteImport } from './routes/leitura'
+import { Route as LigaRouteImport } from './routes/liga'
 import { Route as MetasRouteImport } from './routes/metas'
 import { Route as ModulosRouteImport } from './routes/modulos'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
@@ -34,7 +36,6 @@ import { Route as SaudeRouteImport } from './routes/saude'
 import { Route as SobreRouteImport } from './routes/sobre'
 import { Route as TermosRouteImport } from './routes/termos'
 import { Route as TreinoRouteImport } from './routes/treino'
-import { Route as AuthenticatedAmigosRouteImport } from './routes/_authenticated/amigos'
 import { Route as AuthenticatedEquipeRouteImport } from './routes/_authenticated/equipe'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
 import { Route as AuthenticatedProfissionalRouteImport } from './routes/_authenticated/profissional'
@@ -61,6 +62,11 @@ const AgendaRoute = AgendaRouteImport.update({
 const AlimentacaoRoute = AlimentacaoRouteImport.update({
   id: '/alimentacao',
   path: '/alimentacao',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AmigosRoute = AmigosRouteImport.update({
+  id: '/amigos',
+  path: '/amigos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AtividadesRoute = AtividadesRouteImport.update({
@@ -118,6 +124,11 @@ const LeituraRoute = LeituraRouteImport.update({
   path: '/leitura',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LigaRoute = LigaRouteImport.update({
+  id: '/liga',
+  path: '/liga',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MetasRoute = MetasRouteImport.update({
   id: '/metas',
   path: '/metas',
@@ -168,11 +179,6 @@ const TreinoRoute = TreinoRouteImport.update({
   path: '/treino',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedAmigosRoute = AuthenticatedAmigosRouteImport.update({
-  id: '/amigos',
-  path: '/amigos',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
 const AuthenticatedEquipeRoute = AuthenticatedEquipeRouteImport.update({
   id: '/equipe',
   path: '/equipe',
@@ -219,6 +225,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/agenda': typeof AgendaRoute
   '/alimentacao': typeof AlimentacaoRoute
+  '/amigos': typeof AmigosRoute
   '/atividades': typeof AtividadesRoute
   '/auth': typeof AuthRoute
   '/calendario': typeof CalendarioRoute
@@ -230,6 +237,7 @@ export interface FileRoutesByFullPath {
   '/habitos': typeof HabitosRoute
   '/hoje': typeof HojeRoute
   '/leitura': typeof LeituraRoute
+  '/liga': typeof LigaRoute
   '/metas': typeof MetasRoute
   '/modulos': typeof ModulosRoute
   '/privacidade': typeof PrivacidadeRoute
@@ -240,7 +248,6 @@ export interface FileRoutesByFullPath {
   '/sobre': typeof SobreRoute
   '/termos': typeof TermosRoute
   '/treino': typeof TreinoRoute
-  '/amigos': typeof AuthenticatedAmigosRoute
   '/equipe': typeof AuthenticatedEquipeRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/profissional': typeof AuthenticatedProfissionalRoute
@@ -254,6 +261,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/agenda': typeof AgendaRoute
   '/alimentacao': typeof AlimentacaoRoute
+  '/amigos': typeof AmigosRoute
   '/atividades': typeof AtividadesRoute
   '/auth': typeof AuthRoute
   '/calendario': typeof CalendarioRoute
@@ -265,6 +273,7 @@ export interface FileRoutesByTo {
   '/habitos': typeof HabitosRoute
   '/hoje': typeof HojeRoute
   '/leitura': typeof LeituraRoute
+  '/liga': typeof LigaRoute
   '/metas': typeof MetasRoute
   '/modulos': typeof ModulosRoute
   '/privacidade': typeof PrivacidadeRoute
@@ -275,7 +284,6 @@ export interface FileRoutesByTo {
   '/sobre': typeof SobreRoute
   '/termos': typeof TermosRoute
   '/treino': typeof TreinoRoute
-  '/amigos': typeof AuthenticatedAmigosRoute
   '/equipe': typeof AuthenticatedEquipeRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/profissional': typeof AuthenticatedProfissionalRoute
@@ -291,6 +299,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/agenda': typeof AgendaRoute
   '/alimentacao': typeof AlimentacaoRoute
+  '/amigos': typeof AmigosRoute
   '/atividades': typeof AtividadesRoute
   '/auth': typeof AuthRoute
   '/calendario': typeof CalendarioRoute
@@ -302,6 +311,7 @@ export interface FileRoutesById {
   '/habitos': typeof HabitosRoute
   '/hoje': typeof HojeRoute
   '/leitura': typeof LeituraRoute
+  '/liga': typeof LigaRoute
   '/metas': typeof MetasRoute
   '/modulos': typeof ModulosRoute
   '/privacidade': typeof PrivacidadeRoute
@@ -312,7 +322,6 @@ export interface FileRoutesById {
   '/sobre': typeof SobreRoute
   '/termos': typeof TermosRoute
   '/treino': typeof TreinoRoute
-  '/_authenticated/amigos': typeof AuthenticatedAmigosRoute
   '/_authenticated/equipe': typeof AuthenticatedEquipeRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
   '/_authenticated/profissional': typeof AuthenticatedProfissionalRoute
@@ -328,6 +337,7 @@ export interface FileRouteTypes {
     | '/'
     | '/agenda'
     | '/alimentacao'
+    | '/amigos'
     | '/atividades'
     | '/auth'
     | '/calendario'
@@ -339,6 +349,7 @@ export interface FileRouteTypes {
     | '/habitos'
     | '/hoje'
     | '/leitura'
+    | '/liga'
     | '/metas'
     | '/modulos'
     | '/privacidade'
@@ -349,7 +360,6 @@ export interface FileRouteTypes {
     | '/sobre'
     | '/termos'
     | '/treino'
-    | '/amigos'
     | '/equipe'
     | '/perfil'
     | '/profissional'
@@ -363,6 +373,7 @@ export interface FileRouteTypes {
     | '/'
     | '/agenda'
     | '/alimentacao'
+    | '/amigos'
     | '/atividades'
     | '/auth'
     | '/calendario'
@@ -374,6 +385,7 @@ export interface FileRouteTypes {
     | '/habitos'
     | '/hoje'
     | '/leitura'
+    | '/liga'
     | '/metas'
     | '/modulos'
     | '/privacidade'
@@ -384,7 +396,6 @@ export interface FileRouteTypes {
     | '/sobre'
     | '/termos'
     | '/treino'
-    | '/amigos'
     | '/equipe'
     | '/perfil'
     | '/profissional'
@@ -399,6 +410,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/agenda'
     | '/alimentacao'
+    | '/amigos'
     | '/atividades'
     | '/auth'
     | '/calendario'
@@ -410,6 +422,7 @@ export interface FileRouteTypes {
     | '/habitos'
     | '/hoje'
     | '/leitura'
+    | '/liga'
     | '/metas'
     | '/modulos'
     | '/privacidade'
@@ -420,7 +433,6 @@ export interface FileRouteTypes {
     | '/sobre'
     | '/termos'
     | '/treino'
-    | '/_authenticated/amigos'
     | '/_authenticated/equipe'
     | '/_authenticated/perfil'
     | '/_authenticated/profissional'
@@ -436,6 +448,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AgendaRoute: typeof AgendaRoute
   AlimentacaoRoute: typeof AlimentacaoRoute
+  AmigosRoute: typeof AmigosRoute
   AtividadesRoute: typeof AtividadesRoute
   AuthRoute: typeof AuthRoute
   CalendarioRoute: typeof CalendarioRoute
@@ -447,6 +460,7 @@ export interface RootRouteChildren {
   HabitosRoute: typeof HabitosRoute
   HojeRoute: typeof HojeRoute
   LeituraRoute: typeof LeituraRoute
+  LigaRoute: typeof LigaRoute
   MetasRoute: typeof MetasRoute
   ModulosRoute: typeof ModulosRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
@@ -492,6 +506,13 @@ declare module '@tanstack/react-router' {
       path: '/alimentacao'
       fullPath: '/alimentacao'
       preLoaderRoute: typeof AlimentacaoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/amigos': {
+      id: '/amigos'
+      path: '/amigos'
+      fullPath: '/amigos'
+      preLoaderRoute: typeof AmigosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/atividades': {
@@ -571,6 +592,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LeituraRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/liga': {
+      id: '/liga'
+      path: '/liga'
+      fullPath: '/liga'
+      preLoaderRoute: typeof LigaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/metas': {
       id: '/metas'
       path: '/metas'
@@ -641,13 +669,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TreinoRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/amigos': {
-      id: '/_authenticated/amigos'
-      path: '/amigos'
-      fullPath: '/amigos'
-      preLoaderRoute: typeof AuthenticatedAmigosRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/equipe': {
       id: '/_authenticated/equipe'
       path: '/equipe'
@@ -708,14 +729,12 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
-  AuthenticatedAmigosRoute: typeof AuthenticatedAmigosRoute
   AuthenticatedEquipeRoute: typeof AuthenticatedEquipeRoute
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
   AuthenticatedProfissionalRoute: typeof AuthenticatedProfissionalRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedAmigosRoute: AuthenticatedAmigosRoute,
   AuthenticatedEquipeRoute: AuthenticatedEquipeRoute,
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
   AuthenticatedProfissionalRoute: AuthenticatedProfissionalRoute,
@@ -729,6 +748,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AgendaRoute: AgendaRoute,
   AlimentacaoRoute: AlimentacaoRoute,
+  AmigosRoute: AmigosRoute,
   AtividadesRoute: AtividadesRoute,
   AuthRoute: AuthRoute,
   CalendarioRoute: CalendarioRoute,
@@ -740,6 +760,7 @@ const rootRouteChildren: RootRouteChildren = {
   HabitosRoute: HabitosRoute,
   HojeRoute: HojeRoute,
   LeituraRoute: LeituraRoute,
+  LigaRoute: LigaRoute,
   MetasRoute: MetasRoute,
   ModulosRoute: ModulosRoute,
   PrivacidadeRoute: PrivacidadeRoute,

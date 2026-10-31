@@ -2,7 +2,7 @@ import { Flame } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { useTaskBio } from "@/lib/trilha-store";
 import { greeting } from "@/lib/engagement";
-import { useLeague } from "@/lib/use-league";
+import { usePersonalStatus } from "@/lib/use-personal-status";
 import { XP_DAILY_CAP } from "@/lib/xp";
 import { isMealRecorded } from "@/lib/meal-planning";
 import { formatFullDate } from "@/lib/calendar-utils";
@@ -22,10 +22,10 @@ export function AgendaGreeting() {
 /** Single-line status strip (streak + XP) and day progress bar, above the timeline. */
 export function AgendaDayOverview({ dateKey }: { dateKey: string }) {
   const { plan } = useTaskBio();
-  const league = useLeague();
+  const personal = usePersonalStatus();
   const blocks = plan[dateKey] ?? [];
-  const xp = league.me?.today_xp ?? 0;
-  const days = league.me && "streak_rotina" in league.me ? league.me.streak_rotina : 0;
+  const xp = personal.todayXp;
+  const days = personal.routineStreak;
   const done = blocks.filter((b) => (b.kind === "refeicao" ? isMealRecorded(b) : b.done)).length;
   const total = blocks.length;
   const pct = total ? Math.round((done / total) * 100) : 0;

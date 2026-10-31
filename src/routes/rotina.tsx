@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { CalendarDays, ChevronRight, Settings2, Snowflake, Users, type LucideIcon } from "lucide-react";
+import { CalendarDays, ChevronRight, Settings2, Snowflake, type LucideIcon } from "lucide-react";
 import { MODULES, isModuleOn, type ModuleId } from "@/lib/modules";
 import { useTaskBio } from "@/lib/trilha-store";
 import { useAuth } from "@/lib/auth-context";
@@ -111,7 +111,6 @@ function Rotina() {
       ))}
 
       <div className="mt-8 flex flex-wrap gap-x-5 gap-y-2 border-t border-line pt-4 text-[13px] font-medium text-steel">
-        {user && <Link to="/amigos" className="inline-flex items-center gap-1.5 hover:text-ink"><Users className="size-4" aria-hidden="true" /> Amigos</Link>}
         <Link to="/modulos" className="inline-flex items-center gap-1.5 hover:text-ink"><Settings2 className="size-4" aria-hidden="true" /> Módulos ativáveis</Link>
       </div>
     </main>
