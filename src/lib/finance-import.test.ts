@@ -49,7 +49,7 @@ describe("parseDateValue", () => {
     expect(parseDateValue("2026-03-05")).toBe("2026-03-05");
   });
   it("parses Excel serial numbers", () => {
-    expect(parseDateValue(45743)).toBe("2025-03-15"); // known serial
+    expect(parseDateValue(45743)).toBe("2025-03-27"); // known serial
   });
   it("rejects invalid dates", () => {
     expect(parseDateValue("31/02/2026")).toBeNull();
