@@ -57,13 +57,13 @@ export function AppHeader() {
               to={l.to}
               activeOptions={{ exact: l.to === "/" }}
               className="rounded-lg px-3 py-2 font-medium text-steel hover:text-ink"
-              activeProps={{ className: "rounded-lg px-3 py-2 font-medium bg-ink text-white" }}
+              activeProps={{ className: "rounded-lg px-3 py-2 font-medium bg-ink text-background" }}
             >
               {l.label}
             </Link>
           ))}
-          <Link to="/modulos" className="rounded-lg px-3 py-2 font-medium text-steel hover:text-ink" activeProps={{ className: "rounded-lg px-3 py-2 font-medium bg-ink text-white" }}>Módulos</Link>
-          {user && <Link to="/amigos" className="rounded-lg px-3 py-2 font-medium text-steel hover:text-ink" activeProps={{ className: "rounded-lg px-3 py-2 font-medium bg-ink text-white" }}>Amigos</Link>}
+          <Link to="/modulos" className="rounded-lg px-3 py-2 font-medium text-steel hover:text-ink" activeProps={{ className: "rounded-lg px-3 py-2 font-medium bg-ink text-background" }}>Módulos</Link>
+          {user && <Link to="/amigos" className="rounded-lg px-3 py-2 font-medium text-steel hover:text-ink" activeProps={{ className: "rounded-lg px-3 py-2 font-medium bg-ink text-background" }}>Amigos</Link>}
         </nav>
 
         <div className="flex shrink-0 items-center gap-1 sm:gap-2">
@@ -71,7 +71,7 @@ export function AppHeader() {
           {isAdmin && <Button asChild variant="ghost" size="sm"><Link to="/equipe">Equipe</Link></Button>}
           {!loading && user ? <>
             <span className="hidden text-[11px] font-medium text-steel sm:inline">Acesso gratuito</span>
-            <Link to="/perfil" title="Abrir meu perfil" aria-label="Abrir meu perfil" className="grid size-9 place-items-center rounded-full bg-mist text-xs font-semibold text-steel ring-1 ring-black/5">{initials || <UserRound className="size-4" />}</Link>
+            <Link to="/perfil" title="Abrir meu perfil" aria-label="Abrir meu perfil" className="grid size-9 place-items-center rounded-full bg-mist text-xs font-semibold text-steel ring-1 ring-line">{initials || <UserRound className="size-4" />}</Link>
           </> : !loading ? <Button asChild variant="outline" size="sm"><Link to="/auth"><LogIn /> Entrar</Link></Button> : <span className="size-9 animate-pulse rounded-full bg-mist" />}
         </div>
       </div>

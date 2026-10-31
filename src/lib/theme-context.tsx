@@ -43,7 +43,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       const next = resolve(theme);
       setResolved(next);
       document.documentElement.classList.toggle("dark", next === "dark");
-      document.documentElement.dataset.theme = next;
+      document.documentElement.dataset["theme"] = next;
     };
     apply();
     media.addEventListener("change", apply);

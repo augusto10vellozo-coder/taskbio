@@ -171,7 +171,7 @@ function Agenda() {
         />
 
         <aside className="space-y-5 lg:col-span-5">
-          {compras.length > 0 && <div className="glass-strong rounded-2xl p-5 ring-1 ring-black/5">
+          {compras.length > 0 && <div className="glass-strong rounded-2xl p-5 ring-1 ring-line">
             <div className="flex items-center justify-between">
               <h2 className="font-display text-lg font-semibold tracking-tight">Compras da semana</h2>
               <span className="text-sm font-semibold text-ink">{brl(semanaCusto)}</span>

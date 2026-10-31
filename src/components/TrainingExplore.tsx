@@ -78,7 +78,7 @@ export function TrainingExplore() {
 
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
           <section className="lg:col-span-5 space-y-5">
-            <div className="glass-strong rounded-2xl p-5 ring-1 ring-black/5">
+            <div className="glass-strong rounded-2xl p-5 ring-1 ring-line">
               <div className="flex items-center justify-between gap-3">
                 <h2 className="font-display text-lg font-semibold tracking-tight">Modalidades</h2>
                 {preferredModality && <span className="text-xs font-medium text-brand-deep">{preferredModality}</span>}
@@ -109,7 +109,7 @@ export function TrainingExplore() {
               </div>
             </div>
 
-            <div className="glass-strong rounded-2xl p-5 ring-1 ring-black/5">
+            <div className="glass-strong rounded-2xl p-5 ring-1 ring-line">
               <h2 className="font-display text-lg font-semibold tracking-tight">Meu objetivo</h2>
               <p className="mt-1 text-xs text-steel">Seu objetivo deixa os exemplos com a sua cara.</p>
               <div className="mt-3 flex flex-wrap gap-1.5">
@@ -140,7 +140,7 @@ export function TrainingExplore() {
           </section>
 
           <section className="lg:col-span-7 space-y-5">
-            <div className="glass-strong rounded-2xl p-5 ring-1 ring-black/5">
+            <div className="glass-strong rounded-2xl p-5 ring-1 ring-line">
               <div className="flex items-start gap-3">
                 <div className="grid size-9 shrink-0 place-items-center rounded-lg bg-brand/10 text-brand-deep"><Sparkles className="size-4" /></div>
                 <div>
@@ -203,7 +203,7 @@ export function TrainingExplore() {
               </div>
             </div>
 
-            <div className="glass-strong rounded-2xl p-5 ring-1 ring-black/5">
+            <div className="glass-strong rounded-2xl p-5 ring-1 ring-line">
               <div className="flex items-center justify-between">
                 <h2 className="font-display text-lg font-semibold tracking-tight">Meus treinos</h2>
                 <Button
@@ -250,7 +250,7 @@ export function TrainingExplore() {
               )}
 
               {workout && (
-                <div className="mt-4 rail rounded-xl bg-white/50 p-3 pl-4 ring-1 ring-black/5">
+                <div className="mt-4 rail rounded-xl bg-card/50 p-3 pl-4 ring-1 ring-line">
                   <div className="flex items-start justify-between gap-3">
                     <p className="text-sm font-medium">
                       {workout.name} — {workout.focus}
@@ -278,7 +278,7 @@ export function TrainingExplore() {
                   </div>
                   <div className="mt-3 space-y-2.5">
                     {workout.exercises.map((e) => (
-                      <div key={e.id} className="rounded-lg bg-white/70 p-2.5 ring-1 ring-black/5">
+                      <div key={e.id} className="rounded-lg bg-card/70 p-2.5 ring-1 ring-line">
                         <div className="flex items-center justify-between gap-2">
                           <p className="text-sm font-medium">{e.name}</p>
                           <span className="text-[11px] text-steel">
@@ -298,7 +298,7 @@ export function TrainingExplore() {
               )}
             </div>
 
-            <div className="glass-strong rounded-2xl p-5 ring-1 ring-black/5">
+            <div className="glass-strong rounded-2xl p-5 ring-1 ring-line">
               <div className="flex items-center justify-between">
                 <h2 className="flex items-center gap-2 font-display text-lg font-semibold tracking-tight"><History className="size-4 text-brand-deep" /> Histórico recente</h2>
                 <span className="text-xs text-steel">últimas sessões</span>
@@ -372,26 +372,26 @@ function NewWorkoutForm({ onCreate }: { onCreate: (w: Workout) => void }) {
           exercises,
         });
       }}
-      className="mt-4 space-y-2 rounded-xl bg-white/50 p-3 ring-1 ring-black/5"
+      className="mt-4 space-y-2 rounded-xl bg-card/50 p-3 ring-1 ring-line"
     >
       <div className="grid gap-2 sm:grid-cols-3">
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Nome (ex.: Treino D)"
-          className="rounded-lg bg-white px-2 py-1.5 text-sm ring-1 ring-line"
+          className="rounded-lg bg-card px-2 py-1.5 text-sm ring-1 ring-line"
         />
         <input
           value={focus}
           onChange={(e) => setFocus(e.target.value)}
           placeholder="Foco (ex.: Ombros)"
-          className="rounded-lg bg-white px-2 py-1.5 text-sm ring-1 ring-line"
+          className="rounded-lg bg-card px-2 py-1.5 text-sm ring-1 ring-line"
         />
         <input
           value={modality}
           onChange={(e) => setModality(e.target.value)}
           placeholder="Modalidade"
-          className="rounded-lg bg-white px-2 py-1.5 text-sm ring-1 ring-line"
+          className="rounded-lg bg-card px-2 py-1.5 text-sm ring-1 ring-line"
         />
       </div>
 
@@ -401,25 +401,25 @@ function NewWorkoutForm({ onCreate }: { onCreate: (w: Workout) => void }) {
             value={r.name}
             onChange={(e) => update(i, { name: e.target.value })}
             placeholder="Exercício"
-            className="rounded-lg bg-white px-2 py-1.5 text-sm ring-1 ring-line"
+            className="rounded-lg bg-card px-2 py-1.5 text-sm ring-1 ring-line"
           />
           <input
             value={r.sets}
             onChange={(e) => update(i, { sets: e.target.value })}
             placeholder="Séries"
-            className="rounded-lg bg-white px-2 py-1.5 text-sm ring-1 ring-line"
+            className="rounded-lg bg-card px-2 py-1.5 text-sm ring-1 ring-line"
           />
           <input
             value={r.reps}
             onChange={(e) => update(i, { reps: e.target.value })}
             placeholder="Reps"
-            className="rounded-lg bg-white px-2 py-1.5 text-sm ring-1 ring-line"
+            className="rounded-lg bg-card px-2 py-1.5 text-sm ring-1 ring-line"
           />
           <input
             value={r.rest}
             onChange={(e) => update(i, { rest: e.target.value })}
             placeholder="Descanso s"
-            className="rounded-lg bg-white px-2 py-1.5 text-sm ring-1 ring-line"
+            className="rounded-lg bg-card px-2 py-1.5 text-sm ring-1 ring-line"
           />
         </div>
       ))}
@@ -432,7 +432,7 @@ function NewWorkoutForm({ onCreate }: { onCreate: (w: Workout) => void }) {
         >
           + Exercício
         </button>
-        <button className="rounded-lg bg-brand px-3 py-1.5 text-sm font-medium text-white ring-1 ring-brand/30">
+        <button className="rounded-lg bg-brand px-3 py-1.5 text-sm font-medium text-background ring-1 ring-brand/30">
           Salvar treino
         </button>
       </div>
