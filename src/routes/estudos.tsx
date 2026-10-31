@@ -1,6 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { StudyModule } from "@/components/StudyModule";
 import { ModuleGate } from "@/components/EmptyState";
+import { ModuleHeader } from "@/components/ModuleHeader";
+import { useTaskBio } from "@/lib/trilha-store";
+import { isModuleOn } from "@/lib/modules";
 
 export const Route = createFileRoute("/estudos")({
   head: () => ({ meta: [
@@ -11,5 +14,11 @@ export const Route = createFileRoute("/estudos")({
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary" },
   ] }),
-  component: () => <ModuleGate id="estudos"><StudyModule /></ModuleGate>,
+  component: Estudos,
 });
+
+function Estudos() {
+  const { modules } = useTaskBio();
+  if (isModuleOn(modules, "estudos")) return <StudyModule />;
+  return <main className="mx-auto max-w-4xl px-5 pb-20 sm:px-8"><ModuleHeader title="Estudos" /><ModuleGate id="estudos"><StudyModule /></ModuleGate></main>;
+}
