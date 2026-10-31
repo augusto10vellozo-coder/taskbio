@@ -23,7 +23,7 @@ describe("dueReminders", () => {
   });
 });
 
-import { dueSettingsReminders, dueStreakRisk, dueDayClose, dueMealReminders, dueLeagueOpen, readNotifPrefs, inQuietHours, wallClockMs } from "./push-reminders";
+import { dueSettingsReminders, dueStreakRisk, dueDayClose, dueMealReminders, readNotifPrefs, inQuietHours, wallClockMs } from "./push-reminders";
 describe("dueSettingsReminders", () => {
   it("avisa conta 1 dia antes às 9h e medicamento no horário", () => {
     const at9 = new Date("2026-10-14T12:02:00Z"); // 09:02 em São Paulo
@@ -100,22 +100,9 @@ describe("dueMealReminders", () => {
   });
 });
 
-describe("dueLeagueOpen", () => {
-  it("avisa segunda às 9h com a posição da semana anterior", () => {
-    const mon = new Date("2026-10-19T12:01:00Z"); // segunda 09:01 em SP
-    const r = dueLeagueOpen(3, TZ, mon)[0]!;
-    expect(r.title).toBe("🏆 Nova liga começou! Você fechou a semana passada em 3º lugar");
-    expect(r.url).toBe("/amigos");
-  });
-  it("não avisa em outro dia nem sem posição conhecida", () => {
-    expect(dueLeagueOpen(3, TZ, new Date("2026-10-20T12:01:00Z"))).toEqual([]); // terça
-    expect(dueLeagueOpen(null, TZ, new Date("2026-10-19T12:01:00Z"))[0]!.title).not.toContain("lugar");
-  });
-});
-
 describe("preferências e horário de silêncio", () => {
   it("lê toggles salvos e liga tudo por padrão", () => {
-    expect(readNotifPrefs(null)).toEqual({ master: true, streak: true, dayClose: true, meals: true, league: true, tasks: true, workouts: true, weekly: true, exams: true });
+    expect(readNotifPrefs(null)).toEqual({ master: true, streak: true, dayClose: true, meals: true, tasks: true, workouts: true, weekly: true, exams: true });
     expect(readNotifPrefs({ notifPrefs: { streak: false } }).streak).toBe(false);
     expect(readNotifPrefs({ notifPrefs: { streak: false } }).meals).toBe(true);
     expect(readNotifPrefs({ notifPrefs: { master: false } }).master).toBe(false);
@@ -133,7 +120,7 @@ describe("preferências e horário de silêncio", () => {
   });
 });
 
-import { dueStreakMilestone, dueDayComplete, dueLeagueMove, dueWeeklySummary } from "./push-reminders";
+import { dueStreakMilestone, dueDayComplete, dueWeeklySummary } from "./push-reminders";
 describe("celebrações e resumo", () => {
   const habits = [{ id: "h1" }];
   const log = (n: number) => Object.fromEntries(Array.from({ length: n }, (_, i) => [new Date(Date.UTC(2026, 9, 14 - i)).toISOString().slice(0, 10), ["h1"]]));
@@ -148,16 +135,11 @@ describe("celebrações e resumo", () => {
     expect(dueDayComplete({ "2026-10-14": [{ done: true }] }, TZ, noon)[0]!.url).toBe("/agenda");
     expect(dueDayComplete({ "2026-10-14": [{ done: true }, { done: false }] }, TZ, noon)).toEqual([]);
   });
-  it("avisa liderança assumida e ultrapassagem", () => {
-    expect(dueLeagueMove(2, 1, null, TZ, noon)[0]!.title).toBe("📈 Você assumiu a liderança!");
-    expect(dueLeagueMove(1, 2, { name: "Ana Souza", xpGap: 15 }, TZ, noon)[0]!.title).toBe("📉 Ana te ultrapassou — 2 hábitos hoje te devolvem o 1º");
-    expect(dueLeagueMove(null, 1, null, TZ, noon)).toEqual([]);
-  });
   it("resumo semanal só domingo às 20h", () => {
     const sun = new Date("2026-10-18T23:01:00Z"); // domingo 20:01 em SP
     const plan = { "2026-10-17": [{ kind: "treino", done: true }, { kind: "refeicao" }] };
     const r = dueWeeklySummary({ plan, habitLog: { "2026-10-18": ["h1"] }, kcalFor: (b) => b.filter((x) => x.kind === "refeicao").length * 500 }, TZ, sun)[0]!;
-    expect(r.title).toBe("📊 Sua semana: 2 dias marcados · 1 treino · 500 kcal planejadas. Confira o card e compartilhe!");
+    expect(r.title).toBe("📊 Sua semana: 2 dias marcados · 1 treino · 500 kcal planejadas. Confira seu progresso!");
     expect(dueWeeklySummary({ plan, habitLog: {}, kcalFor: () => 0 }, TZ, new Date("2026-10-17T23:01:00Z"))).toEqual([]);
   });
 });

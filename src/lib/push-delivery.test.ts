@@ -29,7 +29,7 @@ describe("delivery acceptance and retries", () => {
   });
 });
 describe("all layers obey silence and preferences", () => {
-  for (const layer of ["streak", "dayClose", "meals", "league", "tasks", "workouts", "weekly", "exams", "bill", "med"]) {
+  for (const layer of ["streak", "dayClose", "meals", "tasks", "workouts", "weekly", "exams", "bill", "med"]) {
     it(`${layer} is silent from 22:30 through 06:59`, () => {
       for (const utc of ["2026-10-20T01:30:00Z", "2026-10-20T09:59:00Z"]) expect(canDeliver(layer, defaultNotifPrefs, "America/Sao_Paulo", new Date(utc))).toBe(false);
       expect(canDeliver(layer, defaultNotifPrefs, "America/Sao_Paulo", new Date("2026-10-20T10:00:00Z"))).toBe(true);
@@ -40,9 +40,19 @@ describe("all layers obey silence and preferences", () => {
   });
   it("master toggle pauses every layer without touching individual prefs", () => {
     const off = { ...defaultNotifPrefs, master: false };
-    for (const layer of ["streak", "dayClose", "meals", "league", "tasks", "workouts", "weekly", "exams", "bill", "med"]) {
+    for (const layer of ["streak", "dayClose", "meals", "tasks", "workouts", "weekly", "exams", "bill", "med"]) {
       expect(canDeliver(layer, off, "America/Sao_Paulo", new Date("2026-10-20T12:00:00Z"))).toBe(false);
     }
     expect(canDeliver("tasks", { ...off, master: true }, "America/Sao_Paulo", new Date("2026-10-20T12:00:00Z"))).toBe(true);
+  });
+});
+// Legacy preferences or queued social jobs must never revive removed notifications.
+describe("removed competition notifications", () => {
+  it("blocks league, position, invite, friend and nudge jobs even with legacy opt-in", () => {
+    const legacyPrefs = { ...defaultNotifPrefs, league: true };
+    for (const layer of ["league", "leaguemove", "invite", "friend", "nudge"]) {
+      expect(canDeliver(layer, legacyPrefs, "America/Sao_Paulo", new Date("2026-10-31T12:00:00Z"))).toBe(false);
+    }
+    expect(canDeliver("tasks", legacyPrefs, "America/Sao_Paulo", new Date("2026-10-31T12:00:00Z"))).toBe(true);
   });
 });

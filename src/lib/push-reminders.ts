@@ -5,14 +5,14 @@ type ReminderBlock = { id: string; time: string; kind: string; title: string; do
 export type DueReminder = { key: string; title: string; body: string; url: string; tag?: string };
 
 /** Per-layer notification toggles stored in user_data.settings.notifPrefs; all on by default. `master` pauses every layer without revoking the OS permission. */
-export type NotifPrefs = { master: boolean; streak: boolean; dayClose: boolean; meals: boolean; league: boolean; tasks: boolean; workouts: boolean; weekly: boolean; exams: boolean };
-export const defaultNotifPrefs: NotifPrefs = { master: true, streak: true, dayClose: true, meals: true, league: true, tasks: true, workouts: true, weekly: true, exams: true };
+export type NotifPrefs = { master: boolean; streak: boolean; dayClose: boolean; meals: boolean; tasks: boolean; workouts: boolean; weekly: boolean; exams: boolean };
+export const defaultNotifPrefs: NotifPrefs = { master: true, streak: true, dayClose: true, meals: true, tasks: true, workouts: true, weekly: true, exams: true };
 export function readNotifPrefs(settings: unknown): NotifPrefs {
   const raw = settings && typeof settings === "object" && !Array.isArray(settings)
     ? (settings as Record<string, unknown>)["notifPrefs"] : undefined;
   const p = raw && typeof raw === "object" && !Array.isArray(raw) ? raw as Record<string, unknown> : {};
   const on = (k: keyof NotifPrefs) => typeof p[k] === "boolean" ? (p[k] as boolean) : true;
-  return { master: on("master"), streak: on("streak"), dayClose: on("dayClose"), meals: on("meals"), league: on("league"), tasks: on("tasks"), workouts: on("workouts"), weekly: on("weekly"), exams: on("exams") };
+  return { master: on("master"), streak: on("streak"), dayClose: on("dayClose"), meals: on("meals"), tasks: on("tasks"), workouts: on("workouts"), weekly: on("weekly"), exams: on("exams") };
 }
 
 /** No notifications between 22:30 and 07:00 (user-local wall clock ms from localWallClock). */
@@ -189,17 +189,6 @@ export function dueMealReminders(plan: unknown, timeZone: string, now: Date): Du
   return result;
 }
 
-/** Monday 09:00 — new league week, with last week's position when known. */
-export function dueLeagueOpen(lastWeekPosition: number | null, timeZone: string, now: Date): DueReminder[] {
-  const nowMs = wallClock(now, timeZone);
-  if (new Date(nowMs).getUTCDay() !== 1 || !atTime(nowMs, "09:00")) return [];
-  const weekStart = dayKey(nowMs);
-  const title = lastWeekPosition && lastWeekPosition > 0
-    ? `🏆 Nova liga começou! Você fechou a semana passada em ${lastWeekPosition}º lugar`
-    : "🏆 Nova liga começou! Marque hábitos e suba no ranking";
-  return [{ key: `league|${weekStart}`, title, body: "", url: "/amigos", tag: "league" }];
-}
-
 const firstName = (name?: string) => (name ?? "").trim().split(/\s+/)[0]?.slice(0, 30) ?? "";
 
 function mealQuestion(title: string) {
@@ -236,19 +225,6 @@ export function dueDayComplete(plan: unknown, timeZone: string, now: Date): DueR
   return [{ key: `dayfull|${today}`, title: "✅ Dia fechado! 100% dos blocos. Descanse merecidamente", body: "", url: "/agenda", tag: "dayfull" }];
 }
 
-/** League position change versus the last stored position this week. */
-export function dueLeagueMove(prev: number | null, pos: number, leader: { name: string; xpGap: number; pctGap?: number } | null, timeZone: string, now: Date): DueReminder[] {
-  if (!prev || prev === pos) return [];
-  const today = dayKey(wallClock(now, timeZone));
-  if (pos === 1 && prev > 1) return [{ key: `leaguemove|lead|${today}`, title: "📈 Você assumiu a liderança!", body: "", url: "/amigos", tag: "leaguemove" }];
-  if (prev === 1 && pos > 1 && leader) {
-    if (leader.pctGap !== undefined) return [{ key: `leaguemove|lost|${today}`, title: `📉 ${firstName(leader.name) || "Um amigo"} te ultrapassou — conclua o seu dia pra voltar ao 1º`, body: "", url: "/amigos", tag: "leaguemove" }];
-    const habits = Math.max(1, Math.ceil((leader.xpGap + 1) / 10));
-    return [{ key: `leaguemove|lost|${today}`, title: `📉 ${firstName(leader.name) || "Um amigo"} te ultrapassou — ${habits} hábito${habits > 1 ? "s" : ""} hoje te devolve${habits > 1 ? "m" : ""} o 1º`, body: "", url: "/amigos", tag: "leaguemove" }];
-  }
-  return [];
-}
-
 /** Sunday 20:00 weekly summary (Sunday → Saturday week ending today). */
 export function dueWeeklySummary(input: { plan: unknown; habitLog: unknown; kcalFor: (blocks: { kind: string }[]) => number }, timeZone: string, now: Date): DueReminder[] {
   const nowMs = wallClock(now, timeZone);
@@ -264,5 +240,5 @@ export function dueWeeklySummary(input: { plan: unknown; habitLog: unknown; kcal
     kcal += input.kcalFor(blocks as { kind: string }[]);
   }
   const today = dayKey(nowMs);
-  return [{ key: `weekly|${today}`, title: `📊 Sua semana: ${days} dia${days === 1 ? "" : "s"} marcado${days === 1 ? "" : "s"} · ${workouts} treino${workouts === 1 ? "" : "s"} · ${Math.round(kcal)} kcal planejadas. Confira o card e compartilhe!`, body: "", url: "/progresso", tag: "weekly" }];
+  return [{ key: `weekly|${today}`, title: `📊 Sua semana: ${days} dia${days === 1 ? "" : "s"} marcado${days === 1 ? "" : "s"} · ${workouts} treino${workouts === 1 ? "" : "s"} · ${Math.round(kcal)} kcal planejadas. Confira seu progresso!`, body: "", url: "/progresso", tag: "weekly" }];
 }
