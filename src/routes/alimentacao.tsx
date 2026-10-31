@@ -245,8 +245,7 @@ function Alimentacao() {
           </article>)}
         </div>
       </details>}
-      <div className="flex flex-wrap items-center justify-between gap-3 py-5">
-        <p className="text-xs leading-5 text-steel">Registros pessoais. Não substituem orientação de profissional.</p>
+      <div className="flex justify-end py-5">
         <Button asChild variant="link" size="sm"><Link to="/compras">Lista da semana <ArrowRight className="size-4" /></Link></Button>
       </div>
       <Dialog open={manualOpen} onOpenChange={setManualOpen}>
@@ -275,6 +274,6 @@ function Alimentacao() {
           </form>
         </DialogContent>
       </Dialog>
-    </main>
+    </ModuleGate></main>
   );
 }
