@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { consumeAiQuota } from "./ai-quota.server";
 
 const reviewInput = z.object({
   criteria: z.string().trim().min(20).max(4000),
@@ -17,6 +18,10 @@ export const reviewPublicContent = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { data: isAdmin } = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" });
     if (!isAdmin) return { data: null, error: "Esta área é exclusiva da equipe responsável pelo TaskBio." };
+
+    const chars = data.criteria.length + data.pages.reduce((total, page) => total + page.content.length, 0);
+    const quota = await consumeAiQuota(context.supabase, "content_review", chars);
+    if (!quota.allowed) return { data: null, error: quota.error };
 
     const { evaluatePublicContent } = await import("./content-review.server");
     const evaluation = await evaluatePublicContent(data.pages, data.criteria);

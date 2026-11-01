@@ -30,7 +30,7 @@ describe("engagement", () => {
     expect(streak({}, { "2026-10-13": ["b"] }, today, habits)).toBe(1);
   });
   it("milestones at 7, 14 and 30", () => {
-    expect([7, 14, 30].every(isMilestone)).toBe(true);
+    expect([5, 10, 20, 30, 50].every(isMilestone)).toBe(true);
     expect(isMilestone(8)).toBe(false);
   });
   it("workout goals count completed workouts of the month", () => {

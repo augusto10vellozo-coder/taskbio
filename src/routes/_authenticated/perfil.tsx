@@ -5,6 +5,7 @@ import { Bell, Download, LogOut, MonitorSmartphone, Moon, Save, Sun, Trash2, Use
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import type { Json } from "@/integrations/supabase/types";
 import { GOALS } from "@/lib/trilha-data";
 import { useTaskBio } from "@/lib/trilha-store";
 import { deleteMyAccount } from "@/lib/account.functions";
@@ -24,8 +25,6 @@ export const Route = createFileRoute("/_authenticated/perfil")({
   component: ProfilePage,
 });
 
-type Preferences = { reminders: boolean; weeklySummary: boolean; compactView: boolean };
-
 function ProfilePage() {
   const navigate = useNavigate();
   const { user } = Route.useRouteContext();
@@ -34,7 +33,6 @@ function ProfilePage() {
   const [name, setName] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
   const [goal, setProfileGoal] = useState("");
-  const [preferences, setPreferences] = useState<Preferences>({ reminders: true, weeklySummary: true, compactView: false });
   const savedPrefsRef = useRef<Record<string, unknown>>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -47,13 +45,7 @@ function ProfilePage() {
         setAvatarUrl(data.avatar_url || user.user_metadata["avatar_url"] || "");
         setProfileGoal(data.goal || "");
         if (data.preferences && typeof data.preferences === "object" && !Array.isArray(data.preferences)) {
-          const saved = data.preferences as Record<string, unknown>;
-          savedPrefsRef.current = saved;
-          setPreferences((current) => ({
-            reminders: typeof saved["reminders"] === "boolean" ? saved["reminders"] : current.reminders,
-            weeklySummary: typeof saved["weeklySummary"] === "boolean" ? saved["weeklySummary"] : current.weeklySummary,
-            compactView: typeof saved["compactView"] === "boolean" ? saved["compactView"] : current.compactView,
-          }));
+          savedPrefsRef.current = data.preferences as Record<string, unknown>;
         }
       }
       setLoading(false);
@@ -63,7 +55,7 @@ function ProfilePage() {
   async function save(event: FormEvent) {
     event.preventDefault();
     setSaving(true);
-    const { error } = await supabase.from("profiles").update({ display_name: name.trim(), avatar_url: avatarUrl.trim() || null, goal: goal || null, preferences: { ...savedPrefsRef.current, ...preferences }, updated_at: new Date().toISOString() }).eq("id", user.id);
+    const { error } = await supabase.from("profiles").update({ display_name: name.trim(), avatar_url: avatarUrl.trim() || null, goal: goal || null, preferences: savedPrefsRef.current as Json, updated_at: new Date().toISOString() }).eq("id", user.id);
     setSaving(false);
     if (error) {
       toast.error("Não foi possível salvar o perfil.");
@@ -117,7 +109,7 @@ function ProfilePage() {
   return <main className="mx-auto max-w-4xl px-5 pb-20 sm:px-8"><ModuleHeader title="Meu perfil" /><div className="flex justify-end"><Button variant="outline" onClick={signOut}><LogOut /> Sair</Button></div>
     <form onSubmit={save} className="mt-7 grid gap-5 lg:grid-cols-[220px_1fr]">
       <aside className="glass-strong rounded-2xl p-5 text-center ring-1 ring-line">{avatarUrl ? <img src={avatarUrl} alt="Foto do perfil" className="mx-auto size-24 rounded-full object-cover ring-4 ring-card" /> : <div className="mx-auto grid size-24 place-items-center rounded-full bg-mist text-steel"><UserRound className="size-10" /></div>}<p className="mt-4 text-sm font-medium">{name || "Seu nome"}</p><p className="mt-1 truncate text-xs text-steel">{user.email}</p></aside>
-      <section className="glass-strong rounded-2xl p-6 ring-1 ring-line">{loading ? <p className="text-sm text-steel">Carregando perfil...</p> : <div className="space-y-5"><label className="block text-sm font-medium">Nome<input required value={name} onChange={(event) => setName(event.target.value)} className="mt-1.5 h-10 w-full rounded-md bg-card px-3 font-normal ring-1 ring-line" /></label><label className="block text-sm font-medium">Endereço da foto<input type="url" value={avatarUrl} onChange={(event) => setAvatarUrl(event.target.value)} className="mt-1.5 h-10 w-full rounded-md bg-card px-3 font-normal ring-1 ring-line" placeholder="https://..." /></label><label className="block text-sm font-medium">Objetivo principal<select value={goal} onChange={(event) => setProfileGoal(event.target.value)} className="mt-1.5 h-10 w-full rounded-md bg-card px-3 font-normal ring-1 ring-line"><option value="">Escolha um objetivo</option>{GOALS.map((item) => <option key={item}>{item}</option>)}</select></label><fieldset><legend className="text-sm font-medium">Preferências</legend><div className="mt-2 space-y-2">{([{ key: "reminders", label: "Receber lembretes da rotina" }, { key: "weeklySummary", label: "Receber resumo semanal" }, { key: "compactView", label: "Usar visualização compacta" }] as const).map((item) => <label key={item.key} className="flex items-center gap-3 rounded-lg bg-card p-3 text-sm ring-1 ring-line"><input type="checkbox" checked={preferences[item.key]} onChange={(event) => setPreferences((current) => ({ ...current, [item.key]: event.target.checked }))} className="size-4 accent-brand" />{item.label}</label>)}</div></fieldset><Button disabled={saving}><Save />{saving ? "Salvando..." : "Salvar perfil"}</Button></div>}</section>
+      <section className="glass-strong rounded-2xl p-6 ring-1 ring-line">{loading ? <p className="text-sm text-steel">Carregando perfil...</p> : <div className="space-y-5"><label className="block text-sm font-medium">Nome<input required value={name} onChange={(event) => setName(event.target.value)} className="mt-1.5 h-10 w-full rounded-md bg-card px-3 font-normal ring-1 ring-line" /></label><label className="block text-sm font-medium">Endereço da foto<input type="url" value={avatarUrl} onChange={(event) => setAvatarUrl(event.target.value)} className="mt-1.5 h-10 w-full rounded-md bg-card px-3 font-normal ring-1 ring-line" placeholder="https://..." /></label><label className="block text-sm font-medium">Objetivo principal<select value={goal} onChange={(event) => setProfileGoal(event.target.value)} className="mt-1.5 h-10 w-full rounded-md bg-card px-3 font-normal ring-1 ring-line"><option value="">Escolha um objetivo</option>{GOALS.map((item) => <option key={item}>{item}</option>)}</select></label><Button disabled={saving}><Save />{saving ? "Salvando..." : "Salvar perfil"}</Button></div>}</section>
     </form>
     <section className="mt-6 grid gap-4 sm:grid-cols-2"><div className="rounded-lg bg-card p-5 ring-1 ring-line"><h2 className="font-display text-xl font-semibold">Privacidade e dados</h2><p className="mt-2 text-sm text-steel">Baixe uma cópia dos seus registros ou exclua sua conta e seus dados.</p><div className="mt-4 flex flex-wrap gap-2"><Button type="button" variant="outline" onClick={exportData}><Download /> Exportar dados</Button><Button type="button" variant="destructive" onClick={removeAccount}><Trash2 /> Excluir conta</Button></div></div><div className="rounded-lg bg-card p-5 ring-1 ring-line"><h2 className="font-display text-xl font-semibold">Lembretes no aparelho</h2><p className="mt-2 text-sm text-steel">Avisamos cerca de 5 minutos antes dos compromissos (30 minutos antes dos treinos), mesmo com o TaskBio fechado. No iPhone, use o app instalado na Tela de Início.</p><div className="mt-4 flex flex-wrap gap-2"><Button type="button" variant="outline" onClick={enableNotifications}><Bell /> Ativar avisos</Button><Button type="button" variant="ghost" onClick={disableNotifications}>Desativar</Button></div></div></section>
     <AppearanceSection userId={user.id} />

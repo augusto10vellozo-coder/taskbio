@@ -1,4 +1,5 @@
 import { addDays, format, parseISO } from "date-fns";
+import { isStreakMilestone } from "./xp";
 import type { Plan, WorkoutHistoryEntry } from "./trilha-data";
 
 /** countsForStreak defaults to true when missing. */
@@ -72,8 +73,8 @@ export function streak(plan: Plan, log: HabitLog, today: Date, habits?: Habit[],
   return count;
 }
 
-export const STREAK_MILESTONES = [7, 14, 30] as const;
-export const isMilestone = (n: number) => (STREAK_MILESTONES as readonly number[]).includes(n);
+export { STREAK_MILESTONES } from "./xp";
+export const isMilestone = isStreakMilestone;
 
 export function goalProgress(goal: MonthGoal, history: WorkoutHistoryEntry[], log: HabitLog, plan: Plan = {}) {
   if (goal.source === "workouts") {

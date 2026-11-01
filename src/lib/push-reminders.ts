@@ -1,6 +1,7 @@
 // Pure scheduling logic for server-sent agenda reminders (shared with tests).
 import { medicationDoses, doseTaken } from "./health";
 import type { Medication } from "./engagement";
+import { STREAK_MILESTONES, XP_DAILY_CAP, isStreakMilestone } from "./xp";
 type ReminderBlock = { id: string; time: string; kind: string; title: string; done?: boolean; reminderMinutes?: number };
 export type DueReminder = { key: string; title: string; body: string; url: string; tag?: string };
 
@@ -86,7 +87,7 @@ export function dueSettingsReminders(settings: unknown, timeZone: string, now: D
   const taken = s.health?.medsTaken?.[today] ?? [];
   for (const med of medicationDoses(s.health?.meds ?? [], today)) {
     if (doseTaken(med, taken) || !inWindow(at(med.time))) continue;
-    result.push({ key: med.legacy ? `med|${med.medicationId}|${today}` : `med|${med.id}`, title: `Lembrete: ${String(med.name).slice(0, 80)}`, body: `Horário marcado: ${med.time}.`, url: "/saude" });
+    result.push({ key: `med|${med.legacy ? med.medicationId : med.id}|${today}`, title: `Lembrete: ${String(med.name).slice(0, 80)}`, body: `Horário marcado: ${med.time}.`, url: "/saude" });
   }
   for (const ex of (s as { trackers?: { exams?: { id: string; subjectName?: string; title: string; date: string; done?: boolean }[] } }).trackers?.exams ?? []) {
     if (!prefs.exams || !ex || ex.done || typeof ex.date !== "string") continue;
@@ -169,7 +170,7 @@ export function dueDayClose(plan: unknown, todayXp: number, timeZone: string, no
   const blocks = (plan && typeof plan === "object" ? (plan as PlanLike)[today] : undefined) ?? [];
   const pending = blocks.filter((b) => b && !b.done).length;
   if (pending === 0) return [];
-  const xpLeft = Math.max(0, 100 - Math.max(0, Math.floor(todayXp)));
+  const xpLeft = Math.max(0, XP_DAILY_CAP - Math.max(0, Math.floor(todayXp)));
   return [{ key: `dayclose|${today}`, title: `🌙 Faltam ${pending} ${pending > 1 ? "itens" : "item"} pra fechar o dia — ${xpLeft === 1 ? "vale" : "valem"} ${xpLeft} XP`, body: "", url: "/agenda", tag: "dayclose" }];
 }
 
@@ -200,9 +201,10 @@ function mealQuestion(title: string) {
   return `Já registrou ${title.slice(0, 40)}?`;
 }
 
-export const STREAK_MILESTONES = [5, 10, 20, 30, 50];
+/** Kept as an alias so existing imports keep working. */
+export const STREAK_MILESTONE_DAYS = STREAK_MILESTONES;
 
-/** Streak milestone reached today: bonus of 10 XP from the 10-day mark, capped by the 100 XP/day limit. */
+/** Streak milestone reached today: bonus of 10 XP from the 10-day mark, capped by the daily XP limit. */
 export function dueStreakMilestone(input: { plan: unknown; habitLog: unknown; habits: unknown; frozenDays: string[]; todayXp: number }, timeZone: string, now: Date): (DueReminder & { bonus: number })[] {
   const nowMs = wallClock(now, timeZone);
   const today = dayKey(nowMs);
@@ -211,8 +213,8 @@ export function dueStreakMilestone(input: { plan: unknown; habitLog: unknown; ha
   const hs = Array.isArray(input.habits) ? (input.habits as HabitLike[]) : [];
   if (!activeDay(p, log, today, hs, new Set())) return [];
   const streak = streakDays(input.plan, input.habitLog, input.habits, input.frozenDays, today);
-  if (!STREAK_MILESTONES.includes(streak)) return [];
-  const bonus = streak >= 10 ? Math.max(0, Math.min(10, 100 - Math.max(0, Math.floor(input.todayXp)))) : 0;
+  if (!isStreakMilestone(streak)) return [];
+  const bonus = streak >= 10 ? Math.max(0, Math.min(10, XP_DAILY_CAP - Math.max(0, Math.floor(input.todayXp)))) : 0;
   const title = bonus > 0 ? `🎉 ${streak} dias seguidos! +${bonus} XP de bônus` : `🎉 ${streak} dias seguidos! Continue assim`;
   return [{ key: `milestone|${streak}|${today}`, title, body: "", url: "/progresso", tag: "milestone", bonus }];
 }

@@ -72,13 +72,13 @@ describe("dueStreakRisk", () => {
 describe("dueDayClose", () => {
   const at2130 = new Date("2026-10-15T00:31:00Z"); // 21:31 em SP
   const dayPlan = { "2026-10-14": [{ done: true }, { done: false }, { done: false }] };
-  it("avisa às 21h30 com itens pendentes e XP restante até o teto de 100", () => {
+  it("avisa às 21h30 com itens pendentes e XP restante até o teto diário", () => {
     const r = dueDayClose(dayPlan, 60, TZ, at2130)[0]!;
-    expect(r.title).toBe("🌙 Faltam 2 itens pra fechar o dia — valem 40 XP");
+    expect(r.title).toBe("🌙 Faltam 2 itens pra fechar o dia — valem 90 XP");
   });
   it("não avisa sem pendências e zera o XP no teto", () => {
     expect(dueDayClose({ "2026-10-14": [{ done: true }] }, 60, TZ, at2130)).toEqual([]);
-    expect(dueDayClose(dayPlan, 120, TZ, at2130)[0]!.title).toContain("valem 0 XP");
+    expect(dueDayClose(dayPlan, 150, TZ, at2130)[0]!.title).toContain("valem 0 XP");
   });
 });
 
@@ -125,9 +125,9 @@ describe("celebrações e resumo", () => {
   const habits = [{ id: "h1" }];
   const log = (n: number) => Object.fromEntries(Array.from({ length: n }, (_, i) => [new Date(Date.UTC(2026, 9, 14 - i)).toISOString().slice(0, 10), ["h1"]]));
   const noon = new Date("2026-10-14T15:00:00Z");
-  it("marco de 10 dias dá 10 XP de bônus respeitando o teto de 100", () => {
+  it("marco de 10 dias dá 10 XP de bônus respeitando o teto diário", () => {
     expect(dueStreakMilestone({ plan: {}, habitLog: log(10), habits, frozenDays: [], todayXp: 20 }, TZ, noon)[0]!.title).toBe("🎉 10 dias seguidos! +10 XP de bônus");
-    expect(dueStreakMilestone({ plan: {}, habitLog: log(10), habits, frozenDays: [], todayXp: 95 }, TZ, noon)[0]!.bonus).toBe(5);
+    expect(dueStreakMilestone({ plan: {}, habitLog: log(10), habits, frozenDays: [], todayXp: 145 }, TZ, noon)[0]!.bonus).toBe(5);
     expect(dueStreakMilestone({ plan: {}, habitLog: log(5), habits, frozenDays: [], todayXp: 0 }, TZ, noon)[0]!.bonus).toBe(0);
     expect(dueStreakMilestone({ plan: {}, habitLog: log(7), habits, frozenDays: [], todayXp: 0 }, TZ, noon)).toEqual([]);
   });

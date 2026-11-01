@@ -6,6 +6,10 @@ export type XpKind = "habit" | "block" | "meal" | "workout" | "photo" | "reading
 export const XP_POINTS: Record<XpKind, number> = { habit: 5, block: 5, meal: 5, workout: 15, photo: 5, reading: 10, study: 10, bill: XP_BILL_PAID };
 export const XP_DAY_COMPLETE_BONUS = 20;
 export const XP_DAILY_CAP = 150;
+/** Streak days that trigger a celebration (toast and push). Single source for both. */
+export const STREAK_MILESTONES = [5, 10, 20, 30, 50] as const;
+export const isStreakMilestone = (days: number) =>
+  (STREAK_MILESTONES as readonly number[]).includes(days);
 /** Kinds that never count toward the daily cap. */
 export const XP_CAP_EXEMPT = ["bonus", "bonus_dia_completo", "saldo_inicial_migracao"] as const;
 export const LEAGUE_DAILY_CAP = 100;

@@ -1,5 +1,5 @@
 import { streamText } from "ai";
-import { openaiModel } from "./openai.server";
+import { openaiGuard, openaiModel } from "./openai.server";
 
 type ReviewPage = { path: string; title: string; content: string };
 
@@ -43,6 +43,7 @@ export async function evaluatePublicContent(pages: ReviewPage[], criteria: strin
       system: "Você é um revisor editorial brasileiro especializado em conteúdo público de bem-estar. Avalie sem oferecer diagnóstico, prescrição ou aconselhamento jurídico. Responda somente com JSON válido, sem markdown.",
       prompt: `Avalie as páginas públicas do TaskBio segundo os critérios informados. Dê notas inteiras de 0 a 100. As melhorias devem ser específicas, acionáveis e priorizadas.\n\nCRITÉRIOS:\n${criteria}\n\nPÁGINAS:\n${JSON.stringify(pages)}\n\nFormato obrigatório: {"summary":"...","scores":{"clarity":0,"utility":0,"suitability":0},"strengths":["..."],"improvements":[{"priority":"alta|média|baixa","page":"/caminho","action":"...","reason":"..."}],"risks":["..."]}`,
       providerOptions: { openai: { forceReasoning: true, reasoningEffort: "medium", reasoningSummary: "auto", store: false, include: ["reasoning.encrypted_content"] } },
+      ...openaiGuard(),
     });
     const text = await result.text;
     if (!text.trim()) return { data: null, error: "A avaliação terminou sem conteúdo. Tente novamente mais tarde." };
