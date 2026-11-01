@@ -1,6 +1,5 @@
-import { createOpenAI } from "@ai-sdk/openai";
 import { streamText } from "ai";
-import { createGatewayFetch } from "./ai-run-id.server";
+import { openaiModel } from "./openai.server";
 import type { ImportedWorkout } from "./training";
 
 const DAYS = ["seg", "ter", "qua", "qui", "sex", "sab", "dom"] as const;
@@ -25,18 +24,11 @@ function parse(text: string): { readable: boolean; workouts: ImportedWorkout[] }
 }
 
 export async function interpretPlanText(text: string) {
-  const apiKey = process.env["LOVABLE_API_KEY"];
+  const apiKey = process.env["OPENAI_API_KEY"];
   if (!apiKey) return { data: null, error: "A leitura automática ainda não está configurada." };
-  const gateway = createGatewayFetch();
-  const provider = createOpenAI({
-    baseURL: "https://ai.gateway.lovable.dev/v1",
-    apiKey,
-    headers: { "Lovable-API-Key": apiKey, "X-Lovable-AIG-SDK": "vercel-ai-sdk" },
-    fetch: gateway.fetch,
-  });
   try {
     const result = streamText({
-      model: provider.responses("openai/gpt-6-astra"),
+      model: openaiModel(apiKey),
       system: "Você converte planos de treino em português (texto corrido, tabelas, abreviações como 3x10, '3 séries de 10 reps a 40kg') em JSON estruturado. Não invente exercícios nem cargas que não estejam no texto. Responda somente com JSON válido, sem markdown.",
       prompt: `Formato obrigatório: {"readable":true,"workouts":[{"day":"seg|ter|qua|qui|sex|sab|dom|null","name":"Peito e tríceps","exercises":[{"name":"Supino reto","sets":3,"reps":10,"loadKg":40}]}]}\nUse "day": null quando o dia não for informado, e "loadKg": null quando a carga não aparecer. Para faixas de repetições (8-12) use o menor valor. Se o texto não contiver um plano de treino, retorne {"readable":false,"workouts":[]}.\n\nTEXTO DO ARQUIVO:\n${text}`,
       providerOptions: { openai: { forceReasoning: true, reasoningEffort: "low", reasoningSummary: "auto", store: false, include: ["reasoning.encrypted_content"] } },

@@ -3,7 +3,6 @@ import { useEffect, useState, type FormEvent } from "react";
 import { ArrowRight, Eye, EyeOff, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { lovable } from "@/integrations/lovable";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { authErrorMessage } from "@/lib/auth-errors";
@@ -67,16 +66,14 @@ function AuthPage() {
 
   async function handleGoogle() {
     setBusy(true);
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
-      extraParams: { prompt: "select_account" },
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: window.location.origin, queryParams: { prompt: "select_account" } },
     });
-    if (result.error) {
-      toast.error(authErrorMessage(result.error, "Não foi possível entrar com o Google."));
+    if (error) {
+      toast.error(authErrorMessage(error, "Não foi possível entrar com o Google."));
       setBusy(false);
-      return;
     }
-    if (!result.redirected) navigate({ to: "/", replace: true });
   }
 
   if (confirmationEmail) {
