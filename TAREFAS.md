@@ -4,24 +4,24 @@ Lista de pendências do TaskBio. Ordenada por impacto. Atualize ao concluir.
 
 ## Infraestrutura (bloqueios atuais)
 
-- [ ] **`SUPABASE_SERVICE_ROLE_KEY` indisponível no Cloudflare.** A Lovable não libera a chave.
-      XP, sequência e congelamentos já foram resolvidos com funções que usam `auth.uid()`
-      (`drizzle/migrations/0023_self_service_xp.sql`). Ainda dependem do backend da Lovable:
-      exclusão de conta e o cron de notificações.
-- [ ] **Migrar para um Supabase próprio** (projeto `hecqqcconnbjawcevigo` já criado). Pausado.
-      Falta gerar o token da CLI e rodar o `db push` com as migrações, depois importar os dados
-      do export (`Export data` na Lovable).
-- [ ] **Job de notificações** ainda aponta para `project--0c271fe2...lovable.app`.
-      Só trocar depois que o backend estiver no ambiente novo.
-- [ ] **`VAPID_PRIVATE_KEY` na Lovable é a chave antiga.** O Cloudflare já usa o par novo.
-      Trocar na Lovable só depois do push e da troca do job.
-- [ ] **Branch `melhorias/limite-ia-e-bugs` não foi para a `main`.** Já publicada no Cloudflare,
-      falta merge + push para sincronizar com a Lovable.
+- [x] **Migrar para um Supabase próprio.** Banco em `hecqqcconnbjawcevigo`, estrutura restaurada
+      do dump de 01/11 e migrations 0022–0026 aplicadas em 02/11. O app já usa o banco novo.
+      Dados antigos descartados de propósito (eram de teste).
+- [ ] **`SUPABASE_SERVICE_ROLE_KEY` no Cloudflare.** A chave agora existe (projeto próprio), falta
+      cadastrá-la em Settings → Variables and Secrets. Sem ela: excluir conta, push pelo servidor
+      e o cron não funcionam.
+- [ ] **Cron no banco novo.** Ativar `pg_cron` e `pg_net` e recriar os jobs
+      `push-agenda-reminders` (5 min, chamando `taskbio.com.br`) e `habit-freeze-midnight` (03:00 UTC).
+      O job antigo ainda pode existir na Lovable.
+- [ ] **Desligar a Lovable** só depois de confirmar cron, e-mails e push no ambiente novo.
 - [ ] **`.env`, `.env.development` e `.env.production` estão versionados**, com um token Paddle
       `live_` sem uso. O `.gitignore` não ignora `.env*`. Parar de versionar e revogar o token.
 - [ ] **Verificação de marca no Google** para o login exibir "TaskBio" em vez do domínio Supabase.
-- [ ] **Schema não reproduzível:** migrações divididas entre `supabase/migrations` e
-      `drizzle/migrations`, e o agendamento do cron vive fora do repositório.
+- [ ] **`.env` precisa ser atualizado a cada troca de banco.** As chaves `VITE_*` são embutidas no
+      build; trocar só os segredos do Cloudflare deixa o navegador apontando para o banco antigo.
+- [ ] **Backup e schema andam juntos.** O dump de 01/11 não tinha as migrations 0022–0026.
+      Antes de migrar de novo, aplique as migrations pendentes ou gere um backup novo.
+
 
 ## Privacidade e LGPD
 
