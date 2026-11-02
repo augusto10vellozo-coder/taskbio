@@ -130,8 +130,14 @@ function ProfilePage() {
       } catch { /* a limpeza das fotos não impede a exclusão da conta */ }
       await deleteMyAccount();
       try { await supabase.auth.signOut(); } catch { /* a sessão já deixa de valer com a conta */ }
-      navigate({ to: "/", replace: true });
-      toast.success("Conta e dados excluídos.");
+      // O app é local-first: sem limpar aqui, a próxima conta criada neste navegador
+      // herdaria a rotina, a saúde e as finanças que acabaram de ser excluídas.
+      try {
+        Object.keys(localStorage)
+          .filter((key) => key.startsWith("trilha") || key.startsWith("taskbio"))
+          .forEach((key) => localStorage.removeItem(key));
+      } catch { /* armazenamento indisponível */ }
+      window.location.replace("/");
     } catch {
       toast.error("Não foi possível excluir a conta agora.");
     } finally {
