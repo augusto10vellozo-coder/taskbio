@@ -14,6 +14,17 @@ it('missing required cells remain null and block saving until corrected',()=>{
  expect(items[0]?.exercises[0]).toEqual({name:'Supino',sets:null,reps:null,loadKg:null});expect(spreadsheetValid(items)).toBe(false);
 });
 it('structure without headers supports combined prescription and comma load',()=>{expect(spreadsheetRows([['Supino','4x12','20,5']])[0]?.exercises[0]).toEqual({name:'Supino',sets:4,reps:12,loadKg:20.5});});
+it('timer column accepts seconds without repetitions',()=>{
+ const items=spreadsheetRows([['Exercício','Séries','Reps','Tempo','Carga'],['Prancha',3,'',30,''],['Supino',4,12,'',20]]);
+ expect(items[0]?.exercises[0]).toEqual({name:'Prancha',sets:3,reps:null,durationSec:30,loadKg:null});
+ expect(items[0]?.exercises[1]).toEqual({name:'Supino',sets:4,reps:12,loadKg:20});
+ expect(spreadsheetValid(items)).toBe(true);
+});
+it('timer column without seconds stays invalid',()=>{
+ const items=spreadsheetRows([['Exercício','Séries','Tempo'],['Prancha',3,'']]);
+ expect(items[0]?.exercises[0]).toEqual({name:'Prancha',sets:3,reps:null,loadKg:null});
+ expect(spreadsheetValid(items)).toBe(false);
+});
 it('rejects unrelated sheets, oversize and wrong extension',async()=>{
  await expect(readSpreadsheet(file('a.csv','Produto;Valor\nBanana;10'))).rejects.toThrow(SPREADSHEET_EMPTY);
  await expect(readSpreadsheet({...file('a.xlsx',''),size:10*1024*1024+1})).rejects.toThrow('10 MB');

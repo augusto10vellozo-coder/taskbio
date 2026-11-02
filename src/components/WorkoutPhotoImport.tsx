@@ -71,9 +71,17 @@ export function WorkoutPhotoImport({ onContinue, onCancel }: { onContinue: (item
     finally { lock.current = false; if (active.current) setBusy(false); }
   }
 
-  const update = (wi: number, ei: number, field: "sets" | "reps" | "loadKg", value: string) => {
+  const update = (wi: number, ei: number, field: "sets" | "reps" | "durationSec" | "loadKg", value: string) => {
     const number = value.trim() === "" ? null : Number(value.replace(",", "."));
     setItems(all => all.map((w, i) => i !== wi ? w : { ...w, exercises: w.exercises.map((e, j) => j !== ei ? e : { ...e, [field]: number !== null && Number.isFinite(number) ? number : null }) }));
+  };
+  const needsReview = (e: { sets: number | null; reps: number | null; durationSec?: number | null | undefined }, field: "sets" | "reps" | "durationSec" | "loadKg") => {
+    if (field === "loadKg") return false;
+    if (field === "sets") return e.sets === null;
+    const hasAmount = (e.reps !== null && e.reps > 0) || (typeof e.durationSec === "number" && e.durationSec > 0);
+    if (hasAmount) return false;
+    const value = e[field];
+    return value === null || value === 0 || value === undefined;
   };
   const ready = photoToValidation(items);
 
@@ -93,9 +101,9 @@ export function WorkoutPhotoImport({ onContinue, onCancel }: { onContinue: (item
         {workout.notes?.map((note, index) => <p key={index} className="text-sm text-steel">{note}</p>)}
         {workout.exercises.map((exercise, ei) => <div key={ei} className="space-y-2">
           <div className="flex flex-wrap items-center gap-2"><span className="text-sm">{exercise.name}</span>{exercise.review && <span className="text-xs font-semibold text-gold">revisar</span>}</div>
-          <div className="grid grid-cols-3 gap-2">{([['sets', 'Séries'], ['reps', 'Repetições'], ['loadKg', 'Carga (kg)']] as const).map(([field, label]) => <label key={field} className="min-w-0 text-xs text-steel">{label}
-            <input aria-label={`${label} de ${exercise.name}`} inputMode={field === 'loadKg' ? 'decimal' : 'numeric'} placeholder={field === 'loadKg' ? 'opcional' : undefined} value={exercise[field] ?? ""} disabled={busy} onChange={e => update(wi, ei, field, e.target.value)} className={`mt-1 h-9 w-full min-w-0 rounded-md bg-background px-2 text-sm text-ink ring-1 ${field !== 'loadKg' && exercise[field] === null ? 'ring-gold' : 'ring-line'}`} />
-            {field !== 'loadKg' && exercise[field] === null && <span className="mt-1 block text-gold">revisar</span>}
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">{([['sets', 'Séries'], ['reps', 'Repetições'], ['durationSec', 'Tempo (s)'], ['loadKg', 'Carga (kg)']] as const).map(([field, label]) => <label key={field} className="min-w-0 text-xs text-steel">{label}
+            <input aria-label={`${label} de ${exercise.name}`} inputMode={field === 'loadKg' ? 'decimal' : 'numeric'} placeholder={field === 'loadKg' ? 'opcional' : undefined} value={exercise[field] ?? ""} disabled={busy} onChange={e => update(wi, ei, field, e.target.value)} className={`mt-1 h-9 w-full min-w-0 rounded-md bg-background px-2 text-sm text-ink ring-1 ${needsReview(exercise, field) ? 'ring-gold' : 'ring-line'}`} />
+            {needsReview(exercise, field) && <span className="mt-1 block text-gold">revisar</span>}
           </label>)}</div>
           {exercise.review && <Button size="sm" variant="outline" disabled={busy} onClick={() => setItems(all => all.map((w, i) => i !== wi ? w : { ...w, exercises: w.exercises.map((e, j) => j !== ei ? e : { ...e, review: false }) }))}>Conferi este exercício</Button>}
         </div>)}

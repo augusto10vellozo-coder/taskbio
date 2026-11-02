@@ -11,7 +11,6 @@ export const DAYS = [
 export type DayKey = (typeof DAYS)[number]["key"];
 
 export type BlockKind = "refeicao" | "treino" | "compromisso" | "descanso" | "leitura";
-
 export type Macros = { kcal: number; prot: number; carb: number; gord: number };
 
 export type Exercise = {
@@ -19,6 +18,8 @@ export type Exercise = {
   name: string;
   sets: number;
   reps: number;
+  /** Time-based prescription in seconds (plank, isometry). When set, reps may be 0. */
+  durationSec?: number | undefined;
   restSec: number;
   muscles: string;
   howTo: string;
@@ -26,6 +27,10 @@ export type Exercise = {
   doneSets: number;
   seriesByDate?: Record<string, { done: boolean; loadKg?: number | undefined }[]>;
 };
+
+/** "3 × 12" for repetitions, "3 × 30s" for time-based exercises. */
+export const exercisePrescription = (e: { sets: number; reps: number; durationSec?: number | null | undefined }) =>
+  e.durationSec && e.durationSec > 0 ? `${e.sets} × ${e.durationSec}s` : `${e.sets} × ${e.reps}`;
 
 export type Workout = {
   id: string;

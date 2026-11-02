@@ -21,7 +21,7 @@ import { getWeekDates, toDateKey } from "@/lib/calendar-utils";
 import { exerciseHistory, exercisePerformance, kg, progression, toWorkout, weeklyMax, type ImportedWorkout } from "@/lib/training";
 import { interpretWorkoutPlan } from "@/lib/plan-import.functions";
 import type { Block, Exercise, Workout } from "@/lib/trilha-data";
-import { getWorkoutExamples } from "@/lib/trilha-data";
+import { getWorkoutExamples, exercisePrescription } from "@/lib/trilha-data";
 import { WorkoutSeries, SessionProgress } from "@/components/WorkoutSeries";
 import { Progress } from "@/components/ui/progress";
 import { exerciseSeries, weeklyTrainingProgress } from "@/lib/training-session";
@@ -136,17 +136,24 @@ function AssignForm({ workouts, onPick, onCreate }: { workouts: Workout[]; onPic
 function WorkoutDetail({ workout, dateKey }: { workout: Workout; dateKey: string }) {
   const { updateWorkout } = useTaskBio();
   const [open, setOpen] = useState<string | null>(null);
-  const [form, setForm] = useState({ name: "", sets: "3", reps: "10", load: "" });
+  const [form, setForm] = useState({ name: "", sets: "3", reps: "10", duration: "30", load: "", mode: "reps" as "reps" | "tempo" });
+  const timed = form.mode === "tempo";
   return <div className="mt-3 pb-32">
     <RestTimer />
     <SessionProgress workout={workout} date={dateKey} />
     {workout.exercises.length === 0 && <p className="py-4 text-sm text-steel">Adicione os exercícios deste treino.</p>}
     <ul className="divide-y divide-line">{workout.exercises.map((ex) => <ExerciseRow key={ex.id} ex={ex} workout={workout} dateKey={dateKey} open={open === ex.id} onToggle={() => setOpen(open === ex.id ? null : ex.id)} />)}</ul>
-    <form className="mt-4 grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto] sm:grid-cols-[minmax(0,1fr)_64px_64px_80px_auto] gap-2" onSubmit={(e) => { e.preventDefault(); if (!form.name.trim()) return; const ex: Exercise = { id: `e-${Date.now()}`, name: form.name.trim(), sets: Math.max(1, Number(form.sets) || 3), reps: Math.max(1, Number(form.reps) || 10), restSec: 60, muscles: "", howTo: "", doneSets: 0, ...(Number(form.load.replace(",", ".")) ? { loadKg: Number(form.load.replace(",", ".")) } : {}) }; updateWorkout({ ...workout, exercises: [...workout.exercises, ex] }); setForm({ ...form, name: "", load: "" }); }}>
-      <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Exercício" className="col-span-4 h-10 min-w-0 sm:col-span-1 rounded-md bg-background px-3 text-sm ring-1 ring-line" />
-      <input value={form.sets} onChange={(e) => setForm({ ...form, sets: e.target.value })} aria-label="Séries" inputMode="numeric" className="h-10 rounded-md bg-background px-2 text-sm ring-1 ring-line" />
-      <input value={form.reps} onChange={(e) => setForm({ ...form, reps: e.target.value })} aria-label="Repetições" inputMode="numeric" className="h-10 rounded-md bg-background px-2 text-sm ring-1 ring-line" />
-      <input value={form.load} onChange={(e) => setForm({ ...form, load: e.target.value })} placeholder="kg" aria-label="Carga em kg" inputMode="decimal" className="h-10 rounded-md bg-background px-2 text-sm ring-1 ring-line" />
+    <form className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-[minmax(0,1fr)_82px_60px_70px_76px_auto]" onSubmit={(e) => { e.preventDefault(); if (!form.name.trim()) return; if (timed && !Number(form.duration)) return; const ex: Exercise = { id: `e-${Date.now()}`, name: form.name.trim(), sets: Math.max(1, Number(form.sets) || 3), reps: timed ? 0 : Math.max(1, Number(form.reps) || 10), ...(timed ? { durationSec: Math.max(1, Math.round(Number(form.duration))) } : {}), restSec: 60, muscles: "", howTo: "", doneSets: 0, ...(Number(form.load.replace(",", ".")) ? { loadKg: Number(form.load.replace(",", ".")) } : {}) }; updateWorkout({ ...workout, exercises: [...workout.exercises, ex] }); setForm({ ...form, name: "", load: "" }); }}>
+      <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Exercício" className="col-span-2 h-10 min-w-0 rounded-md bg-background px-3 text-sm ring-1 ring-line sm:col-span-1" />
+      <select value={form.mode} onChange={(e) => setForm({ ...form, mode: e.target.value as "reps" | "tempo" })} aria-label="Medida do exercício" className="h-10 min-w-0 rounded-md bg-background px-2 text-sm ring-1 ring-line">
+        <option value="reps">Reps</option>
+        <option value="tempo">Tempo</option>
+      </select>
+      <input value={form.sets} onChange={(e) => setForm({ ...form, sets: e.target.value })} aria-label="Séries" inputMode="numeric" className="h-10 min-w-0 rounded-md bg-background px-2 text-sm ring-1 ring-line" />
+      {timed
+        ? <input value={form.duration} onChange={(e) => setForm({ ...form, duration: e.target.value })} aria-label="Tempo em segundos" placeholder="s" inputMode="numeric" className="h-10 min-w-0 rounded-md bg-background px-2 text-sm ring-1 ring-line" />
+        : <input value={form.reps} onChange={(e) => setForm({ ...form, reps: e.target.value })} aria-label="Repetições" inputMode="numeric" className="h-10 min-w-0 rounded-md bg-background px-2 text-sm ring-1 ring-line" />}
+      <input value={form.load} onChange={(e) => setForm({ ...form, load: e.target.value })} placeholder="kg" aria-label="Carga em kg" inputMode="decimal" className="h-10 min-w-0 rounded-md bg-background px-2 text-sm ring-1 ring-line" />
       <Button size="icon" aria-label="Adicionar exercício"><Plus /></Button>
     </form>
   </div>;
@@ -166,12 +173,12 @@ function ExerciseRow({ ex, workout, dateKey, open, onToggle }: { ex: Exercise; w
   return <li className="py-3">
     <button className="flex w-full items-center gap-3 text-left" onClick={onToggle} aria-expanded={open}>
       <Tick on={ex.sets > 0 && seriesDone === ex.sets} />
-      <span className="min-w-0 flex-1"><span className="block text-sm font-medium">{ex.name}</span><span className="block text-xs text-steel">{seriesDone} de {ex.sets} séries · {ex.sets}x{ex.reps}{ex.loadKg ? ` · ${kg(ex.loadKg)}` : ""}{last ? ` · última vez: ${exercisePerformance(last)}` : ""}</span></span>
+      <span className="min-w-0 flex-1"><span className="block text-sm font-medium">{ex.name}</span><span className="block text-xs text-steel">{seriesDone} de {ex.sets} séries · {exercisePrescription(ex)}{ex.loadKg ? ` · ${kg(ex.loadKg)}` : ""}{last ? ` · última vez: ${exercisePerformance(last)}` : ""}</span></span>
       {delta > 0 && <span className="inline-flex items-center gap-1 rounded-full bg-good/15 px-2 py-0.5 text-[11px] font-medium"><TrendingUp className="size-3" />progressão +{kg(delta)}</span>}
     </button>
     {open && <div className="mt-3 rounded-md bg-background p-3 ring-1 ring-line">
       <WorkoutSeries workout={workout} ex={ex} date={dateKey} />
-      <form className="flex flex-wrap items-end gap-2" onSubmit={(e) => { e.preventDefault(); const l = Number(load.replace(",", ".")); const r = Number(reps); if (!(l >= 0) || !(r > 0)) return; addExerciseLog({ date: dateKey, exercise: ex.name, loadKg: l, reps: r, sets: ex.sets, workoutId: workout.id }); updateWorkout({ ...workout, exercises: workout.exercises.map((x) => x.id === ex.id ? { ...x, loadKg: l } : x) }); toast.success(last && l > last.loadKg ? `Progressão +${kg(l - last.loadKg)}!` : "Registro salvo"); onToggle(); }}>
+      <form className="flex flex-wrap items-end gap-2" onSubmit={(e) => { e.preventDefault(); const l = Number(load.replace(",", ".")); const r = Number(reps); const byTime = Boolean(ex.durationSec && ex.durationSec > 0); if (!(l >= 0) || (!byTime && !(r > 0))) return; addExerciseLog({ date: dateKey, exercise: ex.name, loadKg: l, reps: byTime ? 0 : r, sets: ex.sets, workoutId: workout.id }); updateWorkout({ ...workout, exercises: workout.exercises.map((x) => x.id === ex.id ? { ...x, loadKg: l } : x) }); toast.success(last && l > last.loadKg ? `Progressão +${kg(l - last.loadKg)}!` : "Registro salvo"); onToggle(); }}>
         <label className="text-xs text-steel">Carga (kg)<input autoFocus inputMode="decimal" value={load} onChange={(e) => setLoad(e.target.value)} className="mt-1 block h-10 w-24 rounded-md bg-card px-2 text-sm text-ink ring-1 ring-line" /></label>
         <label className="text-xs text-steel">Repetições<input inputMode="numeric" value={reps} onChange={(e) => setReps(e.target.value)} className="mt-1 block h-10 w-24 rounded-md bg-card px-2 text-sm text-ink ring-1 ring-line" /></label>
         <Button>Salvar registro</Button>
@@ -218,7 +225,10 @@ function ImportDialog({ open, onOpenChange, week, onAssign }: { open: boolean; o
     const known = [...(exerciseLog ?? []).map((e) => e.exercise), ...workoutHistory.flatMap((h) => h.exercises.map((e) => e.name)), ...workouts.flatMap((w) => w.exercises.map((e) => e.name))];
     const stamp = Date.now();
     items.forEach((it, i) => {
-      const validated: ImportedWorkout = { ...it, exercises: it.exercises.map(e => ({ ...e, sets: Number(e.sets), reps: Number(e.reps) })) };
+      const validated: ImportedWorkout = { ...it, exercises: it.exercises.map(e => {
+        const duration = typeof e.durationSec === "number" && e.durationSec > 0 ? Number(e.durationSec) : null;
+        return { ...e, sets: Number(e.sets), reps: duration ? 0 : Number(e.reps), ...(duration ? { durationSec: duration } : {}) };
+      }) };
       const w = toWorkout(validated, known, `w-imp-${stamp}-${i}`);
       addWorkout(w);
       if (it.day) { const date = week[DAY_ORDER.indexOf(it.day)]; if (date) onAssign(toDateKey(date), w); }
@@ -243,14 +253,15 @@ function ImportDialog({ open, onOpenChange, week, onAssign }: { open: boolean; o
         : step === "reading" ? <div className="py-10 text-center text-sm text-steel"><div className="mx-auto mb-3 size-8 animate-spin rounded-full border-2 border-line border-t-brand" />Lendo e interpretando o plano…</div>
         : <div className="space-y-4">
           <p className="text-sm text-steel">Confira e ajuste antes de salvar.</p>
-          {spreadsheet && !spreadsheetValid(items) && items.length > 0 && <p role="alert" className="text-xs text-destructive">Revise os campos de séries e repetições antes de salvar.</p>}
+          {spreadsheet && !spreadsheetValid(items) && items.length > 0 && <p role="alert" className="text-xs text-destructive">Revise séries e repetições (ou o tempo, em segundos) antes de salvar.</p>}
           {items.length === 0 && <p className="text-sm">Nenhum treino restante.</p>}
           {items.map((w, i) => <div key={i} className="rounded-lg p-3 ring-1 ring-line">
             <div className="flex gap-2"><select value={w.day ?? ""} onChange={(e) => upd(i, { ...w, day: (e.target.value || null) as ImportedWorkout["day"] })} aria-label="Dia da semana" className="h-9 rounded-md bg-background px-2 text-sm ring-1 ring-line"><option value="">Sem dia</option>{DAY_ORDER.map((d) => <option key={d} value={d}>{d}</option>)}</select><input value={w.name} onChange={(e) => upd(i, { ...w, name: e.target.value })} aria-label="Nome do treino" className="h-9 min-w-0 flex-1 rounded-md bg-background px-2 text-sm font-medium ring-1 ring-line" /><Button variant="ghost" size="icon" aria-label="Descartar treino" onClick={() => setItems(items.filter((_, j) => j !== i))}><Trash2 /></Button></div>
-            <ul className="mt-2 space-y-1.5">{w.exercises.map((e, k) => { const set = (p: Partial<typeof e>) => upd(i, { ...w, exercises: w.exercises.map((x, m) => (m === k ? { ...x, ...p } : x)) }); return <li key={k} className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto] gap-1.5 sm:grid-cols-[minmax(0,1fr)_52px_52px_64px_auto]">
-              <input value={e.name} onChange={(ev) => set({ name: ev.target.value })} aria-label="Exercício" className="col-span-4 h-8 min-w-0 rounded-md bg-background px-2 text-xs ring-1 ring-line sm:col-span-1" />
+            <ul className="mt-2 space-y-1.5">{w.exercises.map((e, k) => { const set = (p: Partial<typeof e>) => upd(i, { ...w, exercises: w.exercises.map((x, m) => (m === k ? { ...x, ...p } : x)) }); const amountOk = Boolean(e.reps && Number.isInteger(e.reps) && e.reps > 0) || (typeof e.durationSec === "number" && Number.isInteger(e.durationSec) && e.durationSec > 0); return <li key={k} className="grid grid-cols-2 gap-1.5 sm:grid-cols-[minmax(0,1fr)_52px_52px_58px_64px_auto]">
+              <input value={e.name} onChange={(ev) => set({ name: ev.target.value })} aria-label="Exercício" className="col-span-2 h-8 min-w-0 rounded-md bg-background px-2 text-xs ring-1 ring-line sm:col-span-1" />
               <input value={e.sets ?? ""} placeholder={spreadsheet && !e.sets ? "Revisar" : undefined} aria-invalid={spreadsheet && !(e.sets && Number.isInteger(e.sets) && e.sets > 0)} onChange={(ev) => set({ sets: spreadsheet && !ev.target.value ? null : Number(ev.target.value) || 0 })} aria-label="Séries" inputMode="numeric" className="h-8 rounded-md bg-background px-2 text-xs ring-1 ring-line aria-invalid:ring-destructive" />
-              <input value={e.reps ?? ""} placeholder={spreadsheet && !e.reps ? "Revisar" : undefined} aria-invalid={spreadsheet && !(e.reps && Number.isInteger(e.reps) && e.reps > 0)} onChange={(ev) => set({ reps: spreadsheet && !ev.target.value ? null : Number(ev.target.value) || 0 })} aria-label="Repetições" inputMode="numeric" className="h-8 rounded-md bg-background px-2 text-xs ring-1 ring-line aria-invalid:ring-destructive" />
+              <input value={e.reps ?? ""} placeholder={spreadsheet && !amountOk ? "Revisar" : undefined} aria-invalid={spreadsheet && !amountOk} onChange={(ev) => set({ reps: spreadsheet && !ev.target.value ? null : Number(ev.target.value) || 0 })} aria-label="Repetições" inputMode="numeric" className="h-8 rounded-md bg-background px-2 text-xs ring-1 ring-line aria-invalid:ring-destructive" />
+              <input value={e.durationSec ?? ""} placeholder="s" onChange={(ev) => set({ durationSec: ev.target.value ? Number(ev.target.value) || null : null })} aria-label="Tempo em segundos" inputMode="numeric" className="h-8 rounded-md bg-background px-2 text-xs ring-1 ring-line aria-invalid:ring-destructive" aria-invalid={spreadsheet && !amountOk} />
               <input value={e.loadKg ?? ""} placeholder="kg" onChange={(ev) => set({ loadKg: Number(ev.target.value.replace(",", ".")) || null })} aria-label="Carga" inputMode="decimal" className="h-8 rounded-md bg-background px-2 text-xs ring-1 ring-line" />
               <Button variant="ghost" size="icon" className="size-8" aria-label="Descartar exercício" onClick={() => upd(i, { ...w, exercises: w.exercises.filter((_, m) => m !== k) })}><X /></Button>
             </li>; })}</ul>

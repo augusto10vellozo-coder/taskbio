@@ -9,7 +9,8 @@ export const photoPlanSchema = z.object({
     day: z.enum(["seg", "ter", "qua", "qui", "sex", "sab", "dom"]).nullable(),
     name: z.string(),
     exercises: z.array(z.object({
-      name: z.string(), sets: z.number().nullable(), reps: z.number().nullable(), loadKg: z.number().nullable(),
+      name: z.string(), sets: z.number().nullable(), reps: z.number().nullable(),
+      durationSec: z.number().nullable().optional(), loadKg: z.number().nullable(),
       review: z.boolean(),
     }).strict()),
   }).strict()),
@@ -42,9 +43,28 @@ export function validatePhoto(file: { name: string; size: number }) {
 
 /** Only explicitly reviewed, complete values may enter the legacy validator. */
 export function photoToValidation(workouts: PhotoWorkout[]): ImportedWorkout[] | null {
-  if (!workouts.length || workouts.some(w => !w.name.trim() || !w.exercises.length || w.exercises.some(e =>
-    !e.name.trim() || e.review || e.sets === null || !Number.isInteger(e.sets) || e.sets < 1 || e.reps === null || !Number.isInteger(e.reps) || e.reps < 1 || (e.loadKg !== null && (!Number.isFinite(e.loadKg) || e.loadKg < 0))))) return null;
-  return workouts.map(w => ({ ...w, exercises: w.exercises.map(e => ({ name: e.name, sets: Number(e.sets), reps: Number(e.reps), loadKg: e.loadKg })) }));
+  const valid = (e: PhotoWorkout["exercises"][number]) => {
+    const repsOk = e.reps !== null && Number.isInteger(e.reps) && e.reps >= 1;
+    const durationOk = typeof e.durationSec === "number" && Number.isInteger(e.durationSec) && e.durationSec >= 1;
+    return Boolean(e.name.trim()) && !e.review
+      && e.sets !== null && Number.isInteger(e.sets) && e.sets >= 1
+      && (repsOk || durationOk)
+      && (e.loadKg === null || (Number.isFinite(e.loadKg) && e.loadKg >= 0));
+  };
+  if (!workouts.length || workouts.some(w => !w.name.trim() || !w.exercises.length || w.exercises.some(e => !valid(e)))) return null;
+  return workouts.map(w => ({
+    ...w,
+    exercises: w.exercises.map(e => {
+      const duration = typeof e.durationSec === "number" && e.durationSec >= 1 ? Number(e.durationSec) : null;
+      return {
+        name: e.name,
+        sets: Number(e.sets),
+        reps: duration ? 0 : Number(e.reps),
+        ...(duration ? { durationSec: duration } : {}),
+        loadKg: e.loadKg,
+      };
+    }),
+  }));
 }
 
 /** Merge page continuations, preserving the first appearance and exercise order. */

@@ -18,7 +18,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { ACTIVITY_CATALOG, GOALS, OBJECTIVE_EFFECTS, getWorkoutExamples, type Exercise, type Workout } from "@/lib/trilha-data";
+import { ACTIVITY_CATALOG, GOALS, OBJECTIVE_EFFECTS, exercisePrescription, getWorkoutExamples, type Exercise, type Workout } from "@/lib/trilha-data";
 import { useTaskBio } from "@/lib/trilha-store";
 
 
@@ -185,7 +185,7 @@ export function TrainingExplore() {
                               {example.exercises.map((exercise, index) => (
                                 <li key={exercise.id} className="flex items-start gap-3 text-xs">
                                   <span className="grid size-5 shrink-0 place-items-center rounded-full bg-mist font-semibold text-steel">{index + 1}</span>
-                                  <div><p className="font-medium text-ink">{exercise.name} · {exercise.sets} × {exercise.reps}</p><p className="mt-0.5 leading-5 text-steel">{exercise.howTo}</p></div>
+                                  <div><p className="font-medium text-ink">{exercise.name} · {exercisePrescription(exercise)}</p><p className="mt-0.5 leading-5 text-steel">{exercise.howTo}</p></div>
                                 </li>
                               ))}
                             </ol>
@@ -279,7 +279,7 @@ export function TrainingExplore() {
                         <div className="flex items-center justify-between gap-2">
                           <p className="text-sm font-medium">{e.name}</p>
                           <span className="text-[11px] text-steel">
-                            {e.sets} × {e.reps}
+                            {exercisePrescription(e)}
                             {e.restSec ? ` · descanso ${e.restSec}s` : ""}
                           </span>
                         </div>

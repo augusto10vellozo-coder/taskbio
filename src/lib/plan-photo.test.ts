@@ -57,4 +57,17 @@ describe("importação de fotos", () => {
     expect(result[0]?.exercises.map(e => e.name)).toEqual(["Supino", "Remada"]);
     expect(first.exercises).toHaveLength(1);
   });
+  it("exercício por tempo aceita segundos sem repetições", () => {
+    const w = workout();
+    w.exercises = [{ name: "Prancha", sets: 3, reps: null, durationSec: 30, loadKg: null, review: false }];
+    const validated = photoToValidation([w]);
+    expect(validated?.[0]?.exercises[0]).toEqual({ name: "Prancha", sets: 3, reps: 0, durationSec: 30, loadKg: null });
+  });
+  it("tempo ausente e zero continuam bloqueando", () => {
+    const w = workout();
+    w.exercises = [{ name: "Prancha", sets: 3, reps: null, durationSec: null, loadKg: null, review: false }];
+    expect(photoToValidation([w])).toBeNull();
+    w.exercises[0] = { name: "Prancha", sets: 3, reps: null, durationSec: 0, loadKg: null, review: false };
+    expect(photoToValidation([w])).toBeNull();
+  });
 });

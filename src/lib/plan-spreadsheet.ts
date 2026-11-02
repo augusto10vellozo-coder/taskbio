@@ -1,8 +1,8 @@
 import type { ImportedWorkout } from './training';
-export type SpreadsheetWorkout = Omit<ImportedWorkout, 'exercises'> & { exercises: { name: string; sets: number | null; reps: number | null; loadKg: number | null }[] };
+export type SpreadsheetWorkout = Omit<ImportedWorkout, 'exercises'> & { exercises: { name: string; sets: number | null; reps: number | null; durationSec?: number | null; loadKg: number | null }[] };
 export const SPREADSHEET_EMPTY = 'Não consegui identificar exercícios nesta planilha. Confira as colunas ou envie outro arquivo.';
 const key = (v: unknown) => String(v ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
-const aliases = { name:['exercicio','exercicios','exercise','nome do exercicio'], sets:['series','serie','sets'], reps:['reps','repeticoes','repeticao'], load:['carga','carga kg','carga (kg)','peso','kg','load'], day:['dia','dia da semana','day'], workout:['treino','nome do treino','workout'] };
+const aliases = { name:['exercicio','exercicios','exercise','nome do exercicio'], sets:['series','serie','sets'], reps:['reps','repeticoes','repeticao'], duration:['tempo','duracao','segundos','tempo (s)','duration','tempo seg'], load:['carga','carga kg','carga (kg)','peso','kg','load'], day:['dia','dia da semana','day'], workout:['treino','nome do treino','workout'] };
 function number(v: unknown, integer = false): number | null {
  const text=String(v ?? '').trim().replace(/\s*kg$/i,'').replace(',','.');
  if (!text || !/^\d+(\.\d+)?$/.test(text)) return null;
@@ -21,9 +21,9 @@ export function spreadsheetRows(rows: unknown[][], sheetName='Treino importado')
  for(const row of rows.slice(headerIndex>=0 ? headerIndex+1 : 0)) {
   if(row.every(c=>!String(c??'').trim()))continue;
   const cell=(field:string)=>row[cols[field] ?? -1];
-  let name='';let sets:number|null=null;let reps:number|null=null;let loadKg:number|null=null;
+  let name='';let sets:number|null=null;let reps:number|null=null;let durationSec:number|null=null;let loadKg:number|null=null;
   if(headerIndex>=0){
-   name=String(cell('name')??'').trim();sets=number(cell('sets'),true);reps=number(cell('reps'),true);loadKg=number(cell('load'));
+   name=String(cell('name')??'').trim();sets=number(cell('sets'),true);reps=number(cell('reps'),true);durationSec=number(cell('duration'),true);loadKg=number(cell('load'));
    if(String(cell('workout')??'').trim())currentName=String(cell('workout')).trim();
    if(String(cell('day')??'').trim())currentDay=day(cell('day'));
   }else{
@@ -40,12 +40,14 @@ export function spreadsheetRows(rows: unknown[][], sheetName='Treino importado')
   if(!name || !/[a-zà-ú]/i.test(name) || aliases.name.includes(key(name)))continue;
   let group=result.find(w=>w.name===currentName && w.day===currentDay);
   if(!group){group={name:currentName,day:currentDay,exercises:[]};result.push(group);}
-  group.exercises.push({name,sets,reps,loadKg});
+  group.exercises.push({name,sets,reps,...(durationSec ? { durationSec } : {}),loadKg});
  }
  return result;
 }
 export function spreadsheetValid(items: SpreadsheetWorkout[]) {
- return items.length>0 && items.every(w=>w.name.trim() && w.exercises.length>0 && w.exercises.every(e=>e.name.trim() && e.sets!==null && Number.isInteger(e.sets) && e.sets>0 && e.reps!==null && Number.isInteger(e.reps) && e.reps>0 && (e.loadKg===null || Number.isFinite(e.loadKg) && e.loadKg>=0)));
+ const amountOk = (e: SpreadsheetWorkout['exercises'][number]) =>
+  (e.reps!==null && Number.isInteger(e.reps) && e.reps>0) || (typeof e.durationSec==='number' && Number.isInteger(e.durationSec) && e.durationSec>0);
+ return items.length>0 && items.every(w=>w.name.trim() && w.exercises.length>0 && w.exercises.every(e=>e.name.trim() && e.sets!==null && Number.isInteger(e.sets) && e.sets>0 && amountOk(e) && (e.loadKg===null || Number.isFinite(e.loadKg) && e.loadKg>=0)));
 }
 export async function readSpreadsheet(file: File): Promise<SpreadsheetWorkout[]> {
  if(file.size>10*1024*1024)throw new Error('O arquivo passa de 10 MB. Envie um arquivo menor.');

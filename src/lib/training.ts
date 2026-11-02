@@ -37,12 +37,15 @@ export function exerciseHistory(name: string, log: ExerciseLogEntry[], history: 
 /** Persist a partial exercise independently of completion of its workout. */
 export function recordExerciseSets(log: ExerciseLogEntry[], workout: Workout, exerciseId: string, doneSets: number, date: string) {
   const ex = workout.exercises.find((e) => e.id === exerciseId);
-  if (!ex || doneSets <= 0 || ex.reps <= 0) return log;
+  if (!ex || doneSets <= 0 || (ex.reps <= 0 && !(ex.durationSec && ex.durationSec > 0))) return log;
   const id = `sets:${workout.id}:${exerciseId}:${date}`;
   return [{ id, date, exercise: ex.name, loadKg: ex.loadKg || 0, reps: ex.reps, sets: doneSets, workoutId: workout.id }, ...log.filter((e) => e.id !== id)].slice(0, 2000);
 }
 
-export const exercisePerformance = (entry: { loadKg: number; reps: number }) => entry.loadKg > 0 ? `${kg(entry.loadKg)} x ${entry.reps}` : `${entry.reps} reps`;
+export const exercisePerformance = (entry: { loadKg: number; reps: number; durationSec?: number | null }) =>
+  entry.durationSec && entry.durationSec > 0
+    ? `${entry.durationSec}s`
+    : entry.loadKg > 0 ? `${kg(entry.loadKg)} x ${entry.reps}` : `${entry.reps} reps`;
 
 /** Difference between the latest load and the one before it; positive means progression. */
 export function progression(entries: { loadKg: number }[]) {
@@ -66,22 +69,26 @@ export const kg = (n: number) => `${n.toLocaleString("pt-BR", { maximumFractionD
 export type ImportedWorkout = {
   day: "seg" | "ter" | "qua" | "qui" | "sex" | "sab" | "dom" | null;
   name: string;
-  exercises: { name: string; sets: number; reps: number; loadKg: number | null }[];
+  exercises: { name: string; sets: number; reps: number; durationSec?: number | null; loadKg: number | null }[];
 };
 
 /** Converts an imported workout into the app's workout shape, reusing names already in the history. */
 export function toWorkout(input: ImportedWorkout, knownNames: string[], id: string): Workout {
   const known = new Map(knownNames.map((n) => [exerciseKey(n), n]));
-  const exercises: Exercise[] = input.exercises.map((e, i) => ({
-    id: `${id}-e${i}`,
-    name: known.get(exerciseKey(e.name)) ?? e.name.trim(),
-    sets: Math.max(1, Math.round(e.sets) || 3),
-    reps: Math.max(1, Math.round(e.reps) || 10),
-    restSec: 60,
-    muscles: "",
-    howTo: "",
-    ...(e.loadKg ? { loadKg: e.loadKg } : {}),
-    doneSets: 0,
-  }));
+  const exercises: Exercise[] = input.exercises.map((e, i) => {
+    const duration = e.durationSec && e.durationSec > 0 ? Math.round(e.durationSec) : undefined;
+    return {
+      id: `${id}-e${i}`,
+      name: known.get(exerciseKey(e.name)) ?? e.name.trim(),
+      sets: Math.max(1, Math.round(e.sets) || 3),
+      reps: duration ? 0 : Math.max(1, Math.round(e.reps) || 10),
+      ...(duration ? { durationSec: duration } : {}),
+      restSec: 60,
+      muscles: "",
+      howTo: "",
+      ...(e.loadKg ? { loadKg: e.loadKg } : {}),
+      doneSets: 0,
+    };
+  });
   return { id, name: input.name.trim() || "Treino importado", focus: "Plano importado", modality: "Academia", exercises };
 }

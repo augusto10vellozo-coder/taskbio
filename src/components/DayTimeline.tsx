@@ -3,7 +3,7 @@ import { Bell, BookOpen, CalendarClock, Check, Dumbbell, Moon, Pencil, Plus, Tra
 import { billRemindersOn, brl as brlFinance } from "@/lib/finance";
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
-import { KIND_LABEL, brl, type Block, type BlockKind } from "@/lib/trilha-data";
+import { KIND_LABEL, brl, exercisePrescription, type Block, type BlockKind } from "@/lib/trilha-data";
 import { useTaskBio } from "@/lib/trilha-store";
 import { PhotoBonus } from "@/components/PhotoBonus";
 import { mealNutrition } from "@/lib/meal-summary";
@@ -176,7 +176,7 @@ export function DayTimeline({
                               <div className="flex items-center justify-between gap-2">
                                 <p className="text-sm font-medium">{e.name}</p>
                                 <span className="text-[11px] text-steel">
-                                  {exerciseSeries(e, dateKey).filter(s => s.done).length} de {e.sets} séries · {e.sets} × {e.reps}
+                                  {exerciseSeries(e, dateKey).filter(s => s.done).length} de {e.sets} séries · {exercisePrescription(e)}
                                   {e.restSec ? ` · descanso ${e.restSec}s` : ""}
                                 </span>
                               </div>
