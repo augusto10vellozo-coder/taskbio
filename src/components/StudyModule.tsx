@@ -113,6 +113,12 @@ export function StudyModule() {
   const upcoming = upcomingExams(exams, today);
   const weekKeys = getWeekKeys(new Date());
   const weekBlocks = weekKeys.flatMap((key) => (plan[key] ?? []).filter((b) => b.subjectId).map((b) => ({ key, block: b })));
+  const weekBySub = minutesBySubject(sessions, weekKeys);
+  const weekTargets = new Map<string, number>();
+  for (const { block } of weekBlocks) {
+    if (!block.subjectId || block.review) continue;
+    weekTargets.set(block.subjectId, (weekTargets.get(block.subjectId) ?? 0) + (block.durationMinutes ?? 0));
+  }
 
   return (
     <main className="mx-auto max-w-4xl px-5 pb-24 sm:px-8">
@@ -178,6 +184,29 @@ export function StudyModule() {
             })}
           </ul>}
         </>}
+      </section>
+
+      <section aria-labelledby="semana-materias" className="mt-4 rounded-lg bg-card p-4 ring-1 ring-line">
+        <h2 id="semana-materias" className="font-display text-lg font-semibold">Progresso da semana</h2>
+        <p className="mt-1 text-xs text-steel">Minutos estudados nesta semana contra o que está no cronograma.</p>
+        {subjects.length === 0 ? <p className="mt-2 text-sm text-steel">Crie uma matéria para acompanhar.</p> : (
+          <ul className="mt-3 space-y-3">
+            {subjects.map((s) => {
+              const done = weekBySub.get(s.id) ?? 0;
+              const scheduled = weekTargets.get(s.id) ?? 0;
+              const target = scheduled || (s.weeklyGoalMin ?? 0) || dailyStudyGoal(s) * 7;
+              const pct = target > 0 ? Math.min(100, Math.round((done / target) * 100)) : 0;
+              return <li key={s.id}>
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="size-2.5 shrink-0 rounded-full" style={{ background: s.color }} aria-hidden />
+                  <span className="min-w-0 flex-1 truncate font-medium">{s.name}</span>
+                  <span className="shrink-0 text-xs text-steel">{hm(done)}{target > 0 ? ` / ${hm(target)}` : ""}</span>
+                </div>
+                {target > 0 && <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-mist" role="progressbar" aria-label={`Progresso semanal de ${s.name}`} aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}><div className="h-full bg-brand" style={{ width: `${pct}%` }} /></div>}
+              </li>;
+            })}
+          </ul>
+        )}
       </section>
 
       <section aria-labelledby="semana-estudo" className="mt-4">

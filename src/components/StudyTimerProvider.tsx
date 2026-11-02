@@ -13,7 +13,7 @@ type TimerState = { run: StudyRun | null; now: number; start: (subjectId: string
 const Context = createContext<TimerState | null>(null);
 export function StudyTimerProvider({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
-  const { setTrackers } = useTaskBio();
+  const { setTrackers, addReviewBlocks } = useTaskBio();
   const award = useServerFn(recordXp);
   const [run, setRun] = useState<StudyRun | null>(null);
   const [now, setNow] = useState(0);
@@ -30,6 +30,9 @@ export function StudyTimerProvider({ children }: { children: ReactNode }) {
   const record = async (session: SessionEntry) => {
     if (session.minutes < 1) return;
     setTrackers(t => t.estudos.some(s => s.id === session.id) ? t : ({ ...t, estudos: [session, ...t.estudos] }));
+    if (session.subjectId) {
+      addReviewBlocks({ date: session.date, subjectId: session.subjectId, title: session.title, minutes: session.minutes, sessionId: session.id });
+    }
     if (!user) { toast.success(`Sessão registrada: ${session.minutes} min de ${session.title}`); return; }
     try {
       const result = await award({ data: { kind: "study", ref: session.id, date: session.date, on: true } });

@@ -84,6 +84,8 @@ type Store = TaskBioState & {
   removeShoppingItem: (id: string) => void;
   setWeeklyGoals: (goals: TaskBioState["weeklyGoals"]) => void;
   replaceDays: (days: Record<string, Block[]>) => void;
+  /** Creates the 1/7/30-day review blocks for a finished study session. */
+  addReviewBlocks: (input: { date: string; subjectId: string; title: string; minutes: number; sessionId: string }) => void;
   clearWeek: (keys: string[]) => void;
   addExerciseLog: (entry: Omit<ExerciseLogEntry, "id">) => void;
   updateWorkout: (workout: Workout) => void;
@@ -206,6 +208,7 @@ export function TaskBioProvider({ children }: { children: ReactNode }) {
           const blocks = (s.plan[day] ?? []).map((b) => (b.id === blockId ? { ...b, done: !b.done } : b));
           const changed = blocks.find((b) => b.id === blockId);
           let trackers = s.trackers;
+          let plan = { ...s.plan, [day]: blocks };
           if (changed?.subjectId && changed.durationMinutes) {
             const sessionId = `study-block:${day}:${blockId}`;
             const exists = (s.trackers.estudos ?? []).some((x) => x.id === sessionId);
@@ -217,11 +220,35 @@ export function TaskBioProvider({ children }: { children: ReactNode }) {
                   ...(s.trackers.estudos ?? []),
                 ],
               };
+              // Reviews are created for real study sessions, never for reviews themselves.
+              if (!changed.review) {
+                const label = changed.title.replace(/^Estudo:\s*/i, "");
+                for (const offset of [1, 7, 30]) {
+                  const key = toDateKey(addDays(parseISO(day), offset));
+                  const id = `rev:${sessionId}:${offset}`;
+                  const list = plan[key] ?? [];
+                  if (list.some((b) => b.id === id)) continue;
+                  plan[key] = [...list, {
+                    id,
+                    time: "19:00",
+                    kind: "compromisso",
+                    title: `Revisão: ${label}`,
+                    subjectId: changed.subjectId,
+                    review: true,
+                    durationMinutes: Math.min(changed.durationMinutes, 30),
+                    done: false,
+                  }];
+                }
+              }
             } else if (!changed.done && exists) {
               trackers = { ...s.trackers, estudos: (s.trackers.estudos ?? []).filter((x) => x.id !== sessionId) };
+              for (const offset of [1, 7, 30]) {
+                const key = toDateKey(addDays(parseISO(day), offset));
+                plan[key] = (plan[key] ?? []).filter((b) => b.id !== `rev:${sessionId}:${offset}`);
+              }
             }
           }
-          return { ...s, plan: { ...s.plan, [day]: blocks }, trackers };
+          return { ...s, plan, trackers };
         });
       },
       removeBlock: (day, blockId) => {
@@ -358,6 +385,27 @@ export function TaskBioProvider({ children }: { children: ReactNode }) {
       })),
       setWeeklyGoals: (weeklyGoals) => setState((s) => ({ ...s, weeklyGoals })),
       replaceDays: (days) => setState((s) => ({ ...s, plan: { ...s.plan, ...normalizePlan(days) } })),
+      addReviewBlocks: ({ date, subjectId, title, minutes, sessionId }) => setState((s) => {
+        const plan = { ...s.plan };
+        const label = title.replace(/^Estudo:\s*/i, "");
+        for (const offset of [1, 7, 30]) {
+          const key = toDateKey(addDays(parseISO(date), offset));
+          const id = `rev:${sessionId}:${offset}`;
+          const blocks = plan[key] ?? [];
+          if (blocks.some((b) => b.id === id)) continue;
+          plan[key] = [...blocks, {
+            id,
+            time: "19:00",
+            kind: "compromisso",
+            title: `Revisão: ${label}`,
+            subjectId,
+            review: true,
+            durationMinutes: Math.min(minutes, 30),
+            done: false,
+          }];
+        }
+        return { ...s, plan };
+      }),
       clearWeek: (keys) => setState((s) => ({ ...s, plan: Object.fromEntries(Object.entries(s.plan).filter(([key]) => !keys.includes(key))) })),
       addCustomFood: (food) => setState((s) => ({ ...s, customFoods: [food, ...(s.customFoods ?? []).filter((f) => f.id !== food.id)].slice(0, 500) })),
       addExerciseLog: (entry) => setState((s) => ({ ...s, exerciseLog: [{ ...entry, id: `x-${Date.now()}` }, ...(s.exerciseLog ?? [])].slice(0, 2000) })),
