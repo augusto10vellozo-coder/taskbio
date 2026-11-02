@@ -41,12 +41,11 @@ Lista de pendências do TaskBio. Ordenada por impacto. Atualize ao concluir.
 
 ## Correções e qualidade
 
-- [ ] **Exercícios por tempo (prancha, isometria).** O modelo `Exercise` exige `reps: number` e a
-      interface sempre mostra `séries × repetições`. Preciso de um campo de duração/medida
-      (ex.: `durationSec`) e de a validação aceitar exercício sem repetições. Afeta
-      `src/lib/trilha-data.ts`, `src/lib/training.ts`, `src/lib/plan-photo.ts`,
-      `src/lib/plan-spreadsheet.ts`, `src/components/WorkoutPhotoImport.tsx`,
-      `src/routes/treino.tsx` e `src/components/TrainingExplore.tsx`.
+- [x] **Exercícios por tempo (prancha, isometria).** `durationSec` no exercício, `reps` pode ser 0,
+      importação (foto, planilha e texto) reconhece segundos e a exibição mostra `3 × 30s`.
+- [x] **Criação de treino unificada.** O formulário duplicado de "Explorar e criar" foi removido;
+      a galeria usa "Usar este modelo" e "Criar do zero" abre o editor de `/treino`, que aceita
+      Reps e Tempo.
 - [ ] **Importação inventa valores ausentes.** `src/lib/plan-import.server.ts` preenche
       `sets = 3` e `reps = 10` quando o plano não informa, o que contraria a regra do projeto
       de nunca preencher dados faltantes.
@@ -77,9 +76,10 @@ Lista de pendências do TaskBio. Ordenada por impacto. Atualize ao concluir.
       não só em `/agenda`, e mostrar o app com dados antes de pedir cadastro.
 - [ ] **Cadastro começa em "Criar conta"** e a proposta de valor aparece no celular
       (hoje é `hidden lg:block`).
-- [ ] **Nível e XP total acumulado.** Hoje o XP zera visualmente todo dia, sem progressão longa.
-- [ ] **E-mail de resumo semanal.** Hoje o resumo depende de push, que no iPhone exige o app
-      instalado.
+- [x] **Nível e XP total acumulado.** Card no Progresso e selo `Nv` na home
+      (`drizzle/migrations/0026_total_xp.sql`).
+- [x] **E-mail de resumo semanal.** Enviado às segundas, via Resend, para quem teve atividade
+      (`drizzle/migrations/0027_weekly_digest.sql`).
 - [x] **Instrumentação de funil** (ativação, D1, D7). Painel em `/equipe → Produto`
       (`drizzle/migrations/0025_product_telemetry.sql`).
 
