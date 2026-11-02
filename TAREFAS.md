@@ -59,8 +59,19 @@ Lista de pendências do TaskBio. Ordenada por impacto. Atualize ao concluir.
 
 ## Produto e ativação
 
+- [ ] **Ao sair, limpar os dados locais do aparelho.** Hoje, depois de sair (ou com a sessão
+      expirada), a rotina, saúde e finanças continuam visíveis sem login neste navegador, porque
+      o app é local-first (`localStorage`). Quem usa o mesmo computador vê os dados do outro.
+      Corrigir limpando o estado local no "Sair", avisando antes se houver algo não sincronizado.
+      Quem nunca criou conta continua no modo local.
+- [ ] **Explicar o modelo "dados neste aparelho"** para quem não tem conta, em vez de só oferecer
+      login.
 - [ ] **Onboarding em 3 passos** no cadastro: objetivo, módulos, semana de exemplo.
-- [ ] **Home com estado vazio real**, com CTA no lugar da frase solta.
+- [ ] **Home com estado vazio de verdade.** Hoje é uma linha solta ("Nenhum bloco para este dia.
+      Adicione o primeiro."). Deve ter proposta de valor, um exemplo de como fica preenchido,
+      botão principal ("Montar minha primeira semana" ou "Começar com semana de exemplo") e
+      botão secundário para criar conta. Considerar oferecer a semana de exemplo já na home,
+      não só em `/agenda`, e mostrar o app com dados antes de pedir cadastro.
 - [ ] **Cadastro começa em "Criar conta"** e a proposta de valor aparece no celular
       (hoje é `hidden lg:block`).
 - [ ] **Nível e XP total acumulado.** Hoje o XP zera visualmente todo dia, sem progressão longa.
