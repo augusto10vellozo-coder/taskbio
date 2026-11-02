@@ -38,6 +38,8 @@ export const foodItemCount = (b: Pick<Block, "manualMeal">) => (b.manualMeal?.it
 
 export function emitBlockXp(date: string, block: Block, on: boolean) {
   if (block.kind === "leitura") return;
+  // Study blocks award XP through the study session, never as a generic block.
+  if (block.subjectId) return;
   if (block.kind === "treino") emitXp({ kind: "workout", ref: block.id, date, on });
   else if (block.kind === "refeicao") emitXp({ kind: "meal", ref: block.id, date, on, foodItems: foodItemCount(block) });
   else emitXp({ kind: "block", ref: block.id, date, on });

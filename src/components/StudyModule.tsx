@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useEntryState } from "@/lib/navigation-context";
 import { useServerFn } from "@tanstack/react-start";
-import { CalendarClock, Check, Flame, Pause, Play, Plus, Square, Timer, Trash2 } from "lucide-react";
+import { CalendarClock, CalendarDays, Check, Flame, Pause, Play, Plus, Square, Timer, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { ModuleHeader } from "@/components/ModuleHeader";
 import { Button } from "@/components/ui/button";
@@ -14,13 +14,24 @@ import { recordXp } from "@/lib/social.functions";
 import { XP_EVENT } from "@/lib/xp-client";
 import { brasiliaDay } from "@/lib/xp";
 import { useAuth } from "@/lib/auth-context";
+import { getWeekKeys } from "@/lib/calendar-utils";
+import type { Block } from "@/lib/trilha-data";
 
 const input = "h-10 min-w-0 rounded-md bg-background px-3 text-sm ring-1 ring-line";
+const WEEK_DAYS = [
+  { value: 1, label: "seg" },
+  { value: 2, label: "ter" },
+  { value: 3, label: "qua" },
+  { value: 4, label: "qui" },
+  { value: 5, label: "sex" },
+  { value: 6, label: "sáb" },
+  { value: 0, label: "dom" },
+];
 const fmt = (s: number) => `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
 const hm = (m: number) => (m >= 60 ? `${Math.floor(m / 60)}h${m % 60 ? ` ${m % 60}min` : ""}` : `${m} min`);
 
 export function StudyModule() {
-  const { trackers, setTrackers } = useTaskBio();
+  const { trackers, setTrackers, plan, replaceDays, removeBlock } = useTaskBio();
   const subjects = trackers.subjects ?? [];
   const sessions = trackers.estudos ?? [];
   const exams = trackers.exams ?? [];
@@ -37,6 +48,10 @@ export function StudyModule() {
   const [removing, setRemoving] = useState<string | null>(null);
   const [editing, setEditing] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
+  const [planSub, setPlanSub] = useState("");
+  const [planDays, setPlanDays] = useState<number[]>([1, 3, 5]);
+  const [planMinutes, setPlanMinutes] = useState("60");
+  const [planTime, setPlanTime] = useState("19:00");
 
   useEffect(() => setToday(brasiliaDay(new Date(now || Date.now()))), [now]);
   // Old free-text sessions ("Programação") become subjects once.
@@ -57,6 +72,34 @@ export function StudyModule() {
     setLearned("");
   };
 
+  /** Adds study blocks to this week's agenda; completing a block records the session. */
+  const addSchedule = () => {
+    const sub = subjects.find((s) => s.id === (planSub || subjectId));
+    if (!sub) { toast.error("Crie uma matéria primeiro"); return; }
+    const mins = Math.round(Number(planMinutes));
+    if (!(mins >= 5)) { toast.error("Informe a duração em minutos"); return; }
+    if (!planDays.length) { toast.error("Escolha ao menos um dia"); return; }
+    const days: Record<string, Block[]> = {};
+    for (const key of getWeekKeys(new Date())) {
+      const weekday = new Date(`${key}T12:00:00Z`).getUTCDay();
+      if (!planDays.includes(weekday)) continue;
+      const existing = plan[key] ?? [];
+      if (existing.some((b) => b.subjectId === sub.id)) continue;
+      days[key] = [...existing, {
+        id: `b-${crypto.randomUUID()}`,
+        time: planTime,
+        kind: "compromisso",
+        title: `Estudo: ${sub.name}`,
+        subjectId: sub.id,
+        durationMinutes: mins,
+        done: false,
+      }];
+    }
+    if (!Object.keys(days).length) { toast.info("Já existe estudo desta matéria nos dias escolhidos"); return; }
+    replaceDays(days);
+    toast.success(`Cronograma de ${sub.name} adicionado à agenda`);
+  };
+
   const streak = useMemo(() => readingStreak(sessions, new Date(`${today ?? "2000-01-01"}T12:00:00`)), [sessions, today]);
   if (!today) return <main className="mx-auto max-w-4xl px-5 pt-8"><div className="h-60 animate-pulse rounded-lg bg-mist" /></main>;
 
@@ -68,6 +111,8 @@ export function StudyModule() {
   const patchSub = (id: string, p: Partial<Subject>) => setTrackers((t) => ({ ...t, subjects: (t.subjects ?? []).map((s) => (s.id === id ? { ...s, ...p } : s)) }));
   const remaining = run ? Math.max(0, Math.ceil((run.endsAt - (run.paused ?? now)) / 1000)) : 0;
   const upcoming = upcomingExams(exams, today);
+  const weekKeys = getWeekKeys(new Date());
+  const weekBlocks = weekKeys.flatMap((key) => (plan[key] ?? []).filter((b) => b.subjectId).map((b) => ({ key, block: b })));
 
   return (
     <main className="mx-auto max-w-4xl px-5 pb-24 sm:px-8">
@@ -101,6 +146,38 @@ export function StudyModule() {
             </li>
           ); })}
         </ul>
+      </section>
+
+      <section aria-labelledby="cronograma" className="mt-4 rounded-lg bg-card p-4 ring-1 ring-line">
+        <h2 id="cronograma" className="flex items-center gap-2 font-display text-lg font-semibold"><CalendarDays className="size-5" /> Cronograma da semana</h2>
+        <p className="mt-1 text-xs text-steel">Escolha matéria, dias e duração. Os blocos entram na agenda e, ao concluir, contam como estudo.</p>
+        {subjects.length === 0 ? <p className="mt-2 text-sm text-steel">Crie uma matéria para montar o cronograma.</p> : <>
+          <div className="mt-3 grid gap-2 sm:grid-cols-[1fr_90px_90px_auto]">
+            <select aria-label="Matéria do cronograma" value={planSub || subjectId} onChange={(e) => setPlanSub(e.target.value)} className={input}>
+              {subjects.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+            </select>
+            <input aria-label="Minutos por sessão" type="number" min="5" step="5" value={planMinutes} onChange={(e) => setPlanMinutes(e.target.value)} className={input} />
+            <input aria-label="Horário do estudo" type="time" value={planTime} onChange={(e) => setPlanTime(e.target.value)} className={input} />
+            <Button className="h-10" onClick={addSchedule}><Plus /> Adicionar</Button>
+          </div>
+          <div className="mt-2 flex flex-wrap gap-1.5" role="group" aria-label="Dias do cronograma">
+            {WEEK_DAYS.map((d) => {
+              const on = planDays.includes(d.value);
+              return <button key={d.value} type="button" aria-pressed={on} onClick={() => setPlanDays((cur) => (on ? cur.filter((x) => x !== d.value) : [...cur, d.value]))} className={`rounded-full px-3 py-1 text-xs font-medium ${on ? "bg-brand text-primary-foreground" : "bg-mist text-steel"}`}>{d.label}</button>;
+            })}
+          </div>
+          {weekBlocks.length > 0 && <ul className="mt-3 divide-y divide-line">
+            {weekBlocks.map(({ key, block }) => {
+              const s = subOf(block.subjectId);
+              return <li key={block.id} className="flex items-center gap-2 py-2 text-sm">
+                <span className="size-2.5 shrink-0 rounded-full" style={{ background: s?.color ?? "currentColor" }} aria-hidden />
+                <span className="min-w-0 flex-1 truncate">{["dom", "seg", "ter", "qua", "qui", "sex", "sáb"][new Date(`${key}T12:00:00Z`).getUTCDay()]} · {block.time} · {s?.name ?? block.title}</span>
+                <span className="shrink-0 text-xs text-steel">{block.durationMinutes} min</span>
+                <Button variant="ghost" size="icon" className="size-7 shrink-0" aria-label={`Remover bloco de ${s?.name ?? "estudo"}`} onClick={() => removeBlock(key, block.id)}><Trash2 /></Button>
+              </li>;
+            })}
+          </ul>}
+        </>}
       </section>
 
       <section aria-labelledby="semana-estudo" className="mt-4">

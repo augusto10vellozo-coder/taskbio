@@ -19,7 +19,8 @@ export const MODULES: AppModule[] = [
 ];
 
 export type ModuleSettings = Partial<Record<ModuleId, boolean>>;
-const OFF_BY_DEFAULT: ModuleId[] = ["metas", "saude", "financas", "leitura", "estudos"];
+// Estudos comes enabled: the study routine is the main entry point for the app's current audience.
+const OFF_BY_DEFAULT: ModuleId[] = ["metas", "saude", "financas", "leitura"];
 
 export const isModuleOn = (settings: ModuleSettings, id: ModuleId) => {
   const mod = MODULES.find((m) => m.id === id);

@@ -102,7 +102,7 @@ export function DayTimeline({
             const nutrition = mealNutrition(recorded ? b : predictedMeal(b), getMeal);
             const workout = getWorkout(b.workoutId);
             const open = workout && openWorkout === workout.id;
-            const Icon = KIND_ICON[b.kind];
+            const Icon = b.subjectId ? BookOpen : KIND_ICON[b.kind];
             const title = b.kind === "refeicao"
               ? `${b.title}${nutrition.known ? ` · ${nutrition.kcal} kcal${nutrition.cost > 0 ? ` · ${brl(nutrition.cost)}` : ""}` : ""}`
               : workout ? `${workout.name} — ${workout.focus}` : (b.manualMeal ? b.title : meal?.items ?? b.title);
@@ -110,7 +110,7 @@ export function DayTimeline({
               ? recorded
                 ? `${b.plannedMeal || b.mealId ? "Concluído" : "Não planejado"}${b.mealConfirmedAt ? ` · ${new Date(b.mealConfirmedAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}` : ""}`
                 : "Planejado"
-              : KIND_LABEL[b.kind];
+              : b.subjectId ? "Estudo" : KIND_LABEL[b.kind];
             return (
               <li key={b.id} className="relative flex gap-3 pb-2.5 last:pb-0">
                 <span className="w-[52px] shrink-0 pt-4 text-right text-xs font-medium text-faint">{b.time}</span>

@@ -199,20 +199,44 @@ export function TaskBioProvider({ children }: { children: ReactNode }) {
         const target = (state.plan[day] ?? []).find((b) => b.id === blockId);
         if (target?.plannedMeal) return;
         if (target && (target.kind !== "refeicao" || foodItemCount(target) === 0)) emitBlockXp(day, target, !target.done);
-        setState((s) => ({
-          ...s,
-          plan: {
-            ...s.plan,
-            [day]: (s.plan[day] ?? []).map((b) => (b.id === blockId ? { ...b, done: !b.done } : b)),
-          },
-        }));
+        if (target?.subjectId && target.durationMinutes) {
+          emitXp({ kind: "study", ref: `study-block:${day}:${blockId}`, date: day, on: !target.done });
+        }
+        setState((s) => {
+          const blocks = (s.plan[day] ?? []).map((b) => (b.id === blockId ? { ...b, done: !b.done } : b));
+          const changed = blocks.find((b) => b.id === blockId);
+          let trackers = s.trackers;
+          if (changed?.subjectId && changed.durationMinutes) {
+            const sessionId = `study-block:${day}:${blockId}`;
+            const exists = (s.trackers.estudos ?? []).some((x) => x.id === sessionId);
+            if (changed.done && !exists) {
+              trackers = {
+                ...s.trackers,
+                estudos: [
+                  { id: sessionId, date: day, minutes: changed.durationMinutes, title: changed.title, subjectId: changed.subjectId, agendaBlockId: blockId },
+                  ...(s.trackers.estudos ?? []),
+                ],
+              };
+            } else if (!changed.done && exists) {
+              trackers = { ...s.trackers, estudos: (s.trackers.estudos ?? []).filter((x) => x.id !== sessionId) };
+            }
+          }
+          return { ...s, plan: { ...s.plan, [day]: blocks }, trackers };
+        });
       },
       removeBlock: (day, blockId) => {
         const target = (state.plan[day] ?? []).find((b) => b.id === blockId);
-        if (target) { emitBlockXp(day, target, false); emitXp({ kind: "photo", ref: blockId, date: day, on: false }); }
+        if (target) {
+          emitBlockXp(day, target, false);
+          emitXp({ kind: "photo", ref: blockId, date: day, on: false });
+          if (target.subjectId) emitXp({ kind: "study", ref: `study-block:${day}:${blockId}`, date: day, on: false });
+        }
         setState((s) => ({
           ...s,
           plan: { ...s.plan, [day]: (s.plan[day] ?? []).filter((b) => b.id !== blockId) },
+          trackers: target?.subjectId
+            ? { ...s.trackers, estudos: (s.trackers.estudos ?? []).filter((x) => x.id !== `study-block:${day}:${blockId}`) }
+            : s.trackers,
         }));
       },
       addBlock: (day, block) => {
