@@ -14,6 +14,7 @@ import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, A
 import { WorkoutSeries, SessionProgress } from "@/components/WorkoutSeries";
 import { exerciseSeries } from "@/lib/training-session";
 import { RestTimer } from "@/components/RestTimer";
+import { StarterWeekPrompt } from "@/components/StarterWeekPrompt";
 
 const KIND_ICON: Record<BlockKind, LucideIcon> = {
   treino: Dumbbell,
@@ -29,12 +30,14 @@ export function DayTimeline({
   onAddingChange,
   id,
   className,
+  starterPrompt = true,
 }: {
   dateKey: string;
   adding: boolean;
   onAddingChange: (v: boolean) => void;
   id?: string;
   className?: string;
+  starterPrompt?: boolean;
 }) {
   const { plan, getMeal, getWorkout, toggleBlock, removeBlock, addBlock, updateBlock, finance, consumeMeal, undoMeal } = useTaskBio();
   const personal = usePersonalStatus();
@@ -86,7 +89,9 @@ export function DayTimeline({
           </Link>
         ))}
 
-        {blocks.length === 0 && <p className="text-sm text-steel">Nenhum bloco para este dia. Adicione o primeiro.</p>}
+        {blocks.length === 0 && (starterPrompt
+          ? <StarterWeekPrompt onAdd={() => onAddingChange(true)} />
+          : <p className="text-sm text-steel">Nenhum bloco para este dia. Adicione o primeiro.</p>)}
 
         <ol className="relative">
           {blocks.length > 0 && <span aria-hidden="true" className="absolute bottom-5 left-[25px] top-2 w-px bg-line" />}

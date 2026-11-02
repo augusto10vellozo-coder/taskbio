@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { brl, consolidateIngredients, formatIngredientAmount, type Block } from "@/lib/trilha-data";
 import { useTaskBio } from "@/lib/trilha-store";
 import { formatFullDate, getWeekDates, toDateKey } from "@/lib/calendar-utils";
+import { exampleWeek } from "@/lib/example-week";
 import { toast } from "sonner";
 import { DayTimeline } from "@/components/DayTimeline";
 import { WeekActions } from "@/components/WeekActions";
@@ -96,16 +97,7 @@ function Agenda() {
   };
   const fillExample = () => {
     if (!emptyWeek) return;
-    const examples: Array<Array<Omit<Block, "id">>> = [
-      [{ time: "07:30", kind: "refeicao", title: "Café da manhã", mealId: "m1", done: false }, { time: "18:00", kind: "treino", title: "Caminhada leve", done: false }],
-      [{ time: "12:30", kind: "refeicao", title: "Almoço", mealId: "m2", done: false }],
-      [{ time: "07:30", kind: "refeicao", title: "Café da manhã", mealId: "m1", done: false }, { time: "18:00", kind: "treino", title: "Mobilidade", done: false }],
-      [{ time: "19:00", kind: "descanso", title: "Descanso", done: false }],
-      [{ time: "12:30", kind: "refeicao", title: "Almoço", mealId: "m2", done: false }, { time: "18:00", kind: "treino", title: "Caminhada leve", done: false }],
-      [{ time: "09:00", kind: "treino", title: "Atividade ao ar livre", done: false }],
-      [{ time: "09:00", kind: "descanso", title: "Descanso", done: false }],
-    ];
-    replaceDays(Object.fromEntries(weekKeys.map((key, index) => [key, (examples[index] ?? []).map((block) => ({ ...block, id: crypto.randomUUID() }))])));
+    replaceDays(exampleWeek(weekKeys));
     setExampleDismissed(true); localStorage.setItem("trilha:example-dismissed", "yes");
     toast.success("Semana de exemplo adicionada. Você pode editar ou limpar os itens.");
   };
@@ -168,6 +160,7 @@ function Agenda() {
           adding={adding}
           onAddingChange={setAdding}
           id="linha-do-dia"
+          starterPrompt={false}
           className="scroll-mt-[var(--agenda-scroll-offset,24rem)] lg:col-span-7"
         />
 

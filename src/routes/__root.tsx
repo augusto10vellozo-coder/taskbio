@@ -23,6 +23,7 @@ import { PendingProfessionalInvites } from "../components/PendingProfessionalInv
 import { PrivacyConsent } from "../components/PrivacyConsent";
 import { ThemeProvider } from "../lib/theme-context";
 import { ThemeOnboarding } from "../components/ThemeOnboarding";
+import { ProductOnboarding } from "../components/ProductOnboarding";
 import { StudyTimerProvider } from "../components/StudyTimerProvider";
 import { HabitFreezeNotices } from "../components/HabitFreezeNotices";
 import { NotificationPrompt } from "../components/NotificationPrompt";
@@ -159,6 +160,7 @@ function RootComponent() {
           <BottomNav />
           <PrivacyConsent />
           <ThemeOnboarding />
+          <ProductOnboarding />
           <SyncManager />
           <HabitFreezeNotices />
           <NotificationPrompt />
