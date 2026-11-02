@@ -22,6 +22,7 @@ import { exerciseHistory, exercisePerformance, kg, progression, toWorkout, weekl
 import { interpretWorkoutPlan } from "@/lib/plan-import.functions";
 import type { Block, Exercise, Workout } from "@/lib/trilha-data";
 import { getWorkoutExamples, exercisePrescription } from "@/lib/trilha-data";
+import { trackProductEvent } from "@/lib/product-telemetry";
 import { WorkoutSeries, SessionProgress } from "@/components/WorkoutSeries";
 import { Progress } from "@/components/ui/progress";
 import { exerciseSeries, weeklyTrainingProgress } from "@/lib/training-session";
@@ -233,7 +234,7 @@ function ImportDialog({ open, onOpenChange, week, onAssign }: { open: boolean; o
       addWorkout(w);
       if (it.day) { const date = week[DAY_ORDER.indexOf(it.day)]; if (date) onAssign(toDateKey(date), w); }
     });
-    toast.success(`${items.length} treino(s) importado(s)`); onOpenChange(false); reset();
+    toast.success(`${items.length} treino(s) importado(s)`); trackProductEvent("workout_imported", user?.id); onOpenChange(false); reset();
   };
 
   return <Dialog open={open} onOpenChange={(v) => { onOpenChange(v); if (!v) reset(); }}>

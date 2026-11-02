@@ -24,6 +24,7 @@ import { PrivacyConsent } from "../components/PrivacyConsent";
 import { ThemeProvider } from "../lib/theme-context";
 import { ThemeOnboarding } from "../components/ThemeOnboarding";
 import { ProductOnboarding } from "../components/ProductOnboarding";
+import { ProductTelemetry } from "../components/ProductTelemetry";
 import { StudyTimerProvider } from "../components/StudyTimerProvider";
 import { HabitFreezeNotices } from "../components/HabitFreezeNotices";
 import { NotificationPrompt } from "../components/NotificationPrompt";
@@ -162,6 +163,7 @@ function RootComponent() {
           <ThemeOnboarding />
           <ProductOnboarding />
           <SyncManager />
+          <ProductTelemetry />
           <HabitFreezeNotices />
           <NotificationPrompt />
           <ReminderManager />

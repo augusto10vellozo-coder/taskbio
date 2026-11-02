@@ -77,7 +77,8 @@ Lista de pendências do TaskBio. Ordenada por impacto. Atualize ao concluir.
 - [ ] **Nível e XP total acumulado.** Hoje o XP zera visualmente todo dia, sem progressão longa.
 - [ ] **E-mail de resumo semanal.** Hoje o resumo depende de push, que no iPhone exige o app
       instalado.
-- [ ] **Instrumentação de funil** (ativação, D1, D7). Sem isso não dá para medir retenção.
+- [x] **Instrumentação de funil** (ativação, D1, D7). Painel em `/equipe → Produto`
+      (`drizzle/migrations/0025_product_telemetry.sql`).
 
 ## Monetização (futuro)
 

@@ -10,6 +10,7 @@ import { GOALS } from "@/lib/trilha-data";
 import { MODULES, isModuleOn } from "@/lib/modules";
 import { getWeekKeys } from "@/lib/calendar-utils";
 import { exampleWeek } from "@/lib/example-week";
+import { trackProductEvent } from "@/lib/product-telemetry";
 
 /**
  * First-run setup shown once per account: goal, modules and the starter week.
@@ -62,9 +63,11 @@ export function ProductOnboarding() {
         if (chosenGoal) setGoal(chosenGoal);
         if (starter === "exemplo") {
           replaceDays(exampleWeek(getWeekKeys(new Date())));
+          trackProductEvent("week_example_used", user.id);
           toast.success("Semana de exemplo adicionada em Hoje.");
         }
       }
+      trackProductEvent("onboarding_done", user.id);
     } catch {
       toast.error("Não foi possível salvar suas escolhas agora. Você pode ajustar depois no Perfil.");
     } finally {

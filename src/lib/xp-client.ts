@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { recordXp } from "@/lib/social.functions";
+import { trackProductEvent } from "@/lib/product-telemetry";
 import type { Block } from "@/lib/trilha-data";
 import type { XpKind } from "@/lib/xp";
 
@@ -22,6 +23,7 @@ export function emitXp(input: { kind: XpKind; ref: string; date: string; on: boo
         }
       }
       const res = await recordXp({ data: input });
+      if (input.on && res.points > 0) trackProductEvent("first_block_done", data.session.user.id);
       window.dispatchEvent(new CustomEvent(XP_EVENT, { detail: res }));
     } catch { /* offline: points are not awarded later to keep the same-day rule */ }
   }); };

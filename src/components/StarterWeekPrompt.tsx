@@ -6,6 +6,7 @@ import { useAuth } from "@/lib/auth-context";
 import { useTaskBio } from "@/lib/trilha-store";
 import { getWeekKeys } from "@/lib/calendar-utils";
 import { exampleWeek } from "@/lib/example-week";
+import { trackProductEvent } from "@/lib/product-telemetry";
 
 /**
  * Empty state for a day with nothing planned. When the whole week is empty it
@@ -33,6 +34,7 @@ export function StarterWeekPrompt({ onAdd }: { onAdd: () => void }) {
 
   const start = () => {
     replaceDays(exampleWeek(weekKeys));
+    trackProductEvent("week_example_used", user?.id);
     toast.success("Semana de exemplo adicionada. Edite ou limpe quando quiser.");
   };
 

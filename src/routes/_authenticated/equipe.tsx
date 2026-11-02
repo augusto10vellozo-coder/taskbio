@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState, type FormEvent } from "react";
-import { Activity, FileText, Plus, Sparkles, Trash2 } from "lucide-react";
+import { Activity, FileText, Plus, Sparkles, Trash2, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { reviewPublicContent } from "@/lib/content-review.functions";
 import { ModuleHeader } from "@/components/ModuleHeader";
+import { ProductMetrics } from "@/components/ProductMetrics";
 type ContentReviewResult = { summary: string; scores: { clarity: number; utility: number; suitability: number }; strengths: string[]; improvements: Array<{ priority: string; page: string; action: string; reason: string }>; risks: string[] };
 
 export const Route = createFileRoute("/_authenticated/equipe")({
@@ -86,7 +87,7 @@ function TeamPage() {
   return <main className="mx-auto max-w-5xl px-5 pb-20 sm:px-8">
     <ModuleHeader title="Equipe" /><h2 className="font-display text-lg font-semibold">Conteúdo e audiência</h2>
     <Tabs defaultValue="review" className="mt-8">
-      <TabsList className="w-full justify-start sm:w-auto"><TabsTrigger value="review"><FileText className="mr-2 size-4" />Revisão de conteúdo</TabsTrigger><TabsTrigger value="metrics"><Activity className="mr-2 size-4" />Métricas</TabsTrigger></TabsList>
+      <TabsList className="w-full justify-start sm:w-auto"><TabsTrigger value="review"><FileText className="mr-2 size-4" />Revisão de conteúdo</TabsTrigger><TabsTrigger value="metrics"><Activity className="mr-2 size-4" />Métricas</TabsTrigger><TabsTrigger value="product"><TrendingUp className="mr-2 size-4" />Produto</TabsTrigger></TabsList>
       <TabsContent value="review" className="mt-8">
         <form onSubmit={submit} className="space-y-6">
           <div><label htmlFor="criteria" className="text-sm font-semibold">Critérios editoriais</label><Textarea id="criteria" required minLength={20} maxLength={4000} value={criteria} onChange={(event) => setCriteria(event.target.value)} className="mt-2 min-h-28 bg-card" /></div>
@@ -107,6 +108,7 @@ function TeamPage() {
         <div className="mt-8 overflow-x-auto"><table className="w-full min-w-96 text-left text-sm"><thead className="border-b border-line text-steel"><tr><th className="py-3">Página</th><th className="py-3 text-right">Visitas</th><th className="py-3 text-right">Cliques</th></tr></thead><tbody>{rows.map((row) => <tr key={row.path} className="border-b border-line"><td className="py-3">{row.path}</td><td className="py-3 text-right">{row.visits}</td><td className="py-3 text-right">{row.clicks}</td></tr>)}</tbody></table></div>
         <p className="mt-5 text-xs text-steel">Anúncios ainda não estão ativos. O painel mostra no máximo os 10.000 eventos mais recentes do período selecionado.</p>
       </TabsContent>
+      <TabsContent value="product" className="mt-8"><ProductMetrics /></TabsContent>
     </Tabs>
   </main>;
 }
