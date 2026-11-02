@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { supabase } from "@/integrations/supabase/client";
 import type { Json } from "@/integrations/supabase/types";
 import { GOALS } from "@/lib/trilha-data";
-import { useTaskBio } from "@/lib/trilha-store";
+import { useTaskBio, ACCOUNT_WIPE_KEY } from "@/lib/trilha-store";
 import { deleteMyAccount } from "@/lib/account.functions";
 import { disableServerPush, enableServerPush, type PushResult } from "@/lib/push-client";
 import { useThemePreference, type ThemePreference } from "@/lib/theme-context";
@@ -123,20 +123,22 @@ function ProfilePage() {
   async function removeAccount() {
     setDeleting(true);
     try {
+      // Marca antes de excluir: garante que a próxima visita neste navegador comece vazia,
+      // mesmo que algo reescreva o estado local durante a navegação.
+      try { localStorage.setItem(ACCOUNT_WIPE_KEY, "1"); } catch { /* armazenamento indisponível */ }
       // Apaga as fotos pelo Storage (a política permite ao dono) antes de remover a conta.
       try {
         const { data: files } = await supabase.storage.from("xp-photos").list(user.id, { limit: 1000 });
         if (files?.length) await supabase.storage.from("xp-photos").remove(files.map((file) => `${user.id}/${file.name}`));
       } catch { /* a limpeza das fotos não impede a exclusão da conta */ }
-      await deleteMyAccount();
-      try { await supabase.auth.signOut(); } catch { /* a sessão já deixa de valer com a conta */ }
-      // O app é local-first: sem limpar aqui, a próxima conta criada neste navegador
-      // herdaria a rotina, a saúde e as finanças que acabaram de ser excluídas.
       try {
-        Object.keys(localStorage)
-          .filter((key) => key.startsWith("trilha") || key.startsWith("taskbio"))
-          .forEach((key) => localStorage.removeItem(key));
-      } catch { /* armazenamento indisponível */ }
+        await deleteMyAccount();
+      } catch (cause) {
+        // A conta continua existindo: não podemos apagar os dados locais.
+        try { localStorage.removeItem(ACCOUNT_WIPE_KEY); } catch { /* armazenamento indisponível */ }
+        throw cause;
+      }
+      try { await supabase.auth.signOut(); } catch { /* a sessão já deixa de valer com a conta */ }
       window.location.replace("/");
     } catch {
       toast.error("Não foi possível excluir a conta agora.");

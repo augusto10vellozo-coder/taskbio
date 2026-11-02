@@ -128,6 +128,9 @@ const initialState: TaskBioState = {
 
 const STORAGE_KEY = "trilha.state.v2";
 
+/** Set before deleting the account so the next load in this browser starts empty. */
+export const ACCOUNT_WIPE_KEY = "taskbio:wipe";
+
 // Route chunks can evaluate this module independently in production. Keeping the
 // Context on globalThis guarantees that providers and consumers share one identity.
 const contextKey = "__trilha_store_context__";
@@ -147,6 +150,13 @@ export function TaskBioProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     try {
+      if (localStorage.getItem(ACCOUNT_WIPE_KEY)) {
+        // A conta foi excluída: nada deste navegador deve voltar para a próxima.
+        for (const key of Object.keys(localStorage)) {
+          if (key.startsWith("trilha") || key.startsWith("taskbio")) localStorage.removeItem(key);
+        }
+        return;
+      }
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
         const stored = JSON.parse(raw) as Partial<TaskBioState>;
