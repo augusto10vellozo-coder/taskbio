@@ -208,9 +208,9 @@ const ConviteIndexRoute = ConviteIndexRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const ConviteUsernameRoute = ConviteUsernameRouteImport.update({
-  id: '/convite/$username',
-  path: '/convite/$username',
-  getParentRoute: () => rootRouteImport,
+  id: '/$username',
+  path: '/$username',
+  getParentRoute: () => ConviteRoute,
 } as any)
 const ApiPublicPushRemindersRoute = ApiPublicPushRemindersRouteImport.update({
   id: '/api/public/push-reminders',
@@ -496,7 +496,6 @@ export interface RootRouteChildren {
   SobreRoute: typeof SobreRoute
   TermosRoute: typeof TermosRoute
   TreinoRoute: typeof TreinoRoute
-  ConviteUsernameRoute: typeof ConviteUsernameRoute
   ConviteIndexRoute: typeof ConviteIndexRoute
   ApiPublicPushRemindersRoute: typeof ApiPublicPushRemindersRoute
   ApiPublicWeeklySummaryRoute: typeof ApiPublicWeeklySummaryRoute
@@ -732,10 +731,10 @@ declare module '@tanstack/react-router' {
     }
     '/convite/$username': {
       id: '/convite/$username'
-      path: '/convite/$username'
+      path: '/$username'
       fullPath: '/convite/$username'
       preLoaderRoute: typeof ConviteUsernameRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof ConviteRoute
     }
     '/api/public/push-reminders': {
       id: '/api/public/push-reminders'
@@ -812,7 +811,6 @@ const rootRouteChildren: RootRouteChildren = {
   SobreRoute: SobreRoute,
   TermosRoute: TermosRoute,
   TreinoRoute: TreinoRoute,
-  ConviteUsernameRoute: ConviteUsernameRoute,
   ConviteIndexRoute: ConviteIndexRoute,
   ApiPublicPushRemindersRoute: ApiPublicPushRemindersRoute,
   ApiPublicWeeklySummaryRoute: ApiPublicWeeklySummaryRoute,
