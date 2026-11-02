@@ -4,14 +4,15 @@ import { useEffect, useRef, useState } from "react";
 import { useEntryState } from "@/lib/navigation-context";
 import { Check, ChevronLeft, ChevronRight, FileUp, Pencil, Plus, Trash2, Wallet, X } from "lucide-react";
 import { EmptyState, ModuleGate } from "@/components/EmptyState";
-import { addMonths, format, parseISO } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useTaskBio } from "@/lib/trilha-store";
 import { emitXp } from "@/lib/xp-client";
 import { toDateKey } from "@/lib/calendar-utils";
-import { FIXED_CATEGORIES, billStatus, brl, budgetFor, dailyAllowance, emptyFinance, monthSummary, payBill, removeBill, setBudget, sortBills, unpayBill, validAmount, type Bill } from "@/lib/finance";
+import { ForecastHorizon, ForecastPanel, GoalsPanel } from "@/components/FinancePlanning";
+import { FIXED_CATEGORIES, MAX_MONTHS_AHEAD, billStatus, brl, budgetFor, canGoToMonth, shiftMonth, dailyAllowance, emptyFinance, monthSummary, payBill, removeBill, setBudget, sortBills, unpayBill, validAmount, type Bill } from "@/lib/finance";
 
 export const Route = createFileRoute("/financas")({
   head: () => ({ meta: [
@@ -54,11 +55,13 @@ function Financas() {
   const todayKey = toDateKey(today);
   const currentMonth = todayKey.slice(0, 7);
   const isCurrent = month === currentMonth;
-  const changeMonth = (delta: number) => {
-    const next = format(addMonths(parseISO(`${month}-01`), delta), "yyyy-MM");
-    if (next > currentMonth) return;
+  const isFuture = month > currentMonth;
+  const goToMonth = (next: string) => {
+    if (!canGoToMonth(next, currentMonth)) return;
     sessionMonth = next; setMonthState(next); setAmount(""); setDesc(""); setType("gasto"); setCat("Outros"); setBudgetInput(null);
   };
+  const changeMonth = (delta: number) => goToMonth(shiftMonth(month, delta));
+  const atLimit = !canGoToMonth(shiftMonth(month, 1), currentMonth);
   const sum = monthSummary(f.entries, month);
   const budget = budgetFor(f, month, currentMonth);
   const allowance = isCurrent ? dailyAllowance(budget, sum.spent, today) : null;
@@ -107,9 +110,13 @@ function Financas() {
       </div>
       <div className="mb-4 flex items-center justify-between rounded-lg bg-card p-2 ring-1 ring-line">
         <Button variant="ghost" size="icon" aria-label="Mês anterior" onClick={() => changeMonth(-1)}><ChevronLeft /></Button>
-        <h2 className="font-display text-lg font-semibold">{monthLabel(month)}</h2>
-        <Button variant="ghost" size="icon" aria-label="Próximo mês" disabled={isCurrent} onClick={() => changeMonth(1)}><ChevronRight /></Button>
+        <div className="text-center"><h2 className="font-display text-lg font-semibold">{monthLabel(month)}</h2>
+          {isFuture ? <button type="button" className="text-xs font-medium text-brand-deep underline" onClick={() => goToMonth(currentMonth)}>Mês futuro · voltar para hoje</button> : !isCurrent && <button type="button" className="text-xs font-medium text-brand-deep underline" onClick={() => goToMonth(currentMonth)}>Voltar para hoje</button>}</div>
+        <Button variant="ghost" size="icon" aria-label="Próximo mês" disabled={atLimit} title={atLimit ? `Planejamento até ${MAX_MONTHS_AHEAD} meses à frente` : undefined} onClick={() => changeMonth(1)}><ChevronRight /></Button>
       </div>
+
+      {isFuture && <ForecastPanel f={f} setFinance={setFinance} month={month} currentMonth={currentMonth} cats={cats} isFuture monthName={monthName} />}
+      {!isFuture && <>
 
       <form className="rounded-lg bg-card p-4 ring-1 ring-line" onSubmit={(e) => {
         e.preventDefault(); const v = num(amount);
@@ -150,13 +157,21 @@ function Financas() {
           </form>}
         </section>
       </div>
+      <ForecastPanel f={f} setFinance={setFinance} month={month} currentMonth={currentMonth} cats={cats} isFuture={false} monthName={monthName} />
+      </>}
+      {isFuture && <section className="mt-4 rounded-lg bg-card p-4 ring-1 ring-line"><p className="text-xs font-medium text-steel">Orçamento de {monthName}</p>
+        {budgetInput === null ? <button type="button" className="mt-1 text-sm font-medium text-brand-deep underline" onClick={() => setBudgetInput(budget > 0 ? String(budget).replace(".", ",") : "")}>{budget > 0 ? `${brl(budget)} · editar` : "Definir orçamento"}</button>
+          : <form className="mt-2 flex gap-2" onSubmit={(e) => { e.preventDefault(); saveBudget(); }}><input autoFocus inputMode="decimal" aria-label={`Orçamento de ${monthName}`} value={budgetInput} onChange={(e) => setBudgetInput(e.target.value)} placeholder="R$" className="h-8 w-28 min-w-0 rounded-md bg-background px-2 text-sm ring-1 ring-line" /><Button size="sm">Salvar</Button><Button type="button" size="sm" variant="ghost" aria-label="Cancelar" onClick={() => setBudgetInput(null)}><X /></Button></form>}
+      </section>}
+      <ForecastHorizon f={f} month={month} onPick={goToMonth} />
+      <GoalsPanel f={f} setFinance={setFinance} currentMonth={currentMonth} />
 
-      {monthEntries.length === 0 && <EmptyState icon={Wallet} title="Nada lançado ainda" context="Registre gastos e o TaskBio soma com o custo estimado das refeições." actionLabel="Lançar primeiro gasto" onAction={() => { setType("gasto"); window.scrollTo({ top: 0, behavior: "smooth" }); amountRef.current?.focus(); }} secondaryLabel="Importar extrato" onSecondary={() => navigate({ to: "/financas-importar" })} />}
+      {!isFuture && monthEntries.length === 0 && <EmptyState icon={Wallet} title="Nada lançado ainda" context="Registre gastos e o TaskBio soma com o custo estimado das refeições." actionLabel="Lançar primeiro gasto" onAction={() => { setType("gasto"); window.scrollTo({ top: 0, behavior: "smooth" }); amountRef.current?.focus(); }} secondaryLabel="Importar extrato" onSecondary={() => navigate({ to: "/financas-importar" })} />}
 
-      <section className="mt-4 rounded-lg bg-card p-4 ring-1 ring-line"><h2 className="font-display text-lg font-semibold">Gastos por categoria</h2>
+      {!isFuture && <section className="mt-4 rounded-lg bg-card p-4 ring-1 ring-line"><h2 className="font-display text-lg font-semibold">Gastos por categoria</h2>
         {sum.categories.length === 0 ? null
           : <ul className="mt-3 space-y-2">{sum.categories.map((c) => <li key={c.category} className="text-sm"><div className="flex justify-between gap-2"><span className="min-w-0 truncate">{c.category}</span><span className="shrink-0 font-medium">{brl(c.total)} <span className="text-xs text-steel">· {c.percent}%</span></span></div><div className="mt-1 h-2 rounded-full bg-mist"><div className="h-2 rounded-full bg-brand" style={{ width: `${(c.total / max) * 100}%` }} /></div></li>)}</ul>}
-      </section>
+      </section>}
 
       <section className="mt-4 rounded-lg bg-card p-4 ring-1 ring-line"><h2 className="font-display text-lg font-semibold">Contas a pagar</h2><p className="text-xs text-steel">A gente te lembra na Agenda um dia antes do vencimento.</p>
         <form className="mt-3 grid gap-2 sm:grid-cols-[1fr_110px_150px_150px_auto]" onSubmit={submitBill}>
@@ -177,9 +192,9 @@ function Financas() {
           </li>); })}</ul>
       </section>
 
-      <section className="mt-4 rounded-lg bg-card p-4 ring-1 ring-line"><h2 className="font-display text-lg font-semibold">Últimos registros</h2>
+      {!isFuture && <section className="mt-4 rounded-lg bg-card p-4 ring-1 ring-line"><h2 className="font-display text-lg font-semibold">Últimos registros</h2>
         <ul className="mt-2 divide-y divide-line">{monthEntries.slice(0, 30).map((e) => <li key={e.id} className="flex items-center gap-3 py-2 text-sm"><span className="min-w-0 flex-1 break-words">{e.description} <span className="text-xs text-steel">· {e.category} · {e.date.split("-").reverse().join("/")}{e.billId ? " · conta" : ""}{e.source === "importado" ? " · importado" : ""}</span></span><span className={e.type === "receita" ? "font-medium text-brand-deep" : "font-medium"}>{e.type === "receita" ? "+" : "−"}{brl(e.amount)}</span><Button variant="ghost" size="icon" className="size-7" aria-label={`Remover ${e.description}`} onClick={() => { const pb = e.billId ? f.bills.find((x) => x.id === e.billId) : undefined; if (pb?.paid) emitXp({ kind: "bill", ref: `${pb.id}:${pb.dueDate}`, date: todayKey, on: false }); setFinance((s) => e.billId ? unpayBill(s, e.billId) : { ...s, entries: s.entries.filter((x) => x.id !== e.id) }); }}><Trash2 /></Button></li>)}</ul>
-      </section>
+      </section>}
       </ModuleGate>
     </main>
   );
