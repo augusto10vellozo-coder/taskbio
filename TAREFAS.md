@@ -13,8 +13,12 @@ Lista de pendências do TaskBio. Ordenada por impacto. Atualize ao concluir.
       `habit-freeze-midnight` (03:00 UTC) confirmados com resposta 200 em `net._http_response`.
 - [ ] **Desligar a Lovable.** Baixar um backup novo antes e remover as URLs da Lovable do Google
       Cloud e do Supabase. Só depois cancelar.
-- [ ] **`.env`, `.env.development` e `.env.production` estão versionados**, com um token Paddle
-      `live_` sem uso. O `.gitignore` não ignora `.env*`. Parar de versionar e revogar o token.
+- [x] **Token Paddle removido do código.** Era um token de cliente (`live_`), público por natureza
+      e sem uso em nenhuma linha do app. A conta não é mais acessível, então não há como revogar;
+      risco residual baixo (não é chave secreta e não há cobrança configurada). Só o histórico do
+      Git ainda o contém.
+- [ ] **Parar de versionar `.env*`.** Hoje o arquivo contém apenas chaves públicas (URL e publishable
+      key), mas o padrão correto é injetar no build por variável de ambiente.
 - [ ] **Verificação de marca no Google** para o login exibir "TaskBio" em vez do domínio Supabase.
 - [ ] **`.env` precisa ser atualizado a cada troca de banco.** As chaves `VITE_*` são embutidas no
       build; trocar só os segredos do Cloudflare deixa o navegador apontando para o banco antigo.
