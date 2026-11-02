@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { brasiliaDay } from "@/lib/xp";
-import { hasActivity, previousWeek, weekStats } from "@/lib/weekly-digest";
+import { hasActivity, previousWeek, weekRange, weekStats } from "@/lib/weekly-digest";
 
 function safeEqual(a: string, b: string) {
   if (a.length !== b.length) return false;
@@ -24,7 +24,10 @@ export const Route = createFileRoute("/api/public/weekly-summary")({
         const { data: secret } = await supabaseAdmin.from("push_cron_token").select("token").eq("id", 1).maybeSingle();
         if (!secret || !safeEqual(token, secret.token)) return new Response("Unauthorized", { status: 401 });
 
-        const week = previousWeek(brasiliaDay(new Date()));
+        const today = brasiliaDay(new Date());
+        // ?week=current serves a manual test without waiting for Monday.
+        const current = new URL(request.url).searchParams.get("week") === "current";
+        const week = current ? weekRange(today) : previousWeek(today);
         const weekLabel = `${week.start.slice(8, 10)}/${week.start.slice(5, 7)} a ${week.end.slice(8, 10)}/${week.end.slice(5, 7)}`;
 
         // weekly_digest_sent is newer than the generated Database types.
