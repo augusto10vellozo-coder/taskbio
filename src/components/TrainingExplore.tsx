@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { useEntryState } from "@/lib/navigation-context";
 import { addDays, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -18,7 +19,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { ACTIVITY_CATALOG, GOALS, OBJECTIVE_EFFECTS, exercisePrescription, getWorkoutExamples, type Exercise, type Workout } from "@/lib/trilha-data";
+import { ACTIVITY_CATALOG, GOALS, OBJECTIVE_EFFECTS, exercisePrescription, getWorkoutExamples, type Workout } from "@/lib/trilha-data";
 import { useTaskBio } from "@/lib/trilha-store";
 
 
@@ -50,7 +51,7 @@ export function TrainingExplore() {
   const { workouts: allWorkouts, workoutHistory, addWorkout, removeWorkout, goal, setGoal, preferredModality, setPreferredModality } = useTaskBio();
   const workouts = allWorkouts.filter((w) => !w.templateId);
   const [selected, setSelected] = useEntryState<string | null>("training:model", workouts[0]?.id ?? null);
-  const [creating, setCreating] = useState(false);
+  const navigate = useNavigate();
   const [openExample, setOpenExample] = useEntryState<string | null>("training:example", null);
   const workout = workouts.find((w) => w.id === selected);
   const examples = preferredModality ? getWorkoutExamples(preferredModality, goal) : [];
@@ -70,6 +71,21 @@ export function TrainingExplore() {
     };
     addWorkout(created);
     setSelected(created.id);
+  };
+
+  /** One editor only: a blank workout is created here and opened in /treino. */
+  const createBlank = () => {
+    const created: Workout = {
+      id: `w-${Date.now()}`,
+      name: "Novo treino",
+      focus: "Treino livre",
+      modality: preferredModality || "Academia",
+      exercises: [],
+    };
+    addWorkout(created);
+    setSelected(created.id);
+    toast.success("Treino criado. Abra para adicionar os exercícios.");
+    void navigate({ to: "/treino" });
   };
 
   return (
@@ -189,7 +205,7 @@ export function TrainingExplore() {
                                 </li>
                               ))}
                             </ol>
-                            <div className="mt-4 grid gap-2 sm:grid-cols-2"><Button onClick={() => saveExample(example)}><Plus /> Salvar em meus treinos</Button><ScheduleButton workout={example} /></div>
+                            <div className="mt-4 grid gap-2 sm:grid-cols-2"><Button onClick={() => saveExample(example)}><Plus /> Usar este modelo</Button><ScheduleButton workout={example} /></div>
                           </div>
                         )}
                       </article>
@@ -203,32 +219,17 @@ export function TrainingExplore() {
             <div className="glass-strong rounded-2xl p-5 ring-1 ring-line">
               <div className="flex items-center justify-between">
                 <h2 className="font-display text-lg font-semibold tracking-tight">Meus treinos</h2>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCreating((v) => !v)}
-                >
-                  {creating ? "Cancelar" : "Criar treino"}
+                <Button type="button" variant="outline" size="sm" onClick={createBlank}>
+                  <Plus /> Criar do zero
                 </Button>
               </div>
-
-              {creating && (
-                <NewWorkoutForm
-                  onCreate={(w) => {
-                    addWorkout(w);
-                    setSelected(w.id);
-                    setCreating(false);
-                  }}
-                />
-              )}
 
               {workouts.length === 0 ? (
                 <div className="mt-4 border-y border-dashed border-line py-9 text-center">
                   <Dumbbell className="mx-auto size-7 text-steel" />
                   <p className="mt-2 text-sm font-medium">Você ainda não tem treinos</p>
                   <p className="mx-auto mt-1 max-w-sm text-xs leading-5 text-steel">Crie um treino do seu jeito ou adicione uma das sugestões acima.</p>
-                  <Button type="button" size="sm" className="mt-4" onClick={() => setCreating(true)}><Plus /> Criar meu primeiro treino</Button>
+                  <Button type="button" size="sm" className="mt-4" onClick={createBlank}><Plus /> Criar meu primeiro treino</Button>
                 </div>
               ) : (
                 <div className="mt-4 flex flex-wrap gap-1.5">
@@ -330,109 +331,4 @@ function formatTime(totalSeconds: number) {
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
   return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
-}
-
-
-type Row = { name: string; sets: string; reps: string; rest: string };
-
-function NewWorkoutForm({ onCreate }: { onCreate: (w: Workout) => void }) {
-  const [name, setName] = useState("");
-  const [focus, setFocus] = useState("");
-  const [modality, setModality] = useState("Musculação · Hipertrofia");
-  const [rows, setRows] = useState<Row[]>([{ name: "", sets: "4", reps: "10", rest: "60" }]);
-
-  const update = (i: number, patch: Partial<Row>) =>
-    setRows((r) => r.map((row, idx) => (idx === i ? { ...row, ...patch } : row)));
-
-  return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        const exercises: Exercise[] = rows
-          .filter((r) => r.name.trim())
-          .map((r, i) => ({
-            id: `ex-${Date.now()}-${i}`,
-            name: r.name.trim(),
-            sets: Math.max(1, Number(r.sets) || 1),
-            reps: Math.max(1, Number(r.reps) || 1),
-            restSec: Number(r.rest) || 0,
-            muscles: "Definido por você",
-            howTo: "Execute com técnica e amplitude controladas.",
-            doneSets: 0,
-          }));
-        if (!name.trim() || exercises.length === 0) return;
-        onCreate({
-          id: `w-${Date.now()}`,
-          name: name.trim(),
-          focus: focus.trim() || "Treino livre",
-          modality,
-          exercises,
-        });
-      }}
-      className="mt-4 space-y-2 rounded-xl bg-card/50 p-3 ring-1 ring-line"
-    >
-      <div className="grid gap-2 sm:grid-cols-3">
-        <input
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Nome (ex.: Treino D)"
-          className="rounded-lg bg-card px-2 py-1.5 text-sm ring-1 ring-line"
-        />
-        <input
-          value={focus}
-          onChange={(e) => setFocus(e.target.value)}
-          placeholder="Foco (ex.: Ombros)"
-          className="rounded-lg bg-card px-2 py-1.5 text-sm ring-1 ring-line"
-        />
-        <input
-          value={modality}
-          onChange={(e) => setModality(e.target.value)}
-          placeholder="Modalidade"
-          className="rounded-lg bg-card px-2 py-1.5 text-sm ring-1 ring-line"
-        />
-      </div>
-
-      {rows.map((r, i) => (
-        <div key={i} className="grid gap-2 sm:grid-cols-[1fr_70px_70px_90px]">
-          <input
-            value={r.name}
-            onChange={(e) => update(i, { name: e.target.value })}
-            placeholder="Exercício"
-            className="rounded-lg bg-card px-2 py-1.5 text-sm ring-1 ring-line"
-          />
-          <input
-            value={r.sets}
-            onChange={(e) => update(i, { sets: e.target.value })}
-            placeholder="Séries"
-            className="rounded-lg bg-card px-2 py-1.5 text-sm ring-1 ring-line"
-          />
-          <input
-            value={r.reps}
-            onChange={(e) => update(i, { reps: e.target.value })}
-            placeholder="Reps"
-            className="rounded-lg bg-card px-2 py-1.5 text-sm ring-1 ring-line"
-          />
-          <input
-            value={r.rest}
-            onChange={(e) => update(i, { rest: e.target.value })}
-            placeholder="Descanso s"
-            className="rounded-lg bg-card px-2 py-1.5 text-sm ring-1 ring-line"
-          />
-        </div>
-      ))}
-
-      <div className="flex gap-2">
-        <button
-          type="button"
-          onClick={() => setRows((r) => [...r, { name: "", sets: "3", reps: "12", rest: "45" }])}
-          className="rounded-lg px-3 py-1.5 text-sm font-medium text-steel ring-1 ring-line hover:text-ink"
-        >
-          + Exercício
-        </button>
-        <button className="rounded-lg bg-brand px-3 py-1.5 text-sm font-medium text-background ring-1 ring-brand/30">
-          Salvar treino
-        </button>
-      </div>
-    </form>
-  );
 }
