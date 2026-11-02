@@ -34,7 +34,10 @@ Não remova as variáveis: sem elas o e-mail chega sem link ou sem código.
 
 ## Remetente (SMTP próprio)
 
-Hoje os e-mails saem como `Supabase Auth <noreply@mail.app.supabase.io>`, com limite baixo de envios.
+**Ordem obrigatória:** nesta versão do Supabase, os campos de assunto e corpo ficam bloqueados
+até existir um SMTP próprio. Configure o SMTP primeiro; os templates liberam depois.
+
+Hoje, sem SMTP, os e-mails saem como `Supabase Auth <noreply@mail.app.supabase.io>`, com limite baixo.
 Para usar `TaskBio <noreply@taskbio.com.br>`:
 
 1. Crie uma conta em [resend.com](https://resend.com) (plano gratuito: 3.000 e-mails/mês).
