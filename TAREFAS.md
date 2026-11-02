@@ -7,13 +7,12 @@ Lista de pendências do TaskBio. Ordenada por impacto. Atualize ao concluir.
 - [x] **Migrar para um Supabase próprio.** Banco em `hecqqcconnbjawcevigo`, estrutura restaurada
       do dump de 01/11 e migrations 0022–0026 aplicadas em 02/11. O app já usa o banco novo.
       Dados antigos descartados de propósito (eram de teste).
-- [ ] **`SUPABASE_SERVICE_ROLE_KEY` no Cloudflare.** A chave agora existe (projeto próprio), falta
-      cadastrá-la em Settings → Variables and Secrets. Sem ela: excluir conta, push pelo servidor
-      e o cron não funcionam.
-- [ ] **Cron no banco novo.** Ativar `pg_cron` e `pg_net` e recriar os jobs
-      `push-agenda-reminders` (5 min, chamando `taskbio.com.br`) e `habit-freeze-midnight` (03:00 UTC).
-      O job antigo ainda pode existir na Lovable.
-- [ ] **Desligar a Lovable** só depois de confirmar cron, e-mails e push no ambiente novo.
+- [x] **`SUPABASE_SERVICE_ROLE_KEY` no Cloudflare.** Cadastrada em 02/11; excluir conta, push pelo
+      servidor e cron funcionam.
+- [x] **Cron no banco novo.** `pg_cron` e `pg_net` ativos, jobs `push-agenda-reminders` (5 min) e
+      `habit-freeze-midnight` (03:00 UTC) confirmados com resposta 200 em `net._http_response`.
+- [ ] **Desligar a Lovable.** Baixar um backup novo antes e remover as URLs da Lovable do Google
+      Cloud e do Supabase. Só depois cancelar.
 - [ ] **`.env`, `.env.development` e `.env.production` estão versionados**, com um token Paddle
       `live_` sem uso. O `.gitignore` não ignora `.env*`. Parar de versionar e revogar o token.
 - [ ] **Verificação de marca no Google** para o login exibir "TaskBio" em vez do domínio Supabase.
