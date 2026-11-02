@@ -61,9 +61,8 @@ BEGIN
   DELETE FROM public.profiles WHERE id = me;
   DELETE FROM public.user_roles WHERE user_id = me;
 
-  DELETE FROM storage.objects
-    WHERE bucket_id = 'xp-photos' AND (storage.foldername(name))[1] = me::text;
-
+  -- As fotos do Storage são apagadas pela API antes desta chamada: o Supabase
+  -- bloqueia exclusão direta em storage.objects por gatilho de proteção.
   DELETE FROM auth.users WHERE id = me;
 END;
 $$;
