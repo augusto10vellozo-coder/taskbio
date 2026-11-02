@@ -4,6 +4,8 @@ import { useAuth } from "@/lib/auth-context";
 import { useTaskBio } from "@/lib/trilha-store";
 import { greeting } from "@/lib/engagement";
 import { usePersonalStatus } from "@/lib/use-personal-status";
+import { useTotalXp } from "@/lib/use-total-xp";
+import { levelInfo } from "@/lib/level";
 import { XP_DAILY_CAP } from "@/lib/xp";
 import { isMealRecorded } from "@/lib/meal-planning";
 import { formatFullDate } from "@/lib/calendar-utils";
@@ -24,6 +26,8 @@ export function AgendaGreeting({ showBack = true }: { showBack?: boolean }) {
 export function AgendaDayOverview({ dateKey }: { dateKey: string }) {
   const { plan } = useTaskBio();
   const personal = usePersonalStatus();
+  const { user } = useAuth();
+  const level = levelInfo(useTotalXp()).level;
   const blocks = plan[dateKey] ?? [];
   const xp = personal.todayXp;
   const days = personal.routineStreak;
@@ -37,6 +41,7 @@ export function AgendaDayOverview({ dateKey }: { dateKey: string }) {
         <span className="flex items-center gap-1.5">
           <Flame className={days > 0 ? "size-4 text-accent" : "size-4 text-faint"} aria-hidden="true" />
           {days} {days === 1 ? "dia seguido" : "dias seguidos"}
+          {user && <span className="rounded-full bg-mist px-1.5 py-0.5 text-[11px] font-medium text-steel" title={`Nível ${level}`}>Nv {level}</span>}
         </span>
         <span className="text-steel">{xp} / {XP_DAILY_CAP} XP hoje</span>
       </div>

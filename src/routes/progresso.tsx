@@ -1,5 +1,6 @@
 import { ModuleHeader } from "@/components/ModuleHeader";
 import { ConsistencyCard } from "@/components/ConsistencyCard";
+import { LevelCard } from "@/components/LevelCard";
 import { ReadingGoalBar } from "@/components/ReadingGoalBar";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, type ReactNode } from "react";
@@ -93,6 +94,7 @@ function Progresso() {
     <main className="mx-auto max-w-6xl px-5 pb-20 sm:px-8">
       <ModuleHeader title="Progresso" />
       <ModuleGate id="progresso">
+      <div className="pb-5"><LevelCard /></div>
       <section className="flex flex-wrap items-end justify-between gap-3 pb-5"><div><h2 className="font-display text-lg font-semibold">Evolução baseada nos seus registros</h2></div><div className="flex gap-1" role="group" aria-label="Período">{([7, 30, 90] as const).map((days) => <Button key={days} size="sm" variant={period === days ? "default" : "outline"} onClick={() => setPeriod(days)}>{days} dias</Button>)}</div></section>
 
       {!loading && entries.length === 0 && workoutHistory.length === 0 && <EmptyState icon={TrendingUp} title="Ainda sem dados para comparar" context="Registre treino, peso ou medidas e o progresso aparece aqui." actionLabel="Registrar medida" onAction={() => void navigate({ to: "/saude", hash: "registros-saude" })} secondaryLabel="Ver metas da semana" onSecondary={() => void navigate({ to: "/agenda" })} />}
