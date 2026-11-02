@@ -104,6 +104,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:description", content: "Sua semana saudÃ¡vel em uma Ãºnica agenda." },
       { property: "og:type", content: "website" },
       { property: "og:image", content: "https://taskbio.com.br/og.jpg" },
+      { property: "og:image:secure_url", content: "https://taskbio.com.br/og.jpg" },
+      { property: "og:image:type", content: "image/jpeg" },
       { property: "og:image:width", content: "1200" },
       { property: "og:image:height", content: "630" },
       { property: "og:image:alt", content: "TaskBio â€” sua rotina, dia apÃ³s dia" },
