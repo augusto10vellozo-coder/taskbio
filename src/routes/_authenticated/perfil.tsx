@@ -4,6 +4,8 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Bell, Download, LogOut, MonitorSmartphone, Moon, Save, Sun, Trash2, UserRound, UsersRound } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import type { Json } from "@/integrations/supabase/types";
 import { GOALS } from "@/lib/trilha-data";
@@ -36,6 +38,9 @@ function ProfilePage() {
   const savedPrefsRef = useRef<Record<string, unknown>>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleteWord, setDeleteWord] = useState("");
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     supabase.from("profiles").select("display_name, avatar_url, goal, preferences").eq("id", user.id).single().then(({ data, error }) => {
@@ -90,20 +95,50 @@ function ProfilePage() {
   }
 
   async function exportData() {
-    const [{ data: profile }, { data: progress }] = await Promise.all([
-      supabase.from("profiles").select("display_name, goal, preferences, created_at, updated_at").eq("id", user.id).single(),
+    const [{ data: profile }, { data: progress }, { data: stored }, { data: points }, { data: devices }] = await Promise.all([
+      supabase.from("profiles").select("display_name, goal, preferences, created_at, updated_at").eq("id", user.id).maybeSingle(),
       supabase.from("progress_entries").select("entry_date, kind, value, unit, label, notes, created_at").eq("user_id", user.id),
+      supabase.from("user_data").select("plan, workouts, meals, shopping_state, settings").eq("user_id", user.id).maybeSingle(),
+      supabase.from("xp_events").select("kind, ref, day, points, created_at").eq("user_id", user.id).order("created_at"),
+      supabase.from("push_subscriptions").select("device_label, timezone, active, created_at").eq("user_id", user.id),
     ]);
-    const payload = { exportedAt: new Date().toISOString(), profile, agenda: trilha.plan, workouts: trilha.workouts, meals: trilha.meals, shoppingItems: trilha.shoppingItems, progress };
+    const payload = {
+      exportedAt: new Date().toISOString(),
+      conta: { id: user.id, email: user.email },
+      perfil: profile,
+      rotina: stored
+        ? { agenda: stored.plan, treinos: stored.workouts, refeicoes: stored.meals, compras: stored.shopping_state }
+        : { agenda: trilha.plan, treinos: trilha.workouts, refeicoes: trilha.meals, compras: trilha.shoppingItems },
+      // Hábitos, registro de hábitos, saúde, finanças, leitura, estudos e histórico de exercícios.
+      registros: stored?.settings ?? {},
+      progresso: progress ?? [],
+      pontos: points ?? [],
+      aparelhos: devices ?? [],
+    };
     const url = URL.createObjectURL(new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" }));
-    const anchor = document.createElement("a"); anchor.href = url; anchor.download = `trilha-dados-${new Date().toISOString().slice(0, 10)}.json`; anchor.click(); URL.revokeObjectURL(url);
+    const anchor = document.createElement("a"); anchor.href = url; anchor.download = `taskbio-dados-${new Date().toISOString().slice(0, 10)}.json`; anchor.click(); URL.revokeObjectURL(url);
     toast.success("Arquivo de dados criado.");
   }
 
   async function removeAccount() {
-    if (!window.confirm("Excluir definitivamente sua conta e todos os dados? Esta ação não pode ser desfeita.")) return;
-    try { await deleteMyAccount(); await supabase.auth.signOut(); navigate({ to: "/", replace: true }); toast.success("Conta excluída."); }
-    catch { toast.error("Não foi possível excluir a conta agora."); }
+    setDeleting(true);
+    try {
+      // Apaga as fotos pelo Storage (a política permite ao dono) antes de remover a conta.
+      try {
+        const { data: files } = await supabase.storage.from("xp-photos").list(user.id, { limit: 1000 });
+        if (files?.length) await supabase.storage.from("xp-photos").remove(files.map((file) => `${user.id}/${file.name}`));
+      } catch { /* a limpeza das fotos não impede a exclusão da conta */ }
+      await deleteMyAccount();
+      try { await supabase.auth.signOut(); } catch { /* a sessão já deixa de valer com a conta */ }
+      navigate({ to: "/", replace: true });
+      toast.success("Conta e dados excluídos.");
+    } catch {
+      toast.error("Não foi possível excluir a conta agora.");
+    } finally {
+      setDeleting(false);
+      setConfirmDelete(false);
+      setDeleteWord("");
+    }
   }
 
   return <main className="mx-auto max-w-4xl px-5 pb-20 sm:px-8"><ModuleHeader title="Meu perfil" /><div className="flex justify-end"><Button variant="outline" onClick={signOut}><LogOut /> Sair</Button></div>
@@ -111,11 +146,29 @@ function ProfilePage() {
       <aside className="glass-strong rounded-2xl p-5 text-center ring-1 ring-line">{avatarUrl ? <img src={avatarUrl} alt="Foto do perfil" className="mx-auto size-24 rounded-full object-cover ring-4 ring-card" /> : <div className="mx-auto grid size-24 place-items-center rounded-full bg-mist text-steel"><UserRound className="size-10" /></div>}<p className="mt-4 text-sm font-medium">{name || "Seu nome"}</p><p className="mt-1 truncate text-xs text-steel">{user.email}</p></aside>
       <section className="glass-strong rounded-2xl p-6 ring-1 ring-line">{loading ? <p className="text-sm text-steel">Carregando perfil...</p> : <div className="space-y-5"><label className="block text-sm font-medium">Nome<input required value={name} onChange={(event) => setName(event.target.value)} className="mt-1.5 h-10 w-full rounded-md bg-card px-3 font-normal ring-1 ring-line" /></label><label className="block text-sm font-medium">Endereço da foto<input type="url" value={avatarUrl} onChange={(event) => setAvatarUrl(event.target.value)} className="mt-1.5 h-10 w-full rounded-md bg-card px-3 font-normal ring-1 ring-line" placeholder="https://..." /></label><label className="block text-sm font-medium">Objetivo principal<select value={goal} onChange={(event) => setProfileGoal(event.target.value)} className="mt-1.5 h-10 w-full rounded-md bg-card px-3 font-normal ring-1 ring-line"><option value="">Escolha um objetivo</option>{GOALS.map((item) => <option key={item}>{item}</option>)}</select></label><Button disabled={saving}><Save />{saving ? "Salvando..." : "Salvar perfil"}</Button></div>}</section>
     </form>
-    <section className="mt-6 grid gap-4 sm:grid-cols-2"><div className="rounded-lg bg-card p-5 ring-1 ring-line"><h2 className="font-display text-xl font-semibold">Privacidade e dados</h2><p className="mt-2 text-sm text-steel">Baixe uma cópia dos seus registros ou exclua sua conta e seus dados.</p><div className="mt-4 flex flex-wrap gap-2"><Button type="button" variant="outline" onClick={exportData}><Download /> Exportar dados</Button><Button type="button" variant="destructive" onClick={removeAccount}><Trash2 /> Excluir conta</Button></div></div><div className="rounded-lg bg-card p-5 ring-1 ring-line"><h2 className="font-display text-xl font-semibold">Lembretes no aparelho</h2><p className="mt-2 text-sm text-steel">Avisamos cerca de 5 minutos antes dos compromissos (30 minutos antes dos treinos), mesmo com o TaskBio fechado. No iPhone, use o app instalado na Tela de Início.</p><div className="mt-4 flex flex-wrap gap-2"><Button type="button" variant="outline" onClick={enableNotifications}><Bell /> Ativar avisos</Button><Button type="button" variant="ghost" onClick={disableNotifications}>Desativar</Button></div></div></section>
+    <section className="mt-6 grid gap-4 sm:grid-cols-2"><div className="rounded-lg bg-card p-5 ring-1 ring-line"><h2 className="font-display text-xl font-semibold">Privacidade e dados</h2><p className="mt-2 text-sm text-steel">Baixe uma cópia dos seus registros ou exclua sua conta e seus dados.</p><div className="mt-4 flex flex-wrap gap-2"><Button type="button" variant="outline" onClick={exportData}><Download /> Exportar dados</Button><Button type="button" variant="destructive" onClick={() => { setDeleteWord(""); setConfirmDelete(true); }}><Trash2 /> Excluir conta</Button></div></div><div className="rounded-lg bg-card p-5 ring-1 ring-line"><h2 className="font-display text-xl font-semibold">Lembretes no aparelho</h2><p className="mt-2 text-sm text-steel">Avisamos cerca de 5 minutos antes dos compromissos (30 minutos antes dos treinos), mesmo com o TaskBio fechado. No iPhone, use o app instalado na Tela de Início.</p><div className="mt-4 flex flex-wrap gap-2"><Button type="button" variant="outline" onClick={enableNotifications}><Bell /> Ativar avisos</Button><Button type="button" variant="ghost" onClick={disableNotifications}>Desativar</Button></div></div></section>
     <AppearanceSection userId={user.id} />
     <NotificationPrefsSection />
     <div className="mt-6 rounded-lg bg-card p-5 ring-1 ring-line"><h2 className="font-display text-xl font-semibold">Você trabalha com saúde ou atividade física?</h2><p className="mt-2 text-sm text-steel">A área profissional tem acesso separado e controlado aos alunos, mediante autorização.</p><Button asChild type="button" className="mt-4" variant="outline"><Link to="/profissional"><UsersRound /> Conhecer área profissional</Link></Button></div>
     <footer className="mt-8 flex flex-wrap gap-4 text-xs text-steel"><Link to="/privacidade" className="underline">Privacidade</Link><Link to="/termos" className="underline">Termos</Link></footer>
+    <Dialog open={confirmDelete} onOpenChange={(open) => { if (!deleting) setConfirmDelete(open); }}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Excluir conta</DialogTitle>
+          <DialogDescription>
+            Esta ação apaga permanentemente sua conta e todos os seus dados: rotina, treinos, refeições, hábitos, saúde, finanças, pontos e fotos. Não é possível desfazer.
+          </DialogDescription>
+        </DialogHeader>
+        <label className="mt-2 block text-sm" htmlFor="confirmar-exclusao">Para confirmar, digite <strong>EXCLUIR</strong>.</label>
+        <Input id="confirmar-exclusao" value={deleteWord} onChange={(event) => setDeleteWord(event.target.value)} className="mt-2" autoComplete="off" />
+        <DialogFooter className="gap-2">
+          <Button type="button" variant="outline" disabled={deleting} onClick={() => setConfirmDelete(false)}>Cancelar</Button>
+          <Button type="button" variant="destructive" disabled={deleting || deleteWord.trim().toUpperCase() !== "EXCLUIR"} onClick={removeAccount}>
+            {deleting ? "Excluindo..." : "Excluir definitivamente"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   </main>;
 }
 function AppearanceSection({ userId }: { userId: string }) {

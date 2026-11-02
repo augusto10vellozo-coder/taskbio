@@ -23,14 +23,14 @@ Lista de pendências do TaskBio. Ordenada por impacto. Atualize ao concluir.
 - [ ] **Schema não reproduzível:** migrações divididas entre `supabase/migrations` e
       `drizzle/migrations`, e o agendamento do cron vive fora do repositório.
 
-## Privacidade e LGPD (próximo item combinado)
+## Privacidade e LGPD
 
-- [ ] **Excluir conta não apaga os dados.** `deleteMyAccount` remove só `auth.users`; perfil,
-      rotina, hábitos, saúde, finanças, XP e fotos continuam no banco, contrariando a política
-      de privacidade. Sem FKs com `ON DELETE CASCADE`.
-- [ ] **Exportação incompleta.** Faltam hábitos, `habitLog`, saúde, finanças, leitura, estudos,
-      `exerciseLog`, `customFoods` e XP.
-- [ ] **Reautenticação** antes de excluir a conta.
+- [x] **Excluir conta apaga os dados.** `delete_my_account()` remove todas as tabelas pessoais,
+      os objetos do Storage e o login (`drizzle/migrations/0024_delete_my_account.sql`).
+- [x] **Exportação completa.** Inclui rotina, hábitos, registro de hábitos, saúde, finanças,
+      leitura, estudos, histórico de exercícios, progresso, pontos e aparelhos.
+- [x] **Confirmação por digitação** no lugar do `window.confirm`.
+- [ ] **Reautenticação de verdade** (senha ou código) antes de excluir. Hoje é só a digitação.
 - [ ] **Área profissional sem consentimento granular nem auditoria.** Hoje o profissional lê o
       JSON inteiro do aluno, incluindo finanças e saúde.
 - [ ] Revisar `clients_respond_to_invites`: o convidado consegue alterar `professional_id`,
