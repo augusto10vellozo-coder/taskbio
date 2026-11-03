@@ -14,11 +14,13 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AgendaRouteImport } from './routes/agenda'
 import { Route as AlimentacaoRouteImport } from './routes/alimentacao'
 import { Route as AmigosRouteImport } from './routes/amigos'
+import { Route as AppRotinaDeEstudosRouteImport } from './routes/app-rotina-de-estudos'
 import { Route as AtividadesRouteImport } from './routes/atividades'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CalendarioRouteImport } from './routes/calendario'
 import { Route as ComprasRouteImport } from './routes/compras'
 import { Route as ContatoRouteImport } from './routes/contato'
+import { Route as CronogramaDeEstudosRouteImport } from './routes/cronograma-de-estudos'
 import { Route as EsqueciSenhaRouteImport } from './routes/esqueci-senha'
 import { Route as EstudosRouteImport } from './routes/estudos'
 import { Route as FinancasRouteImport } from './routes/financas'
@@ -71,6 +73,11 @@ const AmigosRoute = AmigosRouteImport.update({
   path: '/amigos',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppRotinaDeEstudosRoute = AppRotinaDeEstudosRouteImport.update({
+  id: '/app-rotina-de-estudos',
+  path: '/app-rotina-de-estudos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AtividadesRoute = AtividadesRouteImport.update({
   id: '/atividades',
   path: '/atividades',
@@ -94,6 +101,11 @@ const ComprasRoute = ComprasRouteImport.update({
 const ContatoRoute = ContatoRouteImport.update({
   id: '/contato',
   path: '/contato',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CronogramaDeEstudosRoute = CronogramaDeEstudosRouteImport.update({
+  id: '/cronograma-de-estudos',
+  path: '/cronograma-de-estudos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EsqueciSenhaRoute = EsqueciSenhaRouteImport.update({
@@ -238,11 +250,13 @@ export interface FileRoutesByFullPath {
   '/agenda': typeof AgendaRoute
   '/alimentacao': typeof AlimentacaoRoute
   '/amigos': typeof AmigosRoute
+  '/app-rotina-de-estudos': typeof AppRotinaDeEstudosRoute
   '/atividades': typeof AtividadesRoute
   '/auth': typeof AuthRoute
   '/calendario': typeof CalendarioRoute
   '/compras': typeof ComprasRoute
   '/contato': typeof ContatoRoute
+  '/cronograma-de-estudos': typeof CronogramaDeEstudosRoute
   '/esqueci-senha': typeof EsqueciSenhaRoute
   '/estudos': typeof EstudosRoute
   '/financas': typeof FinancasRoute
@@ -276,11 +290,13 @@ export interface FileRoutesByTo {
   '/agenda': typeof AgendaRoute
   '/alimentacao': typeof AlimentacaoRoute
   '/amigos': typeof AmigosRoute
+  '/app-rotina-de-estudos': typeof AppRotinaDeEstudosRoute
   '/atividades': typeof AtividadesRoute
   '/auth': typeof AuthRoute
   '/calendario': typeof CalendarioRoute
   '/compras': typeof ComprasRoute
   '/contato': typeof ContatoRoute
+  '/cronograma-de-estudos': typeof CronogramaDeEstudosRoute
   '/esqueci-senha': typeof EsqueciSenhaRoute
   '/estudos': typeof EstudosRoute
   '/financas': typeof FinancasRoute
@@ -316,11 +332,13 @@ export interface FileRoutesById {
   '/agenda': typeof AgendaRoute
   '/alimentacao': typeof AlimentacaoRoute
   '/amigos': typeof AmigosRoute
+  '/app-rotina-de-estudos': typeof AppRotinaDeEstudosRoute
   '/atividades': typeof AtividadesRoute
   '/auth': typeof AuthRoute
   '/calendario': typeof CalendarioRoute
   '/compras': typeof ComprasRoute
   '/contato': typeof ContatoRoute
+  '/cronograma-de-estudos': typeof CronogramaDeEstudosRoute
   '/esqueci-senha': typeof EsqueciSenhaRoute
   '/estudos': typeof EstudosRoute
   '/financas': typeof FinancasRoute
@@ -356,11 +374,13 @@ export interface FileRouteTypes {
     | '/agenda'
     | '/alimentacao'
     | '/amigos'
+    | '/app-rotina-de-estudos'
     | '/atividades'
     | '/auth'
     | '/calendario'
     | '/compras'
     | '/contato'
+    | '/cronograma-de-estudos'
     | '/esqueci-senha'
     | '/estudos'
     | '/financas'
@@ -394,11 +414,13 @@ export interface FileRouteTypes {
     | '/agenda'
     | '/alimentacao'
     | '/amigos'
+    | '/app-rotina-de-estudos'
     | '/atividades'
     | '/auth'
     | '/calendario'
     | '/compras'
     | '/contato'
+    | '/cronograma-de-estudos'
     | '/esqueci-senha'
     | '/estudos'
     | '/financas'
@@ -433,11 +455,13 @@ export interface FileRouteTypes {
     | '/agenda'
     | '/alimentacao'
     | '/amigos'
+    | '/app-rotina-de-estudos'
     | '/atividades'
     | '/auth'
     | '/calendario'
     | '/compras'
     | '/contato'
+    | '/cronograma-de-estudos'
     | '/esqueci-senha'
     | '/estudos'
     | '/financas'
@@ -473,11 +497,13 @@ export interface RootRouteChildren {
   AgendaRoute: typeof AgendaRoute
   AlimentacaoRoute: typeof AlimentacaoRoute
   AmigosRoute: typeof AmigosRoute
+  AppRotinaDeEstudosRoute: typeof AppRotinaDeEstudosRoute
   AtividadesRoute: typeof AtividadesRoute
   AuthRoute: typeof AuthRoute
   CalendarioRoute: typeof CalendarioRoute
   ComprasRoute: typeof ComprasRoute
   ContatoRoute: typeof ContatoRoute
+  CronogramaDeEstudosRoute: typeof CronogramaDeEstudosRoute
   EsqueciSenhaRoute: typeof EsqueciSenhaRoute
   EstudosRoute: typeof EstudosRoute
   FinancasRoute: typeof FinancasRoute
@@ -540,6 +566,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AmigosRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app-rotina-de-estudos': {
+      id: '/app-rotina-de-estudos'
+      path: '/app-rotina-de-estudos'
+      fullPath: '/app-rotina-de-estudos'
+      preLoaderRoute: typeof AppRotinaDeEstudosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/atividades': {
       id: '/atividades'
       path: '/atividades'
@@ -573,6 +606,13 @@ declare module '@tanstack/react-router' {
       path: '/contato'
       fullPath: '/contato'
       preLoaderRoute: typeof ContatoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cronograma-de-estudos': {
+      id: '/cronograma-de-estudos'
+      path: '/cronograma-de-estudos'
+      fullPath: '/cronograma-de-estudos'
+      preLoaderRoute: typeof CronogramaDeEstudosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/esqueci-senha': {
@@ -788,11 +828,13 @@ const rootRouteChildren: RootRouteChildren = {
   AgendaRoute: AgendaRoute,
   AlimentacaoRoute: AlimentacaoRoute,
   AmigosRoute: AmigosRoute,
+  AppRotinaDeEstudosRoute: AppRotinaDeEstudosRoute,
   AtividadesRoute: AtividadesRoute,
   AuthRoute: AuthRoute,
   CalendarioRoute: CalendarioRoute,
   ComprasRoute: ComprasRoute,
   ContatoRoute: ContatoRoute,
+  CronogramaDeEstudosRoute: CronogramaDeEstudosRoute,
   EsqueciSenhaRoute: EsqueciSenhaRoute,
   EstudosRoute: EstudosRoute,
   FinancasRoute: FinancasRoute,
