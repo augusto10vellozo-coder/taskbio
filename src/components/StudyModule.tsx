@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import { useEntryState } from "@/lib/navigation-context";
 import { useServerFn } from "@tanstack/react-start";
 import { CalendarClock, CalendarDays, Check, Flame, Pause, Play, Plus, Square, Timer, Trash2 } from "lucide-react";
@@ -137,20 +137,36 @@ export function StudyModule() {
         </form>
         <ul className="mt-3 space-y-3">
           {subjects.length === 0 && <li className="text-sm text-steel">Crie sua primeira matéria pra começar a estudar.</li>}
-          {subjects.map((s) => { const m = bySub.get(s.id) ?? 0; const g = dailyStudyGoal(s); return (
-            <li key={s.id}>
-              <div className="flex items-center gap-2 text-sm">
-                <span className="size-3 shrink-0 rounded-full" style={{ background: s.color }} aria-hidden />
-                <span className="min-w-0 flex-1 truncate font-medium">{s.name}</span>
-                <span className="shrink-0 text-xs text-steel">{hm(m)}{g ? ` / ${hm(g)}` : ""}</span>
-                <Button variant="ghost" size="icon" className="size-7 shrink-0" aria-label={`Editar ${s.name}`} onClick={() => { setEditing(s.id); setEditName(s.name); }}><span aria-hidden>✎</span></Button>
-                <Button variant="ghost" size="icon" className="size-7 shrink-0" aria-label={`Remover ${s.name}`} onClick={() => { if (confirm(`Remover a matéria “${s.name}”? O histórico continua salvo.`)) setTrackers((t) => ({ ...t, subjects: (t.subjects ?? []).filter((x) => x.id !== s.id) })); }}><Trash2 /></Button>
-              </div>
-              {editing === s.id && <form className="mt-2 flex gap-2" onSubmit={e => { e.preventDefault(); const name = subjectName(editName); const key = normalizeSubject(name); if (!key) return; if (subjects.some(x => x.id !== s.id && normalizeSubject(x.name) === key)) { toast.error("Você já tem essa matéria"); return; } patchSub(s.id, { name, normalizedName: key }); setEditing(null); }}><input aria-label="Nome da matéria" className={`${input} flex-1`} value={editName} onChange={e => setEditName(e.target.value)} /><Button size="icon" aria-label="Salvar nome"><Check /></Button></form>}
-              <StudyGoal subject={s} save={m => { patchSub(s.id, { dailyGoalMin: m }); toast.success(`Meta de ${s.name}: ${m} min por dia`); }} />
-              {g > 0 ? <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-mist" role="progressbar" aria-label={`Progresso de hoje de ${s.name}`} aria-valuenow={Math.min(100, Math.round(m / g * 100))} aria-valuemin={0} aria-valuemax={100}><div className="h-full bg-brand" style={{ width: `${Math.min(100, m / g * 100)}%` }} /></div> : <p className="mt-1 text-xs text-steel">defina sua meta diária</p>}
-            </li>
-          ); })}
+          {subjects.map((s) => {
+            const m = bySub.get(s.id) ?? 0;
+            const g = dailyStudyGoal(s);
+            const weekMin = weekBySub.get(s.id) ?? 0;
+            const scheduled = weekTargets.get(s.id) ?? 0;
+            const weekTarget = scheduled || (s.weeklyGoalMin ?? 0) || g * 7;
+            const weekPct = weekTarget > 0 ? Math.min(100, Math.round((weekMin / weekTarget) * 100)) : 0;
+            const nextExam = upcoming.find((e) => e.subjectId === s.id);
+            const examDays = nextExam ? daysUntil(nextExam.date, today) : 0;
+            return (
+              <li key={s.id} className="rounded-lg bg-background/50 p-3 ring-1 ring-line">
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="size-3 shrink-0 rounded-full" style={{ background: s.color }} aria-hidden />
+                  <span className="min-w-0 flex-1 truncate font-medium">{s.name}</span>
+                  <Button variant="ghost" size="icon" className="size-7 shrink-0" aria-label={`Editar ${s.name}`} onClick={() => { setEditing(s.id); setEditName(s.name); }}><span aria-hidden>✎</span></Button>
+                  <Button variant="ghost" size="icon" className="size-7 shrink-0" aria-label={`Remover ${s.name}`} onClick={() => { if (confirm(`Remover a matéria “${s.name}”? O histórico continua salvo.`)) setTrackers((t) => ({ ...t, subjects: (t.subjects ?? []).filter((x) => x.id !== s.id) })); }}><Trash2 /></Button>
+                </div>
+                {editing === s.id && <form className="mt-2 flex gap-2" onSubmit={e => { e.preventDefault(); const name = subjectName(editName); const key = normalizeSubject(name); if (!key) return; if (subjects.some(x => x.id !== s.id && normalizeSubject(x.name) === key)) { toast.error("Você já tem essa matéria"); return; } patchSub(s.id, { name, normalizedName: key }); setEditing(null); }}><input aria-label="Nome da matéria" className={`${input} flex-1`} value={editName} onChange={e => setEditName(e.target.value)} /><Button size="icon" aria-label="Salvar nome"><Check /></Button></form>}
+                <p className="mt-1.5 text-xs text-steel">hoje {hm(m)}{g ? ` / ${hm(g)}` : ""} · semana {hm(weekMin)}{weekTarget > 0 ? ` / ${hm(weekTarget)}` : ""}</p>
+                {weekTarget > 0 && <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-mist" role="progressbar" aria-label={`Progresso semanal de ${s.name}`} aria-valuenow={weekPct} aria-valuemin={0} aria-valuemax={100}><div className="h-full bg-brand" style={{ width: `${weekPct}%` }} /></div>}
+                {nextExam && (
+                  <p className="mt-2 inline-flex max-w-full items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium" style={{ background: `${s.color}22`, color: s.color }}>
+                    <CalendarClock className="size-3.5 shrink-0" aria-hidden />
+                    <span className="min-w-0 truncate">{examDays < 0 ? `Prova atrasada há ${-examDays}d` : examDays === 0 ? "Prova hoje" : `Prova em ${examDays} ${examDays === 1 ? "dia" : "dias"}`} · {nextExam.title}</span>
+                  </p>
+                )}
+                <StudyGoal subject={s} save={m => { patchSub(s.id, { dailyGoalMin: m }); toast.success(`Meta de ${s.name}: ${m} min por dia`); }} />
+              </li>
+            );
+          })}
         </ul>
       </section>
 
@@ -186,28 +202,6 @@ export function StudyModule() {
         </>}
       </section>
 
-      <section aria-labelledby="semana-materias" className="mt-4 rounded-lg bg-card p-4 ring-1 ring-line">
-        <h2 id="semana-materias" className="font-display text-lg font-semibold">Progresso da semana</h2>
-        <p className="mt-1 text-xs text-steel">Minutos estudados nesta semana contra o que está no cronograma.</p>
-        {subjects.length === 0 ? <p className="mt-2 text-sm text-steel">Crie uma matéria para acompanhar.</p> : (
-          <ul className="mt-3 space-y-3">
-            {subjects.map((s) => {
-              const done = weekBySub.get(s.id) ?? 0;
-              const scheduled = weekTargets.get(s.id) ?? 0;
-              const target = scheduled || (s.weeklyGoalMin ?? 0) || dailyStudyGoal(s) * 7;
-              const pct = target > 0 ? Math.min(100, Math.round((done / target) * 100)) : 0;
-              return <li key={s.id}>
-                <div className="flex items-center gap-2 text-sm">
-                  <span className="size-2.5 shrink-0 rounded-full" style={{ background: s.color }} aria-hidden />
-                  <span className="min-w-0 flex-1 truncate font-medium">{s.name}</span>
-                  <span className="shrink-0 text-xs text-steel">{hm(done)}{target > 0 ? ` / ${hm(target)}` : ""}</span>
-                </div>
-                {target > 0 && <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-mist" role="progressbar" aria-label={`Progresso semanal de ${s.name}`} aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}><div className="h-full bg-brand" style={{ width: `${pct}%` }} /></div>}
-              </li>;
-            })}
-          </ul>
-        )}
-      </section>
 
       <section aria-labelledby="semana-estudo" className="mt-4">
         <h2 id="semana-estudo" className="font-display text-lg font-semibold">Últimos 7 dias</h2>
