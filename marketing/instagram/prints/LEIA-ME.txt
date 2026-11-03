@@ -1,0 +1,7 @@
+﻿Salve aqui os prints do app, com estes nomes:
+print-1.png - tela de Estudos (Minhas materias)
+print-2.png - Cronograma da semana
+print-3.png - Hoje com blocos
+print-4.png - Rotina (modulos)
+
+Pode ser JPG tambem.
