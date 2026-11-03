@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Check } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight } from "lucide-react";
+import { addDays, parseISO } from "date-fns";
 import { toast } from "sonner";
 import { useTaskBio } from "@/lib/trilha-store";
 import { toDateKey } from "@/lib/calendar-utils";
@@ -7,15 +8,19 @@ import { isMilestone } from "@/lib/engagement";
 import { usePersonalStatus } from "@/lib/use-personal-status";
 import { AgendaDayOverview, AgendaGreeting } from "@/components/AgendaDayOverview";
 import { DayTimeline } from "@/components/DayTimeline";
+import { Button } from "@/components/ui/button";
 
-/** Home: greeting, compact status strip, day progress bar and today's timeline. */
+/** Home: greeting, day navigation, compact status strip, progress bar and the day timeline. */
 export function TodayPanel() {
   const { ready } = useTaskBio();
   const personal = usePersonalStatus();
   const [now, setNow] = useState<Date | null>(null);
   const [adding, setAdding] = useState(false);
+  const [day, setDay] = useState<string | null>(null);
   useEffect(() => setNow(new Date()), []);
   const today = now ? toDateKey(now) : "";
+  const dateKey = day ?? today;
+  const isToday = dateKey === today;
   const days = personal.routineStreak;
 
   useEffect(() => {
@@ -28,11 +33,24 @@ export function TodayPanel() {
 
   if (!now) return <div className="mt-8 h-40 animate-pulse rounded-lg bg-mist" />;
 
+  const shift = (delta: number) => setDay(toDateKey(addDays(parseISO(dateKey), delta)));
+
   return (
     <section>
-      <AgendaGreeting />
-      <AgendaDayOverview dateKey={today} />
-      <DayTimeline dateKey={today} adding={adding} onAddingChange={setAdding} />
+      <AgendaGreeting date={parseISO(dateKey)} />
+      <div className="flex items-center justify-between gap-2 pb-1">
+        <Button variant="ghost" size="icon" aria-label="Dia anterior" onClick={() => shift(-1)}><ChevronLeft /></Button>
+        {isToday ? (
+          <span className="text-xs font-medium uppercase tracking-wide text-steel">Hoje</span>
+        ) : (
+          <button type="button" onClick={() => setDay(today)} className="text-xs font-medium text-brand-deep underline underline-offset-4">
+            Voltar para hoje
+          </button>
+        )}
+        <Button variant="ghost" size="icon" aria-label="Próximo dia" onClick={() => shift(1)}><ChevronRight /></Button>
+      </div>
+      <AgendaDayOverview dateKey={dateKey} isToday={isToday} />
+      <DayTimeline dateKey={dateKey} adding={adding} onAddingChange={setAdding} />
     </section>
   );
 }

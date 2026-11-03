@@ -52,6 +52,7 @@ export function TrainingExplore() {
   const workouts = allWorkouts.filter((w) => !w.templateId);
   const [selected, setSelected] = useEntryState<string | null>("training:model", workouts[0]?.id ?? null);
   const navigate = useNavigate();
+  const schedule = useScheduleWorkout();
   const [openExample, setOpenExample] = useEntryState<string | null>("training:example", null);
   const workout = workouts.find((w) => w.id === selected);
   const examples = preferredModality ? getWorkoutExamples(preferredModality, goal) : [];
@@ -83,8 +84,9 @@ export function TrainingExplore() {
       exercises: [],
     };
     addWorkout(created);
+    schedule(toDateKey(new Date()), created);
     setSelected(created.id);
-    toast.success("Treino criado. Abra para adicionar os exercícios.");
+    toast.success("Treino criado e agendado para hoje. Adicione os exercícios.");
     void navigate({ to: "/treino" });
   };
 

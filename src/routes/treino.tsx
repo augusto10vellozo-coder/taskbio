@@ -135,13 +135,25 @@ function AssignForm({ workouts, onPick, onCreate }: { workouts: Workout[]; onPic
 }
 
 function WorkoutDetail({ workout, dateKey }: { workout: Workout; dateKey: string }) {
-  const { updateWorkout } = useTaskBio();
+  const { updateWorkout, plan, replaceDays } = useTaskBio();
   const [open, setOpen] = useState<string | null>(null);
   const [form, setForm] = useState({ name: "", sets: "3", reps: "10", duration: "30", load: "", mode: "reps" as "reps" | "tempo" });
   const timed = form.mode === "tempo";
+  const block = (plan[dateKey] ?? []).find((b) => b.kind === "treino" && b.workoutId === workout.id);
+  const changeTime = (time: string) => {
+    if (!block) return;
+    replaceDays({ [dateKey]: (plan[dateKey] ?? []).map((b) => (b.id === block.id ? { ...b, time } : b)) });
+  };
   return <div className="mt-3 pb-32">
     <RestTimer />
     <SessionProgress workout={workout} date={dateKey} />
+    {block && (
+      <label className="mt-3 flex flex-wrap items-center gap-2 text-xs text-steel">
+        Horário do treino
+        <input type="time" value={block.time} onChange={(e) => changeTime(e.target.value)} aria-label="Horário do treino" className="h-8 rounded-md bg-background px-2 text-sm text-ink ring-1 ring-line" />
+        <span className="text-[11px]">é este horário que aparece na sua agenda</span>
+      </label>
+    )}
     {workout.exercises.length === 0 && <p className="py-4 text-sm text-steel">Adicione os exercícios deste treino.</p>}
     <ul className="divide-y divide-line">{workout.exercises.map((ex) => <ExerciseRow key={ex.id} ex={ex} workout={workout} dateKey={dateKey} open={open === ex.id} onToggle={() => setOpen(open === ex.id ? null : ex.id)} />)}</ul>
     <form className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-[minmax(0,1fr)_82px_60px_70px_76px_auto]" onSubmit={(e) => { e.preventDefault(); if (!form.name.trim()) return; if (timed && !Number(form.duration)) return; const ex: Exercise = { id: `e-${Date.now()}`, name: form.name.trim(), sets: Math.max(1, Number(form.sets) || 3), reps: timed ? 0 : Math.max(1, Number(form.reps) || 10), ...(timed ? { durationSec: Math.max(1, Math.round(Number(form.duration))) } : {}), restSec: 60, muscles: "", howTo: "", doneSets: 0, ...(Number(form.load.replace(",", ".")) ? { loadKg: Number(form.load.replace(",", ".")) } : {}) }; updateWorkout({ ...workout, exercises: [...workout.exercises, ex] }); setForm({ ...form, name: "", load: "" }); }}>
