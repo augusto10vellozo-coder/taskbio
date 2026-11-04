@@ -22,7 +22,7 @@ export function WorkoutSeries({ workout, ex, date }: { workout: Workout; ex: Exe
     <Button type="button" variant="outline" aria-label={`${ex.name}: série ${index + 1}`} aria-pressed={s.done} onClick={() => mark(index, !s.done)} className={`size-11 rounded-full ${s.done ? 'bg-good text-primary-foreground border-good hover:bg-good/80' : 'border-line'}`}>{index + 1}</Button>
     {timed
       ? <span className="grid h-9 place-items-center text-[11px] text-steel">{ex.durationSec}s</span>
-      : <input aria-label={`${ex.name}: carga da série ${index + 1}`} inputMode="decimal" placeholder={ex.loadKg != null ? String(ex.loadKg) : 'kg'} value={s.loadKg ?? ''} onChange={e => { const value = e.target.value.replace(',', '.'); if (value === '' || (Number.isFinite(Number(value)) && Number(value) >= 0)) setSeries(workout.id, ex.id, date, index, { loadKg: value === '' ? undefined : Number(value) }); }} className="h-9 w-full min-w-0 rounded-md bg-card px-1 text-center text-xs ring-1 ring-line" />}
+      : <input aria-label={`${ex.name}: carga da série ${index + 1}`} inputMode="decimal" placeholder={ex.loadKg != null ? String(ex.loadKg) : 'kg'} value={s.loadKg ?? ''} onChange={e => { const value = e.target.value.replace(',', '.'); if (value === '' || (Number.isFinite(Number(value)) && Number(value) >= 0)) setSeries(workout.id, ex.id, date, index, { loadKg: value === '' ? undefined : Number(value) }); }} className="h-11 w-full min-w-0 rounded-md bg-card px-1 text-center text-xs ring-1 ring-line" />}
   </div>)}</div>;
 }
 export function SessionProgress({ workout, date }: { workout: Workout; date: string }) {
@@ -30,9 +30,12 @@ export function SessionProgress({ workout, date }: { workout: Workout; date: str
   const p = sessionProgress(workout, date);
   const block = plan[date]?.find(b => b.kind === 'treino' && b.workoutId === workout.id);
   if (!p.total) return null;
-  return <div className="mb-3 space-y-2" aria-label="Progresso da sessão">
-    <p className="text-xs font-medium">{p.done} de {p.total} séries · {p.exercises} exercícios concluídos</p>
+  return <div className="mb-3 space-y-2" role="status" aria-live="polite">
+    <p className="text-xs font-medium">{p.done} de {p.total} séries · {p.exercises} {p.exercises === 1 ? "exercício concluído" : "exercícios concluídos"}</p>
     <Progress value={100 * p.done / p.total} className="[&>div]:bg-good" />
-    {p.complete && <div className="flex flex-wrap items-center gap-2 text-sm text-good"><span>Treino concluído 💪</span>{block && !block.done && <Button size="sm" variant="outline" onClick={() => toggleBlock(date, block.id)}>Marcar dia como feito</Button>}</div>}
+    {p.complete && <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-good/10 px-3 py-2 text-sm text-good">
+      <span className="font-medium">{block?.done ? "Treino concluído 💪 Dia marcado como feito" : "Treino concluído 💪"}</span>
+      {block?.done && <Button size="sm" variant="ghost" className="h-11" onClick={() => toggleBlock(date, block.id)}>Desfazer</Button>}
+    </div>}
   </div>;
 }

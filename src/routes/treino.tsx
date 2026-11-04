@@ -26,7 +26,7 @@ import { exercisePrescription } from "@/lib/trilha-data";
 import { trackProductEvent } from "@/lib/product-telemetry";
 import { WorkoutSeries, SessionProgress } from "@/components/WorkoutSeries";
 import { Progress } from "@/components/ui/progress";
-import { exerciseSeries, weeklyTrainingProgress } from "@/lib/training-session";
+import { exerciseSeries, sessionProgress, weeklyTrainingProgress } from "@/lib/training-session";
 import { WorkoutPhotoImport } from "@/components/WorkoutPhotoImport";
 import { EmptyState, ModuleGate } from "@/components/EmptyState";
 
@@ -48,9 +48,13 @@ export const Route = createFileRoute("/treino")({
 
 const DAY_ORDER = ["seg", "ter", "qua", "qui", "sex", "sab", "dom"] as const;
 
-function countOf(blocks: Block[], kind: Block["kind"], singular: string, plural: string) {
-  const total = blocks.filter((block) => block.kind === kind).length;
+function countList(blocks: Block[], singular: string, plural: string) {
+  const total = blocks.length;
   return total === 0 ? "" : `${total} ${total === 1 ? singular : plural}`;
+}
+
+function countOf(blocks: Block[], kind: Block["kind"], singular: string, plural: string) {
+  return countList(blocks.filter((block) => block.kind === kind), singular, plural);
 }
 
 function Treino() {
@@ -61,7 +65,7 @@ function Treino() {
     <main className="mx-auto max-w-6xl px-5 pb-20 sm:px-8">
       <ModuleHeader title="Treino" /><section className="pb-4">
         <div role="tablist" aria-label="Seções do treino" className="mt-3 inline-flex rounded-lg bg-mist p-1 text-sm">
-          {([["semana", "Minha semana"], ["explorar", "Explorar e criar"]] as const).map(([id, label]) => <button key={id} role="tab" aria-selected={tab === id} onClick={() => navigate({ search: id === "explorar" ? { aba: "explorar" } : {}, replace: true })} className={`rounded-md px-3 py-1.5 font-medium ${tab === id ? "bg-ink text-background" : "text-steel"}`}>{label}</button>)}
+          {([["semana", "Minha semana"], ["explorar", "Explorar e criar"]] as const).map(([id, label]) => <button key={id} role="tab" aria-selected={tab === id} onClick={() => navigate({ search: id === "explorar" ? { aba: "explorar" } : {}, replace: true })} className={`min-h-11 rounded-md px-3 py-2.5 font-medium ${tab === id ? "bg-ink text-background" : "text-steel"}`}>{label}</button>)}
         </div>
       </section>
       <ModuleGate id="treino">
@@ -74,13 +78,14 @@ function Treino() {
 
 function WeekTab({ initialDay, onExplore }: { initialDay?: string | undefined; onExplore: () => void }) {
   const store = useTaskBio();
-  const { plan, workouts, addWorkout, toggleBlock, removeBlock } = store;
+  const { plan, workouts, addWorkout, toggleBlock, removeBlock, removeWorkout, restoreBlock } = store;
   const models = workouts.filter((w) => !w.templateId);
   const schedule = useScheduleWorkout();
   const [ref, setRef] = useEntryState<Date | null>("training:week", null);
   const [selected, setSelected] = useEntryState<string | null>("training:day", null);
   const [importing, setImporting] = useState(false);
   const [showPlan, setShowPlan] = useState(false);
+  const [confirming, setConfirming] = useState<string | null>(null);
   const stripRef = useRef<HTMLDivElement>(null);
   // A aba abre sempre em hoje; um dia explícito na URL (vindo de Explorar) vence.
   useEffect(() => {
@@ -106,9 +111,12 @@ function WeekTab({ initialDay, onExplore }: { initialDay?: string | undefined; o
   const dayTitle = dayLabel.charAt(0).toUpperCase() + dayLabel.slice(1);
   const dayBlocks = plan[selected] ?? [];
   const otherBlocks = dayBlocks.filter((b) => b.id !== selBlock?.id);
+  const studyBlocks = otherBlocks.filter((b) => b.kind === "compromisso" && b.subjectId);
+  const otherAppointments = otherBlocks.filter((b) => b.kind === "compromisso" && !b.subjectId);
   const contextParts = [
+    countList(studyBlocks, "bloco de estudo", "blocos de estudo"),
     countOf(otherBlocks, "refeicao", "refeição", "refeições"),
-    countOf(otherBlocks, "compromisso", "compromisso", "compromissos"),
+    countList(otherAppointments, "compromisso", "compromissos"),
     countOf(otherBlocks, "leitura", "leitura", "leituras"),
     countOf(otherBlocks, "descanso", "descanso", "descansos"),
   ].filter(Boolean);
@@ -132,6 +140,27 @@ function WeekTab({ initialDay, onExplore }: { initialDay?: string | undefined; o
     const w: Workout = { id: `w-${Date.now()}`, name, focus: "", modality: "Academia", exercises: [] };
     addWorkout(w); assign(dateKey, w);
   };
+  /** Tira o treino do dia guardando como desfazer, e limpa a cópia agendada. */
+  const removeFromDay = () => {
+    if (!selBlock) return;
+    const block = selBlock;
+    const copy = block.workoutId ? workouts.find((w) => w.id === block.workoutId) : undefined;
+    removeBlock(selected, block.id);
+    if (copy?.templateId) removeWorkout(copy.id);
+    toast("Treino tirado do dia", {
+      description: block.title,
+      action: { label: "Desfazer", onClick: () => { restoreBlock(selected, block); if (copy) addWorkout(copy); } },
+    });
+  };
+  const chipAction = (k: string, b: Block) => {
+    if (!b.done && b.workoutId && confirming !== k) {
+      const workout = workouts.find((w) => w.id === b.workoutId);
+      if (workout && sessionProgress(workout, k).done === 0) { setConfirming(k); return; }
+    }
+    setConfirming(null);
+    toggleBlock(k, b.id);
+    if (!b.done) toast.success("Treino concluído!");
+  };
 
   const hasWorkoutToday = Boolean(selBlock && selWorkout);
   const planExpanded = showPlan || !hasWorkoutToday;
@@ -144,9 +173,19 @@ function WeekTab({ initialDay, onExplore }: { initialDay?: string | undefined; o
           <Button variant="outline" onClick={() => setImporting(true)}><FileUp /> Importar plano</Button>
         </section>
       ) : (
-        <section className="mb-3 flex flex-wrap items-center justify-between gap-2">
-          <p className="text-sm font-medium">Semana {getISOWeek(ref)} · {weeklyProgress.done} de {weeklyProgress.total} treinos</p>
-          <Button variant="ghost" size="sm" onClick={() => setShowPlan(true)}><ChevronDown /> Ver semana</Button>
+        <section className="mb-3 rounded-lg bg-card p-3 ring-1 ring-line">
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-xs font-medium text-steel">Semana {getISOWeek(ref)} · {weeklyProgress.done} de {weeklyProgress.total} treinos</p>
+            <Button variant="ghost" size="sm" className="h-11" onClick={() => setShowPlan(true)}><ChevronDown /> Ver semana</Button>
+          </div>
+          <div className="mt-1 flex items-center gap-1">
+            {week.map((d) => {
+              const k = toDateKey(d); const b = blockOf(k); const active = k === selected;
+              return <button key={k} type="button" onClick={() => setSelected(k)} aria-current={active ? "date" : undefined} aria-label={`${format(d, "EEEE", { locale: ptBR })}${b?.done ? ", concluído" : b ? ", treino agendado" : ", sem treino"}`} className={`flex h-11 flex-1 items-center justify-center rounded-md transition ${active ? "bg-brand/10 ring-1 ring-brand" : ""}`}>
+                <span className={`size-2.5 rounded-full ${b?.done ? "bg-good" : b ? "bg-brand" : "bg-line"}`} />
+              </button>;
+            })}
+          </div>
         </section>
       )}
 
@@ -162,7 +201,7 @@ function WeekTab({ initialDay, onExplore }: { initialDay?: string | undefined; o
               <span className="block text-[11px] font-medium uppercase leading-4 text-steel">{format(d, "EEE d", { locale: ptBR })}</span>
               <span className={`mt-1 line-clamp-2 min-h-8 break-words text-sm font-medium leading-snug [overflow-wrap:anywhere] ${b?.done ? "text-steel line-through" : ""}`}>{b?.title ?? <span className="text-steel">Sem treino</span>}</span>
             </button>
-            {b && <button type="button" className="mt-1 flex items-center gap-1.5 text-[11px] text-steel" onClick={() => { toggleBlock(k, b.id); if (!b.done) toast.success("Treino concluído!"); }} aria-label={`${b.done ? "Desmarcar" : "Concluir"} ${b.title}`}><Tick on={b.done} />{b.done ? "Concluído" : "Concluir"}</button>}
+            {b && <button type="button" className="mt-1 flex h-11 w-full items-center gap-1.5 rounded-md text-xs text-steel" onClick={() => chipAction(k, b)} aria-label={`${b.done ? "Desmarcar" : "Concluir"} ${b.title}`}><Tick on={b.done} />{confirming === k ? "Confirmar sem séries?" : b.done ? "Concluído" : "Concluir"}</button>}
           </div>); })}
       </div>
       {hasWorkoutToday && <div className="mb-1 flex justify-end"><Button variant="ghost" size="sm" onClick={() => setShowPlan(false)}><ChevronUp /> Recolher</Button></div>}
@@ -176,7 +215,7 @@ function WeekTab({ initialDay, onExplore }: { initialDay?: string | undefined; o
             {(before || after) && <p className="mt-1 text-xs text-steel">{before ? `Antes: ${before.title} · ${before.time}` : ""}{before && after ? " — " : ""}{after ? `Depois: ${after.title} · ${after.time}` : ""}</p>}
             {!selBlock && <p className="mt-1 text-sm text-steel">Nenhum treino agendado. Escolha um dos seus treinos ou crie um novo.</p>}
           </div>
-          {selBlock && <Button variant="ghost" size="sm" onClick={() => removeBlock(selected, selBlock.id)}><X /> Tirar do dia</Button>}
+          {selBlock && <Button variant="ghost" size="sm" className="h-11" onClick={removeFromDay}><X /> Tirar do dia</Button>}
         </div>
         {!selBlock ? <>
           <h3 className="mt-4 text-sm font-semibold">Meus treinos</h3>

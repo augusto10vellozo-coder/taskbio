@@ -61,6 +61,8 @@ type Store = TaskBioState & {
   hydrate: (state: Partial<TaskBioState>) => void;
   toggleBlock: (date: string, blockId: string) => void;
   removeBlock: (date: string, blockId: string) => void;
+  /** Devolve um bloco removido ao dia e reemite o XP que a remoção revogou. */
+  restoreBlock: (date: string, block: Block) => void;
   addBlock: (date: string, block: Omit<Block, "id" | "done">) => void;
   updateBlock: (date: string, blockId: string, block: Omit<Block, "id" | "done">) => void;
   registerMeal: (date: string, block: Omit<Block, "id" | "done">, editingId?: string) => void;
@@ -264,6 +266,13 @@ export function TaskBioProvider({ children }: { children: ReactNode }) {
           trackers: target?.subjectId
             ? { ...s.trackers, estudos: (s.trackers.estudos ?? []).filter((x) => x.id !== `study-block:${day}:${blockId}`) }
             : s.trackers,
+        }));
+      },
+      restoreBlock: (day, block) => {
+        if (block.done) emitBlockXp(day, block, true);
+        setState((s) => ({
+          ...s,
+          plan: { ...s.plan, [day]: [...(s.plan[day] ?? []), block].sort((a, b) => a.time.localeCompare(b.time)) },
         }));
       },
       addBlock: (day, block) => {
