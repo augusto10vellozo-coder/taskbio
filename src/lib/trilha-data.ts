@@ -116,6 +116,15 @@ export type Block = {
   subjectId?: string;
   /** True when this block is a spaced-repetition review created from a study session. */
   review?: boolean;
+  /** Degrau da escada de revisão (1, 7 ou 30 dias). */
+  reviewStage?: 1 | 7 | 30;
+  /** Sessão de estudo que originou a revisão. */
+  reviewOf?: string;
+  /** Resultado da tentativa de recordação. */
+  reviewVerdict?: "lembrei" | "esqueci";
+  reviewedAt?: string;
+  /** Reforço criado porque o usuário esqueceu. */
+  reviewReinforcement?: boolean;
   durationMinutes?: number;
   reminderMinutes?: number;
   photoPath?: string;

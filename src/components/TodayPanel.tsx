@@ -8,6 +8,7 @@ import { isMilestone } from "@/lib/engagement";
 import { usePersonalStatus } from "@/lib/use-personal-status";
 import { AgendaDayOverview, AgendaGreeting } from "@/components/AgendaDayOverview";
 import { DayTimeline } from "@/components/DayTimeline";
+import { ReviewCard } from "@/components/ReviewSheet";
 import { Button } from "@/components/ui/button";
 
 /** Home: greeting, day navigation, compact status strip, progress bar and the day timeline. */
@@ -51,6 +52,7 @@ export function TodayPanel({ initialDay }: { initialDay?: string | undefined }) 
         <Button variant="ghost" size="icon" aria-label="Próximo dia" onClick={() => shift(1)}><ChevronRight /></Button>
       </div>
       <AgendaDayOverview dateKey={dateKey} isToday={isToday} />
+      {isToday && <ReviewCard />}
       <DayTimeline dateKey={dateKey} adding={adding} onAddingChange={setAdding} />
     </section>
   );

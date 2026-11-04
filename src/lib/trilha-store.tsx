@@ -25,6 +25,7 @@ import type { ModuleSettings } from "./modules";
 import { foodName } from "./meal-summary";
 import { saveMealRecord, unifyMealBlocks } from "./meal-link";
 import { recordExerciseSets, type ExerciseLogEntry } from "./training";
+import { reinforcementDate, reinforcementId } from "./review";
 import { changeSeries } from "./training-session";
 import type { Food } from "./food-db";
 import { emitBlockXp, emitXp, foodItemCount } from "./xp-client";
@@ -88,6 +89,8 @@ type Store = TaskBioState & {
   replaceDays: (days: Record<string, Block[]>) => void;
   /** Creates the 1/7/30-day review blocks for a finished study session. */
   addReviewBlocks: (input: { date: string; subjectId: string; title: string; minutes: number; sessionId: string }) => void;
+  /** Conclui uma revisão com veredito; "esqueci" cria um reforço para o dia seguinte. */
+  completeReview: (date: string, blockId: string, verdict: "lembrei" | "esqueci") => void;
   clearWeek: (keys: string[]) => void;
   addExerciseLog: (entry: Omit<ExerciseLogEntry, "id">) => void;
   updateWorkout: (workout: Workout) => void;
@@ -414,12 +417,38 @@ export function TaskBioProvider({ children }: { children: ReactNode }) {
             title: `Revisão: ${label}`,
             subjectId,
             review: true,
+            reviewStage: offset as 1 | 7 | 30,
+            reviewOf: sessionId,
             durationMinutes: Math.min(minutes, 30),
             done: false,
           }];
         }
         return { ...s, plan };
       }),
+      completeReview: (day, blockId, verdict) => {
+        const target = (state.plan[day] ?? []).find((b) => b.id === blockId);
+        if (!target) return;
+        if (!target.done) {
+          emitBlockXp(day, target, true);
+          if (target.subjectId && target.durationMinutes) emitXp({ kind: "study", ref: `study-block:${day}:${blockId}`, date: day, on: true });
+        }
+        setState((s) => {
+          const reviewedAt = toDateKey(new Date());
+          const blocks = (s.plan[day] ?? []).map((b) => b.id === blockId ? { ...b, done: true, reviewVerdict: verdict, reviewedAt } : b);
+          let plan = { ...s.plan, [day]: blocks };
+          if (verdict === "esqueci") {
+            const nextDay = reinforcementDate(day);
+            const id = reinforcementId(target.reviewOf, blockId, nextDay);
+            if (!(plan[nextDay] ?? []).some((b) => b.id === id)) {
+              const base: Block = { ...target };
+              delete base.reviewVerdict;
+              delete base.reviewedAt;
+              plan = { ...plan, [nextDay]: [...(plan[nextDay] ?? []), { ...base, id, done: false, reviewReinforcement: true }] };
+            }
+          }
+          return { ...s, plan };
+        });
+      },
       clearWeek: (keys) => setState((s) => ({ ...s, plan: Object.fromEntries(Object.entries(s.plan).filter(([key]) => !keys.includes(key))) })),
       addCustomFood: (food) => setState((s) => ({ ...s, customFoods: [food, ...(s.customFoods ?? []).filter((f) => f.id !== food.id)].slice(0, 500) })),
       addExerciseLog: (entry) => setState((s) => ({ ...s, exerciseLog: [{ ...entry, id: `x-${Date.now()}` }, ...(s.exerciseLog ?? [])].slice(0, 2000) })),
