@@ -142,13 +142,13 @@ function Agenda() {
       </div>
 
       <div className="space-y-5">
-        <section aria-label="Semana" className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-2 lg:mx-0 lg:grid lg:grid-cols-7 lg:gap-3 lg:overflow-visible">
+        <section aria-label="Semana" className="flex flex-col gap-2 lg:grid lg:grid-cols-7 lg:gap-3">
           {weekDates.map((date) => {
             const key = toDateKey(date);
             const blocks = [...(plan[key] ?? [])].sort((a, b) => a.time.localeCompare(b.time));
             const done = blocks.filter((b) => b.done).length;
             const today = isSameDay(date, new Date());
-            return <article key={key} className={`flex min-w-[170px] shrink-0 flex-col rounded-lg bg-card p-3 ring-1 lg:min-w-0 ${today ? "ring-brand" : "ring-line"}`}>
+            return <article key={key} className={`flex w-full flex-col rounded-lg bg-card p-3 ring-1 lg:min-w-0 ${today ? "ring-brand" : "ring-line"}`}>
               <button type="button" onClick={() => openDay(key)} className="text-left">
                 <span className="block text-[11px] font-medium uppercase text-steel">{format(date, "EEE", { locale: ptBR })}</span>
                 <span className="block font-display text-lg font-semibold">{format(date, "d")}</span>

@@ -96,7 +96,7 @@ function WeekTab({ initialDay, onExplore }: { initialDay?: string | undefined; o
   }, [initialDay]);
   useEffect(() => {
     const el = stripRef.current?.querySelector<HTMLElement>(`[data-day="${selected}"]`);
-    el?.scrollIntoView({ inline: "center", block: "nearest" });
+    el?.scrollIntoView({ inline: "nearest", block: "nearest" });
   }, [selected, showPlan]);
   if (!ref || !selected) return <div className="h-60 animate-pulse rounded-lg bg-mist" />;
 
