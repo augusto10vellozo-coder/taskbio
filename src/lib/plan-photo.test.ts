@@ -1,7 +1,7 @@
-import { describe, expect, it } from "vitest";
+﻿import { describe, expect, it } from "vitest";
 import { MAX_PHOTO_BYTES, mergePhotoWorkouts, separatePhotoNotes, photoToValidation, validatePhoto, type PhotoWorkout } from "./plan-photo";
 
-const workout = (): PhotoWorkout => ({ day: "seg", name: "Treino A", exercises: [{ name: "Supino", sets: 5, reps: 15, loadKg: 20, review: false }] });
+const workout = (): PhotoWorkout => ({ day: "seg", name: "Treino A", exercises: [{ name: "Supino", sets: 5, reps: 15, durationSec: null, loadKg: 20, review: false }] });
 describe("importação de fotos", () => {
   it("aceita JPG PNG WEBP HEIC até 10 MB por imagem", () => {
     expect(MAX_PHOTO_BYTES).toBe(10485760);
@@ -23,15 +23,15 @@ describe("importação de fotos", () => {
   });
   it("apagar repetições bloqueia mesmo quando carga é opcional", () => {
     const w = workout();
-    w.exercises = [{ name: "Supino", sets: 5, reps: null, loadKg: null, review: false }];
+    w.exercises = [{ name: "Supino", sets: 5, reps: null, durationSec: null, loadKg: null, review: false }];
     expect(photoToValidation([w])).toBeNull();
-    w.exercises[0] = { name: "Supino", sets: 5, reps: 15, loadKg: null, review: false };
+    w.exercises[0] = { name: "Supino", sets: 5, reps: 15, durationSec: null, loadKg: null, review: false };
     expect(photoToValidation([w])?.[0]?.exercises[0]?.loadKg).toBeNull();
   });
   it("aquecimento e instruções sem séries viram notas sem bloquear exercícios", () => {
     const w = workout();
     const notes = ["Aquecimento/mobilidade pré-treino de superiores", "Instrução: mantenha a postura"];
-    w.exercises.unshift(...notes.map(name => ({ name, sets: null, reps: null, loadKg: null, review: true })));
+    w.exercises.unshift(...notes.map(name => ({ name, sets: null, reps: null, durationSec: null, loadKg: null, review: true })));
     const result = separatePhotoNotes([w]);
     expect(result[0]?.notes).toEqual(notes);
     expect(result[0]?.exercises.map(e => e.name)).toEqual(["Supino"]);
@@ -41,9 +41,9 @@ describe("importação de fotos", () => {
   it("mobilidade com prescrição e exercícios incompletos continuam exercícios", () => {
     const w = workout();
     w.exercises = [
-      { name: "Mobilidade", sets: 3, reps: 12, loadKg: null, review: false },
-      { name: "Aquecimento 3x12", sets: null, reps: null, loadKg: null, review: true },
-      { name: "Supino", sets: null, reps: null, loadKg: null, review: false },
+      { name: "Mobilidade", sets: 3, reps: 12, durationSec: null, loadKg: null, review: false },
+      { name: "Aquecimento 3x12", sets: null, reps: null, durationSec: null, loadKg: null, review: true },
+      { name: "Supino", sets: null, reps: null, durationSec: null, loadKg: null, review: false },
     ];
     const result = separatePhotoNotes([w]);
     expect(result[0]?.notes).toEqual([]);

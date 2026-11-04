@@ -47,6 +47,7 @@ export async function interpretPlanText(text: string) {
     return { data: parse(out), error: null };
   } catch (error) {
     const detail = error as { statusCode?: number; responseBody?: string; message?: string };
+    console.error("[plan-import] failed:", detail.statusCode ?? "?", detail.message ?? "sem mensagem", (detail.responseBody ?? "").slice(0, 400));
     let message = "Não foi possível interpretar o arquivo agora.";
     try {
       const body = detail.responseBody ? (JSON.parse(detail.responseBody) as { message?: string; error?: { message?: string } }) : null;

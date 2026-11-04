@@ -10,7 +10,7 @@ export const photoPlanSchema = z.object({
     name: z.string(),
     exercises: z.array(z.object({
       name: z.string(), sets: z.number().nullable(), reps: z.number().nullable(),
-      durationSec: z.number().nullable().optional(), loadKg: z.number().nullable(),
+      durationSec: z.number().nullable(), loadKg: z.number().nullable(),
       review: z.boolean(),
     }).strict()),
   }).strict()),
