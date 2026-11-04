@@ -15,16 +15,23 @@ export function trackProductEvent(event: ProductEvent, userId?: string | null): 
   const key = `${userId}:${event}:${toDateKey(new Date())}`;
   if (sent.has(key)) return;
   sent.add(key);
+  const storageKey = `taskbio:event:${key}`;
+  try { if (localStorage.getItem(storageKey)) return; } catch { /* sem storage */ }
   // product_events is not in the generated Database types yet.
   const client = supabase as unknown as {
     from: (table: string) => {
-      insert: (row: Record<string, unknown>) => PromiseLike<{ error: { message: string } | null }>;
+      insert: (row: Record<string, unknown>) => PromiseLike<{ error: { code?: string; message: string } | null }>;
     };
   };
   void client
     .from("product_events")
     .insert({ user_id: userId, event })
     .then(({ error }) => {
-      if (error) sent.delete(key); // allow a later retry in the same session
+      // 23505 = já existe para hoje: o evento está registrado, então não repetimos.
+      if (!error || error.code === "23505") {
+        try { localStorage.setItem(storageKey, "1"); } catch { /* sem storage */ }
+        return;
+      }
+      sent.delete(key); // allow a later retry in the same session
     });
 }

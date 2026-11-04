@@ -1,4 +1,3 @@
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MealPlanningShortcuts } from "@/components/MealPlanningShortcuts";
 import { makePlannedMeal, mealsForMode, mealsForTotals, predictedMeal, nextMealDate, mealTypes, type MealMode } from "@/lib/meal-planning";
 import { ModuleHeader } from "@/components/ModuleHeader";
@@ -174,9 +173,9 @@ function Alimentacao() {
         </div>
       </section>
 
-      <Tabs value={mode} onValueChange={value => setMode(value as MealMode)} className="mb-4">
-        <TabsList aria-label="Modo de alimentação"><TabsTrigger value="planejar">Planejar</TabsTrigger><TabsTrigger value="registrar">Registrar</TabsTrigger></TabsList>
-      </Tabs>
+      <div role="group" aria-label="Modo de alimentação" className="mb-4 inline-flex rounded-lg bg-mist p-1 text-sm">
+        {([["planejar", "Planejar"], ["registrar", "Registrar"]] as const).map(([value, label]) => <button key={value} type="button" aria-pressed={mode === value} onClick={() => setMode(value as MealMode)} className={`min-h-11 rounded-md px-3 py-2 font-medium ${mode === value ? "bg-ink text-background" : "text-steel"}`}>{label}</button>)}
+      </div>
       {mode === "planejar" && <div className="mb-4"><MealPlanningShortcuts kind="week" date={selectedKey} weekKeys={weekKeys} /></div>}
       <section className="border-y border-line py-4">
         <div className="flex items-center justify-between gap-3">

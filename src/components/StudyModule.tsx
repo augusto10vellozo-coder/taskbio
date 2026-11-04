@@ -158,7 +158,7 @@ export function StudyModule() {
                 <p className="mt-1.5 text-xs text-steel">hoje {hm(m)}{g ? ` / ${hm(g)}` : ""} · semana {hm(weekMin)}{weekTarget > 0 ? ` / ${hm(weekTarget)}` : ""}</p>
                 {weekTarget > 0 && <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-mist" role="progressbar" aria-label={`Progresso semanal de ${s.name}`} aria-valuenow={weekPct} aria-valuemin={0} aria-valuemax={100}><div className="h-full bg-brand" style={{ width: `${weekPct}%` }} /></div>}
                 {nextExam && (
-                  <p className="mt-2 inline-flex max-w-full items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium" style={{ background: `${s.color}22`, color: s.color }}>
+                  <p className="mt-2 inline-flex max-w-full items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium text-ink" style={{ background: `${s.color}22` }}>
                     <CalendarClock className="size-3.5 shrink-0" aria-hidden />
                     <span className="min-w-0 truncate">{examDays < 0 ? `Prova atrasada há ${-examDays}d` : examDays === 0 ? "Prova hoje" : `Prova em ${examDays} ${examDays === 1 ? "dia" : "dias"}`} · {nextExam.title}</span>
                   </p>

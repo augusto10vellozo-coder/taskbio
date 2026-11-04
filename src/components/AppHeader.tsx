@@ -61,7 +61,8 @@ export function AppHeader() {
               to={l.to}
               state={{ taskbioTab: true }}
               activeOptions={{ exact: l.exact }}
-              className="rounded-lg px-3 py-2 font-medium text-steel hover:text-ink"
+              className="rounded-lg px-3 py-2 font-medium"
+              inactiveProps={{ className: "rounded-lg px-3 py-2 font-medium text-steel hover:text-ink" }}
               activeProps={{ className: "rounded-lg px-3 py-2 font-medium bg-ink text-background" }}
             >
               {l.label}

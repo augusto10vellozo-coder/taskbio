@@ -32,7 +32,7 @@ export function SessionProgress({ workout, date }: { workout: Workout; date: str
   if (!p.total) return null;
   return <div className="mb-3 space-y-2" role="status" aria-live="polite">
     <p className="text-xs font-medium">{p.done} de {p.total} séries · {p.exercises} {p.exercises === 1 ? "exercício concluído" : "exercícios concluídos"}</p>
-    <Progress value={100 * p.done / p.total} className="[&>div]:bg-good" />
+    <Progress value={100 * p.done / p.total} aria-label="Progresso da sessão" className="[&>div]:bg-good" />
     {p.complete && <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-good/10 px-3 py-2 text-sm text-good">
       <span className="font-medium">{block?.done ? "Treino concluído 💪 Dia marcado como feito" : "Treino concluído 💪"}</span>
       {block?.done && <Button size="sm" variant="ghost" className="h-11" onClick={() => toggleBlock(date, block.id)}>Desfazer</Button>}

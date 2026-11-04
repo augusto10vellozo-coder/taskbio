@@ -83,7 +83,7 @@
   --secondary-foreground: var(--ink);
   --muted: var(--mist);
   --muted-foreground: var(--steel);
-  --accent: oklch(0.62 0.17 32);
+  --accent: oklch(0.56 0.16 32);
   --accent-foreground: #FFFFFF;
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: #FFFFFF;
