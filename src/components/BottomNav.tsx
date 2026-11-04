@@ -48,10 +48,10 @@ export function BottomNav() {
                 key={item.to}
                 to={item.to}
                 state={{ taskbioTab: true }}
-                className={`flex min-h-11 w-full min-w-0 flex-col items-center justify-center gap-0.5 rounded-lg py-1 text-[11px] transition-colors ${active ? "font-semibold text-accent" : "font-medium text-faint"}`}
+                className={`flex min-h-11 w-full min-w-0 flex-col items-center justify-center gap-0.5 rounded-lg py-1 text-[11px] transition-colors ${active ? "font-semibold text-ink" : "font-medium text-faint"}`}
                 aria-current={active ? "page" : undefined}
               >
-                <item.icon className="size-5 shrink-0" strokeWidth={1.5} />
+                <item.icon className={`size-5 shrink-0 ${active ? "text-accent" : ""}`} strokeWidth={1.5} />
                 <span className="max-w-full truncate">{item.label}</span>
               </Link>
             );

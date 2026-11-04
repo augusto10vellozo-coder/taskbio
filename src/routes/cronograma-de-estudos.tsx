@@ -124,7 +124,7 @@ function Page() {
       <p className="mt-3 text-base leading-7 text-steel">
         Cinco matérias, uma pessoa que trabalha e tem cerca de uma hora por dia:
       </p>
-      <div className="mt-4 overflow-x-auto rounded-xl ring-1 ring-line">
+      <div className="mt-4 overflow-x-auto rounded-xl ring-1 ring-line" role="region" aria-label="Exemplo de cronograma semanal" tabIndex={0}>
         <table className="w-full min-w-96 text-left text-sm">
           <thead className="bg-mist text-steel">
             <tr>
