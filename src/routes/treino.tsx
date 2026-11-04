@@ -8,7 +8,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useEntryState } from "@/lib/navigation-context";
 import { addDays, format, getISOWeek } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarPlus, ChevronLeft, ChevronRight, Dumbbell, FileUp, Plus, Trash2, TrendingUp, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Dumbbell, FileUp, Plus, Trash2, TrendingUp, X } from "lucide-react";
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
@@ -21,7 +21,7 @@ import { getWeekDates, toDateKey } from "@/lib/calendar-utils";
 import { exerciseHistory, exercisePerformance, kg, progression, toWorkout, weeklyMax, type ImportedWorkout } from "@/lib/training";
 import { interpretWorkoutPlan } from "@/lib/plan-import.functions";
 import type { Block, Exercise, Workout } from "@/lib/trilha-data";
-import { getWorkoutExamples, exercisePrescription } from "@/lib/trilha-data";
+import { exercisePrescription } from "@/lib/trilha-data";
 import { trackProductEvent } from "@/lib/product-telemetry";
 import { WorkoutSeries, SessionProgress } from "@/components/WorkoutSeries";
 import { Progress } from "@/components/ui/progress";
@@ -67,7 +67,6 @@ function WeekTab({ onExplore }: { onExplore: () => void }) {
   const store = useTaskBio();
   const { plan, workouts, addWorkout, toggleBlock, removeBlock } = store;
   const models = workouts.filter((w) => !w.templateId);
-  const examples = getWorkoutExamples(store.preferredModality ?? "Musculação", store.goal);
   const schedule = useScheduleWorkout();
   const [ref, setRef] = useEntryState<Date | null>("training:week", null);
   const [selected, setSelected] = useEntryState<string | null>("training:day", null);
@@ -121,11 +120,6 @@ function WeekTab({ onExplore }: { onExplore: () => void }) {
           <h3 className="mt-4 text-sm font-semibold">Meus treinos</h3>
           {models.length === 0 && <p className="mt-1 text-sm text-steel">Você ainda não tem treinos salvos.</p>}
           <AssignForm workouts={models} onPick={(w) => { assign(selected, w); toast.success("Treino adicionado ao dia"); }} onCreate={(n) => createAndAssign(selected, n)} />
-          {examples.length > 0 && <details className="mt-5 border-t border-line pt-4">
-            <summary className="cursor-pointer text-sm font-medium text-steel">Ver exemplos prontos</summary>
-            <p className="mt-2 text-xs text-steel">Sugestões genéricas — dá para ajustar tudo depois.</p>
-            <div className="mt-3 grid gap-3 sm:grid-cols-2">{examples.map((w) => <article key={w.id} className="rounded-lg border border-line p-3"><h4 className="text-sm font-semibold">{w.name}</h4><p className="mt-1 text-xs text-steel">{w.focus} · {w.exercises.length} exercícios</p><Button variant="outline" size="sm" className="mt-3" onClick={() => { assign(selected, w); toast.success("Treino adicionado ao dia"); }}><CalendarPlus /> Agendar</Button></article>)}</div>
-          </details>}
         </>
           : !selWorkout ? <div className="mt-3"><p className="text-sm text-steel">Escolha um treino abaixo pra registrar seus exercícios.</p><AssignForm workouts={models} onPick={(w) => assign(selected, w)} onCreate={(n) => createAndAssign(selected, n)} /></div>
           : <WorkoutDetail key={`${selWorkout.id}-${selected}`} workout={selWorkout} dateKey={selected} />}
