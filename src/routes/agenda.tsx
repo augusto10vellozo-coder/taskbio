@@ -14,7 +14,7 @@ import { exampleWeek } from "@/lib/example-week";
 import { toast } from "sonner";
 import { DayTimeline } from "@/components/DayTimeline";
 import { WeekActions } from "@/components/WeekActions";
-import { AgendaDayOverview, AgendaGreeting } from "@/components/AgendaDayOverview";
+import { AgendaGreeting } from "@/components/AgendaDayOverview";
 import { mealSummary } from "@/lib/meal-summary";
 
 export const Route = createFileRoute("/agenda")({
@@ -150,7 +150,6 @@ function Agenda() {
       </section>
       </div>
       <div>
-        <AgendaDayOverview dateKey={dateKey} />
         {emptyWeek && !exampleDismissed && <div className="mt-5 border-y border-line py-5"><p className="font-display font-semibold">Comece com uma semana de exemplo</p><p className="mt-1 text-sm text-steel">Refeições, atividades e descanso editáveis. Você pode limpar a semana a qualquer momento.</p><div className="mt-3 flex flex-wrap gap-2"><Button size="sm" onClick={fillExample}>Preencher com semana de exemplo</Button><Button size="sm" variant="ghost" onClick={() => { localStorage.setItem("trilha:example-dismissed", "yes"); setExampleDismissed(true); }}>Agora não</Button></div></div>}
       </div>
 
