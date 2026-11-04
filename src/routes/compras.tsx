@@ -10,6 +10,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { brl, formatIngredientAmount, normalizeUnit, SHOPPING_UNITS } from "@/lib/trilha-data";
 import { useTaskBio } from "@/lib/trilha-store";
 import { plannedShopping } from "@/lib/planned-shopping";
+import { groupShoppingItems } from "@/lib/shopping-categories";
 import { getWeekKeys } from "@/lib/calendar-utils";
 import { downloadShoppingPdf, shoppingLines } from "@/lib/shopping-export";
 import { ShoppingFinanceBridge } from "@/components/ShoppingFinanceBridge";
@@ -37,6 +38,7 @@ function Compras() {
   const cost = plannedShopping(plan, period).cost;
   const checked = shoppingItems.filter((item) => item.checked).length;
   const [manualOpen, setManualOpen] = useState(false);
+  const groups = groupShoppingItems(shoppingItems);
 
   const generateFromPlan = () => {
     const trigger = document.querySelector<HTMLButtonElement>("#shopping-plan-generator button");
@@ -74,7 +76,12 @@ function Compras() {
             <p className="font-display text-2xl font-semibold">{brl(cost)}</p>
           </div>
         </div>
-        <ul className="mt-3 divide-y divide-line">{shoppingItems.map((item) => <li key={item.id} className="flex items-center gap-3 py-3"><Button variant={item.checked ? "default" : "outline"} size="icon" className="size-11 shrink-0" onClick={() => toggleShoppingItem(item.id)} aria-label={`${item.name}: ${item.checked ? "retirar" : "colocar"} no carrinho`}>{item.checked ? "✓" : ""}</Button><span className={`min-w-0 flex-1 break-words text-sm ${item.checked ? "text-steel line-through" : ""}`}>{item.name}{item.manual ? <span className="ml-2 text-[10px] text-steel">pessoal</span> : item.source === "plan" ? <span className="ml-2 text-[10px] text-steel">do plano</span> : null}</span><span className="shrink-0 text-xs text-steel">{formatIngredientAmount(item.amount, normalizeUnit(item.unit))}</span>{item.manual || item.source === "plan" ? <Button variant="ghost" size="icon" className="size-11 shrink-0" onClick={() => removeShoppingItem(item.id)} aria-label={`Remover ${item.name}`}><Trash2 /></Button> : null}</li>)}</ul>
+        <div className="mt-3 space-y-4">
+          {groups.map((group) => <div key={group.id}>
+            <h3 className="text-[11px] font-semibold uppercase tracking-wide text-steel">{group.label} · {group.items.length}</h3>
+            <ul className="mt-1 divide-y divide-line">{group.items.map((item) => <li key={item.id} className="flex items-center gap-3 py-3"><Button variant={item.checked ? "default" : "outline"} size="icon" className="size-11 shrink-0" onClick={() => toggleShoppingItem(item.id)} aria-label={`${item.name}: ${item.checked ? "retirar" : "colocar"} no carrinho`}>{item.checked ? "✓" : ""}</Button><span className={`min-w-0 flex-1 break-words text-sm ${item.checked ? "text-steel line-through" : ""}`}>{item.name}{item.manual ? <span className="ml-2 text-[10px] text-steel">pessoal</span> : item.source === "plan" ? <span className="ml-2 text-[10px] text-steel">do plano</span> : null}</span><span className="shrink-0 text-xs text-steel">{formatIngredientAmount(item.amount, normalizeUnit(item.unit))}</span>{item.manual || item.source === "plan" ? <Button variant="ghost" size="icon" className="size-11 shrink-0" onClick={() => removeShoppingItem(item.id)} aria-label={`Remover ${item.name}`}><Trash2 /></Button> : null}</li>)}</ul>
+          </div>)}
+        </div>
         {checked > 0 && <div className="mt-4 flex justify-end"><Button variant="ghost" size="sm" className="h-11" onClick={() => setShoppingItems(shoppingItems.map((item) => ({ ...item, checked: false })))}><RotateCcw /> Desmarcar tudo</Button></div>}
         <ShoppingFinanceBridge cost={cost} />
       </section>

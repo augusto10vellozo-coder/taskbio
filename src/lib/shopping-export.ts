@@ -1,13 +1,16 @@
 import { brl, formatIngredientAmount, type ShoppingItem } from "./trilha-data";
+import { groupShoppingItems } from "./shopping-categories";
 
-export const shoppingLines = (items: ShoppingItem[], cost: number) => [
-  "Compras da semana — TaskBio",
-  "",
-  ...items.map((item) => `• ${item.name} — ${formatIngredientAmount(item.amount, item.unit)}${item.manual ? " (pessoal)" : ""}`),
-  "",
-  `Custo estimado das refeições: ${brl(cost)}`,
-  "Quantidades e preços são estimativas de planejamento e podem variar.",
-];
+export const shoppingLines = (items: ShoppingItem[], cost: number) => {
+  const lines = ["Compras da semana — TaskBio", ""];
+  for (const group of groupShoppingItems(items)) {
+    lines.push(group.label.toUpperCase());
+    for (const item of group.items) lines.push(`• ${item.name} — ${formatIngredientAmount(item.amount, item.unit)}${item.manual ? " (pessoal)" : ""}`);
+    lines.push("");
+  }
+  lines.push(`Custo estimado do plano: ${brl(cost)}`, "Quantidades e preços são estimativas de planejamento e podem variar.");
+  return lines;
+};
 
 export async function downloadShoppingPdf(items: ShoppingItem[], cost: number) {
   const [{ PDFDocument, rgb }, { default: fontkit }] = await Promise.all([
