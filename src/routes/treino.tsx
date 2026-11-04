@@ -19,6 +19,7 @@ import { useTaskBio } from "@/lib/trilha-store";
 import { useAuth } from "@/lib/auth-context";
 import { getWeekDates, toDateKey } from "@/lib/calendar-utils";
 import { exerciseHistory, exercisePerformance, kg, progression, toWorkout, weeklyMax, type ImportedWorkout } from "@/lib/training";
+import { findWorkoutBlock } from "@/lib/training-schedule";
 import { interpretWorkoutPlan } from "@/lib/plan-import.functions";
 import type { Block, Exercise, Workout } from "@/lib/trilha-data";
 import { exercisePrescription } from "@/lib/trilha-data";
@@ -83,10 +84,15 @@ function WeekTab({ onExplore }: { onExplore: () => void }) {
   const dayLabel = format(new Date(`${selected}T12:00:00`), "EEEE, d 'de' MMMM", { locale: ptBR });
   const dayTitle = dayLabel.charAt(0).toUpperCase() + dayLabel.slice(1);
 
-  const assign = (dateKey: string, workout: Workout) => schedule(dateKey, workout);
+  const assign = (dateKey: string, workout: Workout, options?: { replace?: boolean }) => {
+    const result = schedule(dateKey, workout, options);
+    if (result.ok) toast.success(`Treino adicionado ao dia às ${result.block.time}`);
+    else toast.error("Este dia já tem um treino. Tire o atual antes de adicionar outro.");
+    return result;
+  };
   const createAndAssign = (dateKey: string, name: string) => {
     const w: Workout = { id: `w-${Date.now()}`, name, focus: "", modality: "Academia", exercises: [] };
-    addWorkout(w); assign(dateKey, w); toast.success("Treino adicionado ao dia");
+    addWorkout(w); assign(dateKey, w);
   };
 
   return (
@@ -119,7 +125,7 @@ function WeekTab({ onExplore }: { onExplore: () => void }) {
         {!selBlock ? <>
           <h3 className="mt-4 text-sm font-semibold">Meus treinos</h3>
           {models.length === 0 && <p className="mt-1 text-sm text-steel">Você ainda não tem treinos salvos.</p>}
-          <AssignForm workouts={models} onPick={(w) => { assign(selected, w); toast.success("Treino adicionado ao dia"); }} onCreate={(n) => createAndAssign(selected, n)} />
+          <AssignForm workouts={models} onPick={(w) => { assign(selected, w); }} onCreate={(n) => createAndAssign(selected, n)} />
         </>
           : !selWorkout ? <div className="mt-3"><p className="text-sm text-steel">Escolha um treino abaixo pra registrar seus exercícios.</p><AssignForm workouts={models} onPick={(w) => assign(selected, w)} onCreate={(n) => createAndAssign(selected, n)} /></div>
           : <WorkoutDetail key={`${selWorkout.id}-${selected}`} workout={selWorkout} dateKey={selected} />}
@@ -274,9 +280,9 @@ function ExerciseRow({ ex, workout, dateKey, open, onToggle }: { ex: Exercise; w
   </li>;
 }
 
-function ImportDialog({ open, onOpenChange, week, onAssign }: { open: boolean; onOpenChange: (v: boolean) => void; week: Date[]; onAssign: (dateKey: string, w: Workout) => void }) {
+function ImportDialog({ open, onOpenChange, week, onAssign }: { open: boolean; onOpenChange: (v: boolean) => void; week: Date[]; onAssign: (dateKey: string, w: Workout, options?: { replace?: boolean }) => void }) {
   const { user } = useAuth();
-  const { addWorkout, exerciseLog, workoutHistory, workouts } = useTaskBio();
+  const { plan, addWorkout, exerciseLog, workoutHistory, workouts } = useTaskBio();
   const interpret = useServerFn(interpretWorkoutPlan);
   const [step, setStep] = useState<"source" | "photo" | "upload" | "reading" | "review">("source");
   const [spreadsheet, setSpreadsheet] = useState(false);
@@ -303,6 +309,10 @@ function ImportDialog({ open, onOpenChange, week, onAssign }: { open: boolean; o
   }
 
   const upd = (i: number, w: SpreadsheetWorkout) => setItems(items.map((x, j) => (j === i ? w : x)));
+  const conflictDays = items
+    .map((item) => (item.day ? week[DAY_ORDER.indexOf(item.day)] : undefined))
+    .filter((date): date is Date => Boolean(date))
+    .filter((date) => Boolean(findWorkoutBlock(toDateKey(date), plan)));
   const confirm = () => {
     if (spreadsheet && !spreadsheetValid(items)) return;
     const known = [...(exerciseLog ?? []).map((e) => e.exercise), ...workoutHistory.flatMap((h) => h.exercises.map((e) => e.name)), ...workouts.flatMap((w) => w.exercises.map((e) => e.name))];
@@ -314,7 +324,7 @@ function ImportDialog({ open, onOpenChange, week, onAssign }: { open: boolean; o
       }) };
       const w = toWorkout(validated, known, `w-imp-${stamp}-${i}`);
       addWorkout(w);
-      if (it.day) { const date = week[DAY_ORDER.indexOf(it.day)]; if (date) onAssign(toDateKey(date), w); }
+      if (it.day) { const date = week[DAY_ORDER.indexOf(it.day)]; if (date) onAssign(toDateKey(date), w, { replace: true }); }
     });
     toast.success(`${items.length} treino(s) importado(s)`); trackProductEvent("workout_imported", user?.id); onOpenChange(false); reset();
   };
@@ -336,6 +346,9 @@ function ImportDialog({ open, onOpenChange, week, onAssign }: { open: boolean; o
         : step === "reading" ? <div className="py-10 text-center text-sm text-steel"><div className="mx-auto mb-3 size-8 animate-spin rounded-full border-2 border-line border-t-brand" />Lendo e interpretando o plano…</div>
         : <div className="space-y-4">
           <p className="text-sm text-steel">Confira e ajuste antes de salvar.</p>
+          {conflictDays.length > 0 && <p role="alert" className="rounded-md bg-gold/10 p-3 text-sm">
+            {conflictDays.map((date) => format(date, "EEEE", { locale: ptBR })).join(", ")} já {conflictDays.length === 1 ? "tem" : "têm"} treino. Salvar vai substituir o treino desses dias.
+          </p>}
           {spreadsheet && !spreadsheetValid(items) && items.length > 0 && <p role="alert" className="text-xs text-destructive">Revise séries e repetições (ou o tempo, em segundos) antes de salvar.</p>}
           {items.length === 0 && <p className="text-sm">Nenhum treino restante.</p>}
           {items.map((w, i) => <div key={i} className="rounded-lg p-3 ring-1 ring-line">
@@ -349,7 +362,7 @@ function ImportDialog({ open, onOpenChange, week, onAssign }: { open: boolean; o
               <Button variant="ghost" size="icon" className="size-8" aria-label="Descartar exercício" onClick={() => upd(i, { ...w, exercises: w.exercises.filter((_, m) => m !== k) })}><X /></Button>
             </li>; })}</ul>
           </div>)}
-          <div className="flex justify-end gap-2"><Button variant="outline" onClick={reset}>Enviar outro arquivo</Button><Button disabled={items.length === 0 || (spreadsheet && !spreadsheetValid(items))} onClick={confirm}>Salvar no plano</Button></div>
+          <div className="flex justify-end gap-2"><Button variant="outline" onClick={reset}>Enviar outro arquivo</Button><Button disabled={items.length === 0 || (spreadsheet && !spreadsheetValid(items))} onClick={confirm}>{conflictDays.length > 0 ? "Substituir e salvar" : "Salvar no plano"}</Button></div>
         </div>}
     </DialogContent>
   </Dialog>;

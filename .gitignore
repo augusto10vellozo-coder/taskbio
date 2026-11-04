@@ -20,6 +20,9 @@ dist-ssr
 .wrangler/
 .dev.vars
 
+# Ferramentas locais de design (Impeccable)
+.impeccable/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

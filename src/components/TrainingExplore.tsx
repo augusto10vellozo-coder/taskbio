@@ -20,29 +20,55 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { ACTIVITY_CATALOG, GOALS, OBJECTIVE_EFFECTS, exercisePrescription, getWorkoutExamples, type Workout } from "@/lib/trilha-data";
+import { findWorkoutBlock, withWorkoutBlock, workoutTimeFor } from "@/lib/training-schedule";
 import { useTaskBio } from "@/lib/trilha-store";
 
 
-/** Hook shared by both tabs: schedules a copy of a model so week edits never change the model. */
+export type ScheduleResult = { ok: true; block: Block } | { ok: false; existing: Block };
+
+/**
+ * Hook shared by both tabs: schedules a copy of a model so week edits never
+ * change the model. A day that already has a workout is user data, so it is
+ * never overwritten without `replace`: the caller must ask first.
+ */
 export function useScheduleWorkout() {
-  const { plan, addWorkout, replaceDays } = useTaskBio();
-  return (dateKey: string, model: Workout) => {
+  const { plan, workouts, addWorkout, removeWorkout, replaceDays } = useTaskBio();
+  return (dateKey: string, model: Workout, options?: { replace?: boolean }): ScheduleResult => {
+    const existing = findWorkoutBlock(dateKey, plan);
+    if (existing && !options?.replace) return { ok: false, existing };
     const id = `w-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
     const copy: Workout = { ...model, id, templateId: model.templateId ?? model.id, exercises: model.exercises.map((e, i) => ({ ...e, id: `${id}-e${i}`, doneSets: 0, seriesByDate: {} })) };
     addWorkout(copy);
-    const block: Block = { id: `b-${Date.now()}-${dateKey}`, time: "07:00", kind: "treino", title: copy.name, done: false, workoutId: copy.id };
-    replaceDays({ [dateKey]: [...(plan[dateKey] ?? []).filter((b) => b.kind !== "treino"), block].sort((a, b) => a.time.localeCompare(b.time)) });
+    const block: Block = { id: `b-${Date.now()}-${dateKey}`, time: workoutTimeFor(dateKey, plan, existing), kind: "treino", title: copy.name, done: false, workoutId: copy.id };
+    replaceDays({ [dateKey]: withWorkoutBlock(plan[dateKey] ?? [], block, existing?.id) });
+    // A cópia substituída era só um agendamento; o modelo em "Meus treinos" permanece.
+    const replaced = existing?.workoutId ? workouts.find((item) => item.id === existing.workoutId) : undefined;
+    if (replaced?.templateId) removeWorkout(replaced.id);
+    return { ok: true, block };
   };
 }
 
 function ScheduleButton({ workout, label = "Agendar na semana" }: { workout: Workout; label?: string }) {
   const schedule = useScheduleWorkout();
   const [open, setOpen] = useState(false);
+  const [pending, setPending] = useState<{ dateKey: string; day: Date } | null>(null);
   const today = new Date();
   const days = Array.from({ length: 7 }, (_, i) => addDays(today, i));
+  const run = (dateKey: string, day: Date, replace: boolean) => {
+    const result = schedule(dateKey, workout, { replace });
+    if (!result.ok) { setPending({ dateKey, day }); return; }
+    setPending(null);
+    setOpen(false);
+    toast.success(`${workout.name} agendado para ${format(day, "EEEE, d/MM", { locale: ptBR })} às ${result.block.time}`);
+  };
   return <div className="mt-3">
-    <Button type="button" variant="outline" size="sm" className="w-full" onClick={() => setOpen((v) => !v)}><CalendarPlus /> {label}</Button>
-    {open && <div className="mt-2 flex flex-wrap gap-1.5">{days.map((d) => <Button key={toDateKey(d)} type="button" size="sm" variant="secondary" className="h-8 capitalize" onClick={() => { schedule(toDateKey(d), workout); setOpen(false); toast.success(`${workout.name} agendado para ${format(d, "EEEE, d/MM", { locale: ptBR })}`); }}>{i18nDay(d)}</Button>)}</div>}
+    <Button type="button" variant="outline" size="sm" className="w-full" onClick={() => { setOpen((v) => !v); setPending(null); }}><CalendarPlus /> {label}</Button>
+    {open && <div className="mt-2 flex flex-wrap gap-1.5">{days.map((d) => <Button key={toDateKey(d)} type="button" size="sm" variant="secondary" className="h-8 capitalize" onClick={() => run(toDateKey(d), d, false)}>{i18nDay(d)}</Button>)}</div>}
+    {pending && <div role="alertdialog" aria-label="Substituir treino" className="mt-2 rounded-lg bg-gold/10 p-3 text-xs ring-1 ring-gold/30">
+      <p className="font-medium capitalize">{format(pending.day, "EEEE, d/MM", { locale: ptBR })} já tem um treino.</p>
+      <p className="mt-1 text-steel">Substituir apaga o treino atual e o progresso das séries desse dia.</p>
+      <div className="mt-2 flex gap-2"><Button size="sm" onClick={() => run(pending.dateKey, pending.day, true)}>Substituir</Button><Button size="sm" variant="ghost" onClick={() => setPending(null)}>Cancelar</Button></div>
+    </div>}
   </div>;
 }
 const i18nDay = (d: Date) => format(d, "EEE d", { locale: ptBR });
@@ -84,8 +110,12 @@ export function TrainingExplore() {
       exercises: [],
     };
     addWorkout(created);
-    schedule(toDateKey(new Date()), created);
     setSelected(created.id);
+    const result = schedule(toDateKey(new Date()), created);
+    if (!result.ok) {
+      toast.success("Treino criado em Meus treinos. Hoje já tem um treino agendado.");
+      return;
+    }
     toast.success("Treino criado e agendado para hoje. Adicione os exercícios.");
     void navigate({ to: "/treino" });
   };
