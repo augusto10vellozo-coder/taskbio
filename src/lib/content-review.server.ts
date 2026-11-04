@@ -1,5 +1,5 @@
 import { streamText } from "ai";
-import { openaiGuard, openaiModel } from "./openai.server";
+import { describeAiError, openaiGuard, openaiModel } from "./openai.server";
 
 type ReviewPage = { path: string; title: string; content: string };
 
@@ -49,12 +49,13 @@ export async function evaluatePublicContent(pages: ReviewPage[], criteria: strin
     if (!text.trim()) return { data: null, error: "A avaliação terminou sem conteúdo. Tente novamente mais tarde.", failed: true };
     return { data: parseReview(text), error: null, failed: false };
   } catch (error) {
-    const detail = error as { statusCode?: number; responseBody?: string; message?: string };
+    const detail = error as { responseBody?: string };
+    console.error("[content-review] failed:", describeAiError(error));
     let message = "Não foi possível concluir a avaliação agora.";
     try {
       const body = detail.responseBody ? JSON.parse(detail.responseBody) as { message?: string; error?: { message?: string } } : null;
-      message = body?.message ?? body?.error?.message ?? detail.message ?? message;
-    } catch { message = detail.message ?? message; }
+      message = body?.message ?? body?.error?.message ?? message;
+    } catch { /* mantém mensagem padrão */ }
     return { data: null, error: message, failed: true };
   }
 }

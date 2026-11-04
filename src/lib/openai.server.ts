@@ -22,3 +22,25 @@ export function openaiGuard() {
     abortSignal: AbortSignal.timeout(OPENAI_TIMEOUT_MS),
   };
 }
+
+/**
+ * The AI SDK wraps provider failures in a generic "No output generated" error,
+ * so the real reason (no credits, invalid schema, rate limit) lives in `cause`.
+ * This walks the chain and returns status plus the innermost message.
+ */
+export function describeAiError(error: unknown): string {
+  const seen = new Set<unknown>();
+  let current: unknown = error;
+  let fallback = "";
+  while (current && typeof current === "object" && !seen.has(current)) {
+    seen.add(current);
+    const detail = current as { message?: string; statusCode?: number; responseBody?: string; cause?: unknown };
+    if (!fallback && detail.message) fallback = detail.message;
+    if (detail.statusCode || detail.responseBody) {
+      const body = detail.responseBody ? ` ${detail.responseBody.slice(0, 300)}` : "";
+      return `${detail.statusCode ?? "?"} ${detail.message ?? fallback}${body}`.trim();
+    }
+    current = detail.cause;
+  }
+  return fallback || "erro desconhecido";
+}

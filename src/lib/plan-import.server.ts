@@ -1,5 +1,5 @@
 import { streamText } from "ai";
-import { openaiGuard, openaiModel } from "./openai.server";
+import { describeAiError, openaiGuard, openaiModel } from "./openai.server";
 import type { ImportedWorkout } from "./training";
 
 const DAYS = ["seg", "ter", "qua", "qui", "sex", "sab", "dom"] as const;
@@ -47,7 +47,7 @@ export async function interpretPlanText(text: string) {
     return { data: parse(out), error: null, failed: false };
   } catch (error) {
     const detail = error as { statusCode?: number; responseBody?: string; message?: string };
-    console.error("[plan-import] failed:", detail.statusCode ?? "?", detail.message ?? "sem mensagem", (detail.responseBody ?? "").slice(0, 400));
+    console.error("[plan-import] failed:", describeAiError(error));
     let message = "Não foi possível interpretar o arquivo agora.";
     try {
       const body = detail.responseBody ? (JSON.parse(detail.responseBody) as { message?: string; error?: { message?: string } }) : null;
