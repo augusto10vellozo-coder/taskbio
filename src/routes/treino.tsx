@@ -4,11 +4,11 @@ import { ModuleHeader } from "@/components/ModuleHeader";
 import { ProgressRecorder } from "@/components/ProgressRecorder";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { TrainingExplore, useScheduleWorkout } from "@/components/TrainingExplore";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useEntryState } from "@/lib/navigation-context";
 import { addDays, format, getISOWeek } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { ChevronLeft, ChevronRight, Dumbbell, FileUp, Plus, Trash2, TrendingUp, X } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Dumbbell, FileUp, Plus, Trash2, TrendingUp, X } from "lucide-react";
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
@@ -80,8 +80,19 @@ function WeekTab({ initialDay, onExplore }: { initialDay?: string | undefined; o
   const [ref, setRef] = useEntryState<Date | null>("training:week", null);
   const [selected, setSelected] = useEntryState<string | null>("training:day", null);
   const [importing, setImporting] = useState(false);
-  useEffect(() => { const d = new Date(); setRef(value => value ?? d); setSelected(value => value ?? toDateKey(d)); }, []);
-  useEffect(() => { if (!initialDay) return; setRef(fromDateKey(initialDay)); setSelected(initialDay); }, [initialDay]);
+  const [showPlan, setShowPlan] = useState(false);
+  const stripRef = useRef<HTMLDivElement>(null);
+  // A aba abre sempre em hoje; um dia explícito na URL (vindo de Explorar) vence.
+  useEffect(() => {
+    if (initialDay) { setRef(fromDateKey(initialDay)); setSelected(initialDay); return; }
+    const today = new Date();
+    setRef(today);
+    setSelected(toDateKey(today));
+  }, [initialDay]);
+  useEffect(() => {
+    const el = stripRef.current?.querySelector<HTMLElement>(`[data-day="${selected}"]`);
+    el?.scrollIntoView({ inline: "center", block: "nearest" });
+  }, [selected, showPlan]);
   if (!ref || !selected) return <div className="h-60 animate-pulse rounded-lg bg-mist" />;
 
   const week = getWeekDates(ref);
@@ -122,20 +133,31 @@ function WeekTab({ initialDay, onExplore }: { initialDay?: string | undefined; o
     addWorkout(w); assign(dateKey, w);
   };
 
+  const hasWorkoutToday = Boolean(selBlock && selWorkout);
+  const planExpanded = showPlan || !hasWorkoutToday;
+
   return (
     <div>
-      <section className="flex flex-wrap items-end justify-between gap-3 pb-5">
-        <div><h2 className="font-display text-xl font-semibold">Plano da semana</h2>{!firstUse && <div className="mt-3 space-y-2" aria-label="Progresso semanal do treino"><p className="text-xs font-medium">{weeklyProgress.done} de {weeklyProgress.total} treinos · Semana {getISOWeek(ref)}</p><Progress value={weeklyProgress.total ? 100 * weeklyProgress.done / weeklyProgress.total : 0} className="[&>div]:bg-good" />{weeklyProgress.complete && <span className="inline-block text-xs font-medium text-good">Semana completa 🏆</span>}</div>}<p className="mt-2 text-sm text-steel">{firstUse ? "Monte sua primeira ficha ou importe um plano para começar." : "Toque no dia pra ver o treino e marque quando concluir 💪"}</p></div>
-        <Button variant="outline" onClick={() => setImporting(true)}><FileUp /> Importar plano</Button>
-      </section>
+      {firstUse || planExpanded ? (
+        <section className="flex flex-wrap items-end justify-between gap-3 pb-5">
+          <div><h2 className="font-display text-xl font-semibold">Plano da semana</h2>{!firstUse && <div className="mt-3 space-y-2" aria-label="Progresso semanal do treino"><p className="text-xs font-medium">{weeklyProgress.done} de {weeklyProgress.total} treinos · Semana {getISOWeek(ref)}</p><Progress value={weeklyProgress.total ? 100 * weeklyProgress.done / weeklyProgress.total : 0} className="[&>div]:bg-good" />{weeklyProgress.complete && <span className="inline-block text-xs font-medium text-good">Semana completa 🏆</span>}</div>}<p className="mt-2 text-sm text-steel">{firstUse ? "Monte sua primeira ficha ou importe um plano para começar." : "Toque no dia pra ver o treino e marque quando concluir 💪"}</p></div>
+          <Button variant="outline" onClick={() => setImporting(true)}><FileUp /> Importar plano</Button>
+        </section>
+      ) : (
+        <section className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <p className="text-sm font-medium">Semana {getISOWeek(ref)} · {weeklyProgress.done} de {weeklyProgress.total} treinos</p>
+          <Button variant="ghost" size="sm" onClick={() => setShowPlan(true)}><ChevronDown /> Ver semana</Button>
+        </section>
+      )}
 
       {firstUse ? (
         <EmptyState icon={Dumbbell} title="Sua primeira ficha começa aqui" context="Monte o treino da semana e acompanhe carga e volume a cada sessão." actionLabel="Montar ficha" onAction={onExplore} />
       ) : (<>
+      {planExpanded && <>
       <div className="mb-3 flex items-center justify-between"><Button variant="ghost" size="icon" aria-label="Semana anterior" onClick={() => shiftWeek(-7)}><ChevronLeft /></Button><span className="text-sm font-medium">{format(week[0]!, "d MMM", { locale: ptBR })} – {format(week[6]!, "d MMM", { locale: ptBR })}</span><Button variant="ghost" size="icon" aria-label="Próxima semana" onClick={() => shiftWeek(7)}><ChevronRight /></Button></div>
-      <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-2" role="group" aria-label="Dias da semana">
+      <div ref={stripRef} className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-2" role="group" aria-label="Dias da semana">
         {week.map((d) => { const k = toDateKey(d); const b = blockOf(k); const active = k === selected; return (
-          <div key={k} className={`flex min-w-[104px] flex-1 shrink-0 flex-col rounded-lg bg-card p-2.5 ring-1 transition ${active ? "ring-brand" : "ring-line"}`}>
+          <div key={k} data-day={k} className={`flex min-w-[86px] flex-1 shrink-0 flex-col rounded-lg bg-card p-2.5 ring-1 transition ${active ? "ring-brand" : "ring-line"}`}>
             <button type="button" className="w-full text-left" aria-current={active ? "date" : undefined} onClick={() => setSelected(k)}>
               <span className="block text-[11px] font-medium uppercase leading-4 text-steel">{format(d, "EEE d", { locale: ptBR })}</span>
               <span className={`mt-1 line-clamp-2 min-h-8 break-words text-sm font-medium leading-snug [overflow-wrap:anywhere] ${b?.done ? "text-steel line-through" : ""}`}>{b?.title ?? <span className="text-steel">Sem treino</span>}</span>
@@ -143,6 +165,8 @@ function WeekTab({ initialDay, onExplore }: { initialDay?: string | undefined; o
             {b && <button type="button" className="mt-1 flex items-center gap-1.5 text-[11px] text-steel" onClick={() => { toggleBlock(k, b.id); if (!b.done) toast.success("Treino concluído!"); }} aria-label={`${b.done ? "Desmarcar" : "Concluir"} ${b.title}`}><Tick on={b.done} />{b.done ? "Concluído" : "Concluir"}</button>}
           </div>); })}
       </div>
+      {hasWorkoutToday && <div className="mb-1 flex justify-end"><Button variant="ghost" size="sm" onClick={() => setShowPlan(false)}><ChevronUp /> Recolher</Button></div>}
+      </>}
 
       <section className="mt-5 rounded-lg bg-card p-5 ring-1 ring-line">
         <div className="flex flex-wrap items-start justify-between gap-2">
@@ -159,7 +183,7 @@ function WeekTab({ initialDay, onExplore }: { initialDay?: string | undefined; o
           {models.length === 0 && <p className="mt-1 text-sm text-steel">Você ainda não tem treinos salvos.</p>}
           <AssignForm workouts={models} onPick={(w) => { assign(selected, w); }} onCreate={(n) => createAndAssign(selected, n)} />
         </>
-          : !selWorkout ? <div className="mt-3"><p className="text-sm text-steel">Escolha um treino abaixo pra registrar seus exercícios.</p><AssignForm workouts={models} onPick={(w) => assign(selected, w)} onCreate={(n) => createAndAssign(selected, n)} /></div>
+          : !selWorkout ? <div className="mt-3"><p className="text-sm text-steel">Escolha um treino abaixo pra registrar seus exercícios.</p><AssignForm workouts={models} onPick={(w) => assign(selected, w, { replace: true })} onCreate={(n) => createAndAssign(selected, n)} /></div>
           : <WorkoutDetail key={`${selWorkout.id}-${selected}`} workout={selWorkout} dateKey={selected} />}
       </section>
       <p className="mt-4 text-xs leading-5 text-steel">Quer ideias? <button type="button" onClick={onExplore} className="underline">Explorar e criar</button>.</p>
@@ -194,9 +218,15 @@ function WorkoutDetail({ workout, dateKey }: { workout: Workout; dateKey: string
     replaceDays({ [dateKey]: (plan[dateKey] ?? []).map((b) => (b.id === block.id ? { ...b, time } : b)) });
   };
   return <div className="mt-3 pb-32">
-    <WorkoutHeading workout={workout} dateKey={dateKey} />
+    <h3 className="font-display text-lg font-semibold">{workout.name}{workout.focus ? <span className="text-sm font-normal text-steel"> · {workout.focus}</span> : null}</h3>
+    <details className="mt-2 rounded-lg bg-background ring-1 ring-line">
+      <summary className="cursor-pointer px-3 py-2 text-xs font-medium text-steel">Editar título e foco</summary>
+      <div className="px-3 pb-3"><WorkoutHeading workout={workout} dateKey={dateKey} /></div>
+    </details>
     <RestTimer />
-    <SessionProgress workout={workout} date={dateKey} />
+    <div className="sticky top-0 z-10 -mx-5 bg-card px-5 pt-2">
+      <SessionProgress workout={workout} date={dateKey} />
+    </div>
     {block && (
       <div className="mt-3 rounded-lg bg-mist p-3">
         <p className="text-xs font-semibold text-ink">Também na sua agenda</p>
