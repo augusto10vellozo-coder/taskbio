@@ -20,7 +20,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { ACTIVITY_CATALOG, GOALS, OBJECTIVE_EFFECTS, exercisePrescription, getWorkoutExamples, type Workout } from "@/lib/trilha-data";
-import { findWorkoutBlock, withWorkoutBlock, workoutTimeFor } from "@/lib/training-schedule";
+import { findWorkoutBlock, largestFreeGap, withWorkoutBlock, workoutTimeFor } from "@/lib/training-schedule";
 import { useTaskBio } from "@/lib/trilha-store";
 
 
@@ -79,7 +79,7 @@ function ScheduleButton({ workout, label = "Agendar na semana" }: { workout: Wor
 const i18nDay = (d: Date) => format(d, "EEE d", { locale: ptBR });
 
 export function TrainingExplore() {
-  const { workouts: allWorkouts, workoutHistory, addWorkout, removeWorkout, goal, setGoal, preferredModality, setPreferredModality } = useTaskBio();
+  const { workouts: allWorkouts, workoutHistory, addWorkout, removeWorkout, goal, setGoal, preferredModality, setPreferredModality, plan } = useTaskBio();
   const workouts = allWorkouts.filter((w) => !w.templateId);
   const [selected, setSelected] = useEntryState<string | null>("training:model", workouts[0]?.id ?? null);
   const navigate = useNavigate();
@@ -89,6 +89,8 @@ export function TrainingExplore() {
   const workout = workouts.find((w) => w.id === selected);
   const modality = preferredModality ?? "Musculação";
   const examples = getWorkoutExamples(modality, goal);
+  const [day] = useEntryState<string | null>("training:day", null);
+  const freeMinutes = day && (plan[day]?.length ?? 0) > 0 ? largestFreeGap(plan[day] ?? []) : 0;
   const objectiveEffect = goal ? OBJECTIVE_EFFECTS[goal] : null;
 
   useEffect(() => {
@@ -208,6 +210,7 @@ export function TrainingExplore() {
                   {examples.map((example, exampleIndex) => {
                     const expanded = openExample === example.id;
                     const approximateMinutes = example.exercises.reduce((total, exercise) => total + exercise.sets * 3, 0);
+                    const fits = freeMinutes > 0 && approximateMinutes <= freeMinutes;
                     return (
                       <article key={example.id} className="rounded-xl bg-card/70 p-4 ring-1 ring-line">
                         <div className="flex flex-wrap items-start justify-between gap-3">
@@ -216,7 +219,7 @@ export function TrainingExplore() {
                               <h3 className="text-sm font-semibold">{example.name}</h3>
                               <span className="rounded-full bg-mist px-2 py-0.5 text-[10px] font-medium text-steel">{exampleIndex === 0 ? "Mais leve" : "Sessão completa"}</span>
                             </div>
-                            <p className="mt-1 text-xs text-steel">{example.exercises.length} etapas · cerca de {approximateMinutes} min · {example.focus}</p>
+                            <p className="mt-1 text-xs text-steel">{example.exercises.length} etapas · cerca de {approximateMinutes} min · {example.focus}{fits ? " · cabe no seu dia" : ""}</p>
                           </div>
                           <Button variant="ghost" size="sm" onClick={() => setOpenExample(expanded ? null : example.id)}>
                             {expanded ? <ChevronUp /> : <ChevronDown />}{expanded ? "Recolher" : "Ver exemplo"}

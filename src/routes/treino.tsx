@@ -48,6 +48,11 @@ export const Route = createFileRoute("/treino")({
 
 const DAY_ORDER = ["seg", "ter", "qua", "qui", "sex", "sab", "dom"] as const;
 
+function countOf(blocks: Block[], kind: Block["kind"], singular: string, plural: string) {
+  const total = blocks.filter((block) => block.kind === kind).length;
+  return total === 0 ? "" : `${total} ${total === 1 ? singular : plural}`;
+}
+
 function Treino() {
   const { aba, dia } = Route.useSearch();
   const navigate = useNavigate({ from: "/treino" });
@@ -88,6 +93,18 @@ function WeekTab({ initialDay, onExplore }: { initialDay?: string | undefined; o
   const firstUse = models.length === 0 && !hasAnyWorkout;
   const dayLabel = format(new Date(`${selected}T12:00:00`), "EEEE, d 'de' MMMM", { locale: ptBR });
   const dayTitle = dayLabel.charAt(0).toUpperCase() + dayLabel.slice(1);
+  const dayBlocks = plan[selected] ?? [];
+  const otherBlocks = dayBlocks.filter((b) => b.id !== selBlock?.id);
+  const contextParts = [
+    countOf(otherBlocks, "refeicao", "refeição", "refeições"),
+    countOf(otherBlocks, "compromisso", "compromisso", "compromissos"),
+    countOf(otherBlocks, "leitura", "leitura", "leituras"),
+    countOf(otherBlocks, "descanso", "descanso", "descansos"),
+  ].filter(Boolean);
+  const ordered = [...dayBlocks].sort((a, b) => a.time.localeCompare(b.time));
+  const workoutIndex = ordered.findIndex((b) => b.id === selBlock?.id);
+  const before = workoutIndex > 0 ? ordered[workoutIndex - 1] : undefined;
+  const after = workoutIndex >= 0 ? ordered[workoutIndex + 1] : undefined;
 
   /** Troca a semana mantendo o mesmo dia da semana, para o painel não apontar para a semana anterior. */
   const shiftWeek = (days: number) => {
@@ -116,11 +133,14 @@ function WeekTab({ initialDay, onExplore }: { initialDay?: string | undefined; o
         <EmptyState icon={Dumbbell} title="Sua primeira ficha começa aqui" context="Monte o treino da semana e acompanhe carga e volume a cada sessão." actionLabel="Montar ficha" onAction={onExplore} />
       ) : (<>
       <div className="mb-3 flex items-center justify-between"><Button variant="ghost" size="icon" aria-label="Semana anterior" onClick={() => shiftWeek(-7)}><ChevronLeft /></Button><span className="text-sm font-medium">{format(week[0]!, "d MMM", { locale: ptBR })} – {format(week[6]!, "d MMM", { locale: ptBR })}</span><Button variant="ghost" size="icon" aria-label="Próxima semana" onClick={() => shiftWeek(7)}><ChevronRight /></Button></div>
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-7">
+      <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-2" role="group" aria-label="Dias da semana">
         {week.map((d) => { const k = toDateKey(d); const b = blockOf(k); const active = k === selected; return (
-          <div key={k} className={`rounded-lg bg-card p-3 ring-1 transition ${active ? "ring-brand" : "ring-line"}`}>
-            <button className="w-full text-left" aria-current={active ? "date" : undefined} onClick={() => setSelected(k)}><p className="text-[11px] font-medium uppercase leading-4 text-steel">{format(d, "EEE d", { locale: ptBR })}</p><p className={`mt-1.5 min-h-10 break-words text-sm font-medium leading-snug [overflow-wrap:anywhere] ${b?.done ? "text-steel line-through" : ""}`}>{b?.title ?? <span className="text-steel">Sem treino</span>}</p></button>
-            {b && <button className="mt-2 flex items-center gap-1.5 text-xs text-steel" onClick={() => { toggleBlock(k, b.id); if (!b.done) toast.success("Treino concluído!"); }} aria-label={`${b.done ? "Desmarcar" : "Concluir"} ${b.title}`}><Tick on={b.done} />{b.done ? "Concluído" : "Concluir"}</button>}
+          <div key={k} className={`flex min-w-[104px] flex-1 shrink-0 flex-col rounded-lg bg-card p-2.5 ring-1 transition ${active ? "ring-brand" : "ring-line"}`}>
+            <button type="button" className="w-full text-left" aria-current={active ? "date" : undefined} onClick={() => setSelected(k)}>
+              <span className="block text-[11px] font-medium uppercase leading-4 text-steel">{format(d, "EEE d", { locale: ptBR })}</span>
+              <span className={`mt-1 line-clamp-2 min-h-8 break-words text-sm font-medium leading-snug [overflow-wrap:anywhere] ${b?.done ? "text-steel line-through" : ""}`}>{b?.title ?? <span className="text-steel">Sem treino</span>}</span>
+            </button>
+            {b && <button type="button" className="mt-1 flex items-center gap-1.5 text-[11px] text-steel" onClick={() => { toggleBlock(k, b.id); if (!b.done) toast.success("Treino concluído!"); }} aria-label={`${b.done ? "Desmarcar" : "Concluir"} ${b.title}`}><Tick on={b.done} />{b.done ? "Concluído" : "Concluir"}</button>}
           </div>); })}
       </div>
 
@@ -128,6 +148,8 @@ function WeekTab({ initialDay, onExplore }: { initialDay?: string | undefined; o
         <div className="flex flex-wrap items-start justify-between gap-2">
           <div className="min-w-0">
             <h2 className="font-display text-xl font-semibold">{dayTitle}</h2>
+            {contextParts.length > 0 && <p className="mt-1 text-sm text-steel">{contextParts.join(" · ")}</p>}
+            {(before || after) && <p className="mt-1 text-xs text-steel">{before ? `Antes: ${before.title} · ${before.time}` : ""}{before && after ? " — " : ""}{after ? `Depois: ${after.title} · ${after.time}` : ""}</p>}
             {!selBlock && <p className="mt-1 text-sm text-steel">Nenhum treino agendado. Escolha um dos seus treinos ou crie um novo.</p>}
           </div>
           {selBlock && <Button variant="ghost" size="sm" onClick={() => removeBlock(selected, selBlock.id)}><X /> Tirar do dia</Button>}
@@ -176,11 +198,13 @@ function WorkoutDetail({ workout, dateKey }: { workout: Workout; dateKey: string
     <RestTimer />
     <SessionProgress workout={workout} date={dateKey} />
     {block && (
-      <label className="mt-3 flex flex-wrap items-center gap-2 text-xs text-steel">
-        Horário do treino
-        <input type="time" value={block.time} onChange={(e) => changeTime(e.target.value)} aria-label="Horário do treino" className="h-8 rounded-md bg-background px-2 text-sm text-ink ring-1 ring-line" />
-        <span className="text-[11px]">é este horário que aparece na sua agenda</span>
-      </label>
+      <div className="mt-3 rounded-lg bg-mist p-3">
+        <p className="text-xs font-semibold text-ink">Também na sua agenda</p>
+        <label className="mt-1.5 flex flex-wrap items-center gap-2 text-xs text-steel">
+          <input type="time" value={block.time} onChange={(e) => changeTime(e.target.value)} aria-label="Horário do treino na agenda" className="h-8 rounded-md bg-card px-2 text-sm text-ink ring-1 ring-line" />
+          <span>às {block.time} na agenda do dia</span>
+        </label>
+      </div>
     )}
     {workout.exercises.length === 0 && <p className="py-4 text-sm text-steel">Adicione os exercícios deste treino.</p>}
     <ul className="divide-y divide-line">{workout.exercises.map((ex) => <ExerciseRow key={ex.id} ex={ex} workout={workout} dateKey={dateKey} open={open === ex.id} onToggle={() => setOpen(open === ex.id ? null : ex.id)} />)}</ul>

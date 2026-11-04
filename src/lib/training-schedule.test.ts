@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { DEFAULT_WORKOUT_TIME, findWorkoutBlock, withWorkoutBlock, workoutTimeFor } from "./training-schedule";
+import { DEFAULT_WORKOUT_TIME, findWorkoutBlock, largestFreeGap, withWorkoutBlock, workoutTimeFor } from "./training-schedule";
 import type { Block, Plan } from "./trilha-data";
 
 const block = (over: Partial<Block> & Pick<Block, "id" | "time">): Block => ({ kind: "treino", title: "Treino", done: false, ...over });
@@ -44,5 +44,18 @@ describe("agendamento de treino", () => {
     ];
     const next = withWorkoutBlock(blocks, block({ id: "new", time: "08:00" }), "old");
     expect(next.some((item) => item.id === "study")).toBe(true);
+  });
+
+  it("encontra o maior intervalo livre do dia", () => {
+    const blocks: Block[] = [
+      { id: "a", time: "07:00", kind: "refeicao", title: "Café", done: false },
+      { id: "b", time: "08:00", endTime: "12:00", kind: "compromisso", title: "Estudo", done: false },
+      { id: "c", time: "19:00", kind: "treino", title: "Treino", done: false },
+    ];
+    expect(largestFreeGap(blocks)).toBe(7 * 60);
+  });
+
+  it("sem blocos, o dia inteiro está livre", () => {
+    expect(largestFreeGap([])).toBe(17 * 60);
   });
 });

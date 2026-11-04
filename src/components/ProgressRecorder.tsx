@@ -60,7 +60,10 @@ export function ProgressRecorder({ kinds: allowed, title, id, hint, collapsible 
 
   if (collapsible) return (
     <details id={id} className="mt-6 scroll-mt-24 rounded-lg bg-card ring-1 ring-line">
-      <summary className="cursor-pointer p-5 font-display text-lg font-semibold">{title}</summary>
+      <summary className="cursor-pointer p-5">
+        <span className="block font-display text-lg font-semibold">{title}</span>
+        {recent[0] && <span className="mt-1 block text-xs text-steel">Último: {recent[0].label} · {Number(recent[0].value).toLocaleString("pt-BR")} {recent[0].unit}</span>}
+      </summary>
       <div className="px-5 pb-5"><p className="mb-1 text-xs leading-5 text-steel">{description}</p>{form}{list}</div>
     </details>
   );

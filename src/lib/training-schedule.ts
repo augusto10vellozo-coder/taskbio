@@ -36,3 +36,26 @@ export function workoutTimeFor(dateKey: string, plan: Plan, existing?: Block): s
 export function withWorkoutBlock(blocks: Block[], block: Block, replacedId?: string): Block[] {
   return [...blocks.filter((item) => item.id !== replacedId), block].sort((a, b) => a.time.localeCompare(b.time));
 }
+
+const minutesOf = (time: string) => {
+  const [hours, minutes] = time.split(":").map(Number);
+  return (hours ?? 0) * 60 + (minutes ?? 0);
+};
+
+/**
+ * Maior intervalo livre do dia, em minutos, considerando os blocos já marcados.
+ * Usa o fim do bloco quando existe; sem fim, conta só o horário de início.
+ */
+export function largestFreeGap(blocks: Block[], dayStart = 6 * 60, dayEnd = 23 * 60): number {
+  const spans = blocks
+    .map((block) => ({ start: minutesOf(block.time), end: block.endTime ? minutesOf(block.endTime) : minutesOf(block.time) }))
+    .filter((span) => span.end >= dayStart && span.start <= dayEnd)
+    .sort((a, b) => a.start - b.start);
+  let best = 0;
+  let cursor = dayStart;
+  for (const span of spans) {
+    if (span.start > cursor) best = Math.max(best, span.start - cursor);
+    cursor = Math.max(cursor, span.end);
+  }
+  return Math.max(best, dayEnd - cursor);
+}
