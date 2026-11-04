@@ -1,5 +1,13 @@
 import { Link } from "@tanstack/react-router";
+import { useAuth } from "@/lib/auth-context";
 import { PrivacySettingsButton } from "./PrivacyConsent";
+
+/** Rodapé de marketing: só para visitantes. Dentro do app ele é ruído. */
+export function PublicFooter() {
+  const { user } = useAuth();
+  if (user) return null;
+  return <AppFooter />;
+}
 
 export function AppFooter() {
   return (

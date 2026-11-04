@@ -12,7 +12,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AppHeader } from "../components/AppHeader";
-import { AppFooter } from "../components/AppFooter";
+import { PublicFooter } from "../components/AppFooter";
 import { BottomNav } from "../components/BottomNav";
 import { TaskBioProvider } from "../lib/trilha-store";
 import { AuthProvider } from "../lib/auth-context";
@@ -165,7 +165,7 @@ function RootComponent() {
           <div className="app-glow" />
           <AppHeader />
           <Outlet />
-          <AppFooter />
+          <PublicFooter />
           <BottomNav />
           <PrivacyConsent />
           <ThemeOnboarding />

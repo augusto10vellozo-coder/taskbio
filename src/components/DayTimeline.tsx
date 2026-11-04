@@ -56,7 +56,7 @@ export function DayTimeline({
     [plan],
   );
   const doneCount = blocks.filter((b) => (b.kind === "refeicao" ? isMealRecorded(b) : b.done)).length;
-  const dayComplete = blocks.length > 0 && doneCount === blocks.length;
+  const dayComplete = blocks.length >= 3 && doneCount === blocks.length;
   const todayXp = personal.todayXp;
 
   return (

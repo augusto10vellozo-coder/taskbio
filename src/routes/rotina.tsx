@@ -83,7 +83,7 @@ function Rotina() {
     <main className="mx-auto max-w-2xl px-5 pb-24 sm:px-8">
       <div className="flex items-center gap-2 pt-6"><HierarchicalBackButton /><h1 className="min-w-0 text-2xl font-semibold text-ink">Rotina</h1></div>
 
-      {user && freezes != null && (
+      {user && freezes != null && freezes > 0 && (
         <div className="mt-4 flex items-center gap-3 rounded-2xl border border-line bg-card p-4">
           <Snowflake className="size-5 shrink-0 text-accent" aria-hidden="true" />
           <div className="min-w-0">
