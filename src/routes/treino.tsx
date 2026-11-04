@@ -194,14 +194,14 @@ function WeekTab({ initialDay, onExplore }: { initialDay?: string | undefined; o
       ) : (<>
       {planExpanded && <>
       <div className="mb-3 flex items-center justify-between"><Button variant="ghost" size="icon" aria-label="Semana anterior" onClick={() => shiftWeek(-7)}><ChevronLeft /></Button><span className="text-sm font-medium">{format(week[0]!, "d MMM", { locale: ptBR })} – {format(week[6]!, "d MMM", { locale: ptBR })}</span><Button variant="ghost" size="icon" aria-label="Próxima semana" onClick={() => shiftWeek(7)}><ChevronRight /></Button></div>
-      <div ref={stripRef} className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-2" role="group" aria-label="Dias da semana">
+      <div ref={stripRef} className="-mx-1 flex gap-2 overflow-x-auto px-1 pt-1 pb-2" role="group" aria-label="Dias da semana">
         {week.map((d) => { const k = toDateKey(d); const b = blockOf(k); const active = k === selected; return (
           <div key={k} data-day={k} className={`flex min-w-[86px] flex-1 shrink-0 flex-col rounded-lg bg-card p-2.5 ring-1 transition ${active ? "ring-brand" : "ring-line"}`}>
             <button type="button" className="w-full text-left" aria-current={active ? "date" : undefined} onClick={() => setSelected(k)}>
               <span className="block text-[11px] font-medium uppercase leading-4 text-steel">{format(d, "EEE d", { locale: ptBR })}</span>
               <span className={`mt-1 line-clamp-2 min-h-8 break-words text-sm font-medium leading-snug [overflow-wrap:anywhere] ${b?.done ? "text-steel line-through" : ""}`}>{b?.title ?? <span className="text-steel">Sem treino</span>}</span>
             </button>
-            {b && <button type="button" className="mt-1 flex h-11 w-full items-center gap-1.5 rounded-md text-xs text-steel" onClick={() => chipAction(k, b)} aria-label={`${b.done ? "Desmarcar" : "Concluir"} ${b.title}`}><Tick on={b.done} />{confirming === k ? "Confirmar sem séries?" : b.done ? "Concluído" : "Concluir"}</button>}
+            {b && <button type="button" className="mt-1 flex h-11 w-full min-w-0 items-center gap-1.5 rounded-md text-xs text-steel" onClick={() => chipAction(k, b)} aria-label={confirming === k ? `Confirmar ${b.title} sem séries registradas` : `${b.done ? "Desmarcar" : "Concluir"} ${b.title}`}><Tick on={b.done} /><span className="min-w-0 truncate">{confirming === k ? "Confirmar?" : b.done ? "Concluído" : "Concluir"}</span></button>}
           </div>); })}
       </div>
       {hasWorkoutToday && <div className="mb-1 flex justify-end"><Button variant="ghost" size="sm" onClick={() => setShowPlan(false)}><ChevronUp /> Recolher</Button></div>}
