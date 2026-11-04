@@ -11,7 +11,7 @@ import { progressKinds as kinds, progressPayload, progressValueError, type Progr
 import { useProgressEntries } from "@/lib/use-progress-entries";
 
 /** Registration of progress entries, living in the module that owns each kind (Progresso is read-only). */
-export function ProgressRecorder({ kinds: allowed, title, id }: { kinds: ProgressKind[]; title: string; id?: string }) {
+export function ProgressRecorder({ kinds: allowed, title, id, hint }: { kinds: ProgressKind[]; title: string; id?: string; hint?: string }) {
   const { user } = useAuth();
   const { entries, saved, removed, saveWeight } = useProgressEntries();
   const [kind, setKind] = useState<ProgressKind>(allowed[0] ?? "weight");
@@ -50,7 +50,7 @@ export function ProgressRecorder({ kinds: allowed, title, id }: { kinds: Progres
   return (
     <section id={id} className="mt-6 scroll-mt-24 rounded-lg bg-card p-5 ring-1 ring-line">
       <h2 className="font-display text-lg font-semibold">{title}</h2>
-      <p className="mt-1 text-xs text-steel">Aparece também nos gráficos do Progresso.</p>
+      <p className="mt-1 text-xs text-steel">{hint ?? "Aparece também nos gráficos do Progresso."}</p>
       <form noValidate onSubmit={addEntry} className="mt-4 grid gap-3 sm:grid-cols-2">
         {allowed.length > 1 && <label className="block text-sm font-medium">Tipo<select value={kind} onChange={(e) => { setKind(e.target.value as ProgressKind); setDetail(""); setValueError(null); }} className={field}>{allowed.map((k) => <option key={k} value={k}>{kinds[k].label}</option>)}</select></label>}
         <label className="block text-sm font-medium">Data<input type="date" value={date} onChange={(e) => setDate(e.target.value)} className={field} /></label>

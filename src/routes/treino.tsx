@@ -57,7 +57,7 @@ function Treino() {
       </section>
       <ModuleGate id="treino">
         {tab === "semana" ? <WeekTab onExplore={() => navigate({ search: { aba: "explorar" } })} /> : <TrainingExplore />}
-        <ProgressRecorder id="registros-treino" title="Carga e corrida" kinds={["strength", "run"]} />
+        <ProgressRecorder id="registros-treino" title="Carga e corrida" kinds={["strength", "run"]} hint="Registro avulso de carga máxima ou distância, usado nos gráficos do Progresso. Para montar um treino, use o plano da semana acima." />
       </ModuleGate>
     </main>
   );
@@ -81,6 +81,8 @@ function WeekTab({ onExplore }: { onExplore: () => void }) {
   const selBlock = blockOf(selected);
   const selWorkout = selBlock?.workoutId ? workouts.find((w) => w.id === selBlock.workoutId) : undefined;
   const firstUse = models.length === 0 && !week.some((d) => blockOf(toDateKey(d)));
+  const dayLabel = format(new Date(`${selected}T12:00:00`), "EEEE, d 'de' MMMM", { locale: ptBR });
+  const dayTitle = dayLabel.charAt(0).toUpperCase() + dayLabel.slice(1);
 
   const assign = (dateKey: string, workout: Workout) => schedule(dateKey, workout);
   const createAndAssign = (dateKey: string, name: string) => {
@@ -108,16 +110,25 @@ function WeekTab({ onExplore }: { onExplore: () => void }) {
         <EmptyState icon={Dumbbell} title="Sua primeira ficha começa aqui" context="Monte o treino da semana e acompanhe carga e volume a cada sessão." actionLabel="Montar ficha" onAction={onExplore} secondaryLabel="Ver exercícios disponíveis" onSecondary={onExplore} />
       ) : (
       <section className="mt-5 rounded-lg bg-card p-5 ring-1 ring-line">
-        <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="font-display text-xl font-semibold">{selBlock ? format(new Date(`${selected}T12:00:00`), "EEEE, d 'de' MMMM", { locale: ptBR }) : "Nada agendado neste dia"}</h2>{selBlock && <Button variant="ghost" size="sm" onClick={() => removeBlock(selected, selBlock.id)}><X /> Tirar do dia</Button>}</div>
+        <div className="flex flex-wrap items-start justify-between gap-2">
+          <div className="min-w-0">
+            <h2 className="font-display text-xl font-semibold">{dayTitle}</h2>
+            {!selBlock && <p className="mt-1 text-sm text-steel">Nenhum treino agendado. Escolha um dos seus treinos ou crie um novo.</p>}
+          </div>
+          {selBlock && <Button variant="ghost" size="sm" onClick={() => removeBlock(selected, selBlock.id)}><X /> Tirar do dia</Button>}
+        </div>
         {!selBlock ? <>
-          <h3 className="mt-4 text-sm font-semibold">Exemplos disponíveis para agendar</h3>
-          <p className="mt-2 border-l-2 border-brand bg-mist px-3 py-2 text-sm text-steel">Toque num treino pra colocá-lo na sua semana.</p>
-          <div className="mt-3 grid gap-3 sm:grid-cols-2">{examples.map((w) => <article key={w.id} className="rounded-lg border border-line p-3"><p className="text-[11px] uppercase text-steel">Exemplo</p><h4 className="mt-1 text-sm font-semibold">{w.name}</h4><p className="mt-1 text-xs text-steel">{w.focus} · {w.exercises.length} exercícios</p><Button variant="outline" size="sm" className="mt-3" onClick={() => { assign(selected, w); toast.success("Treino adicionado ao dia"); }}><CalendarPlus /> Agendar</Button></article>)}</div>
-          <h3 className="mt-5 text-sm font-semibold">Meus treinos</h3>
+          <h3 className="mt-4 text-sm font-semibold">Meus treinos</h3>
+          {models.length === 0 && <p className="mt-1 text-sm text-steel">Você ainda não tem treinos salvos.</p>}
           <AssignForm workouts={models} onPick={(w) => { assign(selected, w); toast.success("Treino adicionado ao dia"); }} onCreate={(n) => createAndAssign(selected, n)} />
+          {examples.length > 0 && <details className="mt-5 border-t border-line pt-4">
+            <summary className="cursor-pointer text-sm font-medium text-steel">Ver exemplos prontos</summary>
+            <p className="mt-2 text-xs text-steel">Sugestões genéricas — dá para ajustar tudo depois.</p>
+            <div className="mt-3 grid gap-3 sm:grid-cols-2">{examples.map((w) => <article key={w.id} className="rounded-lg border border-line p-3"><h4 className="text-sm font-semibold">{w.name}</h4><p className="mt-1 text-xs text-steel">{w.focus} · {w.exercises.length} exercícios</p><Button variant="outline" size="sm" className="mt-3" onClick={() => { assign(selected, w); toast.success("Treino adicionado ao dia"); }}><CalendarPlus /> Agendar</Button></article>)}</div>
+          </details>}
         </>
           : !selWorkout ? <div className="mt-3"><p className="text-sm text-steel">Escolha um treino abaixo pra registrar seus exercícios.</p><AssignForm workouts={models} onPick={(w) => assign(selected, w)} onCreate={(n) => createAndAssign(selected, n)} /></div>
-          : <WorkoutDetail workout={selWorkout} dateKey={selected} />}
+          : <WorkoutDetail key={`${selWorkout.id}-${selected}`} workout={selWorkout} dateKey={selected} />}
       </section>
       )}
       {!firstUse && <p className="mt-4 text-xs leading-5 text-steel">Quer ideias? <button type="button" onClick={onExplore} className="underline">Explorar e criar</button>.</p>}
@@ -130,12 +141,17 @@ function AssignForm({ workouts, onPick, onCreate }: { workouts: Workout[]; onPic
   const [name, setName] = useState("");
   return <div className="mt-3 space-y-3">
     {workouts.length > 0 && <div className="flex flex-wrap gap-2">{workouts.map((w) => <Button key={w.id} variant="outline" size="sm" onClick={() => onPick(w)}>{w.name}</Button>)}</div>}
-    <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); if (name.trim()) { onCreate(name.trim()); setName(""); } }}><input value={name} onChange={(e) => setName(e.target.value)} placeholder="Novo treino (ex.: Peito e tríceps, Corrida, Full body)" className="h-10 min-w-0 flex-1 rounded-md bg-background px-3 text-sm ring-1 ring-line" /><Button><Plus /> Criar</Button></form>
+    <form className="space-y-2" onSubmit={(e) => { e.preventDefault(); if (name.trim()) { onCreate(name.trim()); setName(""); } }}>
+      <label className="block text-xs font-medium text-steel">Título do novo treino
+        <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex.: Superiores, Peito e tríceps, Corrida" className="mt-1 h-10 w-full min-w-0 rounded-md bg-background px-3 text-sm text-ink ring-1 ring-line" />
+      </label>
+      <Button className="w-full sm:w-auto"><Plus /> Criar treino</Button>
+    </form>
   </div>;
 }
 
 function WorkoutDetail({ workout, dateKey }: { workout: Workout; dateKey: string }) {
-  const { updateWorkout, plan, replaceDays } = useTaskBio();
+  const { updateWorkout, workouts, plan, replaceDays } = useTaskBio();
   const [open, setOpen] = useState<string | null>(null);
   const [form, setForm] = useState({ name: "", sets: "3", reps: "10", duration: "30", load: "", mode: "reps" as "reps" | "tempo" });
   const timed = form.mode === "tempo";
@@ -145,6 +161,7 @@ function WorkoutDetail({ workout, dateKey }: { workout: Workout; dateKey: string
     replaceDays({ [dateKey]: (plan[dateKey] ?? []).map((b) => (b.id === block.id ? { ...b, time } : b)) });
   };
   return <div className="mt-3 pb-32">
+    <WorkoutHeading workout={workout} dateKey={dateKey} />
     <RestTimer />
     <SessionProgress workout={workout} date={dateKey} />
     {block && (
@@ -156,19 +173,78 @@ function WorkoutDetail({ workout, dateKey }: { workout: Workout; dateKey: string
     )}
     {workout.exercises.length === 0 && <p className="py-4 text-sm text-steel">Adicione os exercícios deste treino.</p>}
     <ul className="divide-y divide-line">{workout.exercises.map((ex) => <ExerciseRow key={ex.id} ex={ex} workout={workout} dateKey={dateKey} open={open === ex.id} onToggle={() => setOpen(open === ex.id ? null : ex.id)} />)}</ul>
-    <form className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-[minmax(0,1fr)_82px_60px_70px_76px_auto]" onSubmit={(e) => { e.preventDefault(); if (!form.name.trim()) return; if (timed && !Number(form.duration)) return; const ex: Exercise = { id: `e-${Date.now()}`, name: form.name.trim(), sets: Math.max(1, Number(form.sets) || 3), reps: timed ? 0 : Math.max(1, Number(form.reps) || 10), ...(timed ? { durationSec: Math.max(1, Math.round(Number(form.duration))) } : {}), restSec: 60, muscles: "", howTo: "", doneSets: 0, ...(Number(form.load.replace(",", ".")) ? { loadKg: Number(form.load.replace(",", ".")) } : {}) }; updateWorkout({ ...workout, exercises: [...workout.exercises, ex] }); setForm({ ...form, name: "", load: "" }); }}>
-      <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Exercício" className="col-span-2 h-10 min-w-0 rounded-md bg-background px-3 text-sm ring-1 ring-line sm:col-span-1" />
-      <select value={form.mode} onChange={(e) => setForm({ ...form, mode: e.target.value as "reps" | "tempo" })} aria-label="Medida do exercício" className="h-10 min-w-0 rounded-md bg-background px-2 text-sm ring-1 ring-line">
-        <option value="reps">Reps</option>
-        <option value="tempo">Tempo</option>
-      </select>
-      <input value={form.sets} onChange={(e) => setForm({ ...form, sets: e.target.value })} aria-label="Séries" inputMode="numeric" className="h-10 min-w-0 rounded-md bg-background px-2 text-sm ring-1 ring-line" />
-      {timed
-        ? <input value={form.duration} onChange={(e) => setForm({ ...form, duration: e.target.value })} aria-label="Tempo em segundos" placeholder="s" inputMode="numeric" className="h-10 min-w-0 rounded-md bg-background px-2 text-sm ring-1 ring-line" />
-        : <input value={form.reps} onChange={(e) => setForm({ ...form, reps: e.target.value })} aria-label="Repetições" inputMode="numeric" className="h-10 min-w-0 rounded-md bg-background px-2 text-sm ring-1 ring-line" />}
-      <input value={form.load} onChange={(e) => setForm({ ...form, load: e.target.value })} placeholder="kg" aria-label="Carga em kg" inputMode="decimal" className="h-10 min-w-0 rounded-md bg-background px-2 text-sm ring-1 ring-line" />
-      <Button size="icon" aria-label="Adicionar exercício"><Plus /></Button>
+    <form className="mt-4 rounded-lg bg-background p-3 ring-1 ring-line" onSubmit={(e) => { e.preventDefault(); if (!form.name.trim()) return; if (timed && !Number(form.duration)) return; const ex: Exercise = { id: `e-${Date.now()}`, name: form.name.trim(), sets: Math.max(1, Number(form.sets) || 3), reps: timed ? 0 : Math.max(1, Number(form.reps) || 10), ...(timed ? { durationSec: Math.max(1, Math.round(Number(form.duration))) } : {}), restSec: 60, muscles: "", howTo: "", doneSets: 0, ...(Number(form.load.replace(",", ".")) ? { loadKg: Number(form.load.replace(",", ".")) } : {}) }; updateWorkout({ ...workout, exercises: [...workout.exercises, ex] }); syncEmptyModel(workout, [...workout.exercises, ex], workouts, updateWorkout); setForm({ ...form, name: "", load: "" }); }}>
+      <p className="text-sm font-medium">Adicionar exercício</p>
+      <label className="mt-3 block text-xs font-medium text-steel">Exercício
+        <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Ex.: Supino reto" className="mt-1 h-10 w-full min-w-0 rounded-md bg-card px-3 text-sm text-ink ring-1 ring-line" />
+      </label>
+      <div className="mt-2 grid grid-cols-3 gap-2">
+        <label className="text-xs font-medium text-steel">Séries
+          <input value={form.sets} onChange={(e) => setForm({ ...form, sets: e.target.value })} inputMode="numeric" className="mt-1 h-10 w-full min-w-0 rounded-md bg-card px-2 text-sm text-ink ring-1 ring-line" />
+        </label>
+        {timed
+          ? <label className="text-xs font-medium text-steel">Tempo (s)
+              <input value={form.duration} onChange={(e) => setForm({ ...form, duration: e.target.value })} inputMode="numeric" className="mt-1 h-10 w-full min-w-0 rounded-md bg-card px-2 text-sm text-ink ring-1 ring-line" />
+            </label>
+          : <label className="text-xs font-medium text-steel">Repetições
+              <input value={form.reps} onChange={(e) => setForm({ ...form, reps: e.target.value })} inputMode="numeric" className="mt-1 h-10 w-full min-w-0 rounded-md bg-card px-2 text-sm text-ink ring-1 ring-line" />
+            </label>}
+        <label className="text-xs font-medium text-steel">Carga (kg)
+          <input value={form.load} onChange={(e) => setForm({ ...form, load: e.target.value })} placeholder="opcional" inputMode="decimal" className="mt-1 h-10 w-full min-w-0 rounded-md bg-card px-2 text-sm text-ink ring-1 ring-line" />
+        </label>
+      </div>
+      <div className="mt-2 flex items-end gap-2">
+        <label className="flex-1 text-xs font-medium text-steel">Medida
+          <select value={form.mode} onChange={(e) => setForm({ ...form, mode: e.target.value as "reps" | "tempo" })} className="mt-1 h-10 w-full min-w-0 rounded-md bg-card px-2 text-sm text-ink ring-1 ring-line">
+            <option value="reps">Repetições</option>
+            <option value="tempo">Tempo</option>
+          </select>
+        </label>
+        <Button className="h-10"><Plus /> Adicionar</Button>
+      </div>
     </form>
+  </div>;
+}
+
+/**
+ * Um treino criado direto na semana nasce como cópia vazia do modelo. Enquanto
+ * o modelo estiver vazio, os exercícios adicionados na cópia também o preenchem,
+ * senão "Meus treinos" guardaria um treino sem exercício para reutilizar.
+ */
+function syncEmptyModel(workout: Workout, exercises: Exercise[], workouts: Workout[], updateWorkout: (w: Workout) => void) {
+  if (!workout.templateId) return;
+  const model = workouts.find((w) => w.id === workout.templateId);
+  if (model && model.exercises.length === 0) updateWorkout({ ...model, exercises: exercises.map((e) => ({ ...e })) });
+}
+
+/** Título e foco do treino: o nome define o cartão do dia e o modelo em "Meus treinos". */function WorkoutHeading({ workout, dateKey }: { workout: Workout; dateKey: string }) {
+  const { updateWorkout, workouts, plan, replaceDays } = useTaskBio();
+  const [name, setName] = useState(workout.name);
+  const [focus, setFocus] = useState(workout.focus);
+  useEffect(() => { setName(workout.name); setFocus(workout.focus); }, [workout.id]);
+  const save = () => {
+    const cleanName = name.trim() || workout.name;
+    const cleanFocus = focus.trim();
+    if (cleanName === workout.name && cleanFocus === workout.focus) return;
+    updateWorkout({ ...workout, name: cleanName, focus: cleanFocus });
+    // O título é a identidade do treino: mantém o modelo em "Meus treinos" com o mesmo nome.
+    if (workout.templateId) {
+      const model = workouts.find((w) => w.id === workout.templateId);
+      if (model) updateWorkout({ ...model, name: cleanName, focus: cleanFocus });
+    }
+    const blocks = plan[dateKey] ?? [];
+    if (blocks.some((b) => b.kind === "treino" && b.workoutId === workout.id && b.title !== cleanName)) {
+      replaceDays({ [dateKey]: blocks.map((b) => (b.kind === "treino" && b.workoutId === workout.id ? { ...b, title: cleanName } : b)) });
+    }
+    toast.success("Treino atualizado");
+  };
+  return <div className="space-y-2">
+    <label className="block text-xs font-medium text-steel">Título do treino
+      <input value={name} onChange={(e) => setName(e.target.value)} onBlur={save} onKeyDown={(e) => { if (e.key === "Enter") e.currentTarget.blur(); }} placeholder="Ex.: Superiores" className="mt-1 h-11 w-full min-w-0 rounded-md bg-background px-3 font-display text-lg font-semibold text-ink ring-1 ring-line" />
+    </label>
+    <label className="block text-xs font-medium text-steel">Foco (opcional)
+      <input value={focus} onChange={(e) => setFocus(e.target.value)} onBlur={save} onKeyDown={(e) => { if (e.key === "Enter") e.currentTarget.blur(); }} placeholder="Ex.: peito, ombro e tríceps" className="mt-1 h-9 w-full min-w-0 rounded-md bg-background px-3 text-sm text-ink ring-1 ring-line" />
+    </label>
   </div>;
 }
 
