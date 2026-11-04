@@ -48,27 +48,32 @@ export function useScheduleWorkout() {
   };
 }
 
-function ScheduleButton({ workout, label = "Agendar na semana" }: { workout: Workout; label?: string }) {
+function DayPicker({ workout, onScheduled }: { workout: Workout; onScheduled?: (day: Date) => void }) {
   const schedule = useScheduleWorkout();
-  const [open, setOpen] = useState(false);
   const [pending, setPending] = useState<{ dateKey: string; day: Date } | null>(null);
-  const today = new Date();
-  const days = Array.from({ length: 7 }, (_, i) => addDays(today, i));
+  const days = Array.from({ length: 7 }, (_, i) => addDays(new Date(), i));
   const run = (dateKey: string, day: Date, replace: boolean) => {
     const result = schedule(dateKey, workout, { replace });
     if (!result.ok) { setPending({ dateKey, day }); return; }
     setPending(null);
-    setOpen(false);
     toast.success(`${workout.name} agendado para ${format(day, "EEEE, d/MM", { locale: ptBR })} às ${result.block.time}`);
+    onScheduled?.(day);
   };
-  return <div className="mt-3">
-    <Button type="button" variant="outline" size="sm" className="w-full" onClick={() => { setOpen((v) => !v); setPending(null); }}><CalendarPlus /> {label}</Button>
-    {open && <div className="mt-2 flex flex-wrap gap-1.5">{days.map((d) => <Button key={toDateKey(d)} type="button" size="sm" variant="secondary" className="h-8 capitalize" onClick={() => run(toDateKey(d), d, false)}>{i18nDay(d)}</Button>)}</div>}
+  return <>
+    <div className="flex flex-wrap gap-1.5">{days.map((d) => <Button key={toDateKey(d)} type="button" size="sm" variant="secondary" className="h-8 capitalize" onClick={() => run(toDateKey(d), d, false)}>{i18nDay(d)}</Button>)}</div>
     {pending && <div role="alertdialog" aria-label="Substituir treino" className="mt-2 rounded-lg bg-gold/10 p-3 text-xs ring-1 ring-gold/30">
       <p className="font-medium capitalize">{format(pending.day, "EEEE, d/MM", { locale: ptBR })} já tem um treino.</p>
       <p className="mt-1 text-steel">Substituir apaga o treino atual e o progresso das séries desse dia.</p>
       <div className="mt-2 flex gap-2"><Button size="sm" onClick={() => run(pending.dateKey, pending.day, true)}>Substituir</Button><Button size="sm" variant="ghost" onClick={() => setPending(null)}>Cancelar</Button></div>
     </div>}
+  </>;
+}
+
+function ScheduleButton({ workout, label = "Agendar na semana" }: { workout: Workout; label?: string }) {
+  const [open, setOpen] = useState(false);
+  return <div className="mt-3">
+    <Button type="button" variant="outline" size="sm" className="w-full" onClick={() => setOpen((v) => !v)}><CalendarPlus /> {label}</Button>
+    {open && <div className="mt-2"><DayPicker workout={workout} onScheduled={() => setOpen(false)} /></div>}
   </div>;
 }
 const i18nDay = (d: Date) => format(d, "EEE d", { locale: ptBR });
@@ -78,10 +83,12 @@ export function TrainingExplore() {
   const workouts = allWorkouts.filter((w) => !w.templateId);
   const [selected, setSelected] = useEntryState<string | null>("training:model", workouts[0]?.id ?? null);
   const navigate = useNavigate();
-  const schedule = useScheduleWorkout();
   const [openExample, setOpenExample] = useEntryState<string | null>("training:example", null);
+  const [pendingExample, setPendingExample] = useState<{ model: Workout; exampleId: string } | null>(null);
+  const [pendingBlank, setPendingBlank] = useState<Workout | null>(null);
   const workout = workouts.find((w) => w.id === selected);
-  const examples = preferredModality ? getWorkoutExamples(preferredModality, goal) : [];
+  const modality = preferredModality ?? "Musculação";
+  const examples = getWorkoutExamples(modality, goal);
   const objectiveEffect = goal ? OBJECTIVE_EFFECTS[goal] : null;
 
   useEffect(() => {
@@ -98,9 +105,10 @@ export function TrainingExplore() {
     };
     addWorkout(created);
     setSelected(created.id);
+    setPendingExample({ model: created, exampleId: example.id });
   };
 
-  /** One editor only: a blank workout is created here and opened in /treino. */
+  /** Creates the model and asks for a day: the editor only exists on a scheduled day. */
   const createBlank = () => {
     const created: Workout = {
       id: `w-${Date.now()}`,
@@ -111,13 +119,8 @@ export function TrainingExplore() {
     };
     addWorkout(created);
     setSelected(created.id);
-    const result = schedule(toDateKey(new Date()), created);
-    if (!result.ok) {
-      toast.success("Treino criado em Meus treinos. Hoje já tem um treino agendado.");
-      return;
-    }
-    toast.success("Treino criado e agendado para hoje. Adicione os exercícios.");
-    void navigate({ to: "/treino" });
+    setPendingBlank(created);
+    toast.success("Treino criado em Meus treinos. Escolha um dia para adicionar os exercícios.");
   };
 
   return (
@@ -195,18 +198,10 @@ export function TrainingExplore() {
                 <div>
                   <h2 className="font-display text-lg font-semibold tracking-tight">Exemplos para você explorar</h2>
                   <p className="mt-1 text-xs leading-5 text-steel">
-                    {preferredModality
-                      ? `${preferredModality}${goal ? ` para o objetivo “${goal}”` : ""}.`
-                      : "Selecione uma modalidade para começar."}
+                    {modality}{goal ? ` para o objetivo “${goal}”` : ""}.{!preferredModality ? " Escolha outra modalidade ao lado para ver mais." : ""}
                   </p>
                 </div>
               </div>
-
-              {!preferredModality ? (
-                <p className="mt-5 rounded-lg border border-dashed border-line p-4 text-sm text-steel">As opções aparecerão aqui depois que você escolher uma modalidade.</p>
-              ) : !goal ? (
-                <p className="mt-5 rounded-lg border border-dashed border-line p-4 text-sm text-steel">Agora escolha seu objetivo — ou explore os exemplos gerais abaixo.</p>
-              ) : null}
 
               {examples.length > 0 && (
                 <div className="mt-4 space-y-3">
@@ -237,7 +232,12 @@ export function TrainingExplore() {
                                 </li>
                               ))}
                             </ol>
-                            <div className="mt-4 grid gap-2 sm:grid-cols-2"><Button onClick={() => saveExample(example)}><Plus /> Usar este modelo</Button><ScheduleButton workout={example} /></div>
+                            {pendingExample?.exampleId === example.id ? <div className="mt-4 rounded-lg bg-mist p-3">
+                              <p className="text-sm font-medium">Modelo salvo em “Meus treinos”. Agendar para qual dia?</p>
+                              <p className="mt-1 text-xs text-steel">O editor abre no dia escolhido, pronto para adicionar exercícios.</p>
+                              <div className="mt-2"><DayPicker workout={pendingExample.model} onScheduled={(day) => { setPendingExample(null); void navigate({ to: "/treino", search: { dia: toDateKey(day) } }); }} /></div>
+                              <Button type="button" size="sm" variant="ghost" className="mt-2" onClick={() => setPendingExample(null)}>Agora não</Button>
+                            </div> : <div className="mt-4 grid gap-2 sm:grid-cols-2"><Button onClick={() => saveExample(example)}><Plus /> Usar este modelo</Button><ScheduleButton workout={example} /></div>}
                           </div>
                         )}
                       </article>
@@ -323,6 +323,11 @@ export function TrainingExplore() {
                     ))}
                   </div>
                   <ScheduleButton workout={workout} />
+                  {pendingBlank?.id === workout.id && <div className="mt-2 rounded-lg bg-mist p-3">
+                    <p className="text-sm font-medium">Agendar para qual dia?</p>
+                    <p className="mt-1 text-xs text-steel">Os exercícios são adicionados no dia escolhido.</p>
+                    <div className="mt-2"><DayPicker workout={workout} onScheduled={(day) => { setPendingBlank(null); void navigate({ to: "/treino", search: { dia: toDateKey(day) } }); }} /></div>
+                  </div>}
                   <p className="mt-2 text-[11px] text-steel">Este é um modelo. A cópia agendada pode ser ajustada em “Minha semana” sem alterar o modelo.</p>
                 </div>
               )}
