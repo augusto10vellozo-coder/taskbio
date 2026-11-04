@@ -61,7 +61,7 @@ function Treino() {
       </section>
       <ModuleGate id="treino">
         {tab === "semana" ? <WeekTab initialDay={dia} onExplore={() => navigate({ search: { aba: "explorar" } })} /> : <TrainingExplore />}
-        <ProgressRecorder id="registros-treino" title="Carga e corrida" kinds={["strength", "run"]} hint="Registro avulso de carga máxima ou distância, usado nos gráficos do Progresso. Para montar um treino, use o plano da semana acima." />
+        <ProgressRecorder id="registros-treino" title="Carga e corrida" kinds={["strength", "run"]} collapsible hint="Registro avulso de carga ou tempo de corrida, usado nos gráficos do Progresso. Para montar um treino, use a aba Minha semana." />
       </ModuleGate>
     </main>
   );
@@ -89,6 +89,11 @@ function WeekTab({ initialDay, onExplore }: { initialDay?: string | undefined; o
   const dayLabel = format(new Date(`${selected}T12:00:00`), "EEEE, d 'de' MMMM", { locale: ptBR });
   const dayTitle = dayLabel.charAt(0).toUpperCase() + dayLabel.slice(1);
 
+  /** Troca a semana mantendo o mesmo dia da semana, para o painel não apontar para a semana anterior. */
+  const shiftWeek = (days: number) => {
+    setRef(addDays(ref, days));
+    setSelected((current) => toDateKey(addDays(fromDateKey(current ?? toDateKey(new Date())), days)));
+  };
   const assign = (dateKey: string, workout: Workout, options?: { replace?: boolean }) => {
     const result = schedule(dateKey, workout, options);
     if (result.ok) toast.success(`Treino adicionado ao dia às ${result.block.time}`);
@@ -110,7 +115,7 @@ function WeekTab({ initialDay, onExplore }: { initialDay?: string | undefined; o
       {firstUse ? (
         <EmptyState icon={Dumbbell} title="Sua primeira ficha começa aqui" context="Monte o treino da semana e acompanhe carga e volume a cada sessão." actionLabel="Montar ficha" onAction={onExplore} />
       ) : (<>
-      <div className="mb-3 flex items-center justify-between"><Button variant="ghost" size="icon" aria-label="Semana anterior" onClick={() => setRef(addDays(ref, -7))}><ChevronLeft /></Button><span className="text-sm font-medium">{format(week[0]!, "d MMM", { locale: ptBR })} – {format(week[6]!, "d MMM", { locale: ptBR })}</span><Button variant="ghost" size="icon" aria-label="Próxima semana" onClick={() => setRef(addDays(ref, 7))}><ChevronRight /></Button></div>
+      <div className="mb-3 flex items-center justify-between"><Button variant="ghost" size="icon" aria-label="Semana anterior" onClick={() => shiftWeek(-7)}><ChevronLeft /></Button><span className="text-sm font-medium">{format(week[0]!, "d MMM", { locale: ptBR })} – {format(week[6]!, "d MMM", { locale: ptBR })}</span><Button variant="ghost" size="icon" aria-label="Próxima semana" onClick={() => shiftWeek(7)}><ChevronRight /></Button></div>
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-7">
         {week.map((d) => { const k = toDateKey(d); const b = blockOf(k); const active = k === selected; return (
           <div key={k} className={`rounded-lg bg-card p-3 ring-1 transition ${active ? "ring-brand" : "ring-line"}`}>
