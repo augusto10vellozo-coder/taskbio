@@ -11,13 +11,14 @@ import { DayTimeline } from "@/components/DayTimeline";
 import { Button } from "@/components/ui/button";
 
 /** Home: greeting, day navigation, compact status strip, progress bar and the day timeline. */
-export function TodayPanel() {
+export function TodayPanel({ initialDay }: { initialDay?: string | undefined }) {
   const { ready } = useTaskBio();
   const personal = usePersonalStatus();
   const [now, setNow] = useState<Date | null>(null);
   const [adding, setAdding] = useState(false);
   const [day, setDay] = useState<string | null>(null);
   useEffect(() => setNow(new Date()), []);
+  useEffect(() => { if (initialDay) setDay(initialDay); }, [initialDay]);
   const today = now ? toDateKey(now) : "";
   const dateKey = day ?? today;
   const isToday = dateKey === today;

@@ -8,6 +8,8 @@ import { TodayPanel } from "@/components/TodayPanel";
 import { QuickRegisterSheet } from "@/components/QuickRegisterSheet";
 
 export const Route = createFileRoute("/")({
+  validateSearch: (search: Record<string, unknown>): { dia?: string } =>
+    typeof search["dia"] === "string" && /^\d{4}-\d{2}-\d{2}$/.test(search["dia"]) ? { dia: search["dia"] as string } : {},
   head: () => ({
     meta: [
       { title: "Início — TaskBio" },
@@ -29,6 +31,7 @@ export const Route = createFileRoute("/")({
 });
 
 function Inicio() {
+  const { dia } = Route.useSearch();
   const { user, loading } = useAuth();
   const [installPrompt, setInstallPrompt] = useState<Event | null>(null);
   const [installed, setInstalled] = useState(false);
@@ -47,7 +50,7 @@ function Inicio() {
   return (
     <>
       <main className="mx-auto max-w-6xl px-5 pb-20 sm:px-8">
-        <TodayPanel />
+        <TodayPanel initialDay={dia} />
         {!user && <div className="mt-6 flex flex-wrap items-center justify-between gap-2 border-t border-line pt-4 text-sm text-steel"><span>Entre para salvar sua agenda e acessá-la em outros dispositivos.</span><Button asChild variant="outline" size="sm"><Link to="/auth">Entrar e sincronizar <ArrowRight /></Link></Button></div>}
         {installPrompt && !installed && <div className="mt-4 flex items-center justify-between gap-3 border-t border-line pt-4 text-sm"><span>Instalar TaskBio neste aparelho</span><Button variant="outline" size="sm" onClick={async () => { const prompt = installPrompt as Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: string }> }; await prompt.prompt(); await prompt.userChoice; setInstallPrompt(null); }}>Instalar</Button></div>}
       </main>

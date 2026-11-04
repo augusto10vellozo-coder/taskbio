@@ -1,6 +1,6 @@
 import { ModuleHeader } from "@/components/ModuleHeader";
 import { WeeklyGoals } from "@/components/WeeklyGoals";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useEntryState } from "@/lib/navigation-context";
 import { addDays, format, isSameDay } from "date-fns";
@@ -12,7 +12,6 @@ import { useTaskBio } from "@/lib/trilha-store";
 import { formatFullDate, getWeekDates, toDateKey } from "@/lib/calendar-utils";
 import { exampleWeek } from "@/lib/example-week";
 import { toast } from "sonner";
-import { DayTimeline } from "@/components/DayTimeline";
 import { WeekActions } from "@/components/WeekActions";
 import { AgendaGreeting } from "@/components/AgendaDayOverview";
 import { mealSummary } from "@/lib/meal-summary";
@@ -46,14 +45,14 @@ function Agenda() {
     if (saved) { sessionStorage.removeItem("trilha:selected-date"); return new Date(`${saved}T12:00:00`); }
     return new Date();
   });
-  const [adding, setAdding] = useState(false);
+  const navigate = useNavigate();
+  /** Abre o dia escolhido na home, que é onde a linha do dia vive. */
+  const openDay = (key: string) => { void navigate({ to: "/", search: { dia: key } }); };
   const mainRef = useRef<HTMLElement>(null);
   const dateHeaderRef = useRef<HTMLDivElement>(null);
   const dateStartRef = useRef<HTMLDivElement>(null);
   const [compactDates, setCompactDates] = useState(false);
   const [exampleDismissed, setExampleDismissed] = useState(false);
-  const scrollToTimeline = () => requestAnimationFrame(() => document.getElementById("linha-do-dia")?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth", block: "start" }));
-  const planDay = () => { setAdding(true); scrollToTimeline(); };
   useEffect(() => {
     setExampleDismissed(localStorage.getItem("trilha:example-dismissed") === "yes");
   }, []);
@@ -131,20 +130,9 @@ function Agenda() {
           {!isSameDay(selectedDate, new Date()) && <Button variant="ghost" size="sm" className="h-8 shrink-0 px-2 text-steel" onClick={() => setSelectedDate(new Date())}>Hoje</Button>}
           <WeekActions empty={emptyWeek} onDuplicateDay={duplicateDay} onDuplicateWeek={duplicateWeek} onClear={() => { clearWeek(weekKeys); toast.success("Semana limpa."); }} />
         </div>
-        <div className="mt-1 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-1">
+          <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-1">
           <Button variant="ghost" size="icon" className="size-10 text-steel" onClick={() => setSelectedDate((date) => addDays(date, -7))} aria-label="Semana anterior" title="Semana anterior"><ChevronLeft /></Button>
-          <div className="grid grid-cols-7 gap-1.5 sm:gap-2">
-            {weekDates.map((date) => {
-              const active = isSameDay(date, selectedDate);
-              const today = isSameDay(date, new Date());
-              const count = (plan[toDateKey(date)] ?? []).length;
-              return <Button key={toDateKey(date)} variant={active ? "default" : "outline"} onClick={() => setSelectedDate(date)} className="h-auto min-w-0 flex-col gap-0.5 px-1.5 py-2 sm:px-3" aria-pressed={active}>
-                <span className="text-[10px] font-medium uppercase sm:text-xs">{["dom", "seg", "ter", "qua", "qui", "sex", "sáb"][date.getDay()]}</span>
-                <span className="font-display text-lg font-semibold sm:text-xl">{format(date, "dd")}</span>
-                <span className="hidden text-[10px] font-normal sm:block">{format(date, "MMM", { locale: ptBR }).replace(".", "")}{today ? " · hoje" : count ? ` · ${count}` : ""}</span>
-              </Button>;
-            })}
-          </div>
+          <p className="text-center text-sm font-medium">{format(weekDates[0]!, "d MMM", { locale: ptBR })} – {format(weekDates[6]!, "d MMM", { locale: ptBR })}</p>
           <Button variant="ghost" size="icon" className="size-10 text-steel" onClick={() => setSelectedDate((date) => addDays(date, 7))} aria-label="Próxima semana" title="Próxima semana"><ChevronRight /></Button>
         </div>
       </section>
@@ -154,16 +142,27 @@ function Agenda() {
       </div>
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
-        <DayTimeline
-          dateKey={dateKey}
-          adding={adding}
-          onAddingChange={setAdding}
-          id="linha-do-dia"
-          starterPrompt={false}
-          className="scroll-mt-[var(--agenda-scroll-offset,24rem)] lg:col-span-7"
-        />
+        <section aria-label="Semana" className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-2 lg:col-span-8 lg:mx-0 lg:grid lg:grid-cols-7 lg:overflow-visible">
+          {weekDates.map((date) => {
+            const key = toDateKey(date);
+            const blocks = [...(plan[key] ?? [])].sort((a, b) => a.time.localeCompare(b.time));
+            const done = blocks.filter((b) => b.done).length;
+            const today = isSameDay(date, new Date());
+            return <article key={key} className={`flex min-w-[190px] shrink-0 flex-col rounded-lg bg-card p-3 ring-1 lg:min-w-0 ${today ? "ring-brand" : "ring-line"}`}>
+              <button type="button" onClick={() => openDay(key)} className="text-left">
+                <span className="block text-[11px] font-medium uppercase text-steel">{format(date, "EEE", { locale: ptBR })}</span>
+                <span className="block font-display text-lg font-semibold">{format(date, "d")}</span>
+                <span className="block text-[11px] text-steel">{blocks.length ? `${done} de ${blocks.length}` : "Sem itens"}</span>
+              </button>
+              <ul className="mt-2 space-y-1">
+                {blocks.slice(0, 6).map((b) => <li key={b.id}><button type="button" onClick={() => openDay(key)} className={`w-full truncate rounded px-1.5 py-1 text-left text-[11px] ${b.done ? "bg-good/10 text-good" : "bg-mist text-steel"}`}>{b.time} {b.title}</button></li>)}
+                {blocks.length > 6 && <li className="px-1.5 text-[11px] text-steel">+{blocks.length - 6} itens</li>}
+              </ul>
+            </article>;
+          })}
+        </section>
 
-        <aside className="space-y-5 lg:col-span-5">
+        <aside className="space-y-5 lg:col-span-4">
           {compras.length > 0 && <div className="glass-strong rounded-2xl p-5 ring-1 ring-line">
             <div className="flex items-center justify-between">
               <h2 className="font-display text-lg font-semibold tracking-tight">Compras da semana</h2>
@@ -180,7 +179,7 @@ function Agenda() {
           </div>}
         </aside>
       </div>
-      <Button size="icon" className="fixed right-5 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-40 size-14 rounded-full border border-brand sm:right-8 xl:bottom-6" aria-label="Adicionar bloco" title="Adicionar bloco" onClick={planDay}><Plus className="size-6" /></Button>
+      <Button size="icon" className="fixed right-5 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-40 size-14 rounded-full border border-brand sm:right-8 xl:bottom-6" aria-label="Adicionar bloco" title="Adicionar bloco" onClick={() => openDay(dateKey)}><Plus className="size-6" /></Button>
       <WeeklyGoals />
     </main>
   );
