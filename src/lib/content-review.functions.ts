@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { consumeAiQuota } from "./ai-quota.server";
+import { consumeAiQuota, refundAiQuota } from "./ai-quota.server";
 
 const reviewInput = z.object({
   criteria: z.string().trim().min(20).max(4000),
@@ -25,6 +25,7 @@ export const reviewPublicContent = createServerFn({ method: "POST" })
 
     const { evaluatePublicContent } = await import("./content-review.server");
     const evaluation = await evaluatePublicContent(data.pages, data.criteria);
+    if (evaluation.failed) await refundAiQuota(context.supabase, "content_review");
     if (!evaluation.data) return evaluation;
 
     const scores = evaluation.data.scores;

@@ -33,7 +33,7 @@ function parse(text: string): { readable: boolean; workouts: ImportedWorkout[] }
 
 export async function interpretPlanText(text: string) {
   const apiKey = process.env["OPENAI_API_KEY"];
-  if (!apiKey) return { data: null, error: "A leitura automática ainda não está configurada." };
+  if (!apiKey) return { data: null, error: "A leitura automática ainda não está configurada.", failed: true };
   try {
     const result = streamText({
       model: openaiModel(apiKey),
@@ -43,8 +43,8 @@ export async function interpretPlanText(text: string) {
       ...openaiGuard(),
     });
     const out = await result.text;
-    if (!out.trim()) return { data: null, error: "A leitura terminou sem conteúdo. Tente novamente." };
-    return { data: parse(out), error: null };
+    if (!out.trim()) return { data: null, error: "A leitura terminou sem conteúdo. Tente novamente.", failed: true };
+    return { data: parse(out), error: null, failed: false };
   } catch (error) {
     const detail = error as { statusCode?: number; responseBody?: string; message?: string };
     console.error("[plan-import] failed:", detail.statusCode ?? "?", detail.message ?? "sem mensagem", (detail.responseBody ?? "").slice(0, 400));
@@ -54,6 +54,6 @@ export async function interpretPlanText(text: string) {
       message = body?.message ?? body?.error?.message ?? message;
     } catch { /* mantém mensagem padrão */ }
     if (error instanceof SyntaxError) message = "Não foi possível entender o plano deste arquivo. Cadastre os treinos manualmente.";
-    return { data: null, error: message };
+    return { data: null, error: message, failed: true };
   }
 }

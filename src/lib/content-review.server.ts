@@ -35,7 +35,7 @@ function parseReview(text: string): ContentReviewResult {
 
 export async function evaluatePublicContent(pages: ReviewPage[], criteria: string) {
   const apiKey = process.env["OPENAI_API_KEY"];
-  if (!apiKey) return { data: null, error: "A avaliação por IA ainda não está configurada." };
+  if (!apiKey) return { data: null, error: "A avaliação por IA ainda não está configurada.", failed: true };
 
   try {
     const result = streamText({
@@ -46,8 +46,8 @@ export async function evaluatePublicContent(pages: ReviewPage[], criteria: strin
       ...openaiGuard(),
     });
     const text = await result.text;
-    if (!text.trim()) return { data: null, error: "A avaliação terminou sem conteúdo. Tente novamente mais tarde." };
-    return { data: parseReview(text), error: null };
+    if (!text.trim()) return { data: null, error: "A avaliação terminou sem conteúdo. Tente novamente mais tarde.", failed: true };
+    return { data: parseReview(text), error: null, failed: false };
   } catch (error) {
     const detail = error as { statusCode?: number; responseBody?: string; message?: string };
     let message = "Não foi possível concluir a avaliação agora.";
@@ -55,6 +55,6 @@ export async function evaluatePublicContent(pages: ReviewPage[], criteria: strin
       const body = detail.responseBody ? JSON.parse(detail.responseBody) as { message?: string; error?: { message?: string } } : null;
       message = body?.message ?? body?.error?.message ?? detail.message ?? message;
     } catch { message = detail.message ?? message; }
-    return { data: null, error: message };
+    return { data: null, error: message, failed: true };
   }
 }

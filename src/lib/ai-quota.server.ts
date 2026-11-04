@@ -63,3 +63,17 @@ export async function consumeAiQuota(
     return { allowed: true };
   }
 }
+
+/**
+ * Gives the unit back when the paid call produced nothing because of a
+ * technical failure. Unreadable answers still count: the model was called and
+ * the cost was real.
+ */
+export async function refundAiQuota(client: unknown, feature: AiFeature): Promise<void> {
+  try {
+    const { error } = await (client as QuotaClient).rpc("refund_ai_quota", { _feature: feature });
+    if (error) console.error("[ai-quota] refund unavailable:", error.message);
+  } catch (cause) {
+    console.error("[ai-quota] refund failed:", cause);
+  }
+}

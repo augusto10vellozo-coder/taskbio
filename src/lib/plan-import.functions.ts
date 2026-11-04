@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { consumeAiQuota } from "./ai-quota.server";
+import { consumeAiQuota, refundAiQuota } from "./ai-quota.server";
 
 export const interpretWorkoutPlan = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -10,5 +10,7 @@ export const interpretWorkoutPlan = createServerFn({ method: "POST" })
     const quota = await consumeAiQuota(context.supabase, "plan_import", data.text.length);
     if (!quota.allowed) return { data: null, error: quota.error };
     const { interpretPlanText } = await import("./plan-import.server");
-    return interpretPlanText(data.text);
+    const result = await interpretPlanText(data.text);
+    if (result.failed) await refundAiQuota(context.supabase, "plan_import");
+    return result;
   });

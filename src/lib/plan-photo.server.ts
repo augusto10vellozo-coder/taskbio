@@ -13,12 +13,12 @@ export async function interpretPhotoText(text: string, apiKey: string) {
       ...openaiGuard(),
     });
     const data = await result.output;
-    return { data, error: data.readable && data.workouts.some(w => w.exercises.length) ? null : PHOTO_UNREADABLE };
+    return { data, error: data.readable && data.workouts.some(w => w.exercises.length) ? null : PHOTO_UNREADABLE, failed: false };
   } catch (error) {
     const detail = error as { responseBody?: string; statusCode?: number; message?: string };
     console.error("[plan-photo] failed:", detail.statusCode ?? "?", detail.message ?? "sem mensagem", (detail.responseBody ?? "").slice(0, 400));
     let message = "Não foi possível ler sua planilha agora. Tente novamente mais tarde.";
     try { const body = JSON.parse(detail.responseBody ?? "{}"); message = body.message ?? body.error?.message ?? message; } catch { /* safe default */ }
-    return { data: null, error: message };
+    return { data: null, error: message, failed: true };
   }
 }
