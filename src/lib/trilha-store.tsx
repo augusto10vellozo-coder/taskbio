@@ -320,7 +320,12 @@ export function TaskBioProvider({ children }: { children: ReactNode }) {
         if (!workout || !ex) return s;
         const updated = changeSeries(ex, date, index, patch);
         const next = { ...workout, exercises: workout.exercises.map(e => e.id === exerciseId ? updated : e) };
-        return { ...s, workouts: s.workouts.map(w => w.id === workoutId ? next : w), exerciseLog: patch.done === true ? recordExerciseSets(s.exerciseLog, next, exerciseId, updated.doneSets, date) : s.exerciseLog };
+        // Mantém o histórico alinhado com as séries concluídas e com a carga digitada em cada uma.
+        const logId = `sets:${workoutId}:${exerciseId}:${date}`;
+        const exerciseLog = updated.doneSets > 0
+          ? recordExerciseSets(s.exerciseLog ?? [], next, exerciseId, updated.doneSets, date)
+          : (s.exerciseLog ?? []).filter((e) => e.id !== logId);
+        return { ...s, workouts: s.workouts.map(w => w.id === workoutId ? next : w), exerciseLog };
       }),
       setDoneSets: (workoutId, exerciseId, doneSets, date) =>
         setState((s) => ({

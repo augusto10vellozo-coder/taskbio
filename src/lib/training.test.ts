@@ -72,4 +72,19 @@ describe("training", () => {
     const hist = [{ completedAt: "2026-10-05T08:00:00" }, { completedAt: "2026-10-08T08:00:00" }] as never;
     expect(goalProgress(g, hist, {}, plan)).toBe(2);
   });
+  it("registra a maior carga digitada nas séries concluídas", () => {
+    const ex = workout.exercises[1];
+    if (!ex) throw new Error("Missing fixture");
+    const withSets = { ...workout, exercises: workout.exercises.map((e) => e.id === ex.id ? { ...e, seriesByDate: { "2026-10-12": [{ done: true, loadKg: 42.5 }, { done: true, loadKg: 45 }, { done: false }] } } : e) };
+    const log = recordExerciseSets([], withSets, ex.id, 2, "2026-10-12");
+    expect(log[0]?.loadKg).toBe(45);
+  });
+  it("registra exercício por tempo e o mantém no histórico", () => {
+    const base = workout.exercises[0];
+    if (!base) throw new Error("Missing fixture");
+    const timed = { ...workout, exercises: [{ ...base, id: "plank", name: "Prancha", sets: 3, reps: 0, durationSec: 30, seriesByDate: { "2026-10-12": [{ done: true }] } }] };
+    const log = recordExerciseSets([], timed, "plank", 1, "2026-10-12");
+    expect(log[0]).toMatchObject({ reps: 0, durationSec: 30 });
+    expect(exerciseHistory("Prancha", log, [])[0]).toMatchObject({ date: "2026-10-12", durationSec: 30 });
+  });
 });

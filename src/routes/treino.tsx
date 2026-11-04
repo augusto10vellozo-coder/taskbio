@@ -159,6 +159,7 @@ function WorkoutDetail({ workout, dateKey }: { workout: Workout; dateKey: string
   const { updateWorkout, workouts, plan, replaceDays } = useTaskBio();
   const [open, setOpen] = useState<string | null>(null);
   const [form, setForm] = useState({ name: "", sets: "3", reps: "10", duration: "30", load: "", mode: "reps" as "reps" | "tempo" });
+  const [formError, setFormError] = useState<string | null>(null);
   const timed = form.mode === "tempo";
   const block = (plan[dateKey] ?? []).find((b) => b.kind === "treino" && b.workoutId === workout.id);
   const changeTime = (time: string) => {
@@ -178,7 +179,7 @@ function WorkoutDetail({ workout, dateKey }: { workout: Workout; dateKey: string
     )}
     {workout.exercises.length === 0 && <p className="py-4 text-sm text-steel">Adicione os exercícios deste treino.</p>}
     <ul className="divide-y divide-line">{workout.exercises.map((ex) => <ExerciseRow key={ex.id} ex={ex} workout={workout} dateKey={dateKey} open={open === ex.id} onToggle={() => setOpen(open === ex.id ? null : ex.id)} />)}</ul>
-    <form className="mt-4 rounded-lg bg-background p-3 ring-1 ring-line" onSubmit={(e) => { e.preventDefault(); if (!form.name.trim()) return; if (timed && !Number(form.duration)) return; const ex: Exercise = { id: `e-${Date.now()}`, name: form.name.trim(), sets: Math.max(1, Number(form.sets) || 3), reps: timed ? 0 : Math.max(1, Number(form.reps) || 10), ...(timed ? { durationSec: Math.max(1, Math.round(Number(form.duration))) } : {}), restSec: 60, muscles: "", howTo: "", doneSets: 0, ...(Number(form.load.replace(",", ".")) ? { loadKg: Number(form.load.replace(",", ".")) } : {}) }; updateWorkout({ ...workout, exercises: [...workout.exercises, ex] }); syncEmptyModel(workout, [...workout.exercises, ex], workouts, updateWorkout); setForm({ ...form, name: "", load: "" }); }}>
+    <form className="mt-4 rounded-lg bg-background p-3 ring-1 ring-line" onSubmit={(e) => { e.preventDefault(); if (!form.name.trim()) { setFormError("Dê um nome ao exercício."); return; } if (timed && !(Number(form.duration) > 0)) { setFormError("Informe o tempo em segundos."); return; } setFormError(null); const ex: Exercise = { id: `e-${Date.now()}`, name: form.name.trim(), sets: Math.max(1, Number(form.sets) || 3), reps: timed ? 0 : Math.max(1, Number(form.reps) || 10), ...(timed ? { durationSec: Math.max(1, Math.round(Number(form.duration))) } : {}), restSec: 60, muscles: "", howTo: "", doneSets: 0, ...(Number(form.load.replace(",", ".")) ? { loadKg: Number(form.load.replace(",", ".")) } : {}) }; updateWorkout({ ...workout, exercises: [...workout.exercises, ex] }); syncEmptyModel(workout, [...workout.exercises, ex], workouts, updateWorkout); setForm({ ...form, name: "", load: "" }); }}>
       <p className="text-sm font-medium">Adicionar exercício</p>
       <label className="mt-3 block text-xs font-medium text-steel">Exercício
         <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Ex.: Supino reto" className="mt-1 h-10 w-full min-w-0 rounded-md bg-card px-3 text-sm text-ink ring-1 ring-line" />
@@ -207,6 +208,7 @@ function WorkoutDetail({ workout, dateKey }: { workout: Workout; dateKey: string
         </label>
         <Button className="h-10"><Plus /> Adicionar</Button>
       </div>
+      {formError && <p role="alert" className="mt-2 text-xs text-destructive">{formError}</p>}
     </form>
   </div>;
 }
@@ -254,13 +256,11 @@ function syncEmptyModel(workout: Workout, exercises: Exercise[], workouts: Worko
 }
 
 function ExerciseRow({ ex, workout, dateKey, open, onToggle }: { ex: Exercise; workout: Workout; dateKey: string; open: boolean; onToggle: () => void }) {
-  const { exerciseLog, workoutHistory, workouts, plan, addExerciseLog, updateWorkout } = useTaskBio();
+  const { exerciseLog, workoutHistory, workouts, plan, updateWorkout } = useTaskBio();
   const history = useMemo(() => exerciseHistory(ex.name, exerciseLog ?? [], workoutHistory, workouts, plan, dateKey), [ex.name, exerciseLog, workoutHistory, workouts, plan, dateKey]);
   const last = history[0];
   const delta = progression(history);
-  const [load, setLoad] = useState("");
-  const [reps, setReps] = useState("");
-  useEffect(() => { if (open) { setLoad(String(last?.loadKg ?? ex.loadKg ?? "")); setReps(String(last?.reps ?? ex.reps)); } }, [open]);
+  const timed = Boolean(ex.durationSec && ex.durationSec > 0);
   const chart = useMemo(() => weeklyMax(history, new Date()), [history]);
   const seriesDone = exerciseSeries(ex, dateKey).filter(s => s.done).length;
 
@@ -272,15 +272,13 @@ function ExerciseRow({ ex, workout, dateKey, open, onToggle }: { ex: Exercise; w
     </button>
     {open && <div className="mt-3 rounded-md bg-background p-3 ring-1 ring-line">
       <WorkoutSeries workout={workout} ex={ex} date={dateKey} />
-      <form className="flex flex-wrap items-end gap-2" onSubmit={(e) => { e.preventDefault(); const l = Number(load.replace(",", ".")); const r = Number(reps); const byTime = Boolean(ex.durationSec && ex.durationSec > 0); if (!(l >= 0) || (!byTime && !(r > 0))) return; addExerciseLog({ date: dateKey, exercise: ex.name, loadKg: l, reps: byTime ? 0 : r, sets: ex.sets, workoutId: workout.id }); updateWorkout({ ...workout, exercises: workout.exercises.map((x) => x.id === ex.id ? { ...x, loadKg: l } : x) }); toast.success(last && l > last.loadKg ? `Progressão +${kg(l - last.loadKg)}!` : "Registro salvo"); onToggle(); }}>
-        <label className="text-xs text-steel">Carga (kg)<input autoFocus inputMode="decimal" value={load} onChange={(e) => setLoad(e.target.value)} className="mt-1 block h-10 w-24 rounded-md bg-card px-2 text-sm text-ink ring-1 ring-line" /></label>
-        <label className="text-xs text-steel">Repetições<input inputMode="numeric" value={reps} onChange={(e) => setReps(e.target.value)} className="mt-1 block h-10 w-24 rounded-md bg-card px-2 text-sm text-ink ring-1 ring-line" /></label>
-        <Button>Salvar registro</Button>
-        <Button type="button" variant="ghost" size="icon" aria-label={`Remover ${ex.name} do treino`} onClick={() => { if (window.confirm(`Remover ${ex.name} deste treino? O histórico é mantido.`)) updateWorkout({ ...workout, exercises: workout.exercises.filter((x) => x.id !== ex.id) }); }}><Trash2 /></Button>
-      </form>
-      <p className="mt-3 text-xs font-medium text-steel">Carga máxima por semana · últimas 8 semanas</p>
-      <div className="h-32"><ResponsiveContainer width="100%" height="100%"><LineChart data={chart}><XAxis dataKey="week" tick={{ fontSize: 10 }} /><YAxis tick={{ fontSize: 10 }} width={30} domain={["auto", "auto"]} /><Tooltip formatter={(v) => [`${v} kg`, "Carga"]} /><Line type="monotone" dataKey="kg" stroke="var(--color-brand, currentColor)" strokeWidth={2} connectNulls /></LineChart></ResponsiveContainer></div>
+      <p className="text-xs text-steel">{timed ? "Toque no número para marcar cada série concluída." : "Toque no número para marcar a série e registre a carga usada nela."}</p>
+      {!timed && <>
+        <p className="mt-3 text-xs font-medium text-steel">Carga máxima por semana · últimas 8 semanas</p>
+        <div className="h-32"><ResponsiveContainer width="100%" height="100%"><LineChart data={chart}><XAxis dataKey="week" tick={{ fontSize: 10 }} /><YAxis tick={{ fontSize: 10 }} width={30} domain={["auto", "auto"]} /><Tooltip formatter={(v) => [`${v} kg`, "Carga"]} /><Line type="monotone" dataKey="kg" stroke="var(--color-brand, currentColor)" strokeWidth={2} connectNulls /></LineChart></ResponsiveContainer></div>
+      </>}
       {history.length > 0 && <ul className="mt-2 max-h-28 overflow-y-auto text-xs text-steel">{history.slice(0, 10).map((h, i) => <li key={i}>{h.date.split("-").reverse().join("/")} — {exercisePerformance(h)}</li>)}</ul>}
+      <div className="mt-3 flex justify-end"><Button type="button" variant="ghost" size="sm" onClick={() => { if (window.confirm(`Remover ${ex.name} deste treino? O histórico é mantido.`)) updateWorkout({ ...workout, exercises: workout.exercises.filter((x) => x.id !== ex.id) }); }}><Trash2 /> Remover do treino</Button></div>
     </div>}
   </li>;
 }

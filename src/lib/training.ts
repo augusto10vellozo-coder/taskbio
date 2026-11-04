@@ -7,6 +7,8 @@ export type ExerciseLogEntry = {
   exercise: string;
   loadKg: number;
   reps: number;
+  /** Tempo por série, para exercícios medidos por tempo (prancha, isometria). */
+  durationSec?: number;
   sets: number;
   workoutId?: string;
 };
@@ -18,14 +20,15 @@ export const exerciseKey = (name: string) =>
 /** Every record of one exercise (manual logs + finished workout sessions), newest first. */
 export function exerciseHistory(name: string, log: ExerciseLogEntry[], history: WorkoutHistoryEntry[], workouts: Workout[] = [], plan: Plan = {}, throughDate?: string) {
   const k = exerciseKey(name);
-  const fromLog = log.filter((e) => exerciseKey(e.exercise) === k && e.reps > 0).map((e) => ({ date: e.date, loadKg: e.loadKg || 0, reps: e.reps }));
+  const executed = (entry: { reps: number; durationSec?: number | undefined }) => entry.reps > 0 || (entry.durationSec ?? 0) > 0;
+  const fromLog = log.filter((e) => exerciseKey(e.exercise) === k && executed(e)).map((e) => ({ date: e.date, loadKg: e.loadKg || 0, reps: e.reps, ...(e.durationSec ? { durationSec: e.durationSec } : {}) }));
   const fromSessions = history.flatMap((h) => h.exercises.filter((e) => exerciseKey(e.name) === k && e.reps > 0).map((e) => ({ date: h.completedAt.slice(0, 10), loadKg: e.loadKg || 0, reps: e.reps })));
   // Recover legacy partial sessions only where a set was actually marked.
   // A configured/imported exercise alone is not evidence of execution.
   const fromPartial = Object.entries(plan).flatMap(([date, blocks]) => blocks.flatMap((b) => {
     if (b.kind !== "treino" || !b.workoutId) return [];
     const workout = workouts.find((w) => w.id === b.workoutId);
-    return (workout?.exercises ?? []).filter((e) => exerciseKey(e.name) === k && (e.seriesByDate ? e.seriesByDate[date]?.some(s => s.done) : e.doneSets > 0) && e.reps > 0).map((e) => ({ date, loadKg: e.loadKg || 0, reps: e.reps }));
+    return (workout?.exercises ?? []).filter((e) => exerciseKey(e.name) === k && (e.seriesByDate ? e.seriesByDate[date]?.some(s => s.done) : e.doneSets > 0) && executed(e)).map((e) => ({ date, loadKg: e.loadKg || 0, reps: e.reps, ...(e.durationSec ? { durationSec: e.durationSec } : {}) }));
   }));
   const seen = new Set<string>();
   return [...fromLog, ...fromSessions, ...fromPartial]
@@ -37,9 +40,18 @@ export function exerciseHistory(name: string, log: ExerciseLogEntry[], history: 
 /** Persist a partial exercise independently of completion of its workout. */
 export function recordExerciseSets(log: ExerciseLogEntry[], workout: Workout, exerciseId: string, doneSets: number, date: string) {
   const ex = workout.exercises.find((e) => e.id === exerciseId);
-  if (!ex || doneSets <= 0 || (ex.reps <= 0 && !(ex.durationSec && ex.durationSec > 0))) return log;
+  const durationSec = ex?.durationSec && ex.durationSec > 0 ? ex.durationSec : undefined;
+  const timed = Boolean(durationSec);
+  if (!ex || doneSets <= 0 || (ex.reps <= 0 && !timed)) return log;
+  // A carga registrada é a maior entre as séries concluídas; a do exercício é só o padrão.
+  const doneLoads = (ex.seriesByDate?.[date] ?? [])
+    .filter((s) => s.done && typeof s.loadKg === "number" && s.loadKg > 0)
+    .map((s) => s.loadKg as number);
+  const loadKg = doneLoads.length ? Math.max(...doneLoads) : ex.loadKg || 0;
   const id = `sets:${workout.id}:${exerciseId}:${date}`;
-  return [{ id, date, exercise: ex.name, loadKg: ex.loadKg || 0, reps: ex.reps, sets: doneSets, workoutId: workout.id }, ...log.filter((e) => e.id !== id)].slice(0, 2000);
+  const entry: ExerciseLogEntry = { id, date, exercise: ex.name, loadKg, reps: timed ? 0 : ex.reps, sets: doneSets, workoutId: workout.id };
+  if (durationSec) entry.durationSec = durationSec;
+  return [entry, ...log.filter((e) => e.id !== id)].slice(0, 2000);
 }
 
 export const exercisePerformance = (entry: { loadKg: number; reps: number; durationSec?: number | null }) =>
