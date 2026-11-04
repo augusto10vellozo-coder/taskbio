@@ -17,7 +17,7 @@ export function AgendaGreeting({ showBack = true, date }: { showBack?: boolean; 
   return (
     <div className="pt-5">
       <div className="flex items-center gap-2">{showBack && <HierarchicalBackButton />}<h1 className="min-w-0 text-[22px] font-semibold text-ink">{greeting(new Date().getHours())}{name ? `, ${name}` : ""}</h1></div>
-      <p className="mt-0.5 text-[13px] capitalize text-steel">{formatFullDate(date ?? new Date())}</p>
+      <p className="mt-0.5 text-[13px] text-steel first-letter:uppercase">{formatFullDate(date ?? new Date())}</p>
     </div>
   );
 }

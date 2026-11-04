@@ -126,13 +126,13 @@ function Agenda() {
       <section className={compactDates ? "hidden" : undefined}>
         <div className="flex items-center gap-1">
           <Button asChild variant="ghost" size="icon" className="size-8 shrink-0 text-steel" aria-label="Ver mês" title="Ver mês"><Link to="/calendario"><CalendarDays className="size-4" /></Link></Button>
-          <p className="min-w-0 flex-1 truncate text-sm capitalize text-steel">{formatFullDate(selectedDate)}</p>
+          <p className="min-w-0 flex-1 truncate text-sm text-steel first-letter:uppercase">{formatFullDate(selectedDate)}</p>
           {!isSameDay(selectedDate, new Date()) && <Button variant="ghost" size="sm" className="h-8 shrink-0 px-2 text-steel" onClick={() => setSelectedDate(new Date())}>Hoje</Button>}
           <WeekActions empty={emptyWeek} onDuplicateDay={duplicateDay} onDuplicateWeek={duplicateWeek} onClear={() => { clearWeek(weekKeys); toast.success("Semana limpa."); }} />
         </div>
-          <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-1">
+          <div className="flex items-center justify-center gap-3">
           <Button variant="ghost" size="icon" className="size-10 text-steel" onClick={() => setSelectedDate((date) => addDays(date, -7))} aria-label="Semana anterior" title="Semana anterior"><ChevronLeft /></Button>
-          <p className="text-center text-sm font-medium">{format(weekDates[0]!, "d MMM", { locale: ptBR })} – {format(weekDates[6]!, "d MMM", { locale: ptBR })}</p>
+          <p className="text-sm font-medium">{format(weekDates[0]!, "d MMM", { locale: ptBR })} – {format(weekDates[6]!, "d MMM", { locale: ptBR })}</p>
           <Button variant="ghost" size="icon" className="size-10 text-steel" onClick={() => setSelectedDate((date) => addDays(date, 7))} aria-label="Próxima semana" title="Próxima semana"><ChevronRight /></Button>
         </div>
       </section>
@@ -141,14 +141,14 @@ function Agenda() {
         {emptyWeek && !exampleDismissed && <div className="mt-5 border-y border-line py-5"><p className="font-display font-semibold">Comece com uma semana de exemplo</p><p className="mt-1 text-sm text-steel">Refeições, atividades e descanso editáveis. Você pode limpar a semana a qualquer momento.</p><div className="mt-3 flex flex-wrap gap-2"><Button size="sm" onClick={fillExample}>Preencher com semana de exemplo</Button><Button size="sm" variant="ghost" onClick={() => { localStorage.setItem("trilha:example-dismissed", "yes"); setExampleDismissed(true); }}>Agora não</Button></div></div>}
       </div>
 
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
-        <section aria-label="Semana" className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-2 lg:col-span-8 lg:mx-0 lg:grid lg:grid-cols-7 lg:overflow-visible">
+      <div className="space-y-5">
+        <section aria-label="Semana" className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-2 lg:mx-0 lg:grid lg:grid-cols-7 lg:gap-3 lg:overflow-visible">
           {weekDates.map((date) => {
             const key = toDateKey(date);
             const blocks = [...(plan[key] ?? [])].sort((a, b) => a.time.localeCompare(b.time));
             const done = blocks.filter((b) => b.done).length;
             const today = isSameDay(date, new Date());
-            return <article key={key} className={`flex min-w-[190px] shrink-0 flex-col rounded-lg bg-card p-3 ring-1 lg:min-w-0 ${today ? "ring-brand" : "ring-line"}`}>
+            return <article key={key} className={`flex min-w-[170px] shrink-0 flex-col rounded-lg bg-card p-3 ring-1 lg:min-w-0 ${today ? "ring-brand" : "ring-line"}`}>
               <button type="button" onClick={() => openDay(key)} className="text-left">
                 <span className="block text-[11px] font-medium uppercase text-steel">{format(date, "EEE", { locale: ptBR })}</span>
                 <span className="block font-display text-lg font-semibold">{format(date, "d")}</span>
@@ -162,7 +162,7 @@ function Agenda() {
           })}
         </section>
 
-        <aside className="space-y-5 lg:col-span-4">
+        <aside className="grid gap-5 sm:grid-cols-2">
           {compras.length > 0 && <div className="glass-strong rounded-2xl p-5 ring-1 ring-line">
             <div className="flex items-center justify-between">
               <h2 className="font-display text-lg font-semibold tracking-tight">Compras da semana</h2>
