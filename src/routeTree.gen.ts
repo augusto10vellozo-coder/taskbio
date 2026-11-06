@@ -46,8 +46,6 @@ import { Route as ConviteIndexRouteImport } from './routes/convite.index'
 import { Route as ConviteUsernameRouteImport } from './routes/convite.$username'
 import { Route as ApiPublicPushRemindersRouteImport } from './routes/api/public/push-reminders'
 import { Route as ApiPublicWeeklySummaryRouteImport } from './routes/api/public/weekly-summary'
-import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
-import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -234,16 +232,6 @@ const ApiPublicWeeklySummaryRoute = ApiPublicWeeklySummaryRouteImport.update({
   path: '/api/public/weekly-summary',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
-  id: '/lovable/email/auth/preview',
-  path: '/lovable/email/auth/preview',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LovableEmailAuthWebhookRoute = LovableEmailAuthWebhookRouteImport.update({
-  id: '/lovable/email/auth/webhook',
-  path: '/lovable/email/auth/webhook',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -282,8 +270,6 @@ export interface FileRoutesByFullPath {
   '/convite/': typeof ConviteIndexRoute
   '/api/public/push-reminders': typeof ApiPublicPushRemindersRoute
   '/api/public/weekly-summary': typeof ApiPublicWeeklySummaryRoute
-  '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
-  '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -322,8 +308,6 @@ export interface FileRoutesByTo {
   '/convite': typeof ConviteIndexRoute
   '/api/public/push-reminders': typeof ApiPublicPushRemindersRoute
   '/api/public/weekly-summary': typeof ApiPublicWeeklySummaryRoute
-  '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
-  '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -364,8 +348,6 @@ export interface FileRoutesById {
   '/convite/': typeof ConviteIndexRoute
   '/api/public/push-reminders': typeof ApiPublicPushRemindersRoute
   '/api/public/weekly-summary': typeof ApiPublicWeeklySummaryRoute
-  '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
-  '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -406,8 +388,6 @@ export interface FileRouteTypes {
     | '/convite/'
     | '/api/public/push-reminders'
     | '/api/public/weekly-summary'
-    | '/lovable/email/auth/preview'
-    | '/lovable/email/auth/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -446,8 +426,6 @@ export interface FileRouteTypes {
     | '/convite'
     | '/api/public/push-reminders'
     | '/api/public/weekly-summary'
-    | '/lovable/email/auth/preview'
-    | '/lovable/email/auth/webhook'
   id:
     | '__root__'
     | '/'
@@ -487,8 +465,6 @@ export interface FileRouteTypes {
     | '/convite/'
     | '/api/public/push-reminders'
     | '/api/public/weekly-summary'
-    | '/lovable/email/auth/preview'
-    | '/lovable/email/auth/webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -526,8 +502,6 @@ export interface RootRouteChildren {
   ConviteIndexRoute: typeof ConviteIndexRoute
   ApiPublicPushRemindersRoute: typeof ApiPublicPushRemindersRoute
   ApiPublicWeeklySummaryRoute: typeof ApiPublicWeeklySummaryRoute
-  LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
-  LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -791,20 +765,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicWeeklySummaryRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/lovable/email/auth/preview': {
-      id: '/lovable/email/auth/preview'
-      path: '/lovable/email/auth/preview'
-      fullPath: '/lovable/email/auth/preview'
-      preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/lovable/email/auth/webhook': {
-      id: '/lovable/email/auth/webhook'
-      path: '/lovable/email/auth/webhook'
-      fullPath: '/lovable/email/auth/webhook'
-      preLoaderRoute: typeof LovableEmailAuthWebhookRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
@@ -858,8 +818,6 @@ const rootRouteChildren: RootRouteChildren = {
   ConviteIndexRoute: ConviteIndexRoute,
   ApiPublicPushRemindersRoute: ApiPublicPushRemindersRoute,
   ApiPublicWeeklySummaryRoute: ApiPublicWeeklySummaryRoute,
-  LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
-  LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

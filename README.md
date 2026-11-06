@@ -463,19 +463,7 @@ Isso transforma o projeto de um simples aplicativo B2C em uma possível platafor
 
 essa é uma conversa com ideia de aplicativo, monte pra nos esse projeto
 
-This project was built with [Lovable](https://lovable.dev).
-
-**Live app**: https://taskbio.lovable.app
-
-## Build with Lovable
-
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/0c271fe2-8c53-4e87-94c0-f8fef898c0ed).
-
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
-
-## Development
+## Desenvolvimento
 
 Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
 

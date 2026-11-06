@@ -11,8 +11,10 @@ Lista de pendências do TaskBio. Ordenada por impacto. Atualize ao concluir.
       servidor e cron funcionam.
 - [x] **Cron no banco novo.** `pg_cron` e `pg_net` ativos, jobs `push-agenda-reminders` (5 min) e
       `habit-freeze-midnight` (03:00 UTC) confirmados com resposta 200 em `net._http_response`.
-- [ ] **Desligar a Lovable.** Baixar um backup novo antes e remover as URLs da Lovable do Google
-      Cloud e do Supabase. Só depois cancelar.
+- [x] **Renovação da Lovable cancelada (05/11).** Repositório sincronizado no GitHub, deploy e banco
+      independentes. Rotas, integração de auth, storage de preview e dependências mortas removidas.
+      Falta só: trocar o `vite.config.ts` pelo config padrão do TanStack Start e pedir ao Google a
+      remoção de `taskbio.lovable.app` se estiver indexado.
 - [x] **Token Paddle removido do código.** Era um token de cliente (`live_`), público por natureza
       e sem uso em nenhuma linha do app. A conta não é mais acessível, então não há como revogar;
       risco residual baixo (não é chave secreta e não há cobrança configurada). Só o histórico do
