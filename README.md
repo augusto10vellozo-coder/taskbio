@@ -1,475 +1,143 @@
-# Daily Flow Hub
+# TaskBio
+
+**Organização de vida saudável num app só.** Agenda, treino, alimentação, hábitos, estudos e
+saúde convivem no mesmo dia, com a mesma agenda e a mesma pontuação — em vez de cinco apps e
+uma planilha.
+
+[![App ao vivo](https://img.shields.io/badge/app%20ao%20vivo-taskbio.com.br-2ea44f?style=flat-square)](https://taskbio.com.br)
+![React](https://img.shields.io/badge/React-19-61dafb?style=flat-square&logo=react&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.8-3178c6?style=flat-square&logo=typescript&logoColor=white)
+![TanStack Start](https://img.shields.io/badge/TanStack%20Start-ff4154?style=flat-square)
+![Supabase](https://img.shields.io/badge/Supabase-Postgres%20%2B%20RLS-3ecf8e?style=flat-square&logo=supabase&logoColor=white)
+![Tailwind](https://img.shields.io/badge/Tailwind%20CSS-v4-06b6d4?style=flat-square&logo=tailwindcss&logoColor=white)
+![Vitest](https://img.shields.io/badge/Vitest-311%20tests%20passing-6e9f18?style=flat-square)
+
+<!-- Troque a linha abaixo por um print real da tela "Hoje" assim que tiver um.
+     public/og.jpg é a imagem de compartilhamento, não um screenshot de produto. -->
+![TaskBio](public/og.jpg)
+
+---
+
+## O problema
+
+Quem estuda para concurso organiza a vida em cinco lugares: um app de treino, um de alimentação,
+um caderno de hábitos, uma planilha de finanças e um cronograma de estudos em PDF. O resultado é
+que nenhum deles sabe que **estudar três blocos e treinar 25 minutos disputam o mesmo tempo e a
+mesma energia**.
+
+O TaskBio parte de uma regra simples: *um dia, uma lista*. Toda tela responde "o que eu faço
+agora?", não "qual módulo eu abro?".
+
+## O que ele faz
+
+- **Agenda/hoje** — o eixo do app: blocos datados de treino, refeição, estudo, leitura e
+  compromisso, com confirmação e desfazer atômicos.
+- **Treino** — planos com séries, repetições e descanso; importação de plano por arquivo ou foto,
+  sempre com revisão humana antes de salvar.
+- **Alimentação e compras** — refeições planejadas com totais nutricionais e lista de compras
+  gerada a partir do que está pendente.
+- **Estudos** — cronograma que gera revisões espaçadas (1/7/30 dias) e as encaixa na rotina do dia.
+- **Hábitos, metas, saúde, leitura e finanças** — módulos opcionais, ligados por um registro
+  central (`src/lib/modules.ts`) para não exigir refatoração ao adicionar um novo.
+- **PWA instalável** — notificações push agendadas, respeitando o horário de silêncio do usuário.
+
+## Stack
+
+| Camada | Escolha |
+|---|---|
+| UI | React 19, TypeScript, Tailwind CSS v4, shadcn/Radix |
+| Roteamento / SSR | TanStack Router + TanStack Start (rotas por arquivo, server functions) |
+| Dados | Supabase (Postgres, Auth, Row Level Security), Drizzle ORM |
+| Build / deploy | Vite 8, Cloudflare Workers |
+| Testes | Vitest (39 suítes em `src/lib`) |
+| Integrações | AI SDK (OpenAI) no servidor, Web Push (VAPID), Resend |
+
+## Decisões técnicas (e por quê)
+
+**1. A pontuação é decidida no servidor, não no cliente.**
+XP e sequência só podem ser gravados por funções SQL (`grant_xp` / `revoke_xp`), idempotentes por
+referência e com teto diário. Um trigger rejeita qualquer escrita direta em `xp_events`.
+*Por quê:* é um placar pessoal — se o navegador pudesse escrever nele, não valeria nada.
+
+**2. Row Level Security em tudo.**
+Cada usuário lê apenas os próprios registros, e as políticas vivem no banco, não na aplicação.
+*Por quê:* a chave pública do Supabase vai para o bundle do cliente por design. A segurança tem
+que estar no banco, não em esconder a chave.
+
+**3. Tema por tokens, sem cor literal em componente.**
+Todas as cores são variáveis CSS em `src/styles.css`, escopadas por `:root` e `.dark`. Nenhum
+componente conhece um valor hexadecimal.
+*Por quê:* trocar o tema é trocar valores de token, não caçar 200 arquivos. E um script inline
+aplica o tema salvo **antes do primeiro paint**, então não existe "flash" branco ao abrir.
+
+**4. Regras de domínio isoladas e testáveis.**
+Cálculos de refeição, hábito, finanças, nível e congelamento de sequência ficam em `src/lib`, em
+funções puras cobertas por Vitest — **311 testes em 39 suítes**.
+*Por quê:* regra de negócio que mora dentro de componente React não dá para testar nem reutilizar
+entre servidor e cliente.
+
+**5. IA só onde ela paga, e com a chave longe do navegador.**
+A importação de plano por foto usa OCR no cliente e revisão por IA no servidor; a chave da OpenAI
+nunca entra no bundle. Todo resultado passa por confirmação humana antes de virar dado.
+*Por quê:* um plano de treino inventado pela IA vira lesão. E chave no cliente vira fatura.
+
+**6. Serviço de push separado do app.**
+Lembretes saem por um service worker sem cache e um cron autenticado só no banco, com orçamento
+diário por assinatura e retentativa no mesmo dia.
+*Por quê:* app fechado ainda precisa receber lembrete, e falha de entrega não pode virar sucesso
+falso nem duplicar notificação.
+
+## Estrutura
 
-Memória atualizada
-
-Sim — e a ideia é bem mais interessante do que simplesmente criar um “aplicativo de academia”.
-
-O que você está descrevendo é praticamente um assistente pessoal de rotina + atividade física + alimentação, em que a pessoa consegue visualizar o dia inteiro em um único lugar.
-
-E eu faria uma mudança importante no conceito: em vez de vender o aplicativo como “um app de exercícios”, posicionaria como uma plataforma de organização de vida saudável.
-
-7
-
-💡 Conceito do aplicativo
-
-Imagine o usuário abrindo o aplicativo pela manhã:
-
-📅 Segunda-feira
-
-06:30 — Café da manhã
-
- Receita: ovos + pão integral + fruta
-
- Calorias estimadas
-
- Proteínas, carboidratos e gorduras
-
- Custo aproximado da refeição
-
- ☑️ Marcar como realizado
-
-08:00 — Trabalho
-
- 08:00 às 12:00
-
- Compromisso cadastrado pelo usuário
-
-12:30 — Almoço
-
- Receita
-
- Ingredientes
-
- Informações nutricionais
-
- Custo estimado
-
-18:00 — Academia
-
- Treino A
-
- Peito + Tríceps
-
- Supino
-
- 4 × 10
-
- Descanso: 60 segundos
-
- Demonstração do movimento
-
- ☑️ Exercício concluído
-
-20:00 — Jantar
-
-22:30 — Dormir
-
-E tudo isso aparece dentro da mesma agenda.
-
-🧠 O grande diferencial
-
-Eu dividiria o aplicativo em 5 grandes áreas:
-
-1. 📅 Minha Semana
-
-A tela principal.
-
-SEGUNDA
-────────────────────────
-06:30 ☕ Café da manhã
-08:00 💼 Trabalho
-12:30 🍽️ Almoço
-18:00 🏋️ Academia
-20:00 🍽️ Jantar
-22:30 😴 Dormir
-
-E a pessoa pode passar para:
-
-Terça | Quarta | Quinta | Sexta | Sábado | Domingo
-
-2. 🏋️ Atividades físicas
-
-Aqui está uma parte enorme do projeto.
-
-O usuário poderia escolher:
-
-Academia
-
- Musculação
-
- Hipertrofia
-
- Força
-
- Emagrecimento
-
- Treino funcional
-
-Corrida
-
- Caminhada
-
- Corrida
-
- Intervalado
-
- 5 km
-
- 10 km etc.
-
-Lutas
-
- Boxe
-
- Muay Thai
-
- Jiu-Jitsu
-
- Judô
-
- Karatê
-
- Kickboxing
-
- MMA
-
-Outras
-
- Pilates
-
- Yoga
-
- Cross training
-
- Ciclismo
-
- Natação
-
- Calistenia
-
- Dança
-
- Alongamento
-
- Mobilidade
-
-E o mais importante:
-
-não precisaríamos obrigatoriamente ter um treino pronto para tudo.
-
-O usuário poderia criar o próprio treino.
-
-🏋️ Exemplo de treino
-
-Treino A — Peito e Tríceps
-
-ExercícioSériesRepetiçõesSupino reto410Supino inclinado312Crucifixo312Tríceps pulley410Tríceps francês312
-
-Ao clicar em Supino reto, apareceria:
-
- imagem/animação do exercício
-
- músculos trabalhados
-
- como executar
-
- séries
-
- repetições
-
- carga
-
- descanso
-
- observações
-
-E o usuário poderia marcar:
-
-☑️ Série 1
-☑️ Série 2
-☑️ Série 3
-☑️ Série 4
-
-🍎 3. Alimentação
-
-Essa parte pode ser muito poderosa.
-
-Mas eu evitaria apresentar o sistema como “um nutricionista virtual” sem acompanhamento profissional. O aplicativo pode fornecer planejamento e informações nutricionais, mas não deve se passar por um profissional de saúde.
-
-Poderíamos ter:
-
-Café da manhã
-
-Omelete + pão integral + banana
-
- 420 kcal
-
- Proteínas: 25 g
-
- Carboidratos: 40 g
-
- Gorduras: 17 g
-
-E:
-
-💰 Custo estimado: R$ 6,50
-
-Isso cria uma combinação muito interessante:
-
-alimentação + calorias + receitas + economia
-
-🛒 E podemos ir ainda mais longe
-
-O usuário escolhe as refeições da semana.
-
-O aplicativo monta:
-
-Lista de compras
-
-🛒 COMPRAS DA SEMANA
-
-Ovos ............. 24 unidades
-Bananas .......... 12 unidades
-Arroz ............ 2 kg
-Frango ........... 2 kg
-Aveia ............ 500 g
-Leite ............ 3 litros
-
-E poderia mostrar:
-
-💰 Custo estimado da semana: R$ 187,40
-
-Isso seria um recurso muito interessante.
-
-💼 4. Rotina pessoal
-
-Aqui está uma diferença importante em relação aos aplicativos tradicionais de exercícios.
-
-O usuário não cadastra apenas exercícios.
-
-Ele cadastra a vida dele.
-
-Por exemplo:
-
-06:30  Café da manhã
-07:30  Ir para o trabalho
-08:00  Trabalho
-12:00  Almoço
-13:00  Trabalho
-17:30  Sair do trabalho
-18:30  Academia
-20:00  Jantar
-21:00  Estudar
-22:30  Dormir
-
-Também poderia adicionar:
-
- consultas
-
- reuniões
-
- estudos
-
- tarefas
-
- compromissos
-
- viagens
-
- descanso
-
- hobbies
-
-Assim o aplicativo deixa de ser apenas fitness.
-
-📊 5. Meu progresso
-
-Essa seria outra área importante.
-
-O aplicativo poderia acompanhar:
-
-Atividade
-
-Treinos realizados: 18
-Minutos ativos: 1.240
-Calorias estimadas: 8.540
-
-Academia
-
-Treinos: 12
-Volume levantado: 24.500 kg
-
-Corrida
-
-Distância: 42,8 km
-Tempo: 4h32
-
-Rotina
-
-Tarefas concluídas: 87%
-
-Alimentação
-
-Refeições registradas: 34
-
-E gráficos mostrando a evolução.
-
-🧩 E eu colocaria um sistema de "objetivos"
-
-Quando a pessoa entra no aplicativo:
-
-🎯 Qual é seu objetivo?
-
- Ganhar massa muscular
-
- Melhorar condicionamento
-
- Correr
-
- Ser mais ativo
-
- Organizar minha rotina
-
- Melhorar alimentação
-
- Criar uma rotina saudável
-
- Outro
-
-A partir disso, o aplicativo ajuda a organizar a semana.
-
-Por exemplo:
-
-Seu objetivo: começar a correr.
-
-O sistema poderia sugerir uma rotina inicial:
-
-Segunda
-🚶 Caminhada 30 min
-
-Terça
-🧘 Mobilidade
-
-Quarta
-🏃 Caminhada + corrida
-
-Quinta
-😴 Descanso
-
-Sexta
-🏃 Corrida leve
-
-Sábado
-🚶 Caminhada
-
-Domingo
-😴 Descanso
-
-Mas sempre deixando claro que são sugestões gerais, não uma prescrição médica ou profissional individualizada.
-
-💰 E aqui entra o modelo de negócio
-
-Eu gosto bastante da sua ideia de gratuito + pago.
-
-Podemos criar algo assim:
-
-🆓 Plano gratuito
-
- Agenda semanal
-
- Tarefas
-
- Compromissos
-
- Cadastro de atividades
-
- Alguns exercícios
-
- Alguns treinos
-
- Receitas básicas
-
- Registro de progresso
-
-⭐ Plano Premium
-
-Por exemplo:
-
-R$ 9,90 / mês
-
-ou
-
-R$ 79,90 / ano
-
-Poderia incluir:
-
- biblioteca completa de exercícios
-
- mais modalidades
-
- treinos completos
-
- histórico avançado
-
- gráficos
-
- planejamento alimentar
-
- receitas completas
-
- lista de compras
-
- estatísticas
-
- sincronização
-
- personalização avançada
-
-🏆 E existe uma possibilidade ainda maior
-
-Podemos futuramente criar:
-
-👨‍🏫 Plano Profissional
-
-Para:
-
- Personal trainers
-
- Academias
-
- Professores de Pilates
-
- Professores de luta
-
- Profissionais de educação física
-
- Nutricionistas, dentro do escopo profissional apropriado
-
-O profissional poderia cadastrar alunos.
-
-Por exemplo:
-
-PERSONAL TRAINER
-
-Alunos
-├── João
-├── Maria
-├── Pedro
-└── Ana
-
-E montar treinos para eles.
-
-Isso transforma o projeto de um simples aplicativo B2C em uma possível plataforma B2C + B2B.
-
-essa é uma conversa com ideia de aplicativo, monte pra nos esse projeto
-
-## Desenvolvimento
-
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
-
-```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
-npm run dev
 ```
+src/
+├── components/     # UI reutilizável (design system interno, Radix)
+├── routes/         # rotas por arquivo (TanStack) + server functions e APIs
+├── lib/            # regras de domínio puras + clientes (Supabase, IA, push)
+├── hooks/          # providers e estado de sessão/tema
+├── integrations/   # Supabase (client, server, admin)
+└── styles.css      # tokens de cor, tema claro e escuro
+supabase/           # migrations e funções SQL
+tests/              # scripts de verificação de fluxo
+```
+
+## Rodando localmente
+
+Requisitos: Node 20+ e Bun.
+
+```bash
+bun install
+cp .env.example .env      # preencha com as chaves do SEU projeto Supabase
+bun run dev
+```
+
+Segredos de servidor (`SUPABASE_SERVICE_ROLE_KEY`, `OPENAI_API_KEY`, `RESEND_API_KEY`,
+`VAPID_PRIVATE_KEY`) **nunca** vão no `.env` versionado: use o painel do Cloudflare em produção e
+`.dev.vars` localmente.
+
+```bash
+bun run build     # build de produção
+bun run lint      # ESLint
+bun run test      # Vitest
+```
+
+## Status e escopo
+
+Projeto pessoal em desenvolvimento ativo, com uso real próprio. Não é um produto comercial, não
+tem métricas de usuários publicadas e **não** faz promessa de resultado de saúde, diagnóstico ou
+prescrição. Valores ausentes ficam ausentes e marcados para revisão — o app não completa
+prescrição por conta própria.
+
+---
+
+## English
+
+**TaskBio is a personal routine and health platform for Brazilian exam candidates**, built to stop
+people from juggling five apps and a spreadsheet. The agenda is the shared axis: workouts, meals,
+study blocks, reading and appointments live in the same day, with the same score.
+
+Built with React 19, TypeScript, TanStack Start and Supabase. The parts worth reading are the
+server-side scoring (SQL functions with idempotency and daily caps, enforced by a trigger),
+Row Level Security on every table, token-based theming with no literal colors in components, and
+311 Vitest tests across 39 suites covering the domain rules. Live at
+[taskbio.com.br](https://taskbio.com.br).
