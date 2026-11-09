@@ -12,9 +12,16 @@ uma planilha.
 ![Tailwind](https://img.shields.io/badge/Tailwind%20CSS-v4-06b6d4?style=flat-square&logo=tailwindcss&logoColor=white)
 ![Vitest](https://img.shields.io/badge/Vitest-311%20tests%20passing-6e9f18?style=flat-square)
 
-<!-- Troque a linha abaixo por um print real da tela "Hoje" assim que tiver um.
-     public/og.jpg é a imagem de compartilhamento, não um screenshot de produto. -->
-![TaskBio](public/og.jpg)
+<table>
+  <tr>
+    <td align="center" valign="top"><img src="docs/screenshots/hoje.png" width="215" alt="Tela Hoje"><br><sub><b>Hoje</b> — o dia inteiro em uma lista</sub></td>
+    <td align="center" valign="top"><img src="docs/screenshots/rotina.png" width="215" alt="Tela Rotina"><br><sub><b>Rotina</b> — 9 módulos em três grupos</sub></td>
+    <td align="center" valign="top"><img src="docs/screenshots/progresso.png" width="215" alt="Tela Progresso"><br><sub><b>Progresso</b> — XP, nível e consistência</sub></td>
+  </tr>
+</table>
+
+<sub>Capturas do app real em produção. A imagem de compartilhamento (`public/og.jpg`) é uma
+arte de marca separada.</sub>
 
 ---
 
