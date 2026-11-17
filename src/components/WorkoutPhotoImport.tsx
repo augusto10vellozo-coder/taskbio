@@ -36,6 +36,7 @@ export function WorkoutPhotoImport({ onContinue, onCancel }: { onContinue: (item
     setStatus("Organizando os exercícios…");
     const result = await interpret({ data: { text } });
     if (!active.current) return;
+    if (!result) throw new Error("Não foi possível ler sua planilha agora. Tente novamente em instantes.");
     if (result.error || !result.data?.readable) throw new Error(result.error ?? PHOTO_UNREADABLE);
     const parsed = separatePhotoNotes(mergePhotoWorkouts([result.data.workouts]));
     // An uncertain OCR batch always requires explicit human confirmation.
