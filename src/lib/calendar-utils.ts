@@ -14,8 +14,7 @@ export const getWeekDates = (date: Date) => {
 
 export const getWeekKeys = (date: Date) => getWeekDates(date).map(toDateKey);
 
-export const formatFullDate = (date: Date) =>
-  format(date, "EEEE, d 'de' MMMM", { locale: ptBR });
+export const formatFullDate = (date: Date) => format(date, "EEEE, d 'de' MMMM", { locale: ptBR });
 
 export const formatWeekRange = (date: Date) => {
   const dates = getWeekDates(date);
@@ -36,7 +35,9 @@ export function normalizePlan(input: unknown, referenceDate = new Date()): Plan 
   const alreadyDated = Object.keys(source).some((key) => /^\d{4}-\d{2}-\d{2}$/.test(key));
   if (alreadyDated) {
     return Object.fromEntries(
-      Object.entries(source).filter((entry): entry is [string, Block[]] => Array.isArray(entry[1])).map(([key, blocks]) => [key, unifyMealBlocks(blocks)]),
+      Object.entries(source)
+        .filter((entry): entry is [string, Block[]] => Array.isArray(entry[1]))
+        .map(([key, blocks]) => [key, unifyMealBlocks(blocks)]),
     );
   }
 
@@ -44,7 +45,8 @@ export function normalizePlan(input: unknown, referenceDate = new Date()): Plan 
   return legacyKeys.reduce<Plan>((next, legacyKey, index) => {
     const blocks = source[legacyKey];
     const date = dates[index];
-    if (date && Array.isArray(blocks) && blocks.length > 0) next[toDateKey(date)] = unifyMealBlocks(blocks as Block[]);
+    if (date && Array.isArray(blocks) && blocks.length > 0)
+      next[toDateKey(date)] = unifyMealBlocks(blocks as Block[]);
     return next;
   }, {});
 }

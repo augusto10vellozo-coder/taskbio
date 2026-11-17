@@ -2,7 +2,13 @@ import { describe, expect, it } from "vitest";
 import { dayScore, goalProgress, goalPercent, greeting, isMilestone, streak } from "./engagement";
 import type { Block } from "./trilha-data";
 
-const b = (done: boolean): Block => ({ id: Math.random().toString(), time: "08:00", kind: "compromisso", title: "x", done });
+const b = (done: boolean): Block => ({
+  id: Math.random().toString(),
+  time: "08:00",
+  kind: "compromisso",
+  title: "x",
+  done,
+});
 
 describe("engagement", () => {
   it("greets by hour", () => {
@@ -12,7 +18,10 @@ describe("engagement", () => {
   });
   it("day score counts blocks and habits", () => {
     const plan = { "2026-10-13": [b(true), b(false)] };
-    const habits = [{ id: "h1", name: "Ler", createdAt: "" }, { id: "h2", name: "Água", createdAt: "" }];
+    const habits = [
+      { id: "h1", name: "Ler", createdAt: "" },
+      { id: "h2", name: "Água", createdAt: "" },
+    ];
     expect(dayScore(plan, habits, { "2026-10-13": ["h1"] }, "2026-10-13")).toBe(50);
   });
   it("streak counts consecutive days including habits", () => {
@@ -24,7 +33,10 @@ describe("engagement", () => {
     expect(streak({}, { "2026-10-12": ["h"] }, new Date("2026-10-13T12:00:00"))).toBe(1);
   });
   it("habits excluded from the streak do not count", () => {
-    const habits = [{ id: "a", name: "A", createdAt: "", countsForStreak: false }, { id: "b", name: "B", createdAt: "" }];
+    const habits = [
+      { id: "a", name: "A", createdAt: "", countsForStreak: false },
+      { id: "b", name: "B", createdAt: "" },
+    ];
     const today = new Date("2026-10-13T12:00:00");
     expect(streak({}, { "2026-10-13": ["a"] }, today, habits)).toBe(0);
     expect(streak({}, { "2026-10-13": ["b"] }, today, habits)).toBe(1);
@@ -34,8 +46,19 @@ describe("engagement", () => {
     expect(isMilestone(8)).toBe(false);
   });
   it("workout goals count completed workouts of the month", () => {
-    const g = { id: "g", month: "2026-10", title: "Treinar", target: 12, unit: "treinos", source: "workouts" as const, manual: 0 };
-    const h = [{ completedAt: "2026-10-02T10:00:00Z" }, { completedAt: "2026-09-30T10:00:00Z" }] as never;
+    const g = {
+      id: "g",
+      month: "2026-10",
+      title: "Treinar",
+      target: 12,
+      unit: "treinos",
+      source: "workouts" as const,
+      manual: 0,
+    };
+    const h = [
+      { completedAt: "2026-10-02T10:00:00Z" },
+      { completedAt: "2026-09-30T10:00:00Z" },
+    ] as never;
     expect(goalProgress(g, h, {})).toBe(1);
     expect(goalPercent(6, 12)).toBe(50);
     expect(goalPercent(20, 12)).toBe(100);

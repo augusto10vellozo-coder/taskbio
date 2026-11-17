@@ -34,7 +34,9 @@ export function workoutTimeFor(dateKey: string, plan: Plan, existing?: Block): s
 
 /** Troca apenas o bloco substituído e mantém a ordem por horário. */
 export function withWorkoutBlock(blocks: Block[], block: Block, replacedId?: string): Block[] {
-  return [...blocks.filter((item) => item.id !== replacedId), block].sort((a, b) => a.time.localeCompare(b.time));
+  return [...blocks.filter((item) => item.id !== replacedId), block].sort((a, b) =>
+    a.time.localeCompare(b.time),
+  );
 }
 
 const minutesOf = (time: string) => {
@@ -48,7 +50,10 @@ const minutesOf = (time: string) => {
  */
 export function largestFreeGap(blocks: Block[], dayStart = 6 * 60, dayEnd = 23 * 60): number {
   const spans = blocks
-    .map((block) => ({ start: minutesOf(block.time), end: block.endTime ? minutesOf(block.endTime) : minutesOf(block.time) }))
+    .map((block) => ({
+      start: minutesOf(block.time),
+      end: block.endTime ? minutesOf(block.endTime) : minutesOf(block.time),
+    }))
     .filter((span) => span.end >= dayStart && span.start <= dayEnd)
     .sort((a, b) => a.start - b.start);
   let best = 0;

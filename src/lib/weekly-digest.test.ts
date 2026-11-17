@@ -15,7 +15,11 @@ describe("resumo semanal", () => {
   });
   it("conta blocos, treinos, refeições e hábitos sem inventar dias", () => {
     const plan = {
-      "2026-11-02": [{ kind: "treino", done: true }, { kind: "refeicao", done: true }, { kind: "compromisso", done: false }],
+      "2026-11-02": [
+        { kind: "treino", done: true },
+        { kind: "refeicao", done: true },
+        { kind: "compromisso", done: false },
+      ],
       "2026-11-03": [{ kind: "treino", done: false }],
     };
     const settings = { habitLog: { "2026-11-02": ["h1", "h2"], "2026-11-05": ["h1"] } };

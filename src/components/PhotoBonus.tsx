@@ -14,21 +14,55 @@ export function PhotoBonus({ date, block }: { date: string; block: Block }) {
   const input = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   if (!user || (block.kind !== "refeicao" && block.kind !== "treino")) return null;
-  if (block.photoPath) return <span className="text-[11px] text-good" title="Foto anexada">📷</span>;
+  if (block.photoPath)
+    return (
+      <span className="text-[11px] text-good" title="Foto anexada">
+        📷
+      </span>
+    );
   async function upload(file: File) {
-    if (file.size > 5 * 1024 * 1024) { toast.error("A foto deve ter até 5 MB."); return; }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("A foto deve ter até 5 MB.");
+      return;
+    }
     setBusy(true);
     const path = `${user!.id}/${date}/${block.id}-${Date.now()}.${file.type.split("/")[1] ?? "jpg"}`;
-    const { error } = await supabase.storage.from("xp-photos").upload(path, file, { contentType: file.type });
+    const { error } = await supabase.storage
+      .from("xp-photos")
+      .upload(path, file, { contentType: file.type });
     setBusy(false);
-    if (error) { toast.error("Não foi possível enviar a foto."); return; }
+    if (error) {
+      toast.error("Não foi possível enviar a foto.");
+      return;
+    }
     const { id: _id, done: _done, ...rest } = block;
     updateBlock(date, block.id, { ...rest, photoPath: path });
     emitXp({ kind: "photo", ref: block.id, date, on: true, photoPath: path });
     toast.success("Foto anexada");
   }
-  return <>
-    <input ref={input} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) void upload(f); e.target.value = ""; }} />
-    <button type="button" disabled={busy} onClick={() => input.current?.click()} className="grid size-7 place-items-center text-steel hover:text-ink" aria-label="Anexar foto (+5 XP)" title="Anexar foto (+5 XP)"><Camera className="size-3.5" /></button>
-  </>;
+  return (
+    <>
+      <input
+        ref={input}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          if (f) void upload(f);
+          e.target.value = "";
+        }}
+      />
+      <button
+        type="button"
+        disabled={busy}
+        onClick={() => input.current?.click()}
+        className="grid size-7 place-items-center text-steel hover:text-ink"
+        aria-label="Anexar foto (+5 XP)"
+        title="Anexar foto (+5 XP)"
+      >
+        <Camera className="size-3.5" />
+      </button>
+    </>
+  );
 }

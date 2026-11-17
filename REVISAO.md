@@ -22,13 +22,13 @@ Um bloco de revisão não pode ser uma tarefa para riscar. Precisa ser uma **ten
 
 Campos adicionados ao bloco de revisão:
 
-| Campo | Tipo | Para quê |
-|---|---|---|
-| `reviewStage` | `1 \| 7 \| 30` | Degrau atual da escada |
-| `reviewOf` | `string` | `sessionId` da sessão original |
-| `reviewVerdict` | `"lembrei" \| "esqueci"` | Resultado da tentativa |
-| `reviewedAt` | `string` (yyyy-MM-dd) | Quando foi revisado |
-| `reviewReinforcement` | `boolean` | Marca um reforço criado por esquecimento |
+| Campo                 | Tipo                     | Para quê                                 |
+| --------------------- | ------------------------ | ---------------------------------------- |
+| `reviewStage`         | `1 \| 7 \| 30`           | Degrau atual da escada                   |
+| `reviewOf`            | `string`                 | `sessionId` da sessão original           |
+| `reviewVerdict`       | `"lembrei" \| "esqueci"` | Resultado da tentativa                   |
+| `reviewedAt`          | `string` (yyyy-MM-dd)    | Quando foi revisado                      |
+| `reviewReinforcement` | `boolean`                | Marca um reforço criado por esquecimento |
 
 Tudo vive no `user_data` já sincronizado. Nenhuma migração de banco.
 
@@ -45,31 +45,34 @@ Três portas, todas levando ao mesmo lugar:
 ### 2. Tela de revisão (sheet em tela cheia)
 
 **Passo 1 — Recordar**
+
 - Cabeçalho: matéria + tópico (do título da sessão).
-- Texto: *"Sem olhar, tente lembrar o que você estudou sobre <tópico>."*
+- Texto: _"Sem olhar, tente lembrar o que você estudou sobre <tópico>."_
 - Botão primário: **Já tentei lembrar**.
 - Nada do conteúdo aparece ainda. O `learned` fica escondido — mostrá-lo antes anula a recordação.
 
 **Passo 2 — Conferir**
+
 - Mostra o que você anotou (`learned` da sessão).
-- Se não houver anotação: *"Você não anotou nada nesta sessão. Na próxima, escreva uma frase do que aprendeu — é isso que você vai revisar."*
+- Se não houver anotação: _"Você não anotou nada nesta sessão. Na próxima, escreva uma frase do que aprendeu — é isso que você vai revisar."_
 - Botões: **Lembrei** (primário) e **Esqueci** (secundário).
 
 **Passo 3 — Consequência**
-- Lembrei: *"Próxima revisão: 7 de dezembro."* (ou "Escada concluída" no degrau 30.)
-- Esqueci: *"Reforço amanhã, 5 de novembro."*
+
+- Lembrei: _"Próxima revisão: 7 de dezembro."_ (ou "Escada concluída" no degrau 30.)
+- Esqueci: _"Reforço amanhã, 5 de novembro."_
 - Botão: **Concluir**.
 
 ### 3. Regras do veredito
 
-| Situação | Efeito |
-|---|---|
-| **Lembrei** no degrau 1 | Bloco concluído; degrau 7 já existe na agenda |
-| **Lembrei** no degrau 7 | Bloco concluído; degrau 30 já existe |
-| **Lembrei** no degrau 30 | Bloco concluído; escada encerrada |
-| **Esqueci** em qualquer degrau | Bloco concluído + **novo bloco de reforço em +1 dia** (`reviewReinforcement: true`) |
-| Revisão vencida e não feita | Continua pendente, com "vencida há N dias" e ação **Reagendar para hoje** |
-| Bloco concluído sem veredito (dados antigos) | Tratado como "lembrei" para não criar dívida falsa |
+| Situação                                     | Efeito                                                                              |
+| -------------------------------------------- | ----------------------------------------------------------------------------------- |
+| **Lembrei** no degrau 1                      | Bloco concluído; degrau 7 já existe na agenda                                       |
+| **Lembrei** no degrau 7                      | Bloco concluído; degrau 30 já existe                                                |
+| **Lembrei** no degrau 30                     | Bloco concluído; escada encerrada                                                   |
+| **Esqueci** em qualquer degrau               | Bloco concluído + **novo bloco de reforço em +1 dia** (`reviewReinforcement: true`) |
+| Revisão vencida e não feita                  | Continua pendente, com "vencida há N dias" e ação **Reagendar para hoje**           |
+| Bloco concluído sem veredito (dados antigos) | Tratado como "lembrei" para não criar dívida falsa                                  |
 
 O reforço entra na mesma escada: se o usuário esquecer de novo, cria outro reforço em +1 dia. Isso transforma "esqueci" em trabalho concreto, não em culpa.
 
@@ -102,24 +105,27 @@ E, quando não há nada: a linha não aparece. Silêncio é recompensa.
 
 ## Métricas de validação
 
-| Métrica | O que prova |
-|---|---|
-| Revisões feitas ÷ revisões devidas por semana | O mecanismo está sendo usado |
-| % de "lembrei" por matéria | O app está ajudando a lembrar, não só cobrando |
-| Retorno semanal de quem tem revisão vs. quem não tem | A dívida de revisão realmente retém |
-| Sessões com `learned` preenchido | A qualidade do ciclo depende disso |
+| Métrica                                              | O que prova                                    |
+| ---------------------------------------------------- | ---------------------------------------------- |
+| Revisões feitas ÷ revisões devidas por semana        | O mecanismo está sendo usado                   |
+| % de "lembrei" por matéria                           | O app está ajudando a lembrar, não só cobrando |
+| Retorno semanal de quem tem revisão vs. quem não tem | A dívida de revisão realmente retém            |
+| Sessões com `learned` preenchido                     | A qualidade do ciclo depende disso             |
 
 ## Fases
 
 **Fase 1 — o veredito (menor fatia que já muda o jogo)**
+
 - Campos no bloco, sheet de revisão com recordar → conferir → veredito, regra de reforço.
 - Cartão na home.
 - Sem reagendamento automático de vencidas (só o rótulo "vencida").
 
 **Fase 2 — a dívida**
+
 - Reagendar para hoje, lista de vencidas por matéria, contagem semanal.
 
 **Fase 3 — a inteligência**
+
 - Intervalos adaptativos conforme o histórico de "lembrei/esqueci" por matéria.
 
 ## Decisão de produto embutida

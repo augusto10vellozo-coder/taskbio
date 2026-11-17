@@ -3,17 +3,22 @@ import { dueReminders } from "./push-reminders";
 
 // 13:56 UTC = 10:56 in São Paulo
 const now = new Date("2026-10-14T13:56:00Z");
-const plan = { "2026-10-14": [
-  { id: "a", time: "11:00", kind: "compromisso", title: "Consulta" },
-  { id: "b", time: "11:26", kind: "treino", title: "Academia" },
-  { id: "c", time: "11:00", kind: "refeicao", title: "Lanche" },
-  { id: "d", time: "11:00", kind: "compromisso", title: "Feito", done: true },
-  { id: "e", time: "11:30", kind: "compromisso", title: "Depois" },
-] };
+const plan = {
+  "2026-10-14": [
+    { id: "a", time: "11:00", kind: "compromisso", title: "Consulta" },
+    { id: "b", time: "11:26", kind: "treino", title: "Academia" },
+    { id: "c", time: "11:00", kind: "refeicao", title: "Lanche" },
+    { id: "d", time: "11:00", kind: "compromisso", title: "Feito", done: true },
+    { id: "e", time: "11:30", kind: "compromisso", title: "Depois" },
+  ],
+};
 
 describe("dueReminders", () => {
   it("avisa compromisso 5 minutos antes no fuso do usuário", () => {
-    expect(dueReminders(plan, "America/Sao_Paulo", now).map((r) => r.title)).toEqual(["Consulta", "Academia"]);
+    expect(dueReminders(plan, "America/Sao_Paulo", now).map((r) => r.title)).toEqual([
+      "Consulta",
+      "Academia",
+    ]);
   });
   it("não avisa refeições, itens concluídos nem compromissos distantes", () => {
     const titles = dueReminders(plan, "America/Sao_Paulo", now).map((r) => r.title);
@@ -23,18 +28,44 @@ describe("dueReminders", () => {
   });
 });
 
-import { dueSettingsReminders, dueStreakRisk, dueDayClose, dueMealReminders, readNotifPrefs, inQuietHours, wallClockMs } from "./push-reminders";
+import {
+  dueSettingsReminders,
+  dueStreakRisk,
+  dueDayClose,
+  dueMealReminders,
+  readNotifPrefs,
+  inQuietHours,
+  wallClockMs,
+} from "./push-reminders";
 describe("dueSettingsReminders", () => {
   it("avisa conta 1 dia antes às 9h e medicamento no horário", () => {
     const at9 = new Date("2026-10-14T12:02:00Z"); // 09:02 em São Paulo
-    const settings = { finance: { bills: [{ id: "x", title: "Luz", amount: 120, dueDate: "2026-10-15" }, { id: "y", title: "Água", amount: 50, dueDate: "2026-10-16" }] }, health: { meds: [{ id: "m", name: "Vitamina", time: "09:00" }] } };
-    expect(dueSettingsReminders(settings, "America/Sao_Paulo", at9).map((r) => r.key)).toEqual(["bill|x|2026-10-15", "med|m|2026-10-14"]);
+    const settings = {
+      finance: {
+        bills: [
+          { id: "x", title: "Luz", amount: 120, dueDate: "2026-10-15" },
+          { id: "y", title: "Água", amount: 50, dueDate: "2026-10-16" },
+        ],
+      },
+      health: { meds: [{ id: "m", name: "Vitamina", time: "09:00" }] },
+    };
+    expect(dueSettingsReminders(settings, "America/Sao_Paulo", at9).map((r) => r.key)).toEqual([
+      "bill|x|2026-10-15",
+      "med|m|2026-10-14",
+    ]);
   });
   it("avisa prova 1 dia antes às 9h e no dia às 8h; ignora concluída", () => {
-    const exams = [{ id: "p", subjectId: "s", subjectName: "Inglês", title: "Prova oral", date: "2026-10-15" }, { id: "q", subjectId: "s", title: "Trabalho", date: "2026-10-15", done: true }];
+    const exams = [
+      { id: "p", subjectId: "s", subjectName: "Inglês", title: "Prova oral", date: "2026-10-15" },
+      { id: "q", subjectId: "s", title: "Trabalho", date: "2026-10-15", done: true },
+    ];
     const settings = { trackers: { exams } };
-    expect(dueSettingsReminders(settings, TZ_SP, new Date("2026-10-14T12:02:00Z")).map((r) => r.key)).toEqual(["exam1|p|2026-10-15"]);
-    expect(dueSettingsReminders(settings, TZ_SP, new Date("2026-10-15T11:01:00Z")).map((r) => r.key)).toEqual(["exam0|p|2026-10-15"]);
+    expect(
+      dueSettingsReminders(settings, TZ_SP, new Date("2026-10-14T12:02:00Z")).map((r) => r.key),
+    ).toEqual(["exam1|p|2026-10-15"]);
+    expect(
+      dueSettingsReminders(settings, TZ_SP, new Date("2026-10-15T11:01:00Z")).map((r) => r.key),
+    ).toEqual(["exam0|p|2026-10-15"]);
     expect(dueSettingsReminders(settings, TZ_SP, new Date("2026-10-15T15:00:00Z"))).toEqual([]);
   });
 });
@@ -60,10 +91,18 @@ describe("dueStreakRisk", () => {
   });
   it("menciona o congelamento quando há um disponível", () => {
     const r = dueStreakRisk({ ...streakInput, freezesAvailable: 1 }, TZ, at20)[0]!;
-    expect(r.title).toBe("🧊 Streak em risco! Você tem 1 congelamento — use ou marque seus hábitos");
+    expect(r.title).toBe(
+      "🧊 Streak em risco! Você tem 1 congelamento — use ou marque seus hábitos",
+    );
   });
   it("não avisa com dia 100% marcado, streak curto ou fora do horário", () => {
-    expect(dueStreakRisk({ ...streakInput, habitLog: { "2026-10-13": ["h1"], "2026-10-14": ["h1", "h2"] } }, TZ, at20)).toEqual([]);
+    expect(
+      dueStreakRisk(
+        { ...streakInput, habitLog: { "2026-10-13": ["h1"], "2026-10-14": ["h1", "h2"] } },
+        TZ,
+        at20,
+      ),
+    ).toEqual([]);
     expect(dueStreakRisk({ ...streakInput, plan: {} }, TZ, at20)).toEqual([]);
     expect(dueStreakRisk(streakInput, TZ, new Date("2026-10-14T22:00:00Z"))).toEqual([]); // 19h em SP
   });
@@ -83,11 +122,13 @@ describe("dueDayClose", () => {
 });
 
 describe("dueMealReminders", () => {
-  const mealPlan = { "2026-10-14": [
-    { id: "m1", kind: "refeicao", time: "12:00", title: "Almoço" },
-    { id: "m2", kind: "refeicao", time: "12:00", title: "Feito", done: true },
-    { id: "m3", kind: "compromisso", time: "12:00", title: "Reunião" },
-  ] };
+  const mealPlan = {
+    "2026-10-14": [
+      { id: "m1", kind: "refeicao", time: "12:00", title: "Almoço" },
+      { id: "m2", kind: "refeicao", time: "12:00", title: "Feito", done: true },
+      { id: "m3", kind: "compromisso", time: "12:00", title: "Reunião" },
+    ],
+  };
   it("avisa 45 min após refeição planejada sem registro", () => {
     const at1246 = new Date("2026-10-14T15:46:00Z"); // 12:46 em SP
     const due = dueMealReminders(mealPlan, TZ, at1246);
@@ -102,7 +143,16 @@ describe("dueMealReminders", () => {
 
 describe("preferências e horário de silêncio", () => {
   it("lê toggles salvos e liga tudo por padrão", () => {
-    expect(readNotifPrefs(null)).toEqual({ master: true, streak: true, dayClose: true, meals: true, tasks: true, workouts: true, weekly: true, exams: true });
+    expect(readNotifPrefs(null)).toEqual({
+      master: true,
+      streak: true,
+      dayClose: true,
+      meals: true,
+      tasks: true,
+      workouts: true,
+      weekly: true,
+      exams: true,
+    });
     expect(readNotifPrefs({ notifPrefs: { streak: false } }).streak).toBe(false);
     expect(readNotifPrefs({ notifPrefs: { streak: false } }).meals).toBe(true);
     expect(readNotifPrefs({ notifPrefs: { master: false } }).master).toBe(false);
@@ -115,31 +165,83 @@ describe("preferências e horário de silêncio", () => {
   it("toggles de tarefas e treinos filtram os lembretes da agenda", () => {
     const all = dueReminders(plan, TZ, now);
     expect(all.map((r) => r.title)).toEqual(["Consulta", "Academia"]);
-    expect(dueReminders(plan, TZ, now, { ...readNotifPrefs(null), workouts: false }).map((r) => r.title)).toEqual(["Consulta"]);
-    expect(dueReminders(plan, TZ, now, { ...readNotifPrefs(null), tasks: false }).map((r) => r.title)).toEqual(["Academia"]);
+    expect(
+      dueReminders(plan, TZ, now, { ...readNotifPrefs(null), workouts: false }).map((r) => r.title),
+    ).toEqual(["Consulta"]);
+    expect(
+      dueReminders(plan, TZ, now, { ...readNotifPrefs(null), tasks: false }).map((r) => r.title),
+    ).toEqual(["Academia"]);
   });
 });
 
 import { dueStreakMilestone, dueDayComplete, dueWeeklySummary } from "./push-reminders";
 describe("celebrações e resumo", () => {
   const habits = [{ id: "h1" }];
-  const log = (n: number) => Object.fromEntries(Array.from({ length: n }, (_, i) => [new Date(Date.UTC(2026, 9, 14 - i)).toISOString().slice(0, 10), ["h1"]]));
+  const log = (n: number) =>
+    Object.fromEntries(
+      Array.from({ length: n }, (_, i) => [
+        new Date(Date.UTC(2026, 9, 14 - i)).toISOString().slice(0, 10),
+        ["h1"],
+      ]),
+    );
   const noon = new Date("2026-10-14T15:00:00Z");
   it("marco de 10 dias dá 10 XP de bônus respeitando o teto diário", () => {
-    expect(dueStreakMilestone({ plan: {}, habitLog: log(10), habits, frozenDays: [], todayXp: 20 }, TZ, noon)[0]!.title).toBe("🎉 10 dias seguidos! +10 XP de bônus");
-    expect(dueStreakMilestone({ plan: {}, habitLog: log(10), habits, frozenDays: [], todayXp: 145 }, TZ, noon)[0]!.bonus).toBe(5);
-    expect(dueStreakMilestone({ plan: {}, habitLog: log(5), habits, frozenDays: [], todayXp: 0 }, TZ, noon)[0]!.bonus).toBe(0);
-    expect(dueStreakMilestone({ plan: {}, habitLog: log(7), habits, frozenDays: [], todayXp: 0 }, TZ, noon)).toEqual([]);
+    expect(
+      dueStreakMilestone(
+        { plan: {}, habitLog: log(10), habits, frozenDays: [], todayXp: 20 },
+        TZ,
+        noon,
+      )[0]!.title,
+    ).toBe("🎉 10 dias seguidos! +10 XP de bônus");
+    expect(
+      dueStreakMilestone(
+        { plan: {}, habitLog: log(10), habits, frozenDays: [], todayXp: 145 },
+        TZ,
+        noon,
+      )[0]!.bonus,
+    ).toBe(5);
+    expect(
+      dueStreakMilestone(
+        { plan: {}, habitLog: log(5), habits, frozenDays: [], todayXp: 0 },
+        TZ,
+        noon,
+      )[0]!.bonus,
+    ).toBe(0);
+    expect(
+      dueStreakMilestone(
+        { plan: {}, habitLog: log(7), habits, frozenDays: [], todayXp: 0 },
+        TZ,
+        noon,
+      ),
+    ).toEqual([]);
   });
   it("dia 100% concluído só com todos os blocos feitos", () => {
     expect(dueDayComplete({ "2026-10-14": [{ done: true }] }, TZ, noon)[0]!.url).toBe("/agenda");
-    expect(dueDayComplete({ "2026-10-14": [{ done: true }, { done: false }] }, TZ, noon)).toEqual([]);
+    expect(dueDayComplete({ "2026-10-14": [{ done: true }, { done: false }] }, TZ, noon)).toEqual(
+      [],
+    );
   });
   it("resumo semanal só domingo às 20h", () => {
     const sun = new Date("2026-10-18T23:01:00Z"); // domingo 20:01 em SP
     const plan = { "2026-10-17": [{ kind: "treino", done: true }, { kind: "refeicao" }] };
-    const r = dueWeeklySummary({ plan, habitLog: { "2026-10-18": ["h1"] }, kcalFor: (b) => b.filter((x) => x.kind === "refeicao").length * 500 }, TZ, sun)[0]!;
-    expect(r.title).toBe("📊 Sua semana: 2 dias marcados · 1 treino · 500 kcal planejadas. Confira seu progresso!");
-    expect(dueWeeklySummary({ plan, habitLog: {}, kcalFor: () => 0 }, TZ, new Date("2026-10-17T23:01:00Z"))).toEqual([]);
+    const r = dueWeeklySummary(
+      {
+        plan,
+        habitLog: { "2026-10-18": ["h1"] },
+        kcalFor: (b) => b.filter((x) => x.kind === "refeicao").length * 500,
+      },
+      TZ,
+      sun,
+    )[0]!;
+    expect(r.title).toBe(
+      "📊 Sua semana: 2 dias marcados · 1 treino · 500 kcal planejadas. Confira seu progresso!",
+    );
+    expect(
+      dueWeeklySummary(
+        { plan, habitLog: {}, kcalFor: () => 0 },
+        TZ,
+        new Date("2026-10-17T23:01:00Z"),
+      ),
+    ).toEqual([]);
   });
 });

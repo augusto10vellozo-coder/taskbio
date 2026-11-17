@@ -17,6 +17,10 @@ export function reinforcementDate(date: string): string {
 }
 
 /** Id estável do reforço, para não duplicar ao revisar duas vezes. */
-export function reinforcementId(sessionId: string | undefined, blockId: string, date: string): string {
+export function reinforcementId(
+  sessionId: string | undefined,
+  blockId: string,
+  date: string,
+): string {
   return `rev2:${sessionId ?? blockId}:${date}`;
 }

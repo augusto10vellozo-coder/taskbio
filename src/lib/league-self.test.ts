@@ -2,7 +2,13 @@ import { describe, expect, it } from "vitest";
 import { needsPersonalLeagueRow } from "./league-self";
 import { leaguePositions, rankLeague } from "./xp";
 
-const member = (user_id: string, week_pct: number | null) => ({ user_id, week_pct, week_xp: 0, habit_days: 0, first_mark_sec: 0 });
+const member = (user_id: string, week_pct: number | null) => ({
+  user_id,
+  week_pct,
+  week_xp: 0,
+  habit_days: 0,
+  first_mark_sec: 0,
+});
 
 describe("own league visibility", () => {
   it("shows missing self outside the ranking without adding other missing users", () => {

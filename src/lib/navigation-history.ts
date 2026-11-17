@@ -6,7 +6,11 @@ export type AppHistoryEntry = {
   tab?: boolean | undefined;
 };
 
-type EntryRecord = { entry: AppHistoryEntry; parent?: string | undefined; values: Map<string, unknown> };
+type EntryRecord = {
+  entry: AppHistoryEntry;
+  parent?: string | undefined;
+  values: Map<string, unknown>;
+};
 
 export class NavigationHistory {
   private records = new Map<string, EntryRecord>();
@@ -22,12 +26,16 @@ export class NavigationHistory {
     const previousRecord = this.records.get(previous.key);
     if (action === "PUSH" || action === "REPLACE") {
       const sameScreen = next.pathname === previous.pathname;
-      const parent = next.tab ? undefined : action === "REPLACE" || sameScreen
-        ? previousRecord?.parent : previous.key;
+      const parent = next.tab
+        ? undefined
+        : action === "REPLACE" || sameScreen
+          ? previousRecord?.parent
+          : previous.key;
       this.records.set(next.key, {
         entry: next,
         parent,
-        values: action === "REPLACE" || sameScreen ? previousRecord?.values ?? new Map() : new Map(),
+        values:
+          action === "REPLACE" || sameScreen ? (previousRecord?.values ?? new Map()) : new Map(),
       });
     }
     this.current = next;
@@ -36,12 +44,14 @@ export class NavigationHistory {
   canReturn(key: string) {
     const record = this.records.get(key);
     const parent = record?.parent ? this.records.get(record.parent) : undefined;
-    return Boolean(record && parent && !record.entry.tab && parent.entry.index === record.entry.index - 1);
+    return Boolean(
+      record && parent && !record.entry.tab && parent.entry.index === record.entry.index - 1,
+    );
   }
 
   read<T>(key: string, field: string, fallback: () => T): T {
     const values = this.records.get(key)?.values;
-    return values?.has(field) ? values.get(field) as T : fallback();
+    return values?.has(field) ? (values.get(field) as T) : fallback();
   }
 
   write<T>(key: string, field: string, value: T) {

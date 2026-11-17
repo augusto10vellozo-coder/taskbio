@@ -2,7 +2,15 @@ import { describe, expect, it } from "vitest";
 import { freezesLeft, monthlyBadges, weekChampions, weekTitles } from "./xp";
 import { streak } from "./engagement";
 
-const row = (user_id: string, pct: number, streak = 0, comeback = false) => ({ user_id, week_xp: 0, week_pct: pct / 100, habit_days: 0, first_mark_sec: 0, streak, comeback });
+const row = (user_id: string, pct: number, streak = 0, comeback = false) => ({
+  user_id,
+  week_xp: 0,
+  week_pct: pct / 100,
+  habit_days: 0,
+  first_mark_sec: 0,
+  streak,
+  comeback,
+});
 
 describe("league awards", () => {
   it("1st place is champion only with 2+ members and XP", () => {
@@ -16,7 +24,9 @@ describe("league awards", () => {
     expect(t.get("b")).toEqual(["Muralha da constância", "Recomeço"]);
   });
   it("3 wins in the same month give a badge", () => {
-    expect(monthlyBadges(["2026-10-04", "2026-10-11", "2026-10-18", "2026-11-01"])).toEqual(["2026-10"]);
+    expect(monthlyBadges(["2026-10-04", "2026-10-11", "2026-10-18", "2026-11-01"])).toEqual([
+      "2026-10",
+    ]);
     expect(monthlyBadges(["2026-10-04", "2026-10-11"])).toEqual([]);
   });
   it("one freeze per win", () => expect(freezesLeft(2, 1)).toBe(1));

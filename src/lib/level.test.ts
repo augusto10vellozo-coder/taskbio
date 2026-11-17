@@ -3,7 +3,13 @@ import { levelInfo, levelStep, levelTitle } from "./level";
 
 describe("níveis por XP total", () => {
   it("começa no nível 1 com zero XP", () => {
-    expect(levelInfo(0)).toEqual({ level: 1, current: 0, needed: 100, remaining: 100, progress: 0 });
+    expect(levelInfo(0)).toEqual({
+      level: 1,
+      current: 0,
+      needed: 100,
+      remaining: 100,
+      progress: 0,
+    });
   });
   it("sobe exatamente no limite do nível", () => {
     expect(levelInfo(99).level).toBe(1);

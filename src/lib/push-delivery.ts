@@ -11,9 +11,16 @@ export function transientFailure(status?: number) {
 export function retryAllowed(attempts: number, status?: number) {
   return attempts < 3 && transientFailure(status);
 }
-export async function performDelivery(send: () => Promise<{ status: number }>, record: (result: ReturnType<typeof deliveryResult>, status?: number) => Promise<void>) {
+export async function performDelivery(
+  send: () => Promise<{ status: number }>,
+  record: (result: ReturnType<typeof deliveryResult>, status?: number) => Promise<void>,
+) {
   let status: number | undefined;
-  try { status = (await send()).status; } catch { /* Network/timeout. */ }
+  try {
+    status = (await send()).status;
+  } catch {
+    /* Network/timeout. */
+  }
   const result = deliveryResult(status);
   await record(result, status);
   return { result, status };

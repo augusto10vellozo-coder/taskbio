@@ -21,8 +21,13 @@ export const Route = createFileRoute("/api/public/weekly-summary")({
         if (!token) return new Response("Unauthorized", { status: 401 });
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-        const { data: secret } = await supabaseAdmin.from("push_cron_token").select("token").eq("id", 1).maybeSingle();
-        if (!secret || !safeEqual(token, secret.token)) return new Response("Unauthorized", { status: 401 });
+        const { data: secret } = await supabaseAdmin
+          .from("push_cron_token")
+          .select("token")
+          .eq("id", 1)
+          .maybeSingle();
+        if (!secret || !safeEqual(token, secret.token))
+          return new Response("Unauthorized", { status: 401 });
 
         const today = brasiliaDay(new Date());
         // ?week=current serves a manual test without waiting for Monday.
@@ -34,15 +39,28 @@ export const Route = createFileRoute("/api/public/weekly-summary")({
         const digest = supabaseAdmin as unknown as {
           from: (table: string) => {
             select: (columns: string) => {
-              eq: (column: string, value: string) => Promise<{ data: { user_id: string }[] | null; error: { message: string } | null }>;
+              eq: (
+                column: string,
+                value: string,
+              ) => Promise<{
+                data: { user_id: string }[] | null;
+                error: { message: string } | null;
+              }>;
             };
-            insert: (row: Record<string, unknown>) => Promise<{ error: { message: string } | null }>;
+            insert: (
+              row: Record<string, unknown>,
+            ) => Promise<{ error: { message: string } | null }>;
           };
         };
 
         const [{ data: rows }, { data: points }, { data: already }] = await Promise.all([
           supabaseAdmin.from("user_data").select("user_id, plan, settings"),
-          supabaseAdmin.from("xp_events").select("user_id, points").gte("day", week.start).lte("day", week.end).eq("legacy", false),
+          supabaseAdmin
+            .from("xp_events")
+            .select("user_id, points")
+            .gte("day", week.start)
+            .lte("day", week.end)
+            .eq("legacy", false),
           digest.from("weekly_digest_sent").select("user_id").eq("week_start", week.start),
         ]);
 
@@ -59,7 +77,10 @@ export const Route = createFileRoute("/api/public/weekly-summary")({
           const users = data?.users ?? [];
           for (const user of users) {
             if (!user.email) continue;
-            const display = typeof user.user_metadata?.["display_name"] === "string" ? String(user.user_metadata["display_name"]) : "";
+            const display =
+              typeof user.user_metadata?.["display_name"] === "string"
+                ? String(user.user_metadata["display_name"])
+                : "";
             recipients.set(user.id, { email: user.email, name: display.split(" ")[0] ?? "" });
           }
           if (users.length < 1000) break;
@@ -72,14 +93,23 @@ export const Route = createFileRoute("/api/public/weekly-summary")({
 
         for (const row of rows ?? []) {
           const target = recipients.get(row.user_id);
-          if (!target || sentBefore.has(row.user_id)) { skipped += 1; continue; }
+          if (!target || sentBefore.has(row.user_id)) {
+            skipped += 1;
+            continue;
+          }
 
           const settings = (row.settings ?? {}) as { notifPrefs?: Record<string, boolean> };
           const prefs = settings.notifPrefs ?? {};
-          if (prefs["master"] === false || prefs["weekly"] === false) { skipped += 1; continue; }
+          if (prefs["master"] === false || prefs["weekly"] === false) {
+            skipped += 1;
+            continue;
+          }
 
           const stats = weekStats(row.plan, row.settings, week.keys);
-          if (!hasActivity(stats)) { skipped += 1; continue; }
+          if (!hasActivity(stats)) {
+            skipped += 1;
+            continue;
+          }
 
           const result = await sendWeeklyDigest({
             to: target.email,
@@ -96,7 +126,9 @@ export const Route = createFileRoute("/api/public/weekly-summary")({
             continue;
           }
 
-          const { error } = await digest.from("weekly_digest_sent").insert({ user_id: row.user_id, week_start: week.start });
+          const { error } = await digest
+            .from("weekly_digest_sent")
+            .insert({ user_id: row.user_id, week_start: week.start });
           if (error) console.error("[weekly-digest] ledger insert failed:", error.message);
           sent += 1;
         }

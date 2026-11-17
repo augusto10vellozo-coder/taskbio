@@ -8,12 +8,20 @@ export function ReminderManager() {
     if (!user) return;
     let busy = false;
     const renew = async () => {
-      if (busy || document.visibilityState !== "visible" || !("Notification" in window) || Notification.permission !== "granted") return;
+      if (
+        busy ||
+        document.visibilityState !== "visible" ||
+        !("Notification" in window) ||
+        Notification.permission !== "granted"
+      )
+        return;
       busy = true;
       try {
         const { enableServerPush } = await import("@/lib/push-client");
         await enableServerPush();
-      } finally { busy = false; }
+      } finally {
+        busy = false;
+      }
     };
     void renew();
     document.addEventListener("visibilitychange", renew);

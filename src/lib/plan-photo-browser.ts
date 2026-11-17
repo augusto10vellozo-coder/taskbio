@@ -10,16 +10,22 @@ export async function preparePlanPhoto(file: File): Promise<Blob> {
   return file;
 }
 
-export async function readPlanPhotos(images: Blob[], onProgress: (image: number, progress: number) => void) {
+export async function readPlanPhotos(
+  images: Blob[],
+  onProgress: (image: number, progress: number) => void,
+) {
   const { createWorker } = await import("tesseract.js");
   let current = 0;
-  const worker = await createWorker("por+eng", 1, { logger: event => {
-    if (event.status === "recognizing text") onProgress(current, event.progress);
-  } });
+  const worker = await createWorker("por+eng", 1, {
+    logger: (event) => {
+      if (event.status === "recognizing text") onProgress(current, event.progress);
+    },
+  });
   try {
     const pages: { text: string; uncertain: boolean }[] = [];
     for (let i = 0; i < images.length; i++) {
-      current = i; onProgress(i, 0);
+      current = i;
+      onProgress(i, 0);
       const image = images[i];
       if (!image) continue;
       const result = await worker.recognize(image);
@@ -27,5 +33,7 @@ export async function readPlanPhotos(images: Blob[], onProgress: (image: number,
       onProgress(i, 1);
     }
     return pages;
-  } finally { await worker.terminate(); }
+  } finally {
+    await worker.terminate();
+  }
 }

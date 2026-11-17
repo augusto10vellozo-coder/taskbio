@@ -1,9 +1,11 @@
 # Trilha — conclusão das melhorias do produto
 
 ## Objetivo
+
 Concluir o Trilha como uma plataforma segura e utilizável de organização de vida saudável, sem dados fictícios e com uma experiência consistente no celular e no computador.
 
 ## Etapas
+
 1. **Alimentação semanal e compras**
    - Permitir escolher uma refeição para uma data e horário, trocar ou remover a escolha e repetir o planejamento.
    - Exibir totais diários e semanais de calorias, macros e custo estimado.
@@ -45,6 +47,7 @@ Concluir o Trilha como uma plataforma segura e utilizável de organização de v
    - Testar cadastro, recuperação de senha, agenda, treino, alimentação, compras, progresso, assinatura e vínculo profissional em celular e computador.
 
 ## Decisões e limites
+
 - Interface e mensagens em português do Brasil; valores em reais.
 - Sugestões de treino e alimentação continuam sendo exemplos gerais, não prescrição médica, nutricional ou de educação física.
 - Lembretes do navegador dependem da permissão e do suporte do aparelho; envio por e-mail exige a configuração do remetente antes de produção.
@@ -52,6 +55,7 @@ Concluir o Trilha como uma plataforma segura e utilizável de organização de v
 - A cobrança real e a abertura ampla do Plano Profissional ficam condicionadas à validação do produto e da operação.
 
 ## Ordem de entrega
+
 ```text
 Alimentação e compras → Progresso → Agenda mensal e lembretes
 → Privacidade e páginas jurídicas → Premium de teste

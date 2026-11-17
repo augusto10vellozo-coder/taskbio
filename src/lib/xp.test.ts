@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { brasiliaDay, cappedWeekXp, leaguePositions, leagueWeekStart, rankLeague, weekChampions, xpFor } from "./xp";
+import {
+  brasiliaDay,
+  cappedWeekXp,
+  leaguePositions,
+  leagueWeekStart,
+  rankLeague,
+  weekChampions,
+  xpFor,
+} from "./xp";
 
 describe("pontos (XP)", () => {
   const today = "2026-10-16";
@@ -20,7 +28,13 @@ describe("pontos (XP)", () => {
     expect(brasiliaDay(new Date("2026-10-17T02:30:00Z"))).toBe("2026-10-16");
   });
   it("limita 100 pontos por dia na liga", () => {
-    expect(cappedWeekXp([{ day: "a", points: 80 }, { day: "a", points: 50 }, { day: "b", points: 20 }])).toBe(120);
+    expect(
+      cappedWeekXp([
+        { day: "a", points: 80 },
+        { day: "a", points: 50 },
+        { day: "b", points: 20 },
+      ]),
+    ).toBe(120);
   });
   it("semana da liga começa no domingo", () => {
     expect(leagueWeekStart("2026-10-16")).toBe("2026-10-11");

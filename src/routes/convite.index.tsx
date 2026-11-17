@@ -12,9 +12,17 @@ export const Route = createFileRoute("/convite/")({
   head: () => ({
     meta: [
       { title: "TaskBio — sua rotina de estudos, dia após dia" },
-      { name: "description", content: "Monte sua semana em 2 minutos, marque o que cumpriu e mantenha a sequência. Grátis e sem cadastro para testar." },
+      {
+        name: "description",
+        content:
+          "Monte sua semana em 2 minutos, marque o que cumpriu e mantenha a sequência. Grátis e sem cadastro para testar.",
+      },
       { property: "og:title", content: "Sua rotina de estudos, dia após dia" },
-      { property: "og:description", content: "Monte sua semana em 2 minutos, marque o que cumpriu e mantenha a sequência. Grátis e sem cadastro para testar." },
+      {
+        property: "og:description",
+        content:
+          "Monte sua semana em 2 minutos, marque o que cumpriu e mantenha a sequência. Grátis e sem cadastro para testar.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -44,15 +52,27 @@ function Convite() {
         Seu cronograma existe. Sua rotina, nem sempre.
       </h1>
       <p className="mt-4 max-w-xl text-base leading-7 text-steel">
-        O TaskBio transforma a semana em blocos simples de cumprir: estudo, treino, refeição e descanso.
-        Você marca o que fez, vê a sequência crescer e não precisa de planilha.
+        O TaskBio transforma a semana em blocos simples de cumprir: estudo, treino, refeição e
+        descanso. Você marca o que fez, vê a sequência crescer e não precisa de planilha.
       </p>
 
       <ul className="mt-7 space-y-3">
         {[
-          { icon: CalendarPlus, title: "Monte a semana em 2 minutos", text: "Comece com uma semana pronta e ajuste o que quiser." },
-          { icon: Flame, title: "Marque o que cumpriu", text: "A sequência de dias mostra seu progresso real, não a intenção." },
-          { icon: ShieldCheck, title: "Grátis e sem cadastro para testar", text: "Seus dados ficam neste aparelho até você decidir criar conta." },
+          {
+            icon: CalendarPlus,
+            title: "Monte a semana em 2 minutos",
+            text: "Comece com uma semana pronta e ajuste o que quiser.",
+          },
+          {
+            icon: Flame,
+            title: "Marque o que cumpriu",
+            text: "A sequência de dias mostra seu progresso real, não a intenção.",
+          },
+          {
+            icon: ShieldCheck,
+            title: "Grátis e sem cadastro para testar",
+            text: "Seus dados ficam neste aparelho até você decidir criar conta.",
+          },
         ].map((item) => (
           <li key={item.title} className="flex gap-3 rounded-xl bg-card p-4 ring-1 ring-line">
             <item.icon className="mt-0.5 size-5 shrink-0 text-brand" aria-hidden="true" />
@@ -68,18 +88,30 @@ function Convite() {
         <Button size="lg" disabled={!ready} onClick={start}>
           <CalendarPlus /> Começar com uma semana de exemplo
         </Button>
-        <Link to="/auth" className="text-sm font-medium text-brand-deep underline underline-offset-4">
+        <Link
+          to="/auth"
+          className="text-sm font-medium text-brand-deep underline underline-offset-4"
+        >
           Já tenho conta
         </Link>
       </div>
       <p className="mt-3 flex items-center gap-1.5 text-xs text-steel">
-        <X className="size-3.5" aria-hidden="true" /> Não pedimos cartão, telefone nem dados de saúde.
+        <X className="size-3.5" aria-hidden="true" /> Não pedimos cartão, telefone nem dados de
+        saúde.
       </p>
 
       <p className="mt-10 border-t border-line pt-5 text-xs text-steel">
-        <Link to="/sobre" className="underline">Sobre</Link> ·{" "}
-        <Link to="/privacidade" className="underline">Privacidade</Link> ·{" "}
-        <Link to="/termos" className="underline">Termos</Link>
+        <Link to="/sobre" className="underline">
+          Sobre
+        </Link>{" "}
+        ·{" "}
+        <Link to="/privacidade" className="underline">
+          Privacidade
+        </Link>{" "}
+        ·{" "}
+        <Link to="/termos" className="underline">
+          Termos
+        </Link>
       </p>
     </main>
   );

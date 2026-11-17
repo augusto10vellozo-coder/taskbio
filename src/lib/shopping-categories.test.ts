@@ -35,7 +35,12 @@ describe("corredores da lista de compras", () => {
       { name: "Banana" },
       { name: "Frango" },
     ]);
-    expect(groups.map((group) => group.id)).toEqual(["hortifruti", "proteinas", "mercearia", "limpeza"]);
+    expect(groups.map((group) => group.id)).toEqual([
+      "hortifruti",
+      "proteinas",
+      "mercearia",
+      "limpeza",
+    ]);
     expect(groups[0]?.items).toEqual([{ name: "Banana" }]);
   });
 });

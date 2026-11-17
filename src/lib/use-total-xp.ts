@@ -22,7 +22,9 @@ export function useTotalXp() {
 
   useEffect(() => {
     if (!user) return;
-    const refresh = () => { void client.invalidateQueries({ queryKey: ["total-xp", user.id] }); };
+    const refresh = () => {
+      void client.invalidateQueries({ queryKey: ["total-xp", user.id] });
+    };
     window.addEventListener(XP_EVENT, refresh);
     return () => window.removeEventListener(XP_EVENT, refresh);
   }, [client, user?.id]);

@@ -5,7 +5,7 @@ export function agendaSummary(blocks: Block[]) {
   return {
     total: blocks.length,
     completed,
-    percent: blocks.length ? Math.round(completed / blocks.length * 100) : 0,
+    percent: blocks.length ? Math.round((completed / blocks.length) * 100) : 0,
     workouts: blocks.filter((block) => block.kind === "treino" && block.done).length,
     meals: blocks.filter((block) => block.kind === "refeicao" && block.done).length,
   };

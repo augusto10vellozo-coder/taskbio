@@ -27,7 +27,6 @@ Lista de pendências do TaskBio. Ordenada por impacto. Atualize ao concluir.
 - [ ] **Backup e schema andam juntos.** O dump de 01/11 não tinha as migrations 0022–0026.
       Antes de migrar de novo, aplique as migrations pendentes ou gere um backup novo.
 
-
 ## Privacidade e LGPD
 
 - [x] **Excluir conta apaga os dados.** `delete_my_account()` remove todas as tabelas pessoais,

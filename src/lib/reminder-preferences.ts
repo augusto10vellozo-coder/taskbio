@@ -20,9 +20,13 @@ export const defaultReminderPreferences: ReminderPreferences = {
 
 export function readReminderPreferences() {
   try {
-    const saved = JSON.parse(localStorage.getItem(reminderStorageKey) ?? "null") as Partial<ReminderPreferences> | null;
+    const saved = JSON.parse(
+      localStorage.getItem(reminderStorageKey) ?? "null",
+    ) as Partial<ReminderPreferences> | null;
     return saved ? { ...defaultReminderPreferences, ...saved } : defaultReminderPreferences;
-  } catch { return defaultReminderPreferences; }
+  } catch {
+    return defaultReminderPreferences;
+  }
 }
 
 export function saveReminderPreferences(preferences: ReminderPreferences) {

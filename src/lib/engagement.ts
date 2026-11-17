@@ -3,7 +3,16 @@ import { isStreakMilestone } from "./xp";
 import type { Plan, WorkoutHistoryEntry } from "./trilha-data";
 
 /** countsForStreak defaults to true when missing. */
-export type Habit = { id: string; name: string; createdAt: string; countsForStreak?: boolean; frequency?: "daily" | "weekly"; weeklyTarget?: number; emoji?: string; frequencySince?: string };
+export type Habit = {
+  id: string;
+  name: string;
+  createdAt: string;
+  countsForStreak?: boolean;
+  frequency?: "daily" | "weekly";
+  weeklyTarget?: number;
+  emoji?: string;
+  frequencySince?: string;
+};
 /** dateKey -> ids of habits marked on that day */
 export type HabitLog = Record<string, string[]>;
 export type MonthGoal = {
@@ -26,14 +35,68 @@ export type HealthLog = {
   /** Daily mood (1–5), registered from the quick sheet or Saúde. */
   mood?: Record<string, number>;
 };
-export type Medication = { id: string; name: string; time: string; intervalHours?: 4 | 6 | 8 | 12 | 24; startDate?: string; endDate?: string };
-export type SessionEntry = { id: string; date: string; minutes: number; title: string; bookId?: string; pages?: number; progressMode?: "pages" | "percent"; progressPercent?: number; agendaBlockId?: string; subjectId?: string; learned?: string };
-export type Subject = { id: string; name: string; color: string; weeklyGoalMin?: number; dailyGoalMin?: number; normalizedName?: string };
-export type Exam = { id: string; subjectId: string; subjectName?: string; title: string; date: string; done?: boolean };
+export type Medication = {
+  id: string;
+  name: string;
+  time: string;
+  intervalHours?: 4 | 6 | 8 | 12 | 24;
+  startDate?: string;
+  endDate?: string;
+};
+export type SessionEntry = {
+  id: string;
+  date: string;
+  minutes: number;
+  title: string;
+  bookId?: string;
+  pages?: number;
+  progressMode?: "pages" | "percent";
+  progressPercent?: number;
+  agendaBlockId?: string;
+  subjectId?: string;
+  learned?: string;
+};
+export type Subject = {
+  id: string;
+  name: string;
+  color: string;
+  weeklyGoalMin?: number;
+  dailyGoalMin?: number;
+  normalizedName?: string;
+};
+export type Exam = {
+  id: string;
+  subjectId: string;
+  subjectName?: string;
+  title: string;
+  date: string;
+  done?: boolean;
+};
 export type BookStatus = "lendo" | "concluido" | "quero";
 export type Quote = { id: string; text: string; page?: number };
-export type Book = { id: string; title: string; author: string; totalPages?: number | undefined; pagesRead: number; progressMode?: "pages" | "percent"; progressPercent?: number; cover?: string | undefined; status: BookStatus; rating?: number; quotes: Quote[]; createdAt: string };
-export type Trackers = { leitura: SessionEntry[]; estudos: SessionEntry[]; books?: Book[]; readingGoal?: number; subjects?: Subject[]; exams?: Exam[]; pomodoro?: { focus: number; pause: number } };
+export type Book = {
+  id: string;
+  title: string;
+  author: string;
+  totalPages?: number | undefined;
+  pagesRead: number;
+  progressMode?: "pages" | "percent";
+  progressPercent?: number;
+  cover?: string | undefined;
+  status: BookStatus;
+  rating?: number;
+  quotes: Quote[];
+  createdAt: string;
+};
+export type Trackers = {
+  leitura: SessionEntry[];
+  estudos: SessionEntry[];
+  books?: Book[];
+  readingGoal?: number;
+  subjects?: Subject[];
+  exams?: Exam[];
+  pomodoro?: { focus: number; pause: number };
+};
 export const emptyTrackers: Trackers = { leitura: [], estudos: [], books: [], readingGoal: 180 };
 
 export const emptyHealth: HealthLog = { waterGoal: 8, water: {}, sleep: {}, weight: {} };
@@ -57,12 +120,23 @@ export function dayScore(plan: Plan, habits: Habit[], log: HabitLog, dateKey: st
 }
 
 export function isActiveDay(plan: Plan, log: HabitLog, dateKey: string, habits?: Habit[]) {
-  const excluded = new Set((habits ?? []).filter((h) => h.countsForStreak === false).map((h) => h.id));
-  return (plan[dateKey] ?? []).some((b) => b.done) || (log[dateKey] ?? []).some((id) => !excluded.has(id));
+  const excluded = new Set(
+    (habits ?? []).filter((h) => h.countsForStreak === false).map((h) => h.id),
+  );
+  return (
+    (plan[dateKey] ?? []).some((b) => b.done) ||
+    (log[dateKey] ?? []).some((id) => !excluded.has(id))
+  );
 }
 
 /** Consecutive active days ending today (or yesterday, if today has nothing yet). */
-export function streak(plan: Plan, log: HabitLog, today: Date, habits?: Habit[], frozen?: Set<string>) {
+export function streak(
+  plan: Plan,
+  log: HabitLog,
+  today: Date,
+  habits?: Habit[],
+  frozen?: Set<string>,
+) {
   const on = (d: Date) => isActiveDay(plan, log, key(d), habits) || !!frozen?.has(key(d));
   let cursor = on(today) ? today : addDays(today, -1);
   let count = 0;
@@ -76,16 +150,32 @@ export function streak(plan: Plan, log: HabitLog, today: Date, habits?: Habit[],
 export { STREAK_MILESTONES } from "./xp";
 export const isMilestone = isStreakMilestone;
 
-export function goalProgress(goal: MonthGoal, history: WorkoutHistoryEntry[], log: HabitLog, plan: Plan = {}) {
+export function goalProgress(
+  goal: MonthGoal,
+  history: WorkoutHistoryEntry[],
+  log: HabitLog,
+  plan: Plan = {},
+) {
   if (goal.source === "workouts") {
     // Completed workout blocks in the week plan, plus finished sessions on days without such a block.
-    const doneDays = Object.entries(plan).filter(([d, blocks]) => d.startsWith(goal.month) && blocks.some((b) => b.kind === "treino" && b.done));
+    const doneDays = Object.entries(plan).filter(
+      ([d, blocks]) =>
+        d.startsWith(goal.month) && blocks.some((b) => b.kind === "treino" && b.done),
+    );
     const daysWithBlock = new Set(doneDays.map(([d]) => d));
-    const blocks = doneDays.reduce((n, [, b]) => n + b.filter((x) => x.kind === "treino" && x.done).length, 0);
-    const sessions = history.filter((h) => h.completedAt.slice(0, 7) === goal.month && !daysWithBlock.has(h.completedAt.slice(0, 10))).length;
+    const blocks = doneDays.reduce(
+      (n, [, b]) => n + b.filter((x) => x.kind === "treino" && x.done).length,
+      0,
+    );
+    const sessions = history.filter(
+      (h) =>
+        h.completedAt.slice(0, 7) === goal.month && !daysWithBlock.has(h.completedAt.slice(0, 10)),
+    ).length;
     return blocks + sessions;
   }
-  if (goal.source === "habits") return Object.entries(log).filter(([d, ids]) => d.startsWith(goal.month) && ids.length > 0).length;
+  if (goal.source === "habits")
+    return Object.entries(log).filter(([d, ids]) => d.startsWith(goal.month) && ids.length > 0)
+      .length;
   return goal.manual;
 }
 

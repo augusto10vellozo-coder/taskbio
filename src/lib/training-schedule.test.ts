@@ -1,12 +1,28 @@
 import { describe, expect, it } from "vitest";
-import { DEFAULT_WORKOUT_TIME, findWorkoutBlock, largestFreeGap, withWorkoutBlock, workoutTimeFor } from "./training-schedule";
+import {
+  DEFAULT_WORKOUT_TIME,
+  findWorkoutBlock,
+  largestFreeGap,
+  withWorkoutBlock,
+  workoutTimeFor,
+} from "./training-schedule";
 import type { Block, Plan } from "./trilha-data";
 
-const block = (over: Partial<Block> & Pick<Block, "id" | "time">): Block => ({ kind: "treino", title: "Treino", done: false, ...over });
+const block = (over: Partial<Block> & Pick<Block, "id" | "time">): Block => ({
+  kind: "treino",
+  title: "Treino",
+  done: false,
+  ...over,
+});
 
 describe("agendamento de treino", () => {
   it("encontra apenas o bloco de treino do dia", () => {
-    const plan: Plan = { "2026-11-05": [block({ id: "a", time: "07:00" }), { id: "m", time: "12:00", kind: "refeicao", title: "Almoço", done: false }] };
+    const plan: Plan = {
+      "2026-11-05": [
+        block({ id: "a", time: "07:00" }),
+        { id: "m", time: "12:00", kind: "refeicao", title: "Almoço", done: false },
+      ],
+    };
     expect(findWorkoutBlock("2026-11-05", plan)?.id).toBe("a");
     expect(findWorkoutBlock("2026-11-06", plan)).toBeUndefined();
   });
@@ -49,7 +65,14 @@ describe("agendamento de treino", () => {
   it("encontra o maior intervalo livre do dia", () => {
     const blocks: Block[] = [
       { id: "a", time: "07:00", kind: "refeicao", title: "Café", done: false },
-      { id: "b", time: "08:00", endTime: "12:00", kind: "compromisso", title: "Estudo", done: false },
+      {
+        id: "b",
+        time: "08:00",
+        endTime: "12:00",
+        kind: "compromisso",
+        title: "Estudo",
+        done: false,
+      },
       { id: "c", time: "19:00", kind: "treino", title: "Treino", done: false },
     ];
     expect(largestFreeGap(blocks)).toBe(7 * 60);

@@ -21,12 +21,20 @@ export const recordXp = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const ref = `${data.kind}:${data.ref}`;
     if (data.kind === "study") {
-      const { data: points, error } = await userRpc<number>(context.supabase, "record_my_study_xp", { _session_id: data.ref, _date: data.date, _on: data.on });
+      const { data: points, error } = await userRpc<number>(
+        context.supabase,
+        "record_my_study_xp",
+        { _session_id: data.ref, _date: data.date, _on: data.on },
+      );
       if (error) throw new Error("Não foi possível atualizar os pontos de estudo.");
       return { points: points ?? 0 };
     }
     if (data.kind === "reading") {
-      const { data: points, error } = await userRpc<number>(context.supabase, "record_my_reading_xp", { _session_id: data.ref, _date: data.date, _on: data.on });
+      const { data: points, error } = await userRpc<number>(
+        context.supabase,
+        "record_my_reading_xp",
+        { _session_id: data.ref, _date: data.date, _on: data.on },
+      );
       if (error) throw new Error("Não foi possível atualizar os pontos da leitura.");
       return { points: points ?? 0 };
     }
@@ -34,7 +42,11 @@ export const recordXp = createServerFn({ method: "POST" })
       const suffix = `:${data.date}`;
       if (!data.ref.endsWith(suffix)) return { points: 0 };
       const habitId = data.ref.slice(0, -suffix.length);
-      const { data: points, error } = await userRpc<number>(context.supabase, "record_my_habit_xp", { _habit_id: habitId, _date: data.date, _on: data.on });
+      const { data: points, error } = await userRpc<number>(
+        context.supabase,
+        "record_my_habit_xp",
+        { _habit_id: habitId, _date: data.date, _on: data.on },
+      );
       if (error) throw new Error("Não foi possível atualizar os pontos do hábito.");
       return { points: points ?? 0 };
     }
@@ -44,10 +56,16 @@ export const recordXp = createServerFn({ method: "POST" })
       return { points: 0 };
     }
     const today = brasiliaDay(new Date());
-    if (data.kind === "photo" && !data.photoPath?.startsWith(`${context.userId}/`)) return { points: 0 };
+    if (data.kind === "photo" && !data.photoPath?.startsWith(`${context.userId}/`))
+      return { points: 0 };
     const points = xpFor(data, today);
     if (points === 0) return { points: 0 };
-    const { data: granted, error } = await userRpc<number>(context.supabase, "award_my_xp", { _kind: data.kind, _ref: ref, _day: today, _points: points });
+    const { data: granted, error } = await userRpc<number>(context.supabase, "award_my_xp", {
+      _kind: data.kind,
+      _ref: ref,
+      _day: today,
+      _points: points,
+    });
     if (error) throw new Error("Não foi possível atualizar os pontos.");
     return { points: granted ?? 0 };
   });
@@ -58,7 +76,13 @@ export const getPersonalStatus = createServerFn({ method: "POST" })
   .handler(async ({ context }) => {
     const today = brasiliaDay(new Date());
     const [events, streak] = await Promise.all([
-      context.supabase.from("xp_events").select("points, day, legacy, kind").eq("user_id", context.userId).eq("day", today).eq("legacy", false).neq("kind", "saldo_inicial_migracao"),
+      context.supabase
+        .from("xp_events")
+        .select("points, day, legacy, kind")
+        .eq("user_id", context.userId)
+        .eq("day", today)
+        .eq("legacy", false)
+        .neq("kind", "saldo_inicial_migracao"),
       userRpc<number>(context.supabase, "routine_streak_me"),
     ]);
     if (events.error || streak.error) throw new Error("Não foi possível carregar sua pontuação.");

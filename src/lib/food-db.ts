@@ -2,12 +2,29 @@
 // averages for organization only. Format: name|kcal|prot|carb|gord|measures
 // measures: key:grams separated by commas (see MEASURE_LABELS).
 export type FoodMeasure = { label: string; grams: number };
-export type Food = { id: string; name: string; per100: { kcal: number; prot: number; carb: number; gord: number }; measures: FoodMeasure[]; custom?: boolean };
+export type Food = {
+  id: string;
+  name: string;
+  per100: { kcal: number; prot: number; carb: number; gord: number };
+  measures: FoodMeasure[];
+  custom?: boolean;
+};
 
 export const MEASURE_LABELS: Record<string, string> = {
-  un: "1 unidade", fatia: "1 fatia", cs: "1 colher de sopa", cc: "1 colher de chá", concha: "1 concha",
-  copo: "1 copo (200 ml)", xic: "1 xícara", esc: "1 escumadeira", ped: "1 pedaço", file: "1 filé",
-  prato: "1 prato", pote: "1 pote", lata: "1 lata", porcao: "1 porção",
+  un: "1 unidade",
+  fatia: "1 fatia",
+  cs: "1 colher de sopa",
+  cc: "1 colher de chá",
+  concha: "1 concha",
+  copo: "1 copo (200 ml)",
+  xic: "1 xícara",
+  esc: "1 escumadeira",
+  ped: "1 pedaço",
+  file: "1 filé",
+  prato: "1 prato",
+  pote: "1 pote",
+  lata: "1 lata",
+  porcao: "1 porção",
 };
 
 const RAW = `Arroz branco cozido|128|2.5|28.1|0.2|esc:90,cs:25,concha:120
@@ -253,18 +270,36 @@ Mingau de aveia|90|3.5|14|2.3|prato:250
 Arroz doce|160|3.5|30|3|cs:40
 Canjica|130|3|24|2.5|concha:150`;
 
-const slug = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-");
+const slug = (s: string) =>
+  s
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-");
 
 export const FOODS: Food[] = RAW.split("\n").map((line) => {
-  const [name = "", kcal = "0", prot = "0", carb = "0", gord = "0", measures = ""] = line.split("|");
+  const [name = "", kcal = "0", prot = "0", carb = "0", gord = "0", measures = ""] =
+    line.split("|");
   return {
-    id: slug(name), name,
+    id: slug(name),
+    name,
     per100: { kcal: +kcal, prot: +prot, carb: +carb, gord: +gord },
-    measures: (measures ?? "").split(",").filter(Boolean).map((m) => { const [k = "", g = "0"] = m.split(":"); return { label: MEASURE_LABELS[k] ?? k, grams: +g }; }),
+    measures: (measures ?? "")
+      .split(",")
+      .filter(Boolean)
+      .map((m) => {
+        const [k = "", g = "0"] = m.split(":");
+        return { label: MEASURE_LABELS[k] ?? k, grams: +g };
+      }),
   };
 });
 
-export const normalizeSearch = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+export const normalizeSearch = (s: string) =>
+  s
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
 
 export function searchFoods(query: string, extra: Food[] = [], limit = 8) {
   const q = normalizeSearch(query);
@@ -273,12 +308,20 @@ export function searchFoods(query: string, extra: Food[] = [], limit = 8) {
   return [...extra, ...FOODS]
     .map((f) => ({ f, n: normalizeSearch(f.name) }))
     .filter(({ n }) => words.every((w) => n.includes(w)))
-    .sort((a, b) => Number(!a.n.startsWith(q)) - Number(!b.n.startsWith(q)) || a.n.length - b.n.length)
-    .slice(0, limit).map(({ f }) => f);
+    .sort(
+      (a, b) => Number(!a.n.startsWith(q)) - Number(!b.n.startsWith(q)) || a.n.length - b.n.length,
+    )
+    .slice(0, limit)
+    .map(({ f }) => f);
 }
 
 const r1 = (n: number) => Math.round(n * 10) / 10;
 export function foodMacros(food: Pick<Food, "per100">, grams: number) {
   const k = Math.max(0, grams) / 100;
-  return { kcal: Math.round(food.per100.kcal * k), prot: r1(food.per100.prot * k), carb: r1(food.per100.carb * k), gord: r1(food.per100.gord * k) };
+  return {
+    kcal: Math.round(food.per100.kcal * k),
+    prot: r1(food.per100.prot * k),
+    carb: r1(food.per100.carb * k),
+    gord: r1(food.per100.gord * k),
+  };
 }

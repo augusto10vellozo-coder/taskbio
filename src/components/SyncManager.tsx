@@ -9,7 +9,28 @@ type SyncStatus = "idle" | "loading" | "saved" | "error";
 
 export function SyncManager() {
   const { user, loading: authLoading } = useAuth();
-  const { plan, workouts, meals, goal, preferredModality, workoutHistory, shoppingItems, weeklyGoals, habits, habitLog, monthGoals, health, modules, exerciseLog, customFoods, finance, trackers, notifPrefs, ready, hydrate } = useTaskBio();
+  const {
+    plan,
+    workouts,
+    meals,
+    goal,
+    preferredModality,
+    workoutHistory,
+    shoppingItems,
+    weeklyGoals,
+    habits,
+    habitLog,
+    monthGoals,
+    health,
+    modules,
+    exerciseLog,
+    customFoods,
+    finance,
+    trackers,
+    notifPrefs,
+    ready,
+    hydrate,
+  } = useTaskBio();
   const [, setStatus] = useState<SyncStatus>("idle");
   const initializedUser = useRef<string | null>(null);
   const skipNextPush = useRef(false);
@@ -22,7 +43,11 @@ export function SyncManager() {
     setFailSince((v) => v ?? Date.now());
     window.setTimeout(retry, 5000);
   };
-  const ok = () => { setStatus("saved"); setFailSince(null); window.dispatchEvent(new Event("taskbio:synced")); };
+  const ok = () => {
+    setStatus("saved");
+    setFailSince(null);
+    window.dispatchEvent(new Event("taskbio:synced"));
+  };
   useEffect(() => {
     if (failSince === null) return;
     setNow(Date.now());
@@ -38,61 +63,110 @@ export function SyncManager() {
 
     let active = true;
     setStatus("loading");
-    supabase.from("user_data").select("plan, workouts, meals, shopping_state, settings").eq("user_id", user.id).maybeSingle().then(async ({ data, error }) => {
-      if (!active) return;
-      if (error) {
-        fail(() => setLoadTick((n) => n + 1));
-        return;
-      }
-
-      if (data) {
-        const settings = data.settings && typeof data.settings === "object" && !Array.isArray(data.settings)
-          ? data.settings as Record<string, unknown>
-          : {};
-        skipNextPush.current = true;
-        hydrate({
-          plan: data.plan as unknown as TaskBioState["plan"],
-          workouts: data.workouts as unknown as TaskBioState["workouts"],
-          meals: data.meals as unknown as TaskBioState["meals"],
-          goal: typeof settings["goal"] === "string" ? settings["goal"] : null,
-          preferredModality: typeof settings["preferredModality"] === "string" ? settings["preferredModality"] : null,
-          workoutHistory: Array.isArray(settings["workoutHistory"])
-            ? settings["workoutHistory"] as unknown as TaskBioState["workoutHistory"]
-            : [],
-          shoppingItems: Array.isArray(data.shopping_state)
-            ? data.shopping_state as unknown as TaskBioState["shoppingItems"]
-            : [],
-          weeklyGoals: settings["weeklyGoals"] && typeof settings["weeklyGoals"] === "object" ? settings["weeklyGoals"] as TaskBioState["weeklyGoals"] : { workouts: 3, mealDays: 5, restDays: 2 },
-          ...(Array.isArray(settings["habits"]) ? { habits: settings["habits"] as TaskBioState["habits"] } : {}),
-          ...(settings["habitLog"] && typeof settings["habitLog"] === "object" ? { habitLog: settings["habitLog"] as TaskBioState["habitLog"] } : {}),
-          ...(Array.isArray(settings["monthGoals"]) ? { monthGoals: settings["monthGoals"] as TaskBioState["monthGoals"] } : {}),
-          ...(settings["health"] && typeof settings["health"] === "object" ? { health: settings["health"] as TaskBioState["health"] } : {}),
-          ...(Array.isArray(settings["customFoods"]) ? { customFoods: settings["customFoods"] as TaskBioState["customFoods"] } : {}),
-          ...(Array.isArray(settings["exerciseLog"]) ? { exerciseLog: settings["exerciseLog"] as TaskBioState["exerciseLog"] } : {}),
-          ...(settings["finance"] && typeof settings["finance"] === "object" ? { finance: settings["finance"] as TaskBioState["finance"] } : {}),
-          ...(settings["trackers"] && typeof settings["trackers"] === "object" ? { trackers: settings["trackers"] as TaskBioState["trackers"] } : {}),
-          ...(settings["modules"] && typeof settings["modules"] === "object" ? { modules: settings["modules"] as TaskBioState["modules"] } : {}),
-          ...(settings["notifPrefs"] && typeof settings["notifPrefs"] === "object" ? { notifPrefs: settings["notifPrefs"] as TaskBioState["notifPrefs"] } : {}),
-        });
-      } else {
-        const { error: insertError } = await supabase.from("user_data").insert({
-          user_id: user.id,
-          plan: plan as unknown as Json,
-          workouts: workouts as unknown as Json,
-          meals: meals as unknown as Json,
-          shopping_state: shoppingItems as unknown as Json,
-          settings: { goal, preferredModality, workoutHistory, weeklyGoals, habits, habitLog, monthGoals, health, modules, exerciseLog, customFoods, finance, trackers, notifPrefs } as unknown as Json,
-        });
-        if (insertError) {
+    supabase
+      .from("user_data")
+      .select("plan, workouts, meals, shopping_state, settings")
+      .eq("user_id", user.id)
+      .maybeSingle()
+      .then(async ({ data, error }) => {
+        if (!active) return;
+        if (error) {
           fail(() => setLoadTick((n) => n + 1));
           return;
         }
-      }
-      initializedUser.current = user.id;
-      ok();
-    });
 
-    return () => { active = false; };
+        if (data) {
+          const settings =
+            data.settings && typeof data.settings === "object" && !Array.isArray(data.settings)
+              ? (data.settings as Record<string, unknown>)
+              : {};
+          skipNextPush.current = true;
+          hydrate({
+            plan: data.plan as unknown as TaskBioState["plan"],
+            workouts: data.workouts as unknown as TaskBioState["workouts"],
+            meals: data.meals as unknown as TaskBioState["meals"],
+            goal: typeof settings["goal"] === "string" ? settings["goal"] : null,
+            preferredModality:
+              typeof settings["preferredModality"] === "string"
+                ? settings["preferredModality"]
+                : null,
+            workoutHistory: Array.isArray(settings["workoutHistory"])
+              ? (settings["workoutHistory"] as unknown as TaskBioState["workoutHistory"])
+              : [],
+            shoppingItems: Array.isArray(data.shopping_state)
+              ? (data.shopping_state as unknown as TaskBioState["shoppingItems"])
+              : [],
+            weeklyGoals:
+              settings["weeklyGoals"] && typeof settings["weeklyGoals"] === "object"
+                ? (settings["weeklyGoals"] as TaskBioState["weeklyGoals"])
+                : { workouts: 3, mealDays: 5, restDays: 2 },
+            ...(Array.isArray(settings["habits"])
+              ? { habits: settings["habits"] as TaskBioState["habits"] }
+              : {}),
+            ...(settings["habitLog"] && typeof settings["habitLog"] === "object"
+              ? { habitLog: settings["habitLog"] as TaskBioState["habitLog"] }
+              : {}),
+            ...(Array.isArray(settings["monthGoals"])
+              ? { monthGoals: settings["monthGoals"] as TaskBioState["monthGoals"] }
+              : {}),
+            ...(settings["health"] && typeof settings["health"] === "object"
+              ? { health: settings["health"] as TaskBioState["health"] }
+              : {}),
+            ...(Array.isArray(settings["customFoods"])
+              ? { customFoods: settings["customFoods"] as TaskBioState["customFoods"] }
+              : {}),
+            ...(Array.isArray(settings["exerciseLog"])
+              ? { exerciseLog: settings["exerciseLog"] as TaskBioState["exerciseLog"] }
+              : {}),
+            ...(settings["finance"] && typeof settings["finance"] === "object"
+              ? { finance: settings["finance"] as TaskBioState["finance"] }
+              : {}),
+            ...(settings["trackers"] && typeof settings["trackers"] === "object"
+              ? { trackers: settings["trackers"] as TaskBioState["trackers"] }
+              : {}),
+            ...(settings["modules"] && typeof settings["modules"] === "object"
+              ? { modules: settings["modules"] as TaskBioState["modules"] }
+              : {}),
+            ...(settings["notifPrefs"] && typeof settings["notifPrefs"] === "object"
+              ? { notifPrefs: settings["notifPrefs"] as TaskBioState["notifPrefs"] }
+              : {}),
+          });
+        } else {
+          const { error: insertError } = await supabase.from("user_data").insert({
+            user_id: user.id,
+            plan: plan as unknown as Json,
+            workouts: workouts as unknown as Json,
+            meals: meals as unknown as Json,
+            shopping_state: shoppingItems as unknown as Json,
+            settings: {
+              goal,
+              preferredModality,
+              workoutHistory,
+              weeklyGoals,
+              habits,
+              habitLog,
+              monthGoals,
+              health,
+              modules,
+              exerciseLog,
+              customFoods,
+              finance,
+              trackers,
+              notifPrefs,
+            } as unknown as Json,
+          });
+          if (insertError) {
+            fail(() => setLoadTick((n) => n + 1));
+            return;
+          }
+        }
+        initializedUser.current = user.id;
+        ok();
+      });
+
+    return () => {
+      active = false;
+    };
   }, [authLoading, ready, user?.id, loadTick]);
 
   useEffect(() => {
@@ -109,19 +183,72 @@ export function SyncManager() {
         workouts: workouts as unknown as Json,
         meals: meals as unknown as Json,
         shopping_state: shoppingItems as unknown as Json,
-        settings: { goal, preferredModality, workoutHistory, weeklyGoals, habits, habitLog, monthGoals, health, modules, exerciseLog, customFoods, finance, trackers, notifPrefs } as unknown as Json,
+        settings: {
+          goal,
+          preferredModality,
+          workoutHistory,
+          weeklyGoals,
+          habits,
+          habitLog,
+          monthGoals,
+          health,
+          modules,
+          exerciseLog,
+          customFoods,
+          finance,
+          trackers,
+          notifPrefs,
+        } as unknown as Json,
         updated_at: new Date().toISOString(),
       });
-      if (error) fail(() => setPushTick((n) => n + 1)); else ok();
+      if (error) fail(() => setPushTick((n) => n + 1));
+      else ok();
     }, 900);
     return () => window.clearTimeout(timer);
-  }, [goal, meals, plan, preferredModality, shoppingItems, user, weeklyGoals, workoutHistory, workouts, habits, habitLog, monthGoals, health, modules, exerciseLog, customFoods, finance, trackers, notifPrefs, pushTick]);
+  }, [
+    goal,
+    meals,
+    plan,
+    preferredModality,
+    shoppingItems,
+    user,
+    weeklyGoals,
+    workoutHistory,
+    workouts,
+    habits,
+    habitLog,
+    monthGoals,
+    health,
+    modules,
+    exerciseLog,
+    customFoods,
+    finance,
+    trackers,
+    notifPrefs,
+    pushTick,
+  ]);
 
   if (!user || failSince === null) return null;
-  const retryNow = () => { if (initializedUser.current === user.id) setPushTick((n) => n + 1); else setLoadTick((n) => n + 1); };
-  return <div className="fixed bottom-[calc(4.75rem+env(safe-area-inset-bottom))] left-1/2 z-50 flex max-w-[calc(100%-2rem)] -translate-x-1/2 items-center gap-2 rounded-full bg-card/95 px-3 py-1.5 text-xs font-medium text-ink shadow-md ring-1 ring-line backdrop-blur xl:bottom-4" role="alert">
-    <CloudOff className="size-3.5 shrink-0 text-destructive" />
-    <span>Falha ao salvar — tentando novamente...</span>
-    {now - failSince > 30000 && <button type="button" onClick={retryNow} className="min-h-8 rounded-full bg-brand/15 px-3 text-brand-deep">Tentar novamente</button>}
-  </div>;
+  const retryNow = () => {
+    if (initializedUser.current === user.id) setPushTick((n) => n + 1);
+    else setLoadTick((n) => n + 1);
+  };
+  return (
+    <div
+      className="fixed bottom-[calc(4.75rem+env(safe-area-inset-bottom))] left-1/2 z-50 flex max-w-[calc(100%-2rem)] -translate-x-1/2 items-center gap-2 rounded-full bg-card/95 px-3 py-1.5 text-xs font-medium text-ink shadow-md ring-1 ring-line backdrop-blur xl:bottom-4"
+      role="alert"
+    >
+      <CloudOff className="size-3.5 shrink-0 text-destructive" />
+      <span>Falha ao salvar — tentando novamente...</span>
+      {now - failSince > 30000 && (
+        <button
+          type="button"
+          onClick={retryNow}
+          className="min-h-8 rounded-full bg-brand/15 px-3 text-brand-deep"
+        >
+          Tentar novamente
+        </button>
+      )}
+    </div>
+  );
 }

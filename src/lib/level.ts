@@ -35,6 +35,17 @@ export function levelInfo(totalXp: number): LevelInfo {
   };
 }
 
-const TITLES = ["Início", "Constância", "Ritmo", "Disciplina", "Foco", "Equilíbrio", "Resistência", "Domínio", "Maestria"] as const;
+const TITLES = [
+  "Início",
+  "Constância",
+  "Ritmo",
+  "Disciplina",
+  "Foco",
+  "Equilíbrio",
+  "Resistência",
+  "Domínio",
+  "Maestria",
+] as const;
 
-export const levelTitle = (level: number) => TITLES[Math.min(Math.max(level, 1), TITLES.length) - 1];
+export const levelTitle = (level: number) =>
+  TITLES[Math.min(Math.max(level, 1), TITLES.length) - 1];

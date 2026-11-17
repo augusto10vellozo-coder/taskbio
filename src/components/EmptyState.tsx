@@ -15,15 +15,34 @@ type EmptyStateProps = {
 };
 
 /** Single reusable empty state: icon, title, one context line, one primary action, optional text link. */
-export function EmptyState({ icon: Icon, title, context, actionLabel, onAction, secondaryLabel, onSecondary }: EmptyStateProps) {
+export function EmptyState({
+  icon: Icon,
+  title,
+  context,
+  actionLabel,
+  onAction,
+  secondaryLabel,
+  onSecondary,
+}: EmptyStateProps) {
   return (
     <div className="mx-auto flex max-w-80 flex-col items-center py-12 text-center">
       <Icon className="size-10 text-steel" strokeWidth={1.5} aria-hidden />
       <h2 className="mt-4 truncate text-[17px] font-semibold text-ink">{title}</h2>
       <p className="mt-2 line-clamp-2 text-sm leading-6 text-steel">{context}</p>
-      <Button className="mt-5 h-11 rounded-xl bg-accent px-5 text-accent-foreground shadow-none hover:bg-accent/90" onClick={onAction}>{actionLabel}</Button>
+      <Button
+        className="mt-5 h-11 rounded-xl bg-accent px-5 text-accent-foreground shadow-none hover:bg-accent/90"
+        onClick={onAction}
+      >
+        {actionLabel}
+      </Button>
       {secondaryLabel && onSecondary && (
-        <button type="button" className="mt-3 min-h-11 text-[13px] text-steel underline-offset-4 hover:underline" onClick={onSecondary}>{secondaryLabel}</button>
+        <button
+          type="button"
+          className="mt-3 min-h-11 text-[13px] text-steel underline-offset-4 hover:underline"
+          onClick={onSecondary}
+        >
+          {secondaryLabel}
+        </button>
       )}
     </div>
   );

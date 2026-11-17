@@ -10,7 +10,12 @@ describe("agenda completion synchronization", () => {
       { id: "2", time: "10:00", kind: "compromisso", title: "Estudar", done: false },
       { id: "3", time: "12:00", kind: "refeicao", title: "Almoço", done: false },
     ];
-    expect(agendaSummary(blocks)).toMatchObject({ total: 3, completed: 1, workouts: 1, percent: 33 });
+    expect(agendaSummary(blocks)).toMatchObject({
+      total: 3,
+      completed: 1,
+      workouts: 1,
+      percent: 33,
+    });
   });
   it("a completed timeline workout feeds score, streak and monthly progress from the same plan", () => {
     const date = "2026-10-13";
@@ -20,6 +25,21 @@ describe("agenda completion synchronization", () => {
     expect(agendaSummary(plan[date])).toMatchObject({ completed: 1, workouts: 1, percent: 100 });
     expect(dayScore(plan, [], {}, date)).toBe(100);
     expect(streak(plan, {}, new Date(`${date}T12:00:00`))).toBe(1);
-    expect(goalProgress({ id: "g", month: "2026-10", title: "Treinar", target: 12, unit: "treinos", source: "workouts", manual: 0 }, [], {}, plan)).toBe(1);
+    expect(
+      goalProgress(
+        {
+          id: "g",
+          month: "2026-10",
+          title: "Treinar",
+          target: 12,
+          unit: "treinos",
+          source: "workouts",
+          manual: 0,
+        },
+        [],
+        {},
+        plan,
+      ),
+    ).toBe(1);
   });
 });

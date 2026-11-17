@@ -9,7 +9,9 @@ import { QuickRegisterSheet } from "@/components/QuickRegisterSheet";
 
 export const Route = createFileRoute("/")({
   validateSearch: (search: Record<string, unknown>): { dia?: string } =>
-    typeof search["dia"] === "string" && /^\d{4}-\d{2}-\d{2}$/.test(search["dia"]) ? { dia: search["dia"] as string } : {},
+    typeof search["dia"] === "string" && /^\d{4}-\d{2}-\d{2}$/.test(search["dia"])
+      ? { dia: search["dia"] as string }
+      : {},
   head: () => ({
     meta: [
       { title: "Início — TaskBio" },
@@ -37,25 +39,73 @@ function Inicio() {
   const [installed, setInstalled] = useState(false);
   const [quickOpen, setQuickOpen] = useState(false);
   useEffect(() => {
-    setInstalled(window.matchMedia("(display-mode: standalone)").matches || (navigator as Navigator & { standalone?: boolean }).standalone === true);
-    const onPrompt = (event: Event) => { event.preventDefault(); setInstallPrompt(event); };
+    setInstalled(
+      window.matchMedia("(display-mode: standalone)").matches ||
+        (navigator as Navigator & { standalone?: boolean }).standalone === true,
+    );
+    const onPrompt = (event: Event) => {
+      event.preventDefault();
+      setInstallPrompt(event);
+    };
     window.addEventListener("beforeinstallprompt", onPrompt);
     return () => window.removeEventListener("beforeinstallprompt", onPrompt);
   }, []);
 
   if (loading) {
-    return <main className="mx-auto max-w-6xl px-5 py-12 sm:px-8"><div className="h-48 animate-pulse rounded-2xl bg-mist" /></main>;
+    return (
+      <main className="mx-auto max-w-6xl px-5 py-12 sm:px-8">
+        <div className="h-48 animate-pulse rounded-2xl bg-mist" />
+      </main>
+    );
   }
 
   return (
     <>
       <main className="mx-auto max-w-6xl px-5 pb-20 sm:px-8">
         <TodayPanel initialDay={dia} />
-        {!user && <div className="mt-6 flex flex-wrap items-center justify-between gap-2 border-t border-line pt-4 text-sm text-steel"><span>Entre para salvar sua agenda e acessá-la em outros dispositivos.</span><Button asChild variant="outline" size="sm"><Link to="/auth">Entrar e sincronizar <ArrowRight /></Link></Button></div>}
-        {installPrompt && !installed && <div className="mt-4 flex items-center justify-between gap-3 border-t border-line pt-4 text-sm"><span>Instalar TaskBio neste aparelho</span><Button variant="outline" size="sm" onClick={async () => { const prompt = installPrompt as Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: string }> }; await prompt.prompt(); await prompt.userChoice; setInstallPrompt(null); }}>Instalar</Button></div>}
+        {!user && (
+          <div className="mt-6 flex flex-wrap items-center justify-between gap-2 border-t border-line pt-4 text-sm text-steel">
+            <span>Entre para salvar sua agenda e acessá-la em outros dispositivos.</span>
+            <Button asChild variant="outline" size="sm">
+              <Link to="/auth">
+                Entrar e sincronizar <ArrowRight />
+              </Link>
+            </Button>
+          </div>
+        )}
+        {installPrompt && !installed && (
+          <div className="mt-4 flex items-center justify-between gap-3 border-t border-line pt-4 text-sm">
+            <span>Instalar TaskBio neste aparelho</span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={async () => {
+                const prompt = installPrompt as Event & {
+                  prompt: () => Promise<void>;
+                  userChoice: Promise<{ outcome: string }>;
+                };
+                await prompt.prompt();
+                await prompt.userChoice;
+                setInstallPrompt(null);
+              }}
+            >
+              Instalar
+            </Button>
+          </div>
+        )}
       </main>
       <AdSlot page="/" slot="home-inline" />
-      {user && <Button size="icon" className="fixed right-5 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-40 size-14 rounded-full border border-brand sm:right-8 xl:bottom-6" aria-label="Registrar agora" title="Registrar agora" onClick={() => setQuickOpen(true)}><Plus className="size-6" /></Button>}
+      {user && (
+        <Button
+          size="icon"
+          className="fixed right-5 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-40 size-14 rounded-full border border-brand sm:right-8 xl:bottom-6"
+          aria-label="Registrar agora"
+          title="Registrar agora"
+          onClick={() => setQuickOpen(true)}
+        >
+          <Plus className="size-6" />
+        </Button>
+      )}
       <QuickRegisterSheet open={quickOpen} onClose={() => setQuickOpen(false)} />
     </>
   );

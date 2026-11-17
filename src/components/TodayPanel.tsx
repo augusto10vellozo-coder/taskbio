@@ -19,7 +19,9 @@ export function TodayPanel({ initialDay }: { initialDay?: string | undefined }) 
   const [adding, setAdding] = useState(false);
   const [day, setDay] = useState<string | null>(null);
   useEffect(() => setNow(new Date()), []);
-  useEffect(() => { if (initialDay) setDay(initialDay); }, [initialDay]);
+  useEffect(() => {
+    if (initialDay) setDay(initialDay);
+  }, [initialDay]);
   const today = now ? toDateKey(now) : "";
   const dateKey = day ?? today;
   const isToday = dateKey === today;
@@ -41,15 +43,23 @@ export function TodayPanel({ initialDay }: { initialDay?: string | undefined }) 
     <section>
       <AgendaGreeting date={parseISO(dateKey)} />
       <div className="flex items-center justify-between gap-2 pb-1">
-        <Button variant="ghost" size="icon" aria-label="Dia anterior" onClick={() => shift(-1)}><ChevronLeft /></Button>
+        <Button variant="ghost" size="icon" aria-label="Dia anterior" onClick={() => shift(-1)}>
+          <ChevronLeft />
+        </Button>
         {isToday ? (
           <span className="text-xs font-medium uppercase tracking-wide text-steel">Hoje</span>
         ) : (
-          <button type="button" onClick={() => setDay(today)} className="text-xs font-medium text-brand-deep underline underline-offset-4">
+          <button
+            type="button"
+            onClick={() => setDay(today)}
+            className="text-xs font-medium text-brand-deep underline underline-offset-4"
+          >
             Voltar para hoje
           </button>
         )}
-        <Button variant="ghost" size="icon" aria-label="Próximo dia" onClick={() => shift(1)}><ChevronRight /></Button>
+        <Button variant="ghost" size="icon" aria-label="Próximo dia" onClick={() => shift(1)}>
+          <ChevronRight />
+        </Button>
       </div>
       <AgendaDayOverview dateKey={dateKey} isToday={isToday} />
       {isToday && <ReviewCard />}
@@ -59,5 +69,11 @@ export function TodayPanel({ initialDay }: { initialDay?: string | undefined }) 
 }
 
 export function Tick({ on }: { on: boolean }) {
-  return <span className={`grid size-6 shrink-0 place-items-center rounded-md ring-1 transition-all duration-200 ${on ? "scale-100 bg-brand text-primary-foreground ring-brand" : "ring-line"}`}>{on && <Check className="size-4 animate-in zoom-in-50" />}</span>;
+  return (
+    <span
+      className={`grid size-6 shrink-0 place-items-center rounded-md ring-1 transition-all duration-200 ${on ? "scale-100 bg-brand text-primary-foreground ring-brand" : "ring-line"}`}
+    >
+      {on && <Check className="size-4 animate-in zoom-in-50" />}
+    </span>
+  );
 }

@@ -1,4 +1,11 @@
-import { createContext, useContext, useEffect, useState, type Context, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  type Context,
+  type ReactNode,
+} from "react";
 
 export type ThemePreference = "light" | "dark" | "system";
 export type ResolvedTheme = "light" | "dark";
@@ -8,7 +15,9 @@ type ThemeContextValue = {
   setTheme: (theme: ThemePreference) => void;
 };
 const contextKey = "__trilha_theme_context__";
-const globalContexts = globalThis as typeof globalThis & { [contextKey]?: Context<ThemeContextValue | null> };
+const globalContexts = globalThis as typeof globalThis & {
+  [contextKey]?: Context<ThemeContextValue | null>;
+};
 const ThemeContext = globalContexts[contextKey] ?? createContext<ThemeContextValue | null>(null);
 globalContexts[contextKey] = ThemeContext;
 
@@ -57,7 +66,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       /* armazenamento indisponível */
     }
   };
-  return <ThemeContext.Provider value={{ theme, resolved, setTheme: update }}>{children}</ThemeContext.Provider>;
+  return (
+    <ThemeContext.Provider value={{ theme, resolved, setTheme: update }}>
+      {children}
+    </ThemeContext.Provider>
+  );
 }
 
 export function useThemePreference() {

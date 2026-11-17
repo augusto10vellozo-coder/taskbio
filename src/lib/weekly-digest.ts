@@ -32,7 +32,9 @@ export type WeekStats = {
 /** Counts the week from the synced data. Never invents values for missing days. */
 export function weekStats(plan: unknown, settings: unknown, keys: string[]): WeekStats {
   const p = (plan && typeof plan === "object" ? plan : {}) as Record<string, Block[] | undefined>;
-  const s = (settings && typeof settings === "object" ? settings : {}) as { habitLog?: Record<string, string[]> };
+  const s = (settings && typeof settings === "object" ? settings : {}) as {
+    habitLog?: Record<string, string[]>;
+  };
   const log = s.habitLog && typeof s.habitLog === "object" ? s.habitLog : {};
 
   let daysActive = 0;
@@ -58,4 +60,5 @@ export function weekStats(plan: unknown, settings: unknown, keys: string[]): Wee
 }
 
 /** A week worth mentioning: at least one action. Dormant accounts are not emailed. */
-export const hasActivity = (stats: WeekStats) => stats.daysActive > 0 || stats.done > 0 || stats.habits > 0;
+export const hasActivity = (stats: WeekStats) =>
+  stats.daysActive > 0 || stats.done > 0 || stats.habits > 0;

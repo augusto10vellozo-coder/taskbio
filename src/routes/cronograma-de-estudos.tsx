@@ -76,8 +76,15 @@ export const Route = createFileRoute("/cronograma-de-estudos")({
         content:
           "Passo a passo para montar um cronograma de estudos realista: horas reais, blocos curtos, agenda e revisão em 1, 7 e 30 dias. Com exemplo de semana.",
       },
-      { property: "og:title", content: "Como montar um cronograma de estudos que você consegue cumprir" },
-      { property: "og:description", content: "Seis passos para um cronograma realista, com exemplo de semana e revisão espaçada." },
+      {
+        property: "og:title",
+        content: "Como montar um cronograma de estudos que você consegue cumprir",
+      },
+      {
+        property: "og:description",
+        content:
+          "Seis passos para um cronograma realista, com exemplo de semana e revisão espaçada.",
+      },
       { property: "og:type", content: "article" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -89,22 +96,25 @@ export const Route = createFileRoute("/cronograma-de-estudos")({
 function Page() {
   return (
     <main className="mx-auto max-w-3xl px-5 pb-20 pt-10 sm:px-8">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
 
       <p className="text-xs font-medium uppercase tracking-[0.18em] text-brand-deep">Guia</p>
       <h1 className="mt-3 font-display text-3xl font-semibold leading-tight sm:text-4xl">
         Como montar um cronograma de estudos que você consiga cumprir
       </h1>
       <p className="mt-4 text-base leading-7 text-steel">
-        Montar um cronograma é fácil. Cumprir é a parte difícil. Este guia mostra seis passos para criar
-        um plano que sobrevive à segunda semana — que é onde a maioria desiste.
+        Montar um cronograma é fácil. Cumprir é a parte difícil. Este guia mostra seis passos para
+        criar um plano que sobrevive à segunda semana — que é onde a maioria desiste.
       </p>
 
       <div className="mt-8 rounded-xl bg-brand-soft p-5">
         <p className="text-sm font-semibold text-brand-deep">O erro mais comum</p>
         <p className="mt-1.5 text-sm leading-6 text-steel">
-          Planejar para o dia ideal. Você reserva 4 horas, mas tem 1h30 de verdade. Na primeira semana dá
-          certo; na segunda, o plano já está atrasado e você desiste.
+          Planejar para o dia ideal. Você reserva 4 horas, mas tem 1h30 de verdade. Na primeira
+          semana dá certo; na segunda, o plano já está atrasado e você desiste.
         </p>
       </div>
 
@@ -124,7 +134,12 @@ function Page() {
       <p className="mt-3 text-base leading-7 text-steel">
         Cinco matérias, uma pessoa que trabalha e tem cerca de uma hora por dia:
       </p>
-      <div className="mt-4 overflow-x-auto rounded-xl ring-1 ring-line" role="region" aria-label="Exemplo de cronograma semanal" tabIndex={0}>
+      <div
+        className="mt-4 overflow-x-auto rounded-xl ring-1 ring-line"
+        role="region"
+        aria-label="Exemplo de cronograma semanal"
+        tabIndex={0}
+      >
         <table className="w-full min-w-96 text-left text-sm">
           <thead className="bg-mist text-steel">
             <tr>
@@ -153,8 +168,8 @@ function Page() {
         </table>
       </div>
       <p className="mt-3 text-sm leading-6 text-steel">
-        Repare no domingo vazio: ele não é folga, é a válvula de escape. É o que impede um imprevisto de
-        derrubar o plano todo.
+        Repare no domingo vazio: ele não é folga, é a válvula de escape. É o que impede um
+        imprevisto de derrubar o plano todo.
       </p>
 
       <h2 className="mt-12 font-display text-2xl font-semibold">Perguntas frequentes</h2>
@@ -169,7 +184,10 @@ function Page() {
 
       <p className="mt-8 text-base leading-7 text-steel">
         Se quiser entender o que um app precisa fazer para sustentar esse plano, veja{" "}
-        <Link to="/app-rotina-de-estudos" className="font-medium text-brand-deep underline underline-offset-4">
+        <Link
+          to="/app-rotina-de-estudos"
+          className="font-medium text-brand-deep underline underline-offset-4"
+        >
           app de rotina de estudos: o que resolve de verdade
         </Link>
         .

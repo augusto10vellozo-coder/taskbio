@@ -1,7 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 
 export const PUBLIC_PATHS = ["/", "/sobre", "/contato", "/privacidade", "/termos"] as const;
-export type PublicPath = typeof PUBLIC_PATHS[number];
+export type PublicPath = (typeof PUBLIC_PATHS)[number];
 export type PrivacyChoice = { analytics: boolean; version: 1 };
 
 const STORAGE_KEY = "trilha:privacy-choice";
@@ -12,7 +12,9 @@ export function readPrivacyChoice(): PrivacyChoice | null {
   try {
     const value = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "null") as PrivacyChoice | null;
     return value?.version === 1 && typeof value.analytics === "boolean" ? value : null;
-  } catch { return null; }
+  } catch {
+    return null;
+  }
 }
 
 export function savePrivacyChoice(analytics: boolean): PrivacyChoice {
@@ -26,7 +28,13 @@ export function savePrivacyChoice(analytics: boolean): PrivacyChoice {
   return choice;
 }
 
-export async function recordPublicEvent(pagePath: PublicPath, eventType: "page_view" | "ad_click", adSlot?: string) {
+export async function recordPublicEvent(
+  pagePath: PublicPath,
+  eventType: "page_view" | "ad_click",
+  adSlot?: string,
+) {
   if (!readPrivacyChoice()?.analytics) return;
-  await supabase.from("public_events").insert({ page_path: pagePath, event_type: eventType, ad_slot: adSlot ?? null });
+  await supabase
+    .from("public_events")
+    .insert({ page_path: pagePath, event_type: eventType, ad_slot: adSlot ?? null });
 }

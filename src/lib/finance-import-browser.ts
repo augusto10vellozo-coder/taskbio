@@ -23,7 +23,11 @@ export async function readSpreadsheetRows(file: File): Promise<RawRow[]> {
     const book = XLSX.read(await file.arrayBuffer(), { type: "array" });
     const sheet = book.Sheets[book.SheetNames[0]!];
     if (!sheet) throw new Error("A planilha está vazia.");
-    const rows = XLSX.utils.sheet_to_json<(string | number | null)[]>(sheet, { header: 1, raw: true, defval: "" });
+    const rows = XLSX.utils.sheet_to_json<(string | number | null)[]>(sheet, {
+      header: 1,
+      raw: true,
+      defval: "",
+    });
     return rows
       .map((r) => r.map((v) => (v === null || v === undefined ? "" : String(v))))
       .filter((r) => r.some((v) => v.trim() !== ""));

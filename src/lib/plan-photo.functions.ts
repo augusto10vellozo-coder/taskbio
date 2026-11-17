@@ -5,7 +5,7 @@ import { consumeAiQuota, refundAiQuota } from "./ai-quota.server";
 
 export const interpretWorkoutPhoto = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator(input => z.object({ text: z.string().trim().min(1).max(40000) }).parse(input))
+  .inputValidator((input) => z.object({ text: z.string().trim().min(1).max(40000) }).parse(input))
   .handler(async ({ data, context }) => {
     const key = process.env["OPENAI_API_KEY"];
     if (!key) return { data: null, error: "A leitura automática ainda não está configurada." };

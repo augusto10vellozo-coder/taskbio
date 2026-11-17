@@ -18,7 +18,12 @@ const calendarAriaLabels = {
   labelPrevious: () => "Mês anterior",
   labelWeekday: (date: Date) => date.toLocaleDateString("pt-BR", { weekday: "long" }),
   labelDayButton: (date: Date) =>
-    date.toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long", year: "numeric" }),
+    date.toLocaleDateString("pt-BR", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    }),
   labelWeekNumber: (weekNumber: number) => `Semana ${weekNumber}`,
   labelWeekNumberHeader: () => "Semana",
 };

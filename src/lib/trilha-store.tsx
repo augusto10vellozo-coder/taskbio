@@ -20,7 +20,15 @@ import {
 } from "./trilha-data";
 import { addDays, isAfter, isWeekend, parseISO } from "date-fns";
 import { normalizePlan, toDateKey } from "./calendar-utils";
-import { emptyHealth, emptyTrackers, type Trackers, type Habit, type HabitLog, type HealthLog, type MonthGoal } from "./engagement";
+import {
+  emptyHealth,
+  emptyTrackers,
+  type Trackers,
+  type Habit,
+  type HabitLog,
+  type HealthLog,
+  type MonthGoal,
+} from "./engagement";
 import type { ModuleSettings } from "./modules";
 import { foodName } from "./meal-summary";
 import { saveMealRecord, unifyMealBlocks } from "./meal-link";
@@ -31,7 +39,13 @@ import type { Food } from "./food-db";
 import { emitBlockXp, emitXp, foodItemCount } from "./xp-client";
 import { emptyFinance, type FinanceState } from "./finance";
 import { defaultNotifPrefs, type NotifPrefs } from "./push-reminders";
-import { confirmMeal, undoMealConfirmation, skipPlannedMeal, repeatPlannedDays, copyPreviousMealWeek } from "./meal-planning";
+import {
+  confirmMeal,
+  undoMealConfirmation,
+  skipPlannedMeal,
+  repeatPlannedDays,
+  copyPreviousMealWeek,
+} from "./meal-planning";
 import { changeHabitMark, editHabit, normalizeHabits } from "./habits";
 import { applyReadingProgress } from "./reading";
 import type { SessionEntry } from "./engagement";
@@ -74,7 +88,13 @@ type Store = TaskBioState & {
   undoMeal: (date: string, blockId: string) => void;
   skipMeal: (date: string, blockId: string) => void;
   setDoneSets: (workoutId: string, exerciseId: string, doneSets: number, date?: string) => void;
-  setSeries: (workoutId: string, exerciseId: string, date: string, index: number, patch: { done?: boolean; loadKg?: number | undefined }) => void;
+  setSeries: (
+    workoutId: string,
+    exerciseId: string,
+    date: string,
+    index: number,
+    patch: { done?: boolean; loadKg?: number | undefined },
+  ) => void;
   setExerciseLoad: (workoutId: string, exerciseId: string, loadKg: number) => void;
   completeWorkout: (entry: WorkoutHistoryEntry) => void;
   addWorkout: (workout: Workout) => void;
@@ -88,14 +108,23 @@ type Store = TaskBioState & {
   setWeeklyGoals: (goals: TaskBioState["weeklyGoals"]) => void;
   replaceDays: (days: Record<string, Block[]>) => void;
   /** Creates the 1/7/30-day review blocks for a finished study session. */
-  addReviewBlocks: (input: { date: string; subjectId: string; title: string; minutes: number; sessionId: string }) => void;
+  addReviewBlocks: (input: {
+    date: string;
+    subjectId: string;
+    title: string;
+    minutes: number;
+    sessionId: string;
+  }) => void;
   /** Conclui uma revisão com veredito; "esqueci" cria um reforço para o dia seguinte. */
   completeReview: (date: string, blockId: string, verdict: "lembrei" | "esqueci") => void;
   clearWeek: (keys: string[]) => void;
   addExerciseLog: (entry: Omit<ExerciseLogEntry, "id">) => void;
   updateWorkout: (workout: Workout) => void;
   addHabit: (name: string, options?: Pick<Habit, "frequency" | "weeklyTarget" | "emoji">) => void;
-  updateHabit: (id: string, patch: Pick<Habit, "name" | "frequency" | "weeklyTarget" | "emoji">) => void;
+  updateHabit: (
+    id: string,
+    patch: Pick<Habit, "name" | "frequency" | "weeklyTarget" | "emoji">,
+  ) => void;
   removeHabit: (id: string) => void;
   toggleHabitStreak: (id: string) => void;
   toggleHabit: (date: string, id: string) => void;
@@ -167,7 +196,13 @@ export function TaskBioProvider({ children }: { children: ReactNode }) {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
         const stored = JSON.parse(raw) as Partial<TaskBioState>;
-        setState({ ...initialState, ...stored, habits: normalizeHabits(stored.habits ?? []), notifPrefs: { ...defaultNotifPrefs, ...stored.notifPrefs }, plan: normalizePlan(stored.plan) });
+        setState({
+          ...initialState,
+          ...stored,
+          habits: normalizeHabits(stored.habits ?? []),
+          notifPrefs: { ...defaultNotifPrefs, ...stored.notifPrefs },
+          plan: normalizePlan(stored.plan),
+        });
       }
     } catch {
       /* ignora estado inválido */
@@ -185,9 +220,30 @@ export function TaskBioProvider({ children }: { children: ReactNode }) {
     }
   }, [ready, state]);
 
-  const displayMeals = useMemo(() => state.meals.map((meal) => ({ ...meal, name: foodName(meal.name), items: foodName(meal.items), ingredients: meal.ingredients.map((item) => ({ ...item, name: foodName(item.name) })) })), [state.meals]);
-  const displayPlan = useMemo(() => Object.fromEntries(Object.entries(state.plan).map(([date, blocks]) => [date, blocks.map((b) => b.kind === "refeicao" ? { ...b, title: foodName(b.title) } : b)])), [state.plan]);
-  const displayShoppingItems = useMemo(() => state.shoppingItems.map((item) => ({ ...item, name: foodName(item.name) })), [state.shoppingItems]);
+  const displayMeals = useMemo(
+    () =>
+      state.meals.map((meal) => ({
+        ...meal,
+        name: foodName(meal.name),
+        items: foodName(meal.items),
+        ingredients: meal.ingredients.map((item) => ({ ...item, name: foodName(item.name) })),
+      })),
+    [state.meals],
+  );
+  const displayPlan = useMemo(
+    () =>
+      Object.fromEntries(
+        Object.entries(state.plan).map(([date, blocks]) => [
+          date,
+          blocks.map((b) => (b.kind === "refeicao" ? { ...b, title: foodName(b.title) } : b)),
+        ]),
+      ),
+    [state.plan],
+  );
+  const displayShoppingItems = useMemo(
+    () => state.shoppingItems.map((item) => ({ ...item, name: foodName(item.name) })),
+    [state.shoppingItems],
+  );
   const value = useMemo<Store>(
     () => ({
       ...state,
@@ -195,25 +251,36 @@ export function TaskBioProvider({ children }: { children: ReactNode }) {
       plan: displayPlan,
       shoppingItems: displayShoppingItems,
       ready,
-      hydrate: (nextState) => setState((current) => ({
-        ...current,
-        ...nextState,
-        ...(nextState.notifPrefs ? { notifPrefs: { ...defaultNotifPrefs, ...nextState.notifPrefs } } : {}),
-        ...(nextState.plan ? { plan: normalizePlan(nextState.plan) } : {}),
-        ...(nextState.habits ? { habits: normalizeHabits(nextState.habits) } : {}),
-      })),
+      hydrate: (nextState) =>
+        setState((current) => ({
+          ...current,
+          ...nextState,
+          ...(nextState.notifPrefs
+            ? { notifPrefs: { ...defaultNotifPrefs, ...nextState.notifPrefs } }
+            : {}),
+          ...(nextState.plan ? { plan: normalizePlan(nextState.plan) } : {}),
+          ...(nextState.habits ? { habits: normalizeHabits(nextState.habits) } : {}),
+        })),
       toggleBlock: (day, blockId) => {
         const target = (state.plan[day] ?? []).find((b) => b.id === blockId);
         if (target?.plannedMeal) return;
-        if (target && (target.kind !== "refeicao" || foodItemCount(target) === 0)) emitBlockXp(day, target, !target.done);
+        if (target && (target.kind !== "refeicao" || foodItemCount(target) === 0))
+          emitBlockXp(day, target, !target.done);
         if (target?.subjectId && target.durationMinutes) {
-          emitXp({ kind: "study", ref: `study-block:${day}:${blockId}`, date: day, on: !target.done });
+          emitXp({
+            kind: "study",
+            ref: `study-block:${day}:${blockId}`,
+            date: day,
+            on: !target.done,
+          });
         }
         setState((s) => {
-          const blocks = (s.plan[day] ?? []).map((b) => (b.id === blockId ? { ...b, done: !b.done } : b));
+          const blocks = (s.plan[day] ?? []).map((b) =>
+            b.id === blockId ? { ...b, done: !b.done } : b,
+          );
           const changed = blocks.find((b) => b.id === blockId);
           let trackers = s.trackers;
-          let plan = { ...s.plan, [day]: blocks };
+          const plan = { ...s.plan, [day]: blocks };
           if (changed?.subjectId && changed.durationMinutes) {
             const sessionId = `study-block:${day}:${blockId}`;
             const exists = (s.trackers.estudos ?? []).some((x) => x.id === sessionId);
@@ -221,7 +288,14 @@ export function TaskBioProvider({ children }: { children: ReactNode }) {
               trackers = {
                 ...s.trackers,
                 estudos: [
-                  { id: sessionId, date: day, minutes: changed.durationMinutes, title: changed.title, subjectId: changed.subjectId, agendaBlockId: blockId },
+                  {
+                    id: sessionId,
+                    date: day,
+                    minutes: changed.durationMinutes,
+                    title: changed.title,
+                    subjectId: changed.subjectId,
+                    agendaBlockId: blockId,
+                  },
                   ...(s.trackers.estudos ?? []),
                 ],
               };
@@ -233,20 +307,26 @@ export function TaskBioProvider({ children }: { children: ReactNode }) {
                   const id = `rev:${sessionId}:${offset}`;
                   const list = plan[key] ?? [];
                   if (list.some((b) => b.id === id)) continue;
-                  plan[key] = [...list, {
-                    id,
-                    time: "19:00",
-                    kind: "compromisso",
-                    title: `Revisão: ${label}`,
-                    subjectId: changed.subjectId,
-                    review: true,
-                    durationMinutes: Math.min(changed.durationMinutes, 30),
-                    done: false,
-                  }];
+                  plan[key] = [
+                    ...list,
+                    {
+                      id,
+                      time: "19:00",
+                      kind: "compromisso",
+                      title: `Revisão: ${label}`,
+                      subjectId: changed.subjectId,
+                      review: true,
+                      durationMinutes: Math.min(changed.durationMinutes, 30),
+                      done: false,
+                    },
+                  ];
                 }
               }
             } else if (!changed.done && exists) {
-              trackers = { ...s.trackers, estudos: (s.trackers.estudos ?? []).filter((x) => x.id !== sessionId) };
+              trackers = {
+                ...s.trackers,
+                estudos: (s.trackers.estudos ?? []).filter((x) => x.id !== sessionId),
+              };
               for (const offset of [1, 7, 30]) {
                 const key = toDateKey(addDays(parseISO(day), offset));
                 plan[key] = (plan[key] ?? []).filter((b) => b.id !== `rev:${sessionId}:${offset}`);
@@ -261,13 +341,19 @@ export function TaskBioProvider({ children }: { children: ReactNode }) {
         if (target) {
           emitBlockXp(day, target, false);
           emitXp({ kind: "photo", ref: blockId, date: day, on: false });
-          if (target.subjectId) emitXp({ kind: "study", ref: `study-block:${day}:${blockId}`, date: day, on: false });
+          if (target.subjectId)
+            emitXp({ kind: "study", ref: `study-block:${day}:${blockId}`, date: day, on: false });
         }
         setState((s) => ({
           ...s,
           plan: { ...s.plan, [day]: (s.plan[day] ?? []).filter((b) => b.id !== blockId) },
           trackers: target?.subjectId
-            ? { ...s.trackers, estudos: (s.trackers.estudos ?? []).filter((x) => x.id !== `study-block:${day}:${blockId}`) }
+            ? {
+                ...s.trackers,
+                estudos: (s.trackers.estudos ?? []).filter(
+                  (x) => x.id !== `study-block:${day}:${blockId}`,
+                ),
+              }
             : s.trackers,
         }));
       },
@@ -275,13 +361,23 @@ export function TaskBioProvider({ children }: { children: ReactNode }) {
         if (block.done) emitBlockXp(day, block, true);
         setState((s) => ({
           ...s,
-          plan: { ...s.plan, [day]: [...(s.plan[day] ?? []), block].sort((a, b) => a.time.localeCompare(b.time)) },
+          plan: {
+            ...s.plan,
+            [day]: [...(s.plan[day] ?? []), block].sort((a, b) => a.time.localeCompare(b.time)),
+          },
         }));
       },
       addBlock: (day, block) => {
         const stamp = Date.now();
         const firstId = `b-${stamp}-${day}`;
-        if (block.kind === "refeicao" && foodItemCount(block) > 0) emitXp({ kind: "meal", ref: firstId, date: day, on: true, foodItems: foodItemCount(block) });
+        if (block.kind === "refeicao" && foodItemCount(block) > 0)
+          emitXp({
+            kind: "meal",
+            ref: firstId,
+            date: day,
+            on: true,
+            foodItems: foodItemCount(block),
+          });
         setState((s) => ({
           ...s,
           plan: (() => {
@@ -305,46 +401,125 @@ export function TaskBioProvider({ children }: { children: ReactNode }) {
           })(),
         }));
       },
-      updateBlock: (day, blockId, block) => setState((s) => ({
-        ...s,
-        plan: { ...s.plan, [day]: sortBlocks((s.plan[day] ?? []).map((item) => item.id === blockId ? { ...item, ...block } : item)) },
-      })),
+      updateBlock: (day, blockId, block) =>
+        setState((s) => ({
+          ...s,
+          plan: {
+            ...s.plan,
+            [day]: sortBlocks(
+              (s.plan[day] ?? []).map((item) =>
+                item.id === blockId ? { ...item, ...block } : item,
+              ),
+            ),
+          },
+        })),
       registerMeal: (day, block, editingId) => {
-        const record: Block = { ...block, id: `b-${Date.now()}-${day}`, done: true, mealConfirmedAt: block.mealConfirmedAt ?? new Date().toISOString() };
+        const record: Block = {
+          ...block,
+          id: `b-${Date.now()}-${day}`,
+          done: true,
+          mealConfirmedAt: block.mealConfirmedAt ?? new Date().toISOString(),
+        };
         const next = saveMealRecord(state.plan[day] ?? [], record, editingId);
         const saved = next.find((b) => b.manualMeal === record.manualMeal);
         // Keep the existing food-item XP path and reference; completion adds no extra award.
-        if (!editingId && saved && foodItemCount(saved) > 0) emitXp({ kind: "meal", ref: saved.id, date: day, on: true, foodItems: foodItemCount(saved) });
-        setState((s) => ({ ...s, plan: { ...s.plan, [day]: saveMealRecord(s.plan[day] ?? [], record, editingId) } }));
+        if (!editingId && saved && foodItemCount(saved) > 0)
+          emitXp({
+            kind: "meal",
+            ref: saved.id,
+            date: day,
+            on: true,
+            foodItems: foodItemCount(saved),
+          });
+        setState((s) => ({
+          ...s,
+          plan: { ...s.plan, [day]: saveMealRecord(s.plan[day] ?? [], record, editingId) },
+        }));
       },
-      savePlannedMeal: (day, block) => setState(s => ({ ...s, plan: { ...s.plan, [day]: sortBlocks([...(s.plan[day] ?? []).filter(b => b.id !== block.id), block]) } })),
-      repeatMeals: (sourceDate, dates, blockId) => setState(s => ({ ...s, plan: repeatPlannedDays(s.plan, (s.plan[sourceDate] ?? []).filter(b => !blockId || b.id === blockId), dates, () => `p-${crypto.randomUUID()}`) })),
-      repeatPreviousMealWeek: (weekKeys, replace) => setState(s => ({ ...s, plan: copyPreviousMealWeek(s.plan, weekKeys, replace, () => `p-${crypto.randomUUID()}`) })),
+      savePlannedMeal: (day, block) =>
+        setState((s) => ({
+          ...s,
+          plan: {
+            ...s.plan,
+            [day]: sortBlocks([...(s.plan[day] ?? []).filter((b) => b.id !== block.id), block]),
+          },
+        })),
+      repeatMeals: (sourceDate, dates, blockId) =>
+        setState((s) => ({
+          ...s,
+          plan: repeatPlannedDays(
+            s.plan,
+            (s.plan[sourceDate] ?? []).filter((b) => !blockId || b.id === blockId),
+            dates,
+            () => `p-${crypto.randomUUID()}`,
+          ),
+        })),
+      repeatPreviousMealWeek: (weekKeys, replace) =>
+        setState((s) => ({
+          ...s,
+          plan: copyPreviousMealWeek(s.plan, weekKeys, replace, () => `p-${crypto.randomUUID()}`),
+        })),
       consumeMeal: (day, blockId) => {
         const confirmedAt = new Date().toISOString();
-        setState(s => ({ ...s, plan: { ...s.plan, [day]: (s.plan[day] ?? []).map(b => b.id === blockId ? confirmMeal(b, confirmedAt) : b) } }));
+        setState((s) => ({
+          ...s,
+          plan: {
+            ...s.plan,
+            [day]: (s.plan[day] ?? []).map((b) =>
+              b.id === blockId ? confirmMeal(b, confirmedAt) : b,
+            ),
+          },
+        }));
       },
-      undoMeal: (day, blockId) => setState(s => ({ ...s, plan: { ...s.plan, [day]: undoMealConfirmation(s.plan[day] ?? [], blockId) } })),
-      skipMeal: (day, blockId) => setState(s => ({ ...s, plan: { ...s.plan, [day]: (s.plan[day] ?? []).map(b => b.id === blockId ? skipPlannedMeal(b) : b) } })),
-      setSeries: (workoutId, exerciseId, date, index, patch) => setState(s => {
-        const workout = s.workouts.find(w => w.id === workoutId);
-        const ex = workout?.exercises.find(e => e.id === exerciseId);
-        if (!workout || !ex) return s;
-        const updated = changeSeries(ex, date, index, patch);
-        const next = { ...workout, exercises: workout.exercises.map(e => e.id === exerciseId ? updated : e) };
-        // Mantém o histórico alinhado com as séries concluídas e com a carga digitada em cada uma.
-        const logId = `sets:${workoutId}:${exerciseId}:${date}`;
-        const exerciseLog = updated.doneSets > 0
-          ? recordExerciseSets(s.exerciseLog ?? [], next, exerciseId, updated.doneSets, date)
-          : (s.exerciseLog ?? []).filter((e) => e.id !== logId);
-        return { ...s, workouts: s.workouts.map(w => w.id === workoutId ? next : w), exerciseLog };
-      }),
+      undoMeal: (day, blockId) =>
+        setState((s) => ({
+          ...s,
+          plan: { ...s.plan, [day]: undoMealConfirmation(s.plan[day] ?? [], blockId) },
+        })),
+      skipMeal: (day, blockId) =>
+        setState((s) => ({
+          ...s,
+          plan: {
+            ...s.plan,
+            [day]: (s.plan[day] ?? []).map((b) => (b.id === blockId ? skipPlannedMeal(b) : b)),
+          },
+        })),
+      setSeries: (workoutId, exerciseId, date, index, patch) =>
+        setState((s) => {
+          const workout = s.workouts.find((w) => w.id === workoutId);
+          const ex = workout?.exercises.find((e) => e.id === exerciseId);
+          if (!workout || !ex) return s;
+          const updated = changeSeries(ex, date, index, patch);
+          const next = {
+            ...workout,
+            exercises: workout.exercises.map((e) => (e.id === exerciseId ? updated : e)),
+          };
+          // Mantém o histórico alinhado com as séries concluídas e com a carga digitada em cada uma.
+          const logId = `sets:${workoutId}:${exerciseId}:${date}`;
+          const exerciseLog =
+            updated.doneSets > 0
+              ? recordExerciseSets(s.exerciseLog ?? [], next, exerciseId, updated.doneSets, date)
+              : (s.exerciseLog ?? []).filter((e) => e.id !== logId);
+          return {
+            ...s,
+            workouts: s.workouts.map((w) => (w.id === workoutId ? next : w)),
+            exerciseLog,
+          };
+        }),
       setDoneSets: (workoutId, exerciseId, doneSets, date) =>
         setState((s) => ({
           ...s,
           exerciseLog: (() => {
             const workout = s.workouts.find((w) => w.id === workoutId);
-            return workout ? recordExerciseSets(s.exerciseLog ?? [], workout, exerciseId, doneSets, date ?? toDateKey(new Date())) : s.exerciseLog;
+            return workout
+              ? recordExerciseSets(
+                  s.exerciseLog ?? [],
+                  workout,
+                  exerciseId,
+                  doneSets,
+                  date ?? toDateKey(new Date()),
+                )
+              : s.exerciseLog;
           })(),
           workouts: s.workouts.map((w) =>
             w.id !== workoutId
@@ -373,68 +548,101 @@ export function TaskBioProvider({ children }: { children: ReactNode }) {
         setState((s) => ({
           ...s,
           workoutHistory: [entry, ...s.workoutHistory].slice(0, 50),
-          exerciseLog: [...entry.exercises.filter((e) => e.reps > 0).map((e) => ({ id: `session:${entry.id}:${e.exerciseId}`, date: entry.completedAt.slice(0, 10), exercise: e.name, loadKg: e.loadKg || 0, reps: e.reps, sets: e.sets, workoutId: entry.workoutId })), ...(s.exerciseLog ?? [])].slice(0, 2000),
+          exerciseLog: [
+            ...entry.exercises
+              .filter((e) => e.reps > 0)
+              .map((e) => ({
+                id: `session:${entry.id}:${e.exerciseId}`,
+                date: entry.completedAt.slice(0, 10),
+                exercise: e.name,
+                loadKg: e.loadKg || 0,
+                reps: e.reps,
+                sets: e.sets,
+                workoutId: entry.workoutId,
+              })),
+            ...(s.exerciseLog ?? []),
+          ].slice(0, 2000),
           workouts: s.workouts.map((workout) =>
             workout.id === entry.workoutId
-              ? { ...workout, exercises: workout.exercises.map((exercise) => ({ ...exercise, doneSets: 0 })) }
+              ? {
+                  ...workout,
+                  exercises: workout.exercises.map((exercise) => ({ ...exercise, doneSets: 0 })),
+                }
               : workout,
           ),
         })),
       addWorkout: (workout) => setState((s) => ({ ...s, workouts: [...s.workouts, workout] })),
-      removeWorkout: (workoutId) => setState((s) => ({
-        ...s,
-        workouts: s.workouts.filter((workout) => workout.id !== workoutId),
-      })),
+      removeWorkout: (workoutId) =>
+        setState((s) => ({
+          ...s,
+          workouts: s.workouts.filter((workout) => workout.id !== workoutId),
+        })),
       setGoal: (goal) => setState((s) => ({ ...s, goal })),
       setPreferredModality: (preferredModality) => setState((s) => ({ ...s, preferredModality })),
       setShoppingItems: (shoppingItems) => setState((s) => ({ ...s, shoppingItems })),
-      toggleShoppingItem: (id) => setState((s) => ({
-        ...s,
-        shoppingItems: s.shoppingItems.map((item) => item.id === id ? { ...item, checked: !item.checked } : item),
-      })),
-      addShoppingItem: (item) => setState((s) => ({
-        ...s,
-        shoppingItems: [...s.shoppingItems, { ...item, id: `manual-${Date.now()}`, checked: false, manual: true }],
-      })),
-      removeShoppingItem: (id) => setState((s) => ({
-        ...s,
-        shoppingItems: s.shoppingItems.filter((item) => item.id !== id),
-      })),
+      toggleShoppingItem: (id) =>
+        setState((s) => ({
+          ...s,
+          shoppingItems: s.shoppingItems.map((item) =>
+            item.id === id ? { ...item, checked: !item.checked } : item,
+          ),
+        })),
+      addShoppingItem: (item) =>
+        setState((s) => ({
+          ...s,
+          shoppingItems: [
+            ...s.shoppingItems,
+            { ...item, id: `manual-${Date.now()}`, checked: false, manual: true },
+          ],
+        })),
+      removeShoppingItem: (id) =>
+        setState((s) => ({
+          ...s,
+          shoppingItems: s.shoppingItems.filter((item) => item.id !== id),
+        })),
       setWeeklyGoals: (weeklyGoals) => setState((s) => ({ ...s, weeklyGoals })),
-      replaceDays: (days) => setState((s) => ({ ...s, plan: { ...s.plan, ...normalizePlan(days) } })),
-      addReviewBlocks: ({ date, subjectId, title, minutes, sessionId }) => setState((s) => {
-        const plan = { ...s.plan };
-        const label = title.replace(/^Estudo:\s*/i, "");
-        for (const offset of [1, 7, 30]) {
-          const key = toDateKey(addDays(parseISO(date), offset));
-          const id = `rev:${sessionId}:${offset}`;
-          const blocks = plan[key] ?? [];
-          if (blocks.some((b) => b.id === id)) continue;
-          plan[key] = [...blocks, {
-            id,
-            time: "19:00",
-            kind: "compromisso",
-            title: `Revisão: ${label}`,
-            subjectId,
-            review: true,
-            reviewStage: offset as 1 | 7 | 30,
-            reviewOf: sessionId,
-            durationMinutes: Math.min(minutes, 30),
-            done: false,
-          }];
-        }
-        return { ...s, plan };
-      }),
+      replaceDays: (days) =>
+        setState((s) => ({ ...s, plan: { ...s.plan, ...normalizePlan(days) } })),
+      addReviewBlocks: ({ date, subjectId, title, minutes, sessionId }) =>
+        setState((s) => {
+          const plan = { ...s.plan };
+          const label = title.replace(/^Estudo:\s*/i, "");
+          for (const offset of [1, 7, 30]) {
+            const key = toDateKey(addDays(parseISO(date), offset));
+            const id = `rev:${sessionId}:${offset}`;
+            const blocks = plan[key] ?? [];
+            if (blocks.some((b) => b.id === id)) continue;
+            plan[key] = [
+              ...blocks,
+              {
+                id,
+                time: "19:00",
+                kind: "compromisso",
+                title: `Revisão: ${label}`,
+                subjectId,
+                review: true,
+                reviewStage: offset as 1 | 7 | 30,
+                reviewOf: sessionId,
+                durationMinutes: Math.min(minutes, 30),
+                done: false,
+              },
+            ];
+          }
+          return { ...s, plan };
+        }),
       completeReview: (day, blockId, verdict) => {
         const target = (state.plan[day] ?? []).find((b) => b.id === blockId);
         if (!target) return;
         if (!target.done) {
           emitBlockXp(day, target, true);
-          if (target.subjectId && target.durationMinutes) emitXp({ kind: "study", ref: `study-block:${day}:${blockId}`, date: day, on: true });
+          if (target.subjectId && target.durationMinutes)
+            emitXp({ kind: "study", ref: `study-block:${day}:${blockId}`, date: day, on: true });
         }
         setState((s) => {
           const reviewedAt = toDateKey(new Date());
-          const blocks = (s.plan[day] ?? []).map((b) => b.id === blockId ? { ...b, done: true, reviewVerdict: verdict, reviewedAt } : b);
+          const blocks = (s.plan[day] ?? []).map((b) =>
+            b.id === blockId ? { ...b, done: true, reviewVerdict: verdict, reviewedAt } : b,
+          );
           let plan = { ...s.plan, [day]: blocks };
           if (verdict === "esqueci") {
             const nextDay = reinforcementDate(day);
@@ -443,40 +651,121 @@ export function TaskBioProvider({ children }: { children: ReactNode }) {
               const base: Block = { ...target };
               delete base.reviewVerdict;
               delete base.reviewedAt;
-              plan = { ...plan, [nextDay]: [...(plan[nextDay] ?? []), { ...base, id, done: false, reviewReinforcement: true }] };
+              plan = {
+                ...plan,
+                [nextDay]: [
+                  ...(plan[nextDay] ?? []),
+                  { ...base, id, done: false, reviewReinforcement: true },
+                ],
+              };
             }
           }
           return { ...s, plan };
         });
       },
-      clearWeek: (keys) => setState((s) => ({ ...s, plan: Object.fromEntries(Object.entries(s.plan).filter(([key]) => !keys.includes(key))) })),
-      addCustomFood: (food) => setState((s) => ({ ...s, customFoods: [food, ...(s.customFoods ?? []).filter((f) => f.id !== food.id)].slice(0, 500) })),
-      addExerciseLog: (entry) => setState((s) => ({ ...s, exerciseLog: [{ ...entry, id: `x-${Date.now()}` }, ...(s.exerciseLog ?? [])].slice(0, 2000) })),
-      updateWorkout: (workout) => setState((s) => ({ ...s, workouts: s.workouts.map((w) => w.id === workout.id ? workout : w) })),
-      addHabit: (name, options) => setState((s) => ({ ...s, habits: [...s.habits, { id: `h-${crypto.randomUUID()}`, name, createdAt: new Date().toISOString(), frequency: "daily", ...options }] })),
-      updateHabit: (id, patch) => setState(s => ({ ...s, habits: s.habits.map(h => h.id === id ? editHabit(h, patch, toDateKey(new Date())) : h) })),
-      toggleHabitStreak: (id) => setState((s) => ({ ...s, habits: s.habits.map((h) => h.id === id ? { ...h, countsForStreak: h.countsForStreak === false } : h) })),
+      clearWeek: (keys) =>
+        setState((s) => ({
+          ...s,
+          plan: Object.fromEntries(Object.entries(s.plan).filter(([key]) => !keys.includes(key))),
+        })),
+      addCustomFood: (food) =>
+        setState((s) => ({
+          ...s,
+          customFoods: [food, ...(s.customFoods ?? []).filter((f) => f.id !== food.id)].slice(
+            0,
+            500,
+          ),
+        })),
+      addExerciseLog: (entry) =>
+        setState((s) => ({
+          ...s,
+          exerciseLog: [{ ...entry, id: `x-${Date.now()}` }, ...(s.exerciseLog ?? [])].slice(
+            0,
+            2000,
+          ),
+        })),
+      updateWorkout: (workout) =>
+        setState((s) => ({
+          ...s,
+          workouts: s.workouts.map((w) => (w.id === workout.id ? workout : w)),
+        })),
+      addHabit: (name, options) =>
+        setState((s) => ({
+          ...s,
+          habits: [
+            ...s.habits,
+            {
+              id: `h-${crypto.randomUUID()}`,
+              name,
+              createdAt: new Date().toISOString(),
+              frequency: "daily",
+              ...options,
+            },
+          ],
+        })),
+      updateHabit: (id, patch) =>
+        setState((s) => ({
+          ...s,
+          habits: s.habits.map((h) =>
+            h.id === id ? editHabit(h, patch, toDateKey(new Date())) : h,
+          ),
+        })),
+      toggleHabitStreak: (id) =>
+        setState((s) => ({
+          ...s,
+          habits: s.habits.map((h) =>
+            h.id === id ? { ...h, countsForStreak: h.countsForStreak === false } : h,
+          ),
+        })),
       removeHabit: (id) => setState((s) => ({ ...s, habits: s.habits.filter((h) => h.id !== id) })),
       toggleHabit: (date, id) => {
-        const habit = state.habits.find(h => h.id === id);
+        const habit = state.habits.find((h) => h.id === id);
         if (!habit) return;
         const before = habitLogRef.current;
         const next = changeHabitMark(habit, before, date);
         if (next === before) return;
         habitLogRef.current = next;
         emitXp({ kind: "habit", ref: `${id}:${date}`, date, on: !before[date]?.includes(id) });
-        setState(s => ({ ...s, habitLog: next }));
+        setState((s) => ({ ...s, habitLog: next }));
       },
-      saveMonthGoal: (goal) => setState((s) => ({ ...s, monthGoals: s.monthGoals.some((g) => g.id === goal.id) ? s.monthGoals.map((g) => g.id === goal.id ? goal : g) : [...s.monthGoals, goal] })),
-      removeMonthGoal: (id) => setState((s) => ({ ...s, monthGoals: s.monthGoals.filter((g) => g.id !== id) })),
+      saveMonthGoal: (goal) =>
+        setState((s) => ({
+          ...s,
+          monthGoals: s.monthGoals.some((g) => g.id === goal.id)
+            ? s.monthGoals.map((g) => (g.id === goal.id ? goal : g))
+            : [...s.monthGoals, goal],
+        })),
+      removeMonthGoal: (id) =>
+        setState((s) => ({ ...s, monthGoals: s.monthGoals.filter((g) => g.id !== id) })),
       setHealth: (fn) => setState((s) => ({ ...s, health: fn({ ...emptyHealth, ...s.health }) })),
-      setFinance: (fn) => setState((s) => ({ ...s, finance: fn({ ...emptyFinance, ...s.finance }) })),
-      setTrackers: (fn) => setState((s) => ({ ...s, trackers: fn({ ...emptyTrackers, ...s.trackers }) })),
-      registerReading: (session) => setState(s => ({ ...s,
-        trackers: { ...s.trackers, leitura: [session, ...s.trackers.leitura], books: (s.trackers.books ?? []).map(b => b.id === session.bookId ? applyReadingProgress(b, session) : b) },
-        plan: session.agendaBlockId ? { ...s.plan, [session.date]: (s.plan[session.date] ?? []).map(b => b.id === session.agendaBlockId && b.kind === "leitura" ? { ...b, done: true } : b) } : s.plan,
-      })),
-      setNotifPref: (key, on) => setState((s) => ({ ...s, notifPrefs: { ...defaultNotifPrefs, ...s.notifPrefs, [key]: on } })),
+      setFinance: (fn) =>
+        setState((s) => ({ ...s, finance: fn({ ...emptyFinance, ...s.finance }) })),
+      setTrackers: (fn) =>
+        setState((s) => ({ ...s, trackers: fn({ ...emptyTrackers, ...s.trackers }) })),
+      registerReading: (session) =>
+        setState((s) => ({
+          ...s,
+          trackers: {
+            ...s.trackers,
+            leitura: [session, ...s.trackers.leitura],
+            books: (s.trackers.books ?? []).map((b) =>
+              b.id === session.bookId ? applyReadingProgress(b, session) : b,
+            ),
+          },
+          plan: session.agendaBlockId
+            ? {
+                ...s.plan,
+                [session.date]: (s.plan[session.date] ?? []).map((b) =>
+                  b.id === session.agendaBlockId && b.kind === "leitura" ? { ...b, done: true } : b,
+                ),
+              }
+            : s.plan,
+        })),
+      setNotifPref: (key, on) =>
+        setState((s) => ({
+          ...s,
+          notifPrefs: { ...defaultNotifPrefs, ...s.notifPrefs, [key]: on },
+        })),
       setModule: (id, on) => setState((s) => ({ ...s, modules: { ...s.modules, [id]: on } })),
       getWorkout: (id) => state.workouts.find((w) => w.id === id),
       getMeal: (id) => displayMeals.find((m) => m.id === id),

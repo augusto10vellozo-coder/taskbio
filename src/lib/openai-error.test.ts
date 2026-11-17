@@ -4,7 +4,9 @@ import { describeAiError } from "./openai.server";
 describe("descrição de erro da IA", () => {
   it("mostra o status e a mensagem real escondida na causa", () => {
     const inner = Object.assign(new Error("You have no credits remaining."), { statusCode: 429 });
-    const outer = Object.assign(new Error("No output generated. Check the stream for errors."), { cause: inner });
+    const outer = Object.assign(new Error("No output generated. Check the stream for errors."), {
+      cause: inner,
+    });
     expect(describeAiError(outer)).toBe("429 You have no credits remaining.");
   });
 

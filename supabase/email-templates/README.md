@@ -5,15 +5,15 @@ Todos estão em pt-BR, com a marca do TaskBio e sem imagens externas (melhor ent
 
 ## O que colar em cada template
 
-| Template no Supabase | Arquivo | Assunto sugerido |
-|---|---|---|
-| Confirm signup | `confirmacao-cadastro.html` | Confirme seu e-mail no TaskBio |
-| Invite user | `convite.html` | Você recebeu um convite para o TaskBio |
-| Magic link | `link-magico.html` | Seu link de acesso ao TaskBio |
-| Recovery | `recuperacao-senha.html` | Redefinir sua senha — TaskBio |
-| Change email address | `troca-email.html` | Confirme seu novo e-mail |
-| Reauthentication | `reautenticacao.html` | Seu código de verificação |
-| Password changed | `senha-alterada.html` | Sua senha foi alterada |
+| Template no Supabase | Arquivo                     | Assunto sugerido                       |
+| -------------------- | --------------------------- | -------------------------------------- |
+| Confirm signup       | `confirmacao-cadastro.html` | Confirme seu e-mail no TaskBio         |
+| Invite user          | `convite.html`              | Você recebeu um convite para o TaskBio |
+| Magic link           | `link-magico.html`          | Seu link de acesso ao TaskBio          |
+| Recovery             | `recuperacao-senha.html`    | Redefinir sua senha — TaskBio          |
+| Change email address | `troca-email.html`          | Confirme seu novo e-mail               |
+| Reauthentication     | `reautenticacao.html`       | Seu código de verificação              |
+| Password changed     | `senha-alterada.html`       | Sua senha foi alterada                 |
 
 ## Como aplicar
 

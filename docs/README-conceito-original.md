@@ -18,47 +18,47 @@ Imagine o usuário abrindo o aplicativo pela manhã:
 
 06:30 — Café da manhã
 
- Receita: ovos + pão integral + fruta
+Receita: ovos + pão integral + fruta
 
- Calorias estimadas
+Calorias estimadas
 
- Proteínas, carboidratos e gorduras
+Proteínas, carboidratos e gorduras
 
- Custo aproximado da refeição
+Custo aproximado da refeição
 
- ☑️ Marcar como realizado
+☑️ Marcar como realizado
 
 08:00 — Trabalho
 
- 08:00 às 12:00
+08:00 às 12:00
 
- Compromisso cadastrado pelo usuário
+Compromisso cadastrado pelo usuário
 
 12:30 — Almoço
 
- Receita
+Receita
 
- Ingredientes
+Ingredientes
 
- Informações nutricionais
+Informações nutricionais
 
- Custo estimado
+Custo estimado
 
 18:00 — Academia
 
- Treino A
+Treino A
 
- Peito + Tríceps
+Peito + Tríceps
 
- Supino
+Supino
 
- 4 × 10
+4 × 10
 
- Descanso: 60 segundos
+Descanso: 60 segundos
 
- Demonstração do movimento
+Demonstração do movimento
 
- ☑️ Exercício concluído
+☑️ Exercício concluído
 
 20:00 — Jantar
 
@@ -95,63 +95,63 @@ O usuário poderia escolher:
 
 Academia
 
- Musculação
+Musculação
 
- Hipertrofia
+Hipertrofia
 
- Força
+Força
 
- Emagrecimento
+Emagrecimento
 
- Treino funcional
+Treino funcional
 
 Corrida
 
- Caminhada
+Caminhada
 
- Corrida
+Corrida
 
- Intervalado
+Intervalado
 
- 5 km
+5 km
 
- 10 km etc.
+10 km etc.
 
 Lutas
 
- Boxe
+Boxe
 
- Muay Thai
+Muay Thai
 
- Jiu-Jitsu
+Jiu-Jitsu
 
- Judô
+Judô
 
- Karatê
+Karatê
 
- Kickboxing
+Kickboxing
 
- MMA
+MMA
 
 Outras
 
- Pilates
+Pilates
 
- Yoga
+Yoga
 
- Cross training
+Cross training
 
- Ciclismo
+Ciclismo
 
- Natação
+Natação
 
- Calistenia
+Calistenia
 
- Dança
+Dança
 
- Alongamento
+Alongamento
 
- Mobilidade
+Mobilidade
 
 E o mais importante:
 
@@ -167,21 +167,21 @@ ExercícioSériesRepetiçõesSupino reto410Supino inclinado312Crucifixo312Tríce
 
 Ao clicar em Supino reto, apareceria:
 
- imagem/animação do exercício
+imagem/animação do exercício
 
- músculos trabalhados
+músculos trabalhados
 
- como executar
+como executar
 
- séries
+séries
 
- repetições
+repetições
 
- carga
+carga
 
- descanso
+descanso
 
- observações
+observações
 
 E o usuário poderia marcar:
 
@@ -202,13 +202,13 @@ Café da manhã
 
 Omelete + pão integral + banana
 
- 420 kcal
+420 kcal
 
- Proteínas: 25 g
+Proteínas: 25 g
 
- Carboidratos: 40 g
+Carboidratos: 40 g
 
- Gorduras: 17 g
+Gorduras: 17 g
 
 E:
 
@@ -251,34 +251,34 @@ Ele cadastra a vida dele.
 
 Por exemplo:
 
-06:30  Café da manhã
-07:30  Ir para o trabalho
-08:00  Trabalho
-12:00  Almoço
-13:00  Trabalho
-17:30  Sair do trabalho
-18:30  Academia
-20:00  Jantar
-21:00  Estudar
-22:30  Dormir
+06:30 Café da manhã
+07:30 Ir para o trabalho
+08:00 Trabalho
+12:00 Almoço
+13:00 Trabalho
+17:30 Sair do trabalho
+18:30 Academia
+20:00 Jantar
+21:00 Estudar
+22:30 Dormir
 
 Também poderia adicionar:
 
- consultas
+consultas
 
- reuniões
+reuniões
 
- estudos
+estudos
 
- tarefas
+tarefas
 
- compromissos
+compromissos
 
- viagens
+viagens
 
- descanso
+descanso
 
- hobbies
+hobbies
 
 Assim o aplicativo deixa de ser apenas fitness.
 
@@ -320,21 +320,21 @@ Quando a pessoa entra no aplicativo:
 
 🎯 Qual é seu objetivo?
 
- Ganhar massa muscular
+Ganhar massa muscular
 
- Melhorar condicionamento
+Melhorar condicionamento
 
- Correr
+Correr
 
- Ser mais ativo
+Ser mais ativo
 
- Organizar minha rotina
+Organizar minha rotina
 
- Melhorar alimentação
+Melhorar alimentação
 
- Criar uma rotina saudável
+Criar uma rotina saudável
 
- Outro
+Outro
 
 A partir disso, o aplicativo ajuda a organizar a semana.
 
@@ -375,21 +375,21 @@ Podemos criar algo assim:
 
 🆓 Plano gratuito
 
- Agenda semanal
+Agenda semanal
 
- Tarefas
+Tarefas
 
- Compromissos
+Compromissos
 
- Cadastro de atividades
+Cadastro de atividades
 
- Alguns exercícios
+Alguns exercícios
 
- Alguns treinos
+Alguns treinos
 
- Receitas básicas
+Receitas básicas
 
- Registro de progresso
+Registro de progresso
 
 ⭐ Plano Premium
 
@@ -403,27 +403,27 @@ R$ 79,90 / ano
 
 Poderia incluir:
 
- biblioteca completa de exercícios
+biblioteca completa de exercícios
 
- mais modalidades
+mais modalidades
 
- treinos completos
+treinos completos
 
- histórico avançado
+histórico avançado
 
- gráficos
+gráficos
 
- planejamento alimentar
+planejamento alimentar
 
- receitas completas
+receitas completas
 
- lista de compras
+lista de compras
 
- estatísticas
+estatísticas
 
- sincronização
+sincronização
 
- personalização avançada
+personalização avançada
 
 🏆 E existe uma possibilidade ainda maior
 
@@ -433,17 +433,17 @@ Podemos futuramente criar:
 
 Para:
 
- Personal trainers
+Personal trainers
 
- Academias
+Academias
 
- Professores de Pilates
+Professores de Pilates
 
- Professores de luta
+Professores de luta
 
- Profissionais de educação física
+Profissionais de educação física
 
- Nutricionistas, dentro do escopo profissional apropriado
+Nutricionistas, dentro do escopo profissional apropriado
 
 O profissional poderia cadastrar alunos.
 

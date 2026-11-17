@@ -2,14 +2,14 @@
 
 ## O que está na nuvem (não se perde)
 
-| Item | Onde |
-|---|---|
-| Código | GitHub, repositório privado `taskbio` |
-| Backups do banco | GitHub, repositório privado `taskbio-backups` (14 dias) |
-| Banco, login e dados | Supabase (`hecqqcconnbjawcevigo`) |
-| Site e variáveis de ambiente | Cloudflare Worker |
-| E-mails | Resend |
-| Domínio e DNS | Cloudflare |
+| Item                         | Onde                                                    |
+| ---------------------------- | ------------------------------------------------------- |
+| Código                       | GitHub, repositório privado `taskbio`                   |
+| Backups do banco             | GitHub, repositório privado `taskbio-backups` (14 dias) |
+| Banco, login e dados         | Supabase (`hecqqcconnbjawcevigo`)                       |
+| Site e variáveis de ambiente | Cloudflare Worker                                       |
+| E-mails                      | Resend                                                  |
+| Domínio e DNS                | Cloudflare                                              |
 
 ## O que vive só nesta máquina
 
@@ -45,14 +45,14 @@ O `wrangler` vai pedir login no Cloudflare na primeira vez.
 
 Ficam no Worker e **não** no repositório. Se o Worker for recriado do zero, é preciso cadastrá-los de novo:
 
-| Nome | De onde vem |
-|---|---|
-| `SUPABASE_URL` | Supabase → Settings → API Keys |
-| `SUPABASE_PUBLISHABLE_KEY` | idem (chave pública) |
-| `SUPABASE_SERVICE_ROLE_KEY` | idem (secret key) |
-| `OPENAI_API_KEY` | platform.openai.com |
-| `RESEND_API_KEY` | Resend → API keys |
-| `VAPID_PRIVATE_KEY` | gerado por você; se perdido, gere outro par |
+| Nome                        | De onde vem                                 |
+| --------------------------- | ------------------------------------------- |
+| `SUPABASE_URL`              | Supabase → Settings → API Keys              |
+| `SUPABASE_PUBLISHABLE_KEY`  | idem (chave pública)                        |
+| `SUPABASE_SERVICE_ROLE_KEY` | idem (secret key)                           |
+| `OPENAI_API_KEY`            | platform.openai.com                         |
+| `RESEND_API_KEY`            | Resend → API keys                           |
+| `VAPID_PRIVATE_KEY`         | gerado por você; se perdido, gere outro par |
 
 Anote em um gerenciador de senhas **quais** são esses nomes e onde achar cada valor.
 

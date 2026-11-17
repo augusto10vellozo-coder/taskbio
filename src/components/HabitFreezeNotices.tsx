@@ -9,13 +9,20 @@ export function HabitFreezeNotices() {
   const ack = useServerFn(acknowledgeHabitFreezes);
   const shown = useRef(new Set<string>());
   useEffect(() => {
-    const notices = (data?.notices ?? []).filter(n => !shown.current.has(n.id));
+    const notices = (data?.notices ?? []).filter((n) => !shown.current.has(n.id));
     if (!notices.length) return;
     for (const n of notices) {
       shown.current.add(n.id);
-      toast(n.kind === "use" ? "❄️ Sua sequência foi salva · 1 congelamento usado" : `Sua sequência de ${n.streak} dias terminou`, { id: n.id, duration: 8000 });
+      toast(
+        n.kind === "use"
+          ? "❄️ Sua sequência foi salva · 1 congelamento usado"
+          : `Sua sequência de ${n.streak} dias terminou`,
+        { id: n.id, duration: 8000 },
+      );
     }
-    void ack({ data: { ids: notices.map(n => n.id) } }).catch(() => { for (const n of notices) shown.current.delete(n.id); });
+    void ack({ data: { ids: notices.map((n) => n.id) } }).catch(() => {
+      for (const n of notices) shown.current.delete(n.id);
+    });
   }, [data, ack]);
   return null;
 }

@@ -35,16 +35,16 @@ function NotFoundComponent() {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
         <h1 className="text-7xl font-bold text-foreground">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-foreground">PÃ¡gina nÃ£o encontrada</h2>
+        <h2 className="mt-4 text-xl font-semibold text-foreground">Página não encontrada</h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          A pÃ¡gina que vocÃª procura nÃ£o existe ou foi movida.
+          A página que você procura não existe ou foi movida.
         </p>
         <div className="mt-6">
           <Link
             to="/"
             className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
-            Voltar para o inÃ­cio
+            Voltar para o início
           </Link>
         </div>
       </div>
@@ -63,10 +63,10 @@ function ErrorComponent({ error, reset }: { error: unknown; reset: () => void })
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
         <h1 className="text-xl font-semibold tracking-tight text-foreground">
-          Esta pÃ¡gina nÃ£o carregou
+          Esta página não carregou
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Algo deu errado da nossa parte. VocÃª pode tentar de novo ou voltar para o inÃ­cio.
+          Algo deu errado da nossa parte. Você pode tentar de novo ou voltar para o início.
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
@@ -82,7 +82,7 @@ function ErrorComponent({ error, reset }: { error: unknown; reset: () => void })
             href="/"
             className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
           >
-            Voltar para o inÃ­cio
+            Voltar para o início
           </a>
         </div>
       </div>
@@ -97,18 +97,21 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { name: "theme-color", content: "#1E4D3B" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
-      { title: "TaskBio â€” OrganizaÃ§Ã£o de vida saudÃ¡vel" },
-      { name: "description", content: "Organize rotina, atividades fÃ­sicas, alimentaÃ§Ã£o e progresso em um sÃ³ lugar." },
+      { title: "TaskBio — Organização de vida saudável" },
+      {
+        name: "description",
+        content: "Organize rotina, atividades físicas, alimentação e progresso em um só lugar.",
+      },
       { name: "author", content: "TaskBio" },
-      { property: "og:title", content: "TaskBio â€” OrganizaÃ§Ã£o de vida saudÃ¡vel" },
-      { property: "og:description", content: "Sua semana saudÃ¡vel em uma Ãºnica agenda." },
+      { property: "og:title", content: "TaskBio — Organização de vida saudável" },
+      { property: "og:description", content: "Sua semana saudável em uma única agenda." },
       { property: "og:type", content: "website" },
       { property: "og:image", content: "https://taskbio.com.br/og.jpg" },
       { property: "og:image:secure_url", content: "https://taskbio.com.br/og.jpg" },
       { property: "og:image:type", content: "image/jpeg" },
       { property: "og:image:width", content: "1200" },
       { property: "og:image:height", content: "630" },
-      { property: "og:image:alt", content: "TaskBio â€” sua rotina, dia apÃ³s dia" },
+      { property: "og:image:alt", content: "TaskBio — sua rotina, dia após dia" },
       { property: "og:site_name", content: "TaskBio" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:image", content: "https://taskbio.com.br/og.jpg" },
@@ -116,7 +119,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap",
+      },
       {
         rel: "stylesheet",
         href: appCss,
@@ -158,29 +164,29 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-      <AuthProvider>
-        <TaskBioProvider>
-          <StudyTimerProvider>
-          <NavigationProvider>
-          <div className="app-glow" />
-          <AppHeader />
-          <Outlet />
-          <PublicFooter />
-          <BottomNav />
-          <PrivacyConsent />
-          <ThemeOnboarding />
-          <ProductOnboarding />
-          <SyncManager />
-          <ProductTelemetry />
-          <HabitFreezeNotices />
-          <NotificationPrompt />
-          <ReminderManager />
-          <PendingProfessionalInvites />
-          <Toaster position="top-center" richColors />
-          </NavigationProvider>
-          </StudyTimerProvider>
-        </TaskBioProvider>
-      </AuthProvider>
+        <AuthProvider>
+          <TaskBioProvider>
+            <StudyTimerProvider>
+              <NavigationProvider>
+                <div className="app-glow" />
+                <AppHeader />
+                <Outlet />
+                <PublicFooter />
+                <BottomNav />
+                <PrivacyConsent />
+                <ThemeOnboarding />
+                <ProductOnboarding />
+                <SyncManager />
+                <ProductTelemetry />
+                <HabitFreezeNotices />
+                <NotificationPrompt />
+                <ReminderManager />
+                <PendingProfessionalInvites />
+                <Toaster position="top-center" richColors />
+              </NavigationProvider>
+            </StudyTimerProvider>
+          </TaskBioProvider>
+        </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );

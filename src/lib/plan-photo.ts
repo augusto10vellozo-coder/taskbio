@@ -2,28 +2,50 @@ import { z } from "zod";
 import type { ImportedWorkout } from "./training";
 
 export const MAX_PHOTO_BYTES = 10 * 1024 * 1024;
-export const PHOTO_UNREADABLE = "Não consegui identificar um plano de treino nesta imagem. Tente uma foto mais nítida ou outro ângulo.";
-export const photoPlanSchema = z.object({
-  readable: z.boolean(),
-  workouts: z.array(z.object({
-    day: z.enum(["seg", "ter", "qua", "qui", "sex", "sab", "dom"]).nullable(),
-    name: z.string(),
-    exercises: z.array(z.object({
-      name: z.string(), sets: z.number().nullable(), reps: z.number().nullable(),
-      durationSec: z.number().nullable(), loadKg: z.number().nullable(),
-      review: z.boolean(),
-    }).strict()),
-  }).strict()),
-}).strict();
-export type PhotoWorkout = z.infer<typeof photoPlanSchema>["workouts"][number] & { notes?: string[] };
+export const PHOTO_UNREADABLE =
+  "Não consegui identificar um plano de treino nesta imagem. Tente uma foto mais nítida ou outro ângulo.";
+export const photoPlanSchema = z
+  .object({
+    readable: z.boolean(),
+    workouts: z.array(
+      z
+        .object({
+          day: z.enum(["seg", "ter", "qua", "qui", "sex", "sab", "dom"]).nullable(),
+          name: z.string(),
+          exercises: z.array(
+            z
+              .object({
+                name: z.string(),
+                sets: z.number().nullable(),
+                reps: z.number().nullable(),
+                durationSec: z.number().nullable(),
+                loadKg: z.number().nullable(),
+                review: z.boolean(),
+              })
+              .strict(),
+          ),
+        })
+        .strict(),
+    ),
+  })
+  .strict();
+export type PhotoWorkout = z.infer<typeof photoPlanSchema>["workouts"][number] & {
+  notes?: string[];
+};
 
 /** Keep unquantified preparation/instructions out of the exercise validator. */
 export function separatePhotoNotes(workouts: PhotoWorkout[]): PhotoWorkout[] {
-  return workouts.map(workout => {
+  return workouts.map((workout) => {
     const notes = [...(workout.notes ?? [])];
-    const exercises = workout.exercises.filter(exercise => {
-      const name = exercise.name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-      const instruction = /\b(aquecimento|aquecer|mobilidade|instrucao|instrucoes|orientacao|orientacoes)\b/.test(name);
+    const exercises = workout.exercises.filter((exercise) => {
+      const name = exercise.name
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase();
+      const instruction =
+        /\b(aquecimento|aquecer|mobilidade|instrucao|instrucoes|orientacao|orientacoes)\b/.test(
+          name,
+        );
       const hasPrescription = /\d+\s*[x×]\s*\d+|\d+\s*(series|repeticoes)/.test(name);
       if (instruction && exercise.sets === null && exercise.reps === null && !hasPrescription) {
         notes.push(exercise.name);
@@ -37,7 +59,8 @@ export function separatePhotoNotes(workouts: PhotoWorkout[]): PhotoWorkout[] {
 
 export function validatePhoto(file: { name: string; size: number }) {
   if (file.size > MAX_PHOTO_BYTES) return "A imagem passa de 10 MB. Envie uma imagem menor.";
-  if (!/\.(jpe?g|png|webp|heic|heif)$/i.test(file.name)) return "Formato não aceito. Use JPG, PNG, WEBP ou HEIC.";
+  if (!/\.(jpe?g|png|webp|heic|heif)$/i.test(file.name))
+    return "Formato não aceito. Use JPG, PNG, WEBP ou HEIC.";
   return null;
 }
 
@@ -45,17 +68,30 @@ export function validatePhoto(file: { name: string; size: number }) {
 export function photoToValidation(workouts: PhotoWorkout[]): ImportedWorkout[] | null {
   const valid = (e: PhotoWorkout["exercises"][number]) => {
     const repsOk = e.reps !== null && Number.isInteger(e.reps) && e.reps >= 1;
-    const durationOk = typeof e.durationSec === "number" && Number.isInteger(e.durationSec) && e.durationSec >= 1;
-    return Boolean(e.name.trim()) && !e.review
-      && e.sets !== null && Number.isInteger(e.sets) && e.sets >= 1
-      && (repsOk || durationOk)
-      && (e.loadKg === null || (Number.isFinite(e.loadKg) && e.loadKg >= 0));
+    const durationOk =
+      typeof e.durationSec === "number" && Number.isInteger(e.durationSec) && e.durationSec >= 1;
+    return (
+      Boolean(e.name.trim()) &&
+      !e.review &&
+      e.sets !== null &&
+      Number.isInteger(e.sets) &&
+      e.sets >= 1 &&
+      (repsOk || durationOk) &&
+      (e.loadKg === null || (Number.isFinite(e.loadKg) && e.loadKg >= 0))
+    );
   };
-  if (!workouts.length || workouts.some(w => !w.name.trim() || !w.exercises.length || w.exercises.some(e => !valid(e)))) return null;
-  return workouts.map(w => ({
+  if (
+    !workouts.length ||
+    workouts.some(
+      (w) => !w.name.trim() || !w.exercises.length || w.exercises.some((e) => !valid(e)),
+    )
+  )
+    return null;
+  return workouts.map((w) => ({
     ...w,
-    exercises: w.exercises.map(e => {
-      const duration = typeof e.durationSec === "number" && e.durationSec >= 1 ? Number(e.durationSec) : null;
+    exercises: w.exercises.map((e) => {
+      const duration =
+        typeof e.durationSec === "number" && e.durationSec >= 1 ? Number(e.durationSec) : null;
       return {
         name: e.name,
         sets: Number(e.sets),
@@ -71,9 +107,13 @@ export function photoToValidation(workouts: PhotoWorkout[]): ImportedWorkout[] |
 export function mergePhotoWorkouts(pages: PhotoWorkout[][]): PhotoWorkout[] {
   const result: PhotoWorkout[] = [];
   for (const workout of pages.flat()) {
-    const existing = result.find(w => w.day === workout.day && w.name.trim().toLocaleLowerCase() === workout.name.trim().toLocaleLowerCase());
-    if (existing) existing.exercises.push(...workout.exercises.map(e => ({ ...e })));
-    else result.push({ ...workout, exercises: workout.exercises.map(e => ({ ...e })) });
+    const existing = result.find(
+      (w) =>
+        w.day === workout.day &&
+        w.name.trim().toLocaleLowerCase() === workout.name.trim().toLocaleLowerCase(),
+    );
+    if (existing) existing.exercises.push(...workout.exercises.map((e) => ({ ...e })));
+    else result.push({ ...workout, exercises: workout.exercises.map((e) => ({ ...e })) });
   }
   return result;
 }

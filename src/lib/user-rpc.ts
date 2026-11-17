@@ -2,7 +2,10 @@
 // The generated Database type does not know the newest functions, so the name is
 // passed as a string and the result is typed by the caller.
 type RpcClient = {
-  rpc: (fn: string, args?: Record<string, unknown>) => Promise<{ data: unknown; error: { message: string } | null }>;
+  rpc: (
+    fn: string,
+    args?: Record<string, unknown>,
+  ) => Promise<{ data: unknown; error: { message: string } | null }>;
 };
 
 export function userRpc<T = unknown>(

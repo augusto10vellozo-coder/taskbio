@@ -15,9 +15,12 @@ export function isRunningAsInstalledApp() {
   const fullscreenDisplay = window.matchMedia("(display-mode: fullscreen)").matches;
   const minimalUiDisplay = window.matchMedia("(display-mode: minimal-ui)").matches;
   const iosHomeScreen = navigatorWithStandalone.standalone === true;
-  const nativeContainer = appWindow.Capacitor?.isNativePlatform?.() === true || Boolean(appWindow.ReactNativeWebView);
+  const nativeContainer =
+    appWindow.Capacitor?.isNativePlatform?.() === true || Boolean(appWindow.ReactNativeWebView);
 
-  return standaloneDisplay || fullscreenDisplay || minimalUiDisplay || iosHomeScreen || nativeContainer;
+  return (
+    standaloneDisplay || fullscreenDisplay || minimalUiDisplay || iosHomeScreen || nativeContainer
+  );
 }
 
 export function useBrowserAdsAllowed() {

@@ -45,8 +45,8 @@ export function StarterWeekPrompt({ onAdd }: { onAdd: () => void }) {
       </span>
       <h2 className="mt-3 font-display text-xl font-semibold">Monte sua primeira semana</h2>
       <p className="mt-1.5 text-sm leading-6 text-steel">
-        Preenchemos uma semana com refeições, treino e descanso. Você ajusta o que quiser, e o TaskBio passa a
-        somar seu progresso a partir daí.
+        Preenchemos uma semana com refeições, treino e descanso. Você ajusta o que quiser, e o
+        TaskBio passa a somar seu progresso a partir daí.
       </p>
       <div className="mt-4 flex flex-wrap gap-2">
         <Button onClick={start}>

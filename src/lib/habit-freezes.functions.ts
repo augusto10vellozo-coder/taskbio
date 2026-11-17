@@ -13,7 +13,7 @@ export const getHabitFreezes = createServerFn({ method: "POST" })
 
 export const acknowledgeHabitFreezes = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator(input => z.object({ ids: z.array(z.string().uuid()).max(500) }).parse(input))
+  .inputValidator((input) => z.object({ ids: z.array(z.string().uuid()).max(500) }).parse(input))
   .handler(async ({ context, data }) => {
     const { error } = await context.supabase.rpc("ack_habit_freezes", { _ids: data.ids });
     if (error) throw new Error("Não foi possível confirmar o aviso.");

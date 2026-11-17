@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { NavigationHistory, type AppHistoryEntry } from "./navigation-history";
 
-const entry = (key: string, index: number, pathname: string, tab = false): AppHistoryEntry => ({ key, index, pathname, tab });
+const entry = (key: string, index: number, pathname: string, tab = false): AppHistoryEntry => ({
+  key,
+  index,
+  pathname,
+  tab,
+});
 
 describe("hierarchical navigation", () => {
   it("never offers back on a direct URL, even with earlier external browser history", () => {
@@ -15,11 +20,14 @@ describe("hierarchical navigation", () => {
     history.visit(entry("progress", 0, "/progresso"), "BACK");
     expect(history.canReturn("progress")).toBe(false);
   });
-  it.each(["/", "/rotina", "/progresso", "/perfil", "/alimentacao"])("tab entry to %s never offers back", (path) => {
-    const history = new NavigationHistory(entry("origin", 0, "/agenda"));
-    history.visit(entry("tab", 1, path, true), "PUSH");
-    expect(history.canReturn("tab")).toBe(false);
-  });
+  it.each(["/", "/rotina", "/progresso", "/perfil", "/alimentacao"])(
+    "tab entry to %s never offers back",
+    (path) => {
+      const history = new NavigationHistory(entry("origin", 0, "/agenda"));
+      history.visit(entry("tab", 1, path, true), "PUSH");
+      expect(history.canReturn("tab")).toBe(false);
+    },
+  );
   it("keeps 90-day and strength selections on both button and device BACK", () => {
     const history = new NavigationHistory(entry("progress", 0, "/progresso"));
     history.write("progress", "period", 90);

@@ -10,10 +10,14 @@ export async function extractPlanText(file: File): Promise<string> {
   if (name.endsWith(".xlsx") || name.endsWith(".xls")) {
     const XLSX = await import("xlsx");
     const book = XLSX.read(buffer, { type: "array" });
-    return book.SheetNames.map((s) => `# ${s}\n${XLSX.utils.sheet_to_csv(book.Sheets[s]!)}`).join("\n\n");
+    return book.SheetNames.map((s) => `# ${s}\n${XLSX.utils.sheet_to_csv(book.Sheets[s]!)}`).join(
+      "\n\n",
+    );
   }
   if (name.endsWith(".docx")) {
-    const mammoth = (await import("mammoth/mammoth.browser")) as unknown as { extractRawText: (o: { arrayBuffer: ArrayBuffer }) => Promise<{ value: string }> };
+    const mammoth = (await import("mammoth/mammoth.browser")) as unknown as {
+      extractRawText: (o: { arrayBuffer: ArrayBuffer }) => Promise<{ value: string }>;
+    };
     return (await mammoth.extractRawText({ arrayBuffer: buffer })).value;
   }
   if (name.endsWith(".pdf")) {

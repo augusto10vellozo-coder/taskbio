@@ -20,7 +20,9 @@ export function usePersonalStatus() {
   useEffect(() => {
     if (!user || !ready) return;
     void refetch();
-    const refresh = () => { void refetch(); };
+    const refresh = () => {
+      void refetch();
+    };
     window.addEventListener(XP_EVENT, refresh);
     return () => window.removeEventListener(XP_EVENT, refresh);
   }, [user?.id, ready, plan, habitLog, trackers, finance, modules, refetch]);

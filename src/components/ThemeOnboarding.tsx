@@ -52,10 +52,19 @@ export function ThemeOnboarding() {
   };
 
   return (
-    <div className="fixed inset-0 z-[100] overflow-y-auto bg-background" role="dialog" aria-modal="true" aria-label="Escolha de tema">
+    <div
+      className="fixed inset-0 z-[100] overflow-y-auto bg-background"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Escolha de tema"
+    >
       <div className="mx-auto flex min-h-full w-full max-w-md flex-col justify-center px-6 py-10">
-        <h1 className="font-display text-2xl font-semibold text-foreground">Como você prefere usar o TaskBio?</h1>
-        <p className="mt-2 text-sm text-steel">Você pode mudar isso quando quiser nas preferências.</p>
+        <h1 className="font-display text-2xl font-semibold text-foreground">
+          Como você prefere usar o TaskBio?
+        </h1>
+        <p className="mt-2 text-sm text-steel">
+          Você pode mudar isso quando quiser nas preferências.
+        </p>
 
         <div className="mt-8 grid grid-cols-2 gap-4">
           {(["light", "dark"] as const).map((mode) => (
@@ -76,7 +85,9 @@ export function ThemeOnboarding() {
                   </span>
                 )}
               </button>
-              <span className="text-sm font-medium text-foreground">{mode === "light" ? "Claro" : "Escuro"}</span>
+              <span className="text-sm font-medium text-foreground">
+                {mode === "light" ? "Claro" : "Escuro"}
+              </span>
             </div>
           ))}
         </div>
@@ -112,12 +123,18 @@ function MiniPreview({ mode }: { mode: ResolvedTheme }) {
         {/* Bloco de timeline com horário */}
         <div className="flex items-center gap-2 rounded-lg bg-card p-2 ring-1 ring-line">
           <span className="text-[10px] font-semibold text-brand">07:30</span>
-          <span className="min-w-0 flex-1 truncate text-[10px] text-foreground">Treino A — Peito</span>
+          <span className="min-w-0 flex-1 truncate text-[10px] text-foreground">
+            Treino A — Peito
+          </span>
         </div>
         {/* Card de hábito */}
         <div className="flex items-center gap-2 rounded-lg bg-card p-2 ring-1 ring-line">
-          <span className="grid size-4 shrink-0 place-items-center rounded-full bg-brand text-[9px] text-primary-foreground">✓</span>
-          <span className="min-w-0 flex-1 truncate text-[10px] text-foreground">Beber 2 L de água</span>
+          <span className="grid size-4 shrink-0 place-items-center rounded-full bg-brand text-[9px] text-primary-foreground">
+            ✓
+          </span>
+          <span className="min-w-0 flex-1 truncate text-[10px] text-foreground">
+            Beber 2 L de água
+          </span>
           <span className="text-[9px] text-steel">🔥 6</span>
         </div>
         {/* Barra de progresso */}

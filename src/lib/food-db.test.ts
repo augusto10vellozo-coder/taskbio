@@ -15,9 +15,16 @@ describe("food base", () => {
     const arroz = foodMacros(get("Arroz branco cozido"), 120);
     const feijao = foodMacros(get("Feijão carioca cozido"), 140);
     const frango = foodMacros(get("Frango grelhado (peito)"), 150);
-    expect(mealItemsTotal([{ macros: arroz }, { macros: feijao }, { macros: frango }])).toEqual({ kcal: 499, prot: 57.7, carb: 52.7, gord: 4.7 });
+    expect(mealItemsTotal([{ macros: arroz }, { macros: feijao }, { macros: frango }])).toEqual({
+      kcal: 499,
+      prot: 57.7,
+      carb: 52.7,
+      gord: 4.7,
+    });
   });
   it("manual total kcal overrides the item sum", () => {
-    expect(mealItemsTotal([{ macros: { kcal: 300, prot: 10, carb: 20, gord: 5 } }], 500).kcal).toBe(500);
+    expect(mealItemsTotal([{ macros: { kcal: 300, prot: 10, carb: 20, gord: 5 } }], 500).kcal).toBe(
+      500,
+    );
   });
 });

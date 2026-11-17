@@ -1,4 +1,12 @@
-import { createContext, useContext, useEffect, useRef, useState, type ReactNode, type SetStateAction } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+  type SetStateAction,
+} from "react";
 import { useLocation, useRouter } from "@tanstack/react-router";
 import { NavigationHistory, type AppHistoryEntry } from "./navigation-history";
 
@@ -31,7 +39,13 @@ export function NavigationProvider({ children }: { children: ReactNode }) {
 }
 
 const LedgerContext = createContext<{ current: NavigationHistory | null } | null>(null);
-function NavigationBridge({ ledger, children }: { ledger: { current: NavigationHistory | null }; children: ReactNode }) {
+function NavigationBridge({
+  ledger,
+  children,
+}: {
+  ledger: { current: NavigationHistory | null };
+  children: ReactNode;
+}) {
   return <LedgerContext.Provider value={ledger}>{children}</LedgerContext.Provider>;
 }
 
@@ -41,7 +55,12 @@ export function useHierarchicalBack() {
   const router = useRouter();
   const key = location.state.__TSR_key ?? "initial";
   const canReturn = ledger?.current?.canReturn(key) ?? false;
-  return { canReturn, back: () => { if (canReturn) router.history.back(); } };
+  return {
+    canReturn,
+    back: () => {
+      if (canReturn) router.history.back();
+    },
+  };
 }
 
 /** Local selections belong to a browser entry, not to a new visit of a module. */
@@ -49,13 +68,16 @@ export function useEntryState<T>(field: string, initial: T | (() => T)) {
   const ledger = useContext(LedgerContext);
   const key = useLocation().state.__TSR_key ?? "initial";
   const [value, setValue] = useState<T>(() => {
-    const fallback = () => typeof initial === "function" ? (initial as () => T)() : initial;
+    const fallback = () => (typeof initial === "function" ? (initial as () => T)() : initial);
     return ledger?.current?.read(key, field, fallback) ?? fallback();
   });
   const valueRef = useRef(value);
-  useEffect(() => { ledger?.current?.write(key, field, valueRef.current); }, [ledger, key, field]);
+  useEffect(() => {
+    ledger?.current?.write(key, field, valueRef.current);
+  }, [ledger, key, field]);
   const update = (action: SetStateAction<T>) => {
-    const next = typeof action === "function" ? (action as (previous: T) => T)(valueRef.current) : action;
+    const next =
+      typeof action === "function" ? (action as (previous: T) => T)(valueRef.current) : action;
     valueRef.current = next;
     ledger?.current?.write(key, field, next);
     setValue(next);

@@ -11,10 +11,21 @@ const number = (value: number, label: string) =>
   `<div style="font-size:26px;font-weight:700;color:${BRAND};line-height:1.1;">${value}</div><div style="font-size:11px;color:${STEEL};margin-top:4px;">${label}</div>`;
 
 /** Plain HTML with inline styles so it survives Gmail and Outlook. */
-export function weeklyDigestHtml(input: { name: string; stats: WeekStats; xp: number; weekLabel: string; siteUrl: string }) {
+export function weeklyDigestHtml(input: {
+  name: string;
+  stats: WeekStats;
+  xp: number;
+  weekLabel: string;
+  siteUrl: string;
+}) {
   const { name, stats, xp, weekLabel, siteUrl } = input;
   const hello = name ? `${name}, ` : "";
-  const headline = stats.daysActive >= 5 ? "Semana forte." : stats.daysActive >= 2 ? "Boa semana." : "Uma nova semana começa.";
+  const headline =
+    stats.daysActive >= 5
+      ? "Semana forte."
+      : stats.daysActive >= 2
+        ? "Boa semana."
+        : "Uma nova semana começa.";
 
   return `<!doctype html>
 <html lang="pt-BR">

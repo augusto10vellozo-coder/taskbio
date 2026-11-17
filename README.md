@@ -32,7 +32,7 @@ um caderno de hábitos, uma planilha de finanças e um cronograma de estudos em 
 que nenhum deles sabe que **estudar três blocos e treinar 25 minutos disputam o mesmo tempo e a
 mesma energia**.
 
-O TaskBio parte de uma regra simples: *um dia, uma lista*. Toda tela responde "o que eu faço
+O TaskBio parte de uma regra simples: _um dia, uma lista_. Toda tela responde "o que eu faço
 agora?", não "qual módulo eu abro?".
 
 ## O que ele faz
@@ -50,48 +50,48 @@ agora?", não "qual módulo eu abro?".
 
 ## Stack
 
-| Camada | Escolha |
-|---|---|
-| UI | React 19, TypeScript, Tailwind CSS v4, shadcn/Radix |
+| Camada           | Escolha                                                                |
+| ---------------- | ---------------------------------------------------------------------- |
+| UI               | React 19, TypeScript, Tailwind CSS v4, shadcn/Radix                    |
 | Roteamento / SSR | TanStack Router + TanStack Start (rotas por arquivo, server functions) |
-| Dados | Supabase (Postgres, Auth, Row Level Security), Drizzle ORM |
-| Build / deploy | Vite 8, Cloudflare Workers |
-| Testes | Vitest (39 suítes em `src/lib`) |
-| Integrações | AI SDK (OpenAI) no servidor, Web Push (VAPID), Resend |
+| Dados            | Supabase (Postgres, Auth, Row Level Security), Drizzle ORM             |
+| Build / deploy   | Vite 8, Cloudflare Workers                                             |
+| Testes           | Vitest (39 suítes em `src/lib`)                                        |
+| Integrações      | AI SDK (OpenAI) no servidor, Web Push (VAPID), Resend                  |
 
 ## Decisões técnicas (e por quê)
 
 **1. A pontuação é decidida no servidor, não no cliente.**
 XP e sequência só podem ser gravados por funções SQL (`grant_xp` / `revoke_xp`), idempotentes por
 referência e com teto diário. Um trigger rejeita qualquer escrita direta em `xp_events`.
-*Por quê:* é um placar pessoal — se o navegador pudesse escrever nele, não valeria nada.
+_Por quê:_ é um placar pessoal — se o navegador pudesse escrever nele, não valeria nada.
 
 **2. Row Level Security em tudo.**
 Cada usuário lê apenas os próprios registros, e as políticas vivem no banco, não na aplicação.
-*Por quê:* a chave pública do Supabase vai para o bundle do cliente por design. A segurança tem
+_Por quê:_ a chave pública do Supabase vai para o bundle do cliente por design. A segurança tem
 que estar no banco, não em esconder a chave.
 
 **3. Tema por tokens, sem cor literal em componente.**
 Todas as cores são variáveis CSS em `src/styles.css`, escopadas por `:root` e `.dark`. Nenhum
 componente conhece um valor hexadecimal.
-*Por quê:* trocar o tema é trocar valores de token, não caçar 200 arquivos. E um script inline
+_Por quê:_ trocar o tema é trocar valores de token, não caçar 200 arquivos. E um script inline
 aplica o tema salvo **antes do primeiro paint**, então não existe "flash" branco ao abrir.
 
 **4. Regras de domínio isoladas e testáveis.**
 Cálculos de refeição, hábito, finanças, nível e congelamento de sequência ficam em `src/lib`, em
 funções puras cobertas por Vitest — **311 testes em 39 suítes**.
-*Por quê:* regra de negócio que mora dentro de componente React não dá para testar nem reutilizar
+_Por quê:_ regra de negócio que mora dentro de componente React não dá para testar nem reutilizar
 entre servidor e cliente.
 
 **5. IA só onde ela paga, e com a chave longe do navegador.**
 A importação de plano por foto usa OCR no cliente e revisão por IA no servidor; a chave da OpenAI
 nunca entra no bundle. Todo resultado passa por confirmação humana antes de virar dado.
-*Por quê:* um plano de treino inventado pela IA vira lesão. E chave no cliente vira fatura.
+_Por quê:_ um plano de treino inventado pela IA vira lesão. E chave no cliente vira fatura.
 
 **6. Serviço de push separado do app.**
 Lembretes saem por um service worker sem cache e um cron autenticado só no banco, com orçamento
 diário por assinatura e retentativa no mesmo dia.
-*Por quê:* app fechado ainda precisa receber lembrete, e falha de entrega não pode virar sucesso
+_Por quê:_ app fechado ainda precisa receber lembrete, e falha de entrega não pode virar sucesso
 falso nem duplicar notificação.
 
 ## Estrutura
