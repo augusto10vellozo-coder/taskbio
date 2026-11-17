@@ -124,6 +124,9 @@ Segredos de servidor (`SUPABASE_SERVICE_ROLE_KEY`, `OPENAI_API_KEY`, `RESEND_API
 `VAPID_PRIVATE_KEY`) **nunca** vão no `.env` versionado: use o painel do Cloudflare em produção e
 `.dev.vars` localmente.
 
+O passo a passo de build e deploy no Cloudflare (incluindo o `--keep-vars`) está em
+[DEPLOY.md](DEPLOY.md).
+
 ```bash
 bun run build     # build de produção
 bun run lint      # ESLint
