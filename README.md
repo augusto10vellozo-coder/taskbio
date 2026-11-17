@@ -5,6 +5,7 @@ saúde convivem no mesmo dia, com a mesma agenda e a mesma pontuação — em ve
 uma planilha.
 
 [![App ao vivo](https://img.shields.io/badge/app%20ao%20vivo-taskbio.com.br-2ea44f?style=flat-square)](https://taskbio.com.br)
+[![CI](https://github.com/augusto10vellozo-coder/taskbio/actions/workflows/ci.yml/badge.svg)](https://github.com/augusto10vellozo-coder/taskbio/actions/workflows/ci.yml)
 ![React](https://img.shields.io/badge/React-19-61dafb?style=flat-square&logo=react&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.8-3178c6?style=flat-square&logo=typescript&logoColor=white)
 ![TanStack Start](https://img.shields.io/badge/TanStack%20Start-ff4154?style=flat-square)
